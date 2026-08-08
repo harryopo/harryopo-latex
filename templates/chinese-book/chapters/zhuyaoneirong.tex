@@ -1,0 +1,374 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  zhuyaoneirong.tex — 主要内容组织
+%  介绍如何从零搭建 kaobookCJKsc 中文书籍的结构
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setchapterpreamble[u]{\margintoc}
+\chapter{主要内容组织}
+\labch{zhuyaoneirong}
+
+当你准备用本模板撰写自己的书籍或长篇报告时，首先需要理解
+\Class{kaobookCJKsc} 的文档结构体系。本章将带你从文件组织、编译流程、
+到各部分（前言、正文、附录、后记）的最佳实践，手把手教你搭建一个
+完整的项目。
+
+%----------------------------------------------------------------------------------------
+
+\section{文件结构与项目组织}
+
+\index{内容组织!文件结构}
+\index{内容组织!项目组织}
+
+一个典型的 \Class{kaobookCJKsc} 项目包含以下目录和文件：
+
+\begin{lstlisting}[style=kaolstplain]
+mybook/
+├── main.tex              # 主文件：文档类声明、包配置、\input 各章节
+├── main.bib              # 参考文献数据库（BibTeX/BibLaTeX 格式）
+├── styles/               # 样式目录（模板自带，可修改）
+│   ├── config.tex        # 中文本地化配置
+│   ├── packageconfig.tex # 额外宏包配置
+│   ├── kaobookCJKsc.cls  # 文档类
+│   ├── kaoCJKsc.sty      # 核心样式
+│   ├── kaoWinCJKsc.sty   # 方正字体 + tcolorbox 配置
+│   ├── kaobiblioCJKsc.sty# 参考文献支持
+│   ├── kaorefsCJKsc.sty  # 交叉引用支持
+│   └── kaotheoremsCJKsc.sty # 定理环境
+├── chapters/             # 章节内容（按序编号或命名）
+│   ├── qianyan.tex       # 前言
+│   ├── jieshao.tex       # 第一章
+│   ├── ...
+│   └── fulu.tex          # 附录
+├── images/               # 图片资源
+│   ├── cover.jpg
+│   └── ...
+└── build.ps1             # 编译脚本（Windows PowerShell）
+\end{lstlisting}
+
+\marginnote{将章节放在独立文件中通过 \texttt{\textbackslash input} 引入，%
+是最佳实践。它不仅让代码更整洁，还便于团队协作和版本控制。}
+
+%----------------------------------------------------------------------------------------
+
+\section{主文件结构详解}
+
+\index{内容组织!主文件结构}
+
+\texttt{main.tex} 是整个项目的入口文件，其结构遵循固定的逻辑顺序：
+
+\begin{enumerate}
+    \item \textbf{文档类声明}：设置纸张、字号、双面等选项
+    \item \textbf{宏包加载}：导入字体、参考文献、定理等支持包
+    \item \textbf{自定义设置}：图表路径、索引配置等
+    \item \textbf{前言区（\texttt{\textbackslash frontmatter}）}：标题页、版权、前言
+    \item \textbf{目录区}：生成目录、图录、表录、代码录
+    \item \textbf{正文区（\texttt{\textbackslash mainmatter}）}：各章节内容
+    \item \textbf{附录区（\texttt{\textbackslash appendix}）}：补充材料
+    \item \textbf{后记区（\texttt{\textbackslash backmatter}）}：参考文献、索引
+\end{enumerate}
+
+典型的主文件骨架如下：
+
+\begin{lstlisting}
+\documentclass[a4paper,fontsize=10pt,twoside=false]{kaobookCJKsc}
+
+% == 中文配置 ==
+\input{styles/config.tex}
+
+% == 方正字体 ==
+\usepackage{kaoWinCJKsc}
+
+% == 扩展包 ==
+\input{styles/packageconfig.tex}
+
+% == 参考文献 ==
+\usepackage{kaobiblioCJKsc}
+\addbibresource{main.bib}
+
+% == 数学定理 ==
+\usepackage{kaotheoremsCJKsc}
+
+% == 交叉引用 ==
+\usepackage{kaorefsCJKsc}
+
+\graphicspath{{images/}}
+\makeindex[columns=3, title=索引, intoc]
+
+\begin{document}
+
+% ── 前言 ──
+\frontmatter
+% ... 标题、前言等 ...
+
+% ── 正文 ──
+\mainmatter
+\setchapterstyle{kao}
+\input{chapters/chapter1.tex}
+\input{chapters/chapter2.tex}
+% ...
+
+% ── 附录 ──
+\appendix
+\input{chapters/appendixA.tex}
+
+% ── 后记 ──
+\backmatter
+\printbibliography
+\printindex
+
+\end{document}
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{前言——\texttt{\textbackslash frontmatter}}
+
+\index{内容组织!frontmatter@\texttt{\textbackslash frontmatter}}
+\index{内容组织!前言}
+
+前言部分包含所有出现在正式内容之前的材料。在 \Class{kaobookCJKsc} 中，
+进入前言区后会自动：
+\begin{itemize}
+    \item 使用 \texttt{wide} 页面布局（无边注）
+    \item 使用 \texttt{plain} 页眉页脚样式
+    \item 使用 \texttt{plain} 章节标题样式
+    \item 页码使用罗马数字（i, ii, iii, \ldots{}）
+\end{itemize}
+
+前言区的典型内容：
+
+\begin{lstlisting}
+\frontmatter
+
+% 标题信息
+\title[简略标题]{完整标题}
+\author[简略作者]{完整作者}
+\date{\today}
+
+% 版权信息
+\uppertitleback{版权声明}
+\lowertitleback{开源信息}
+
+% 致献
+\dedication{献给所有热爱排版的人。}
+
+% 输出标题页
+\maketitle
+
+% 前言章节
+\input{chapters/yizhexu.tex}
+\input{chapters/qianyan.tex}
+\end{lstlisting}
+
+\subsection{标题页元素}
+
+\index{内容组织!标题页}
+\Class{kaobookCJKsc} 提供了丰富的标题页元素：
+
+\begin{itemize}
+    \item \lstinline|\titlehead{}| —— 标题页顶部文字（置于标题之前）
+    \item \lstinline|\subject{}| —— 主题/学科分类
+    \item \lstinline|\title{}| —— 主标题（支持可选参数的简略版本）
+    \item \lstinline|\subtitle{}| —— 副标题
+    \item \lstinline|\author{}| —— 作者
+    \item \lstinline|\date{}| —— 日期
+    \item \lstinline|\publishers{}| —— 出版者
+    \item \lstinline|\dedication{}| —— 致献词
+    \item \lstinline|\uppertitleback{}| —— 标题页背面顶部
+    \item \lstinline|\lowertitleback{}| —— 标题页背面底部
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+
+\section{正文——\texttt{\textbackslash mainmatter}}
+
+\index{内容组织!mainmatter@\texttt{\textbackslash mainmatter}}
+\index{内容组织!正文}
+
+正文区（\texttt{\textbackslash mainmatter}）是书籍的核心部分。
+进入正文区后会自动：
+\begin{itemize}
+    \item 使用 \texttt{margin} 页面布局（带边注区域）
+    \item 使用 \texttt{scrheadings} 页眉页脚样式（带导航信息）
+    \item 使用 \texttt{kao} 章节标题样式
+    \item 页码使用阿拉伯数字，从 1 开始
+\end{itemize}
+
+\subsection{组织章节的最佳实践}
+
+\index{内容组织!章节组织}
+以下是一些组织正文章节的建议：
+
+\begin{sidebox}{章节组织原则}
+\begin{enumerate}
+    \item \textbf{一文件一章}：每个 \lstinline|\chapter{}| 放在独立的 %
+\texttt{.tex} 文件中
+    \item \textbf{用 Part 分组}：通过 \lstinline|\part{}| 或
+\texttt{\textbackslash addpart\{\}} 将多个章节编组
+    \item \textbf{页边目录}：每章开头用 \lstinline|\setchapterpreamble[u]{\margintoc}| 生成局部目录
+    \item \textbf{标签规约}：使用 \lstinline|\labch{}| 为每章添加标签
+    \item \textbf{页面布局配合}：Part 标题页前后切换 \lstinline|\pagelayout{wide}| %
+和 \lstinline|\pagelayout{margin}|
+\end{enumerate}
+\end{sidebox}
+
+一个包含 Part 分组的正文结构示例：
+
+\begin{lstlisting}
+\mainmatter
+\setchapterstyle{kao}
+
+% ── 第一部分：基础篇 ──
+\pagelayout{wide}
+\addpart{第一部分：基础篇}
+\pagelayout{margin}
+
+\input{chapters/jieshao.tex}
+\input{chapters/wenbenbiaozhu.tex}
+
+% ── 第二部分：进阶篇 ──
+\pagelayout{wide}
+\addpart{第二部分：进阶篇}
+\pagelayout{margin}
+
+\input{chapters/shuxue.tex}
+\input{chapters/tuxiangyubiaoge.tex}
+\end{lstlisting}
+
+\subsection{章节内容排版建议}
+
+\index{内容组织!排版建议}
+\begin{itemize}
+    \item 每个 \lstinline|\section{}| 标题下至少有一段引导文字
+    \item 适当使用 \lstinline|\marginnote{}| 添加旁注（不要过度使用）
+    \item 引用图表时使用 \lstinline|\reffig{}| 和 \lstinline|\reftab{}|
+    \item 对于关键术语，使用 \lstinline|\index{}| 建立索引条目
+    \item 长代码片段使用 \texttt{kaolst} 样式，短片段使用
+\texttt{kaolstplain} 样式或 \lstinline|\lstinline||
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+
+\section{附录——\texttt{\textbackslash appendix}}
+
+\index{内容组织!appendix@\texttt{\textbackslash appendix}}
+\index{内容组织!附录}
+
+使用 \lstinline|\appendix| 命令进入附录区后：
+\begin{itemize}
+    \item 章节编号从数字变为大写字母（A, B, C, \ldots{}）
+    \item PDF 书签重置为根级别
+    \item 页面布局和样式保持不变
+\end{itemize}
+
+附录适合放置：
+\begin{itemize}
+    \item 补充数据表格
+    \item 数学推导细节
+    \item 字体测试与编译说明
+    \item 术语对照表
+\end{itemize}
+
+\begin{lstlisting}
+\appendix
+\pagelayout{wide}
+\addpart{附\quad 录}
+\pagelayout{margin}
+
+\input{chapters/zimubiao.tex}
+\input{chapters/fulu.tex}
+\end{lstlisting}
+
+\begin{kaobox}[title=注意事项]
+中文模板中，我们会重定义 \lstinline|\appendixname| 为「附\quad 录」以更好
+地适应中文排版习惯（在 \texttt{config.tex} 中设置）。
+\end{kaobox}
+
+%----------------------------------------------------------------------------------------
+
+\section{后记——\texttt{\textbackslash backmatter}}
+
+\index{内容组织!backmatter@\texttt{\textbackslash backmatter}}
+\index{内容组织!后记}
+
+进入后记区后会自动：
+\begin{itemize}
+    \item 恢复 \texttt{wide} 页面布局
+    \item 使用 \texttt{plain} 页眉页脚样式
+    \item 使用 \texttt{plain} 章节标题样式
+    \item PDF 书签重置为根级别
+\end{itemize}
+
+后记区通常包含：
+\begin{itemize}
+    \item 参考文献列表（\lstinline|\printbibliography|）
+    \item 索引（\lstinline|\printindex|）
+    \item 术语表/词汇表
+    \item 后记/跋
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+
+\section{编译工作流}
+
+\index{内容组织!编译工作流}
+\index{编译!工作流}
+
+推荐的编译流程（Windows 环境）：
+
+\subsection{方式一：手动编译}
+
+\begin{lstlisting}[style=kaolstplain]
+# 第一次编译（生成辅助文件）
+xelatex main.tex
+
+# 处理参考文献
+biber main
+
+# 第二次编译（更新引用）
+xelatex main.tex
+
+# 第三次编译（确保交叉引用稳定）
+xelatex main.tex
+\end{lstlisting}
+
+\subsection{方式二：使用编译脚本}
+
+项目自带的 \texttt{build.ps1} 脚本可自动处理上述流程：
+
+\begin{lstlisting}[style=kaolstplain]
+.\build.ps1              # 完整编译（含 biber + 3 次 xelatex）
+.\build.ps1 -Quick       # 快速编译（仅 1 次 xelatex，不含参考文献）
+.\build.ps1 -Clean       # 清理辅助文件
+\end{lstlisting}
+
+\subsection{方式三：使用 latexmk}
+
+如果已安装 \texttt{latexmk}（通常随 TeX Live 一起安装）：
+
+\begin{lstlisting}[style=kaolstplain]
+latexmk -xelatex main.tex
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{从零开始：快速启动清单}
+
+如果你想启动一个新项目，以下是推荐的操作流程：
+
+\begin{solutions}[快速启动清单]
+\begin{enumerate}
+    \item 复制 \texttt{chinese-book/} 目录到你的项目文件夹
+    \item 编辑 \texttt{main.tex}，修改文档信息（标题、作者、日期等）
+    \item 在 \texttt{chapters/} 目录下创建你的章节文件
+    \item 在 \texttt{main.tex} 中按顺序 \lstinline|\input| 这些章节
+    \item 将图片放入 \texttt{images/} 目录
+    \item 在 \texttt{main.bib} 中添加参考文献条目
+    \item 运行 \texttt{.\textbackslash build.ps1} 编译
+    \item 检查输出 PDF，根据需要进行微调
+    \item 重复步骤 7--8，直到满意
+\end{enumerate}
+\end{solutions}
+
+通过以上流程，你可以快速搭建一个结构清晰、易于维护的中文排版项目。
+记住：好的模板只是起点，真正赋予书籍灵魂的是你的内容。

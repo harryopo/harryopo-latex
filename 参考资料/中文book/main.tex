@@ -1,0 +1,242 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX 文档类型
+% 这是一个基于 kaobookCJKsc 的修改版中文模板
+% 字体规范：
+%   最大标题：方正小标宋  |  次级标题：方正黑体  |  正文：方正书宋
+%   其他板块：方正楷体    |  侧边注释：方正仿宋  |  代码：等宽代码字体
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	kaobookCJKsc 文档类型示例与文档
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+    a4paper, % 页面设置
+    fontsize=11pt, % 字号设置（11pt，配合方正字体更清晰）
+    twoside=false, % 对偶数页和奇数页使用不同的布局（特别是，如果 twoside=true，边距列将始终在外面）
+    open=any, % 如果 twoside=true，取消注释以强制新章节在任何页面上开始，而不仅仅是在正确（奇数）页面上
+    chapterentrydots=true, % 在目录中，添加章节名到页码之间的圆点
+    numbers=noenddot, % 注释章节号后的输出点； 此选项最常见的值是：enddot、noenddot 和 auto（请参阅 KOMAScript 文档以获得深入的解释）
+	toc=nottotoc,
+	BCOR=12mm,
+	DIV=calc,
+]{styles/kaobookCJKsc}
+
+%----------------------------------------------------------------------------------------
+%	加载包以及文档配置，新项目可以直接复制粘贴
+%----------------------------------------------------------------------------------------
+\input{styles/packageconfig.tex}
+%----------------------------------------------------------------------------------------
+% 图 片 路 径
+\graphicspath{{examples/documentation/images/}{images/}}
+% 生成用于编译 索 引 的 文 件
+\makeindex[columns=3, title=索引, intoc]
+% 生成用于编译 词汇表 的文件（可选，如不需要可整块注释）
+%\makeglossaries
+%\input{chapters/zimubiao.tex}
+% 生成用于编译 术语 的文件
+%\makenomenclature
+% 每章开头重新给 边注 编号
+\counterwithin*{sidenote}{chapter}
+% 允许标题中出现 \\ 而不发出警告
+\pdfstringdefDisableCommands{\let\\\empty}
+%给标题自定义一个颜色
+\KOMAoptions{toc=flat} % 如果还没有设置，添加这个选项来平板化目录样式
+\setcounter{tocdepth}{0} 
+\setuptoc{toc}{disable} % 取消目录加入目录本身
+
+
+%----------------------------------------------------------------------------------------
+\begin{document}
+%----------------------------------------------------------------------------------------
+%	加载其他无法放在导言区的配置
+%----------------------------------------------------------------------------------------
+\input{styles/config.tex}
+%----------------------------------------------------------------------------------------
+%	标题页信息
+%----------------------------------------------------------------------------------------
+
+\titlehead{A \LaTeX Template for Books in Chinese}
+\subject{中文KaoBook模板}
+
+\title{中文KaoBook模板\\A \LaTeX Template for Books in Chinese}
+\subtitle{\fzkai\textit{对一个惊艳的报告样式的复刻}}
+
+
+\author{Benjamin}
+\date{\zhtoday}
+
+\publishers{回声一出版社}
+
+%----------------------------------------------------------------------------------------
+
+\frontmatter % 前置文档开始，使用罗马数字编号
+
+%----------------------------------------------------------------------------------------
+%	版权页（无需的话可以注释掉）
+%----------------------------------------------------------------------------------------
+
+% \makeatletter
+% \uppertitleback{
+% 	\textbf{内容提要}
+
+% 	\bigskip
+% 	介绍一种宽边排版的 \LaTeX 模板，常见于现代风格教科书。除了提供完整的开箱即用的特性，还允许用户自定义自己的特性。
+% }
+
+% \lowertitleback{
+% 	\textbf{声明} \\
+% 	您可以编辑此页面以满足您的需要。例如，有无版权声明以及其他一些信息。此页面基于 Ken Arroyo Ohori 论文的相应页面，改动很小。
+
+% 	\medskip
+% 	\textbf{版权没有，翻版不究} \\
+% 	\cczero 本书使用 CC0 代码发布到公共领域。在法律允许的范围内，我放弃本作品的所有版权。
+
+% 	要查看 CC0 代码的副本，请访问：\url{http://creativecommons.org/publicdomain/zero/1.0/}
+
+% 	\medskip
+% 	\textbf{出版说明} \\
+% 	本文档基于 \href{https://sourceforge.net/projects/koma-script/}{\KOMAScript} 以及 \href{https://www.latex-project.org/}{\LaTeX} 并使用 \href{https://github.com/xuehao/kaobookCJKsc}{kaobookCJKsc} 模板。
+
+% 	源码可以从这里下载：\url{https://github.com/xuehao/kaobookCJKsc}
+
+% 	（欢迎贡献！）
+
+% 	\medskip
+% 	\textbf{版本} \\
+% 	首次由\textbf{\@publishers}出版于\zhtoday
+% }
+% \makeatother
+
+%----------------------------------------------------------------------------------------
+%	致谢
+%----------------------------------------------------------------------------------------
+
+% \dedication{
+% 	世界的和谐体现在形式和数量上，心灵和灵魂以及自然哲学的所有诗意都体现在数学美的概念中。\\
+% 	\flushright —— 达西·温特沃斯·汤普森
+% }
+
+%----------------------------------------------------------------------------------------
+%	插入自定义标题页
+%----------------------------------------------------------------------------------------
+\begin{titlepage} % 创建一个新的页面
+%用来将图片从左下角开始平铺整个封面
+	\AddToShipoutPicture*{%
+	\AtPageLowerLeft{%
+		\adjustbox{width=1.1\paperwidth, height=1.5\paperheight, keepaspectratio}{% 强制图片至纸张尺寸，但可能裁切
+			\includegraphics{images/Elias_Maur.jpg}
+		}
+	}
+}
+\begin{flushleft} % 左对齐环境
+	\setlength{\leftskip}{1cm} % 左侧缩进
+	\makeatletter % 允许访问带有@字符的内部命令
+	\vspace*{4cm} % 标题距离页面顶端的空白
+	{\color{titlecolorcoverpage}\Huge\fzxiaobiaosong \textbf{\@title} \par} % 使用前文定义的title作为标题
+	\vspace{1cm} % 标题和子标题的间距
+	{\color{titlecolorcoverpage}\Large\yh\@subtitle \par} % 使用前文定义的subtitle作为子标题
+	\vfill % 作者信息前的垂直填充
+	{\color{white}\large\yh{\@author}\par} % 作者名
+	{\color{white}\large\yh \@publishers \par} % 出版者
+	{\color{white}\large\yh \zhtoday\par} % 日期，默认为当天
+	\makeatother % 将@重置为非字母字符
+	\vspace{0cm} % 标题和子标题的间距
+	% 结束左对齐环境
+\end{flushleft}
+\ClearShipoutPicture % 清除背景图片
+\end{titlepage}
+
+%----------------------------------------------------------------------------------------
+%	译者序（无需可删除）
+%----------------------------------------------------------------------------------------
+% \input{chapters/yizhexu.tex}
+%----------------------------------------------------------------------------------------
+%	前言（无需可删除）
+%----------------------------------------------------------------------------------------
+\setchapterstyle{plain} % 选择后续默认章节标题样式
+\input{chapters/qianyan.tex}
+\index{前言}
+%----------------------------------------------------------------------------------------
+%	以下插入自定义目录
+%----------------------------------------------------------------------------------------
+
+\begingroup % 创建局部变量范围
+
+\setchapterimage[8cm]{Paul Pastour (2).jpg}
+\chapter*{目录} 
+\let\clearpage\relax % 防止目录中的页码跳转
+\vspace*{-9cm} % 调整负值以减少空间
+\renewcommand{\contentsname}{}
+% 增加左边距
+\begin{adjustwidth}{0.85cm}{0cm} % 第一个参数是左边距，第二个是右边距
+	\tableofcontents
+\end{adjustwidth}
+\endgroup % 结束局部变量范围
+
+%----------------------------------------------------------------------------------------
+%	术语（无需可删除）
+%----------------------------------------------------------------------------------------
+
+% \nomenclature{$c$}{真空惯性系中的光速}
+% \nomenclature{$h$}{普朗克常数}
+
+% \renewcommand{\nomname}{符号} % 重命名术语页面标题
+% \renewcommand{\nompreamble}{\noindent 以下列出正文中将会使用的几个符号：} % 术语表页面添加导言
+
+% \printnomenclature % 输出术语页面
+
+%----------------------------------------------------------------------------------------
+
+\mainmatter % 正文文档开始，重置页码并使用阿拉伯数字
+
+%----------------------------------------------------------------------------------------
+%	主体部分
+%----------------------------------------------------------------------------------------
+
+\setchapterstyle{kao} % 设置章节标题样式，为了统一，不要在章节内设置
+
+\addpartwithbg{基础}{Paul-Pastourmat}
+\input{chapters/zhuyaoneirong.tex}
+\input{chapters/xuanxiang.tex}
+\input{chapters/wenbenbiaozhu.tex}
+\input{chapters/tuxiangyubiaoge.tex}
+\input{chapters/yinyong.tex}
+
+\addpartwithbg{进阶}{Paul-Pastourmat}
+\input{chapters/paiban.tex}
+\input{chapters/shuxue.tex}
+
+\appendix % 从这里开始，章节序号将以字母排序并重设书签等级
+\addpartwithbg{附录}{Paul-Pastourmat}
+
+\pagelayout{wide}
+\input{chapters/fulu.tex}
+\pagelayout{margin}
+
+\backmatter % 正文文档结束
+
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+%	参考文献
+%----------------------------------------------------------------------------------------
+
+\setchapterstyle{plain} % 设置章节标题样式
+\printbibliography[heading=bibintoc, title=参考文献] % 输出参考文献页面
+
+%----------------------------------------------------------------------------------------
+%	生词表（可选，需取消前文 \makeglossaries 注释）
+%----------------------------------------------------------------------------------------
+
+%\setglossarystyle{listgroup}
+%\printglossary[title=词汇表, toctitle=词汇表]
+
+%----------------------------------------------------------------------------------------
+%	索引
+%----------------------------------------------------------------------------------------
+
+\printindex
+
+%----------------------------------------------------------------------------------------
+\end{document}

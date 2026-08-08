@@ -1,0 +1,268 @@
+% ============================================================
+%  示例：云-边-端三层系统总体架构图
+%  基于 harryopo-tikz-diagram layered-arch 模板
+%  Nature 无衬线风格 — 参考 paper-structure 布局经验
+%
+%  编译命令：xelatex -interaction=nonstopmode example-architecture-full.tex
+% ============================================================
+
+\documentclass[12pt,a4paper]{ctexart}
+
+\usepackage{geometry}
+\geometry{left=2cm,right=2cm,top=2cm,bottom=2cm}
+
+\usepackage{fontspec}
+\usepackage{tikz}
+\usetikzlibrary{positioning, fit, backgrounds, arrows.meta, calc}
+
+% ============================================================
+% Nature 风格配色（与 paper-structure 一致）
+% ============================================================
+\definecolor{PaperBorder}{HTML}{B0C4DE}
+\definecolor{PaperFill}{HTML}{FFFFFF}
+\definecolor{PaperTitle}{HTML}{2C3E50}
+\definecolor{PaperMuted}{HTML}{7F8C8D}
+\definecolor{AccentOrange}{HTML}{D35400}
+\definecolor{PaperLayerBg}{HTML}{F5F8FA}
+\definecolor{PaperLayerBorder}{HTML}{D8E3EE}
+
+% ============================================================
+% 字体设置 — Nature 无衬线风格（与 paper-structure 一致）
+% ============================================================
+\setmainfont{Arial}
+\setsansfont{Arial}
+\setmonofont{Consolas}[Scale=0.90]
+\setCJKsansfont{Microsoft YaHei}
+\setCJKmainfont{Microsoft YaHei}
+
+% ============================================================
+%  间距常量
+% ============================================================
+\def\ModW{4.0cm}
+\def\ModH{1.5cm}
+\def\ModGap{0.55cm}
+\def\LayerGap{1.6cm}
+\def\LayerPad{12pt}
+
+\begin{document}
+
+\begin{center}
+  {\Large\sffamily\bfseries\textcolor{PaperTitle}{云-边-端三层系统总体架构图}}\\[0.3em]
+  {\small\sffamily\itshape\textcolor{PaperMuted}{Cloud-Edge-Device Architecture}}
+\end{center}
+
+\vspace{1em}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance = 0pt and \ModGap,
+    >=Stealth,
+    line width = 0.7pt,
+    every node/.style = {inner sep=0pt, outer sep=0pt},
+    % ---- 模块节点：标题加粗+2行描述+技术栈 ----
+    module/.style = {
+        rectangle,
+        draw = PaperBorder,
+        fill = PaperFill,
+        text = PaperTitle,
+        line width = 0.8pt,
+        text width = \ModW,
+        minimum height = \ModH,
+        font = \small\sffamily,
+        align = center,
+        rounded corners = 5pt,
+        inner sep = 8pt,
+    },
+    mod-title/.style = {
+        font = \small\sffamily\bfseries,
+        text = PaperTitle,
+    },
+    mod-desc/.style = {
+        font = \footnotesize\sffamily,
+        text = PaperMuted,
+    },
+    mod-tech/.style = {
+        font = \footnotesize\sffamily\ttfamily,
+        text = AccentOrange,
+    },
+    % ---- 层容器（与 paper-structure group-box 一致） ----
+    layer-box/.style = {
+        draw = PaperLayerBorder,
+        fill = PaperLayerBg,
+        line width = 0.7pt,
+        dashed,
+        dash pattern = on 4pt off 3pt,
+        inner sep = \LayerPad,
+        rounded corners = 8pt,
+    },
+    layer-title/.style = {
+        font = \normalsize\sffamily\bfseries,
+        text = PaperTitle,
+        anchor = north west,
+        inner sep = 0pt,
+    },
+    layer-tag/.style = {
+        font = \footnotesize\sffamily\itshape,
+        text = PaperMuted,
+        anchor = north east,
+        inner sep = 0pt,
+    },
+    % ---- 箭头 ----
+    arr-down/.style = {
+        ->, >=Stealth, thick, PaperBorder,
+    },
+    arr-up/.style = {
+        ->, >=Stealth, thick, PaperMuted,
+    },
+    arr-label/.style = {
+        font = \footnotesize\sffamily\bfseries,
+        fill = white,
+        text = PaperBorder,
+        inner sep = 2pt,
+        outer sep = 0pt,
+    },
+    arr-label-rev/.style = {
+        font = \footnotesize\sffamily\bfseries,
+        fill = white,
+        text = PaperMuted,
+        inner sep = 2pt,
+        outer sep = 0pt,
+    },
+    % ---- 图例 ----
+    legend-box/.style = {
+        draw = PaperLayerBorder,
+        fill = PaperFill,
+        line width = 0.6pt,
+        rounded corners = 5pt,
+        inner sep = 8pt,
+        font = \footnotesize\sffamily,
+        text = PaperTitle,
+    },
+]
+
+    % ============================================================
+    %  第一层：云层
+    % ============================================================
+
+    \node[module] (L1a) {
+        {\mod-title 数据存储}\\[2pt]
+        {\mod-desc 海量数据持久化}\\[1pt]
+        {\mod-desc 分布式文件系统}
+    };
+
+    \node[module, right=\ModGap of L1a] (L1b) {
+        {\mod-title AI 训练}\\[2pt]
+        {\mod-desc 模型训练、优化}\\[1pt]
+        {\mod-desc 智能算法迭代}
+    };
+
+    \node[module, right=\ModGap of L1b] (L1c) {
+        {\mod-title 监控中心}\\[2pt]
+        {\mod-desc 全局监控、告警}\\[1pt]
+        {\mod-desc 可视化分析}
+    };
+
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L1a)(L1b)(L1c)] (box1) {};
+    \end{scope}
+    \node[layer-title] at ($(box1.north west)+(0,4pt)$) {云层（Cloud Platform）};
+    \node[layer-tag] at ($(box1.north east)+(0,4pt)$) {数据中心 / 云服务器};
+
+    % ============================================================
+    %  第二层：边缘层
+    % ============================================================
+
+    \node[module, below=\LayerGap of L1a.south west, anchor=north west] (L2a) {
+        {\mod-title 流处理引擎}\\[2pt]
+        {\mod-tech Flink / DataStream}\\[1pt]
+        {\mod-desc 实时数据流计算}
+    };
+
+    \node[module, right=\ModGap of L2a] (L2b) {
+        {\mod-title 资源调度器}\\[2pt]
+        {\mod-desc 弹性扩缩容}\\[1pt]
+        {\mod-desc 任务动态分配}
+    };
+
+    \node[module, right=\ModGap of L2b] (L2c) {
+        {\mod-title 缓存服务}\\[2pt]
+        {\mod-tech Redis 热点缓存}\\[1pt]
+        {\mod-desc 低延迟数据访问}
+    };
+
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L2a)(L2b)(L2c)] (box2) {};
+    \end{scope}
+    \node[layer-title] at ($(box2.north west)+(0,4pt)$) {边缘层（Edge Computing）};
+    \node[layer-tag] at ($(box2.north east)+(0,4pt)$) {边缘服务器 / 网关};
+
+    % ============================================================
+    %  第三层：端层
+    % ============================================================
+
+    \node[module, below=\LayerGap of L2a.south west, anchor=north west] (L3a) {
+        {\mod-title 传感器}\\[2pt]
+        {\mod-desc 温度、湿度、压力}\\[1pt]
+        {\mod-desc 环境数据采集}
+    };
+
+    \node[module, right=\ModGap of L3a] (L3b) {
+        {\mod-title 移动设备}\\[2pt]
+        {\mod-desc 智能手机、平板}\\[1pt]
+        {\mod-desc 用户交互终端}
+    };
+
+    \node[module, right=\ModGap of L3b] (L3c) {
+        {\mod-title IoT 网关}\\[2pt]
+        {\mod-desc 协议转换、设备接入}\\[1pt]
+        {\mod-desc 边缘数据汇聚}
+    };
+
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L3a)(L3b)(L3c)] (box3) {};
+    \end{scope}
+    \node[layer-title] at ($(box3.north west)+(0,4pt)$) {端层（Edge Devices）};
+    \node[layer-tag] at ($(box3.north east)+(0,4pt)$) {终端设备 / 感知节点};
+
+    % ============================================================
+    %  层间数据流箭头
+    % ============================================================
+
+    % 端 → 边缘：数据上报
+    \coordinate (e2c-start) at ($(box3.north)!0.25!(box3.north west)$);
+    \coordinate (e2c-end)   at ($(box2.south)!0.25!(box2.south west)$);
+    \draw[arr-up] (e2c-start) -- (e2c-end) node[midway, arr-label-rev, anchor=east, xshift=-3pt] {数据上报};
+
+    % 边缘 → 云：聚合数据上报
+    \coordinate (c2cl-start) at ($(box2.north)!0.25!(box2.north west)$);
+    \coordinate (c2cl-end)   at ($(box1.south)!0.25!(box1.south west)$);
+    \draw[arr-up] (c2cl-start) -- (c2cl-end) node[midway, arr-label-rev, anchor=east, xshift=-3pt] {聚合数据上报};
+
+    % 云 → 边缘：模型/结果下发
+    \coordinate (cl2c-start) at ($(box1.south)!0.25!(box1.south east)$);
+    \coordinate (cl2c-end)   at ($(box2.north)!0.25!(box2.north east)$);
+    \draw[arr-down] (cl2c-start) -- (cl2c-end) node[midway, arr-label, anchor=west, xshift=3pt] {模型/结果下发};
+
+    % 边缘 → 端：控制指令
+    \coordinate (c2e-start) at ($(box2.south)!0.25!(box2.south east)$);
+    \coordinate (c2e-end)   at ($(box3.north)!0.25!(box3.north east)$);
+    \draw[arr-down] (c2e-start) -- (c2e-end) node[midway, arr-label, anchor=west, xshift=3pt] {控制指令};
+
+    % ============================================================
+    %  图例（嵌入 tikzpicture 内部，右下角）
+    % ============================================================
+
+    \node[legend-box, anchor=north east] (legend) at ($(box3.south east)+(0,-0.8cm)$) {
+        \begin{tabular}{@{}c@{\hspace{6pt}}l@{\hspace{14pt}}c@{\hspace{6pt}}l@{}}
+            \textcolor{PaperBorder}{\rule[1pt]{14pt}{1.6pt}{{\scriptsize$>$}}} & {\sffamily\bfseries\small 指令/结果下发} &
+            \textcolor{PaperMuted}{\rule[1pt]{14pt}{1.6pt}{{\scriptsize$>$}}} & {\sffamily\bfseries\small 数据上报}
+        \end{tabular}
+    };
+
+\end{tikzpicture}
+\caption{\sffamily 云-边-端三层系统总体架构图}
+\label{fig:cloud-edge-device-arch}
+\end{figure}
+
+\end{document}

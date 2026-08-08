@@ -1,0 +1,291 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  zimubiao.tex — 字母表、符号与字体样本
+%  含希腊字母表、常用数学符号、方正字体样例
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setchapterpreamble[u]{\margintoc}
+\chapter{字母表与符号}
+\labch{zimubiao}
+
+本章汇集了学术写作中常用的希腊字母表、数学符号对比，以及
+\Class{kaobookCJKsc} 中文模板所使用的方正字体样本。这些参考资料
+可以作为日常排版的快速查阅工具。
+
+%----------------------------------------------------------------------------------------
+
+\section{希腊字母表}
+
+\index{字母表!希腊字母}
+\index{希腊字母}
+
+以下是完整的希腊字母表，包含大写、小写及对应的 \LaTeX{} 命令。
+在数学模式中使用时，直接输入命令即可；在文本模式中可以使用
+\lstinline|\textalpha|、\lstinline|\textbeta| 等（需
+\Package{textgreek} 宏包）。
+
+\subsection{小写希腊字母}
+
+\begin{table}[h]
+\centering
+\caption{小写希腊字母及其 \LaTeX{} 命令}
+\labtab{greek-lower}
+\begin{tabular}{@{}lll@{\hspace{1.5cm}}lll@{}}
+\toprule
+字母 & 命令 & 输出 & 字母 & 命令 & 输出 \\
+\midrule
+alpha   & \lstinline|\alpha|   & $\alpha$   & nu      & \lstinline|\nu|      & $\nu$ \\
+beta    & \lstinline|\beta|    & $\beta$    & xi      & \lstinline|\xi|      & $\xi$ \\
+gamma   & \lstinline|\gamma|   & $\gamma$   & omicron & \lstinline|o|        & $o$ \\
+delta   & \lstinline|\delta|   & $\delta$   & pi      & \lstinline|\pi|      & $\pi$ \\
+epsilon & \lstinline|\epsilon| & $\epsilon$ & rho     & \lstinline|\rho|     & $\rho$ \\
+zeta    & \lstinline|\zeta|    & $\zeta$    & sigma   & \lstinline|\sigma|   & $\sigma$ \\
+eta     & \lstinline|\eta|     & $\eta$     & tau     & \lstinline|\tau|     & $\tau$ \\
+theta   & \lstinline|\theta|   & $\theta$   & upsilon & \lstinline|\upsilon| & $\upsilon$ \\
+iota    & \lstinline|\iota|    & $\iota$    & phi     & \lstinline|\phi|     & $\phi$ \\
+kappa   & \lstinline|\kappa|   & $\kappa$   & chi     & \lstinline|\chi|     & $\chi$ \\
+lambda  & \lstinline|\lambda|  & $\lambda$  & psi     & \lstinline|\psi|     & $\psi$ \\
+mu      & \lstinline|\mu|      & $\mu$      & omega   & \lstinline|\omega|   & $\omega$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\marginnote{注意：omicron 就是普通的拉丁小写字母 o，没有专门的命令。}
+
+\subsection{大写希腊字母}
+
+\begin{table}[h]
+\centering
+\caption{大写希腊字母及其 \LaTeX{} 命令}
+\labtab{greek-upper}
+\begin{tabular}{@{}lll@{\hspace{1.5cm}}lll@{}}
+\toprule
+字母 & 命令 & 输出 & 字母 & 命令 & 输出 \\
+\midrule
+Alpha   & \lstinline|A|        & $A$     & Nu      & \lstinline|N|        & $N$ \\
+Beta    & \lstinline|B|        & $B$     & Xi      & \lstinline|\Xi|      & $\Xi$ \\
+Gamma   & \lstinline|\Gamma|   & $\Gamma$   & Omicron & \lstinline|O|        & $O$ \\
+Delta   & \lstinline|\Delta|   & $\Delta$   & Pi      & \lstinline|\Pi|      & $\Pi$ \\
+Epsilon & \lstinline|E|        & $E$     & Rho     & \lstinline|P|        & $P$ \\
+Zeta    & \lstinline|Z|        & $Z$     & Sigma   & \lstinline|\Sigma|   & $\Sigma$ \\
+Eta     & \lstinline|H|        & $H$     & Tau     & \lstinline|T|        & $T$ \\
+Theta   & \lstinline|\Theta|   & $\Theta$   & Upsilon & \lstinline|\Upsilon| & $\Upsilon$ \\
+Iota    & \lstinline|I|        & $I$     & Phi     & \lstinline|\Phi|     & $\Phi$ \\
+Kappa   & \lstinline|K|        & $K$     & Chi     & \lstinline|X|        & $X$ \\
+Lambda  & \lstinline|\Lambda|  & $\Lambda$  & Psi     & \lstinline|\Psi|     & $\Psi$ \\
+Mu      & \lstinline|M|        & $M$     & Omega   & \lstinline|\Omega|   & $\Omega$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\index{希腊字母!变体}
+此外，还有一些希腊字母的变体形式：
+\begin{itemize}
+    \item \lstinline|\varepsilon| —— $\varepsilon$（epsilon 的花体变体）
+    \item \lstinline|\vartheta| —— $\vartheta$（theta 的变体）
+    \item \lstinline|\varpi| —— $\varpi$（pi 的变体）
+    \item \lstinline|\varrho| —— $\varrho$（rho 的变体）
+    \item \lstinline|\varsigma| —— $\varsigma$（sigma 的变体）
+    \item \lstinline|\varphi| —— $\varphi$（phi 的变体）
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+
+\section{常用数学符号}
+
+\index{数学符号}
+
+以下汇总了学术写作中高频使用的数学符号及其 \LaTeX{} 命令。
+
+\subsection{关系运算符}
+
+\begin{table}[h]
+\centering
+\caption{常用关系运算符}
+\labtab{math-rel}
+\begin{tabular}{@{}lll@{\hspace{2cm}}lll@{}}
+\toprule
+符号 & 命令 & 输出 & 符号 & 命令 & 输出 \\
+\midrule
+小于等于 & \lstinline|\leq|   & $\leq$   & 大于等于 & \lstinline|\geq|   & $\geq$ \\
+不等于   & \lstinline|\neq|   & $\neq$   & 约等于   & \lstinline|\approx| & $\approx$ \\
+正比于   & \lstinline|\propto| & $\propto$ & 相似于 & \lstinline|\sim|    & $\sim$ \\
+子集     & \lstinline|\subset| & $\subset$ & 属于   & \lstinline|\in|     & $\in$ \\
+空集     & \lstinline|\emptyset| & $\emptyset$ & 全集 & \lstinline|\forall| & $\forall$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{常用运算符号}
+
+\begin{table}[h]
+\centering
+\caption{常用运算符号}
+\labtab{math-ops}
+\begin{tabular}{@{}lll@{\hspace{2cm}}lll@{}}
+\toprule
+符号 & 命令 & 输出 & 符号 & 命令 & 输出 \\
+\midrule
+求和   & \lstinline|\sum|    & $\sum$    & 求积   & \lstinline|\prod|   & $\prod$ \\
+积分   & \lstinline|\int|    & $\int$    & 偏导   & \lstinline|\partial| & $\partial$ \\
+无穷   & \lstinline|\infty|  & $\infty$  & 梯度   & \lstinline|\nabla|  & $\nabla$ \\
+加减   & \lstinline|\pm|     & $\pm$     & 乘号   & \lstinline|\times|  & $\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{常用箭头}
+
+\begin{table}[h]
+\centering
+\caption{常用箭头}
+\labtab{math-arrows}
+\begin{tabular}{@{}lll@{\hspace{2cm}}lll@{}}
+\toprule
+符号 & 命令 & 输出 & 符号 & 命令 & 输出 \\
+\midrule
+右箭头   & \lstinline|\rightarrow| & $\rightarrow$ & 双向箭头 & \lstinline|\leftrightarrow| & $\leftrightarrow$ \\
+长右箭头 & \lstinline|\longrightarrow| & $\longrightarrow$ & 左箭头 & \lstinline|\leftarrow| & $\leftarrow$ \\
+映射     & \lstinline|\mapsto| & $\mapsto$ & 推出 & \lstinline|\Rightarrow| & $\Rightarrow$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{常用希腊字母类符号}
+
+\begin{table}[h]
+\centering
+\caption{特殊数学符号}
+\labtab{math-special}
+\begin{tabular}{@{}lll@{\hspace{2cm}}lll@{}}
+\toprule
+符号 & 命令 & 输出 & 符号 & 命令 & 输出 \\
+\midrule
+实数集 & \lstinline|\mathbb{R}| & $\mathbb{R}$ & 自然数集 & \lstinline|\mathbb{N}| & $\mathbb{N}$ \\
+花体 R & \lstinline|\mathcal{R}| & $\mathcal{R}$ & 手写体 l & \lstinline|\ell|  & $\ell$ \\
+角     & \lstinline|\angle| & $\angle$ & 度 & \lstinline|^\circ|  & $^\circ$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%----------------------------------------------------------------------------------------
+
+\section{方正字体样本}
+
+\index{字体!方正书宋}
+\index{字体!方正黑体}
+\index{字体!方正楷体}
+\index{字体!方正仿宋}
+\index{字体!方正小标宋}
+\index{字体!方正隶书}
+
+{% 用分组将字体样本与正文区分
+
+\Class{kaobookCJKsc} 中文模板使用方正字库中的六款字体进行排版。
+以下展示每种字体的实际效果（含中英文混排）。
+
+\medskip
+
+% ── 方正书宋：正文字体 ──
+\subsection*{1. 方正书宋（\texttt{\textbackslash fzsong}）—— 正文字体}
+\index{字体!方正书宋}
+\fzsong
+这是方正书宋——中文模板的默认正文字体。\\
+\textit{The quick brown fox jumps over the lazy dog.}\\
+\textbf{书宋体的字形端正清晰，适合长篇正文的连续阅读。}\\
+0123456789 —「学而时习之，不亦说乎？」
+
+\medskip
+
+% ── 方正黑体：标题字体 ──
+\subsection*{2. 方正黑体（\texttt{\textbackslash fzhei}）—— 标题字体}
+\index{字体!方正黑体}
+\fzhei
+这是方正黑体——{\large 用作次级标题}。\\
+\textit{The quick brown fox jumps over the lazy dog.}\\
+\textbf{黑体笔画粗细均匀，醒目大方，适合各级标题。}\\
+0123456789 —「学而时习之，不亦说乎？」
+
+\medskip
+
+% ── 方正楷体：强调/引用字体 ──
+\subsection*{3. 方正楷体（\texttt{\textbackslash fzkai}）—— 引用/强调字体}
+\index{字体!方正楷体}
+\fzkai
+这是方正楷体——\textit{如手书般优雅温润}。\\
+\textit{The quick brown fox jumps over the lazy dog.}\\
+\textbf{楷体常用于致献词、引文或需要优雅强调的段落。}\\
+0123456789 —「学而时习之，不亦说乎？」
+
+\medskip
+
+% ── 方正仿宋：边注字体 ──
+\subsection*{4. 方正仿宋（\texttt{\textbackslash fzfs}）—— 边注/注释字体}
+\index{字体!方正仿宋}
+\fzfs
+这是方正仿宋——\footnotesize 页面边注的专用字体。\\
+\textit{The quick brown fox jumps over the lazy dog.}\\
+\textbf{仿宋体常用于批注和页边旁注，与正文形成视觉对比。}\\
+0123456789 —「学而时习之，不亦说乎？」
+
+\medskip
+
+% ── 方正小标宋：大标题字体 ──
+\subsection*{5. 方正小标宋（\texttt{\textbackslash fzxiaobiaosong}）—— 大标题专用}
+\index{字体!方正小标宋}
+\fzxiaobiaosong
+\Large 这是方正小标宋——{\LARGE 最大标题专用字体}。\\
+\large \textit{The quick brown fox jumps over the lazy dog.}\\
+\textbf{小标宋是方正字库的经典标题字体，用于 Part、Chapter 的大标题。}\\
+\large 0123456789 —「学而时习之，不亦说乎？」
+
+\medskip
+
+% ── 方正隶书：装饰字体 ──
+\subsection*{6. 方正隶书（\texttt{\textbackslash fzli}）—— 装饰字体（可选）}
+\index{字体!方正隶书}
+\fzli
+\large 这是方正隶书——{\LARGE 古韵盎然}。\\
+\large \textit{The quick brown fox jumps over the lazy dog.}\\
+\textbf{隶书字体典雅古朴，适合封面、题词或需要特殊氛围的场合。}\\
+\large 0123456789 —「学而时习之，不亦说乎？」
+
+} % 结束字体样本分组
+
+\marginnote[-8cm]{页码区域的边注文字使用方正仿宋，%
+正文使用方正书宋，这是本模板的默认排版规范。}
+
+%----------------------------------------------------------------------------------------
+
+\section{字体使用速查}
+
+\index{字体!速查表}
+下表汇总了六款方正字体的命令与用途：
+
+\begin{table}[h]
+\centering
+\caption{方正字体命令速查}
+\labtab{font-quick}
+\begin{tabular}{@{}llp{6cm}@{}}
+\toprule
+命令 & 字体名称 & 用途 \\
+\midrule
+\lstinline|\fzsong| & 方正书宋 & 正文默认字体 \\
+\lstinline|\fzhei|  & 方正黑体 & 次级标题 \\
+\lstinline|\fzkai|  & 方正楷体 & 引文、致献、强调 \\
+\lstinline|\fzfs|   & 方正仿宋 & 边注、批注 \\
+\lstinline|\fzxiaobiaosong| & 方正小标宋 & Part/Chapter 大标题 \\
+\lstinline|\fzli|   & 方正隶书 & 装饰性文字（可选） \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{kaobox}[title=字体要求]
+以上字体均需安装在 Windows 系统中（通常位于 \lstinline|C:\textbackslash Windows\textbackslash Fonts\| 目录下）。
+如果缺少某款字体，可在 \texttt{kaoWinCJKsc.sty} 中修改对应字体路径或替换为系统自带字体
+（模板已预置了 \texttt{\textbackslash song}、\texttt{\textbackslash hei}、%
+\texttt{\textbackslash kai}、\texttt{\textbackslash fs} 作为备选）。
+\end{kaobox}
+
+本章提供的字母表和字体样本可以作为日常排版的快速参考。
+关于字体的更详细说明以及编译流程，请参见下一章
+\nrefch{fulu}。

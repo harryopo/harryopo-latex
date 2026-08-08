@@ -1,0 +1,43 @@
+% packageconfig.tex — 中文模板包配置
+% 在 \begin{document} 之前加载
+
+% ── 中文兼容包 ──
+\usepackage{xeCJKfntef}          % 中文下划线/着重号
+\usepackage{xpinyin}             % 拼音
+\usepackage{indentfirst}         % 中文段落首行缩进
+\usepackage{pifont}              % 中文编号符号
+\usepackage[perpage,symbol*]{footmisc} % 脚注符号
+\usepackage{zhlipsum}            % 中文测试文本
+
+% ── 表格增强 ──
+\usepackage{diagbox}             % 斜线表头
+\usepackage{longtable}           % 长表格
+\usepackage{multirow}            % 表格行合并
+\usepackage{multicol}            % 多栏
+\usepackage{makecell}            % 表格单元格格式
+
+% ── 插图与图形 ──
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,calc,fit,backgrounds}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+% ── 数学增强 ──
+\usepackage{amsmath,amssymb,amsthm}
+
+% ── 列表增强 ──
+\usepackage{enumitem}
+
+% ── 排版工具 ──
+\usepackage{lipsum}              % 英文测试文本
+\usepackage{rotating}            % 旋转
+\usepackage{array}               % 表格列格式
+\usepackage{tabularx}            % 等宽表格
+\usepackage{booktabs}            % 三线表
+\usepackage{float}               % 浮动体控制
+
+% ── 超链接 ──
+\usepackage{url}
+
+% ── Markdown 支持 ──
+\usepackage{markdown}

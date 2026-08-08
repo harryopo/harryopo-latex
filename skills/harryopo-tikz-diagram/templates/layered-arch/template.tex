@@ -1,0 +1,294 @@
+% ============================================================
+% harryopo-tikz-diagram - 分层架构图模板 v2 (Layered Architecture)
+% ============================================================
+%
+% 【用途】
+%   绘制 2-5 层的分层架构图，每层包含若干模块，层之间用箭头连接。
+%   适用于系统架构、技术栈分层、网络协议栈等场景。
+%
+% 【设计原则】（参考 example-paper-structure 布局经验）
+%   1. 无阴影设计：干净扁平，避免视觉噪音
+%   2. 居中对齐：模块内容居中，层次清晰
+%   3. 宽松内边距：inner sep=8pt，不拥挤
+%   4. 统一无衬线：Arial + Microsoft YaHei
+%   5. 层标题浮于虚线框上方，不打断边框
+%   6. 图例嵌入 tikzpicture 内部，避免额外排版间距
+%
+% 【使用方法】
+%   将本文件内容复制到你的 LaTeX 文档中，或使用 \input 命令引入。
+%   修改下方"可调整参数"部分来自定义你的架构图。
+%
+% 【编译要求】
+%   XeLaTeX 编译器，需加载 ctex + fontspec 宏包以支持中文。
+%
+% ============================================================
+
+% ------------------------------------------------------------
+% 必要的宏包（如果文档中已加载可省略）
+% ------------------------------------------------------------
+% \usepackage{tikz}
+% \usetikzlibrary{positioning, fit, backgrounds, arrows.meta, calc}
+
+% ------------------------------------------------------------
+% 可调整参数 —— 在这里修改你的架构图配置
+% ------------------------------------------------------------
+
+% 主题色定义（Nature 无衬线风格，与 paper-structure 一致）
+\definecolor{PaperBorder}{HTML}{B0C4DE}      % 柔和灰蓝边框
+\definecolor{PaperFill}{HTML}{FFFFFF}        % 纯白模块填充
+\definecolor{PaperTitle}{HTML}{2C3E50}       % 深蓝灰标题
+\definecolor{PaperLayerBg}{HTML}{F5F8FA}     % 层背景：极淡蓝灰
+\definecolor{PaperLayerBorder}{HTML}{D8E3EE} % 层边框：更浅的灰蓝
+\definecolor{PaperMuted}{HTML}{7F8C8D}       % 次要文字：柔和灰
+\definecolor{AccentOrange}{HTML}{D35400}     % 代码/技术栈强调：柔和橙
+
+% 全局间距控制
+\def\archLayerGap{1.6cm}      % 层与层之间的垂直距离
+\def\archModuleGap{0.55cm}    % 同一层内模块之间的水平距离
+\def\archLayerPad{12pt}       % 层背景框内边距（x/y统一）
+\def\archTitleOffset{4pt}     % 层标题相对于背景框顶部的偏移
+
+% 模块尺寸
+\def\archModuleW{4.0cm}       % 普通模块的宽度（text width）
+\def\archModuleH{1.5cm}       % 普通模块的最小高度（minimum height）
+\def\archWideW{13.0cm}        % 宽模块的宽度（横跨整层）
+\def\archWideH{0.95cm}        % 宽模块的最小高度
+
+% 箭头样式
+\def\archArrowThickness{1.0pt}
+
+% ------------------------------------------------------------
+% 样式定义（一般不需要修改）
+% ------------------------------------------------------------
+\tikzset{
+  % ===== 通用模块样式 =====
+  arch-module/.style = {
+    rectangle,
+    draw = PaperBorder,
+    fill = PaperFill,
+    line width = 0.8pt,
+    rounded corners = 5pt,
+    text width = \archModuleW,
+    minimum height = \archModuleH,
+    align = center,
+    font = \small\sffamily,
+    text = PaperTitle,
+    inner sep = 8pt,
+  },
+  % ===== 模块内容子样式（在 node 内用 {} 包裹使用） =====
+  mod-title/.style = {
+    font = \small\sffamily\bfseries,
+    text = PaperTitle,
+  },
+  mod-desc/.style = {
+    font = \footnotesize\sffamily,
+    text = PaperMuted,
+  },
+  mod-tech/.style = {
+    font = \footnotesize\sffamily\ttfamily,
+    text = AccentOrange,
+  },
+  % ===== 宽模块样式（横跨整层） =====
+  arch-wide-module/.style = {
+    arch-module,
+    text width = \archWideW,
+    minimum height = \archWideH,
+  },
+  % ===== 层背景框样式 =====
+  arch-layerbox/.style = {
+    draw = PaperLayerBorder,
+    fill = PaperLayerBg,
+    line width = 0.7pt,
+    dashed,
+    dash pattern = on 4pt off 3pt,
+    rounded corners = 8pt,
+    inner sep = \archLayerPad,
+  },
+  % ===== 层标题样式（浮于框上方，不 fill=white 打断边框） =====
+  arch-layertitle/.style = {
+    font = \normalsize\sffamily\bfseries,
+    text = PaperTitle,
+    anchor = north west,
+    inner sep = 0pt,
+    outer sep = 0pt,
+  },
+  arch-layertag/.style = {
+    font = \footnotesize\sffamily\itshape,
+    text = PaperMuted,
+    anchor = north east,
+    inner sep = 0pt,
+    outer sep = 0pt,
+  },
+  % ===== 箭头样式（双向/下行/上行） =====
+  arch-arrow/.style = {
+    Stealth-Stealth,
+    draw = PaperBorder,
+    line width = \archArrowThickness,
+  },
+  arch-arrow-down/.style = {
+    -Stealth,
+    draw = PaperBorder,
+    line width = \archArrowThickness,
+  },
+  arch-arrow-up/.style = {
+    -Stealth,
+    draw = PaperMuted,
+    line width = \archArrowThickness,
+  },
+  % ===== 箭头标签 =====
+  arr-label/.style = {
+    font = \footnotesize\sffamily\bfseries,
+    fill = white,
+    text = PaperBorder,
+    inner sep = 2pt,
+    outer sep = 0pt,
+  },
+  arr-label-rev/.style = {
+    font = \footnotesize\sffamily\bfseries,
+    fill = white,
+    text = PaperMuted,
+    inner sep = 2pt,
+    outer sep = 0pt,
+  },
+  % ===== 图例框 =====
+  arch-legend/.style = {
+    draw = PaperLayerBorder,
+    fill = PaperFill,
+    line width = 0.6pt,
+    rounded corners = 5pt,
+    inner sep = 8pt,
+    font = \footnotesize\sffamily,
+    text = PaperTitle,
+  },
+}
+
+% ------------------------------------------------------------
+% 模板正文 —— tikzpicture 环境
+% ------------------------------------------------------------
+%
+% 【使用说明】
+%   1. 第一层（最上层）的第一个节点用绝对坐标 at (0,0)
+%   2. 同一层内的其他节点用 right=\archModuleGap of <节点名> 相对定位
+%   3. 下一层的第一个节点用 below=\archLayerGap of <上一层>.south west, anchor=north west 定位
+%   4. 每层结束后用 fit 库创建背景框和标题
+%   5. 最后绘制层之间的箭头
+%   6. 模块内容用 {\mod-title 标题}\\[2pt]{\mod-desc 描述}\\[1pt]{\mod-tech 技术栈} 结构
+%
+% ------------------------------------------------------------
+
+\begin{tikzpicture}[
+    node distance = 0pt and \archModuleGap,
+    >=Stealth,
+    line width = 0.7pt,
+    every node/.style = {inner sep = 0pt, outer sep = 0pt},
+  ]
+
+  % ==========================================================
+  % 第 1 层 —— 表示层（示例）
+  % ==========================================================
+  \node[arch-module] (ui-web) at (0,0) {
+    {\mod-title Web 前端}
+  };
+  \node[arch-module, right=\archModuleGap of ui-web] (ui-mobile) {
+    {\mod-title 移动 App}
+  };
+  \node[arch-module, right=\archModuleGap of ui-mobile] (ui-admin) {
+    {\mod-title 管理后台}
+  };
+
+  \begin{scope}[on background layer]
+    \node[arch-layerbox, fit=(ui-web)(ui-mobile)(ui-admin)] (layer1-box) {};
+  \end{scope}
+  \node[arch-layertitle] at ($(layer1-box.north west)+(0,\archTitleOffset)$) {表示层};
+
+  % ==========================================================
+  % 第 2 层 —— 业务逻辑层（示例，含多行内容）
+  % ==========================================================
+  \node[arch-module, below=\archLayerGap of ui-web.south west, anchor=north west] (biz-user) {
+    {\mod-title 用户服务}\\[2pt]
+    {\mod-desc 认证、授权}\\[1pt]
+    {\mod-desc 权限管理}
+  };
+  \node[arch-module, right=\archModuleGap of biz-user] (biz-order) {
+    {\mod-title 订单服务}\\[2pt]
+    {\mod-desc 订单创建}\\[1pt]
+    {\mod-tech 状态机}
+  };
+  \node[arch-module, right=\archModuleGap of biz-order] (biz-pay) {
+    {\mod-title 支付服务}\\[2pt]
+    {\mod-tech 支付宝/微信}\\[1pt]
+    {\mod-desc 交易处理}
+  };
+
+  \begin{scope}[on background layer]
+    \node[arch-layerbox, fit=(biz-user)(biz-order)(biz-pay)] (layer2-box) {};
+  \end{scope}
+  \node[arch-layertitle] at ($(layer2-box.north west)+(0,\archTitleOffset)$) {业务逻辑层};
+
+  % ==========================================================
+  % 第 3 层 —— 数据访问层（示例，含宽模块）
+  % ==========================================================
+  \node[arch-wide-module, below=\archLayerGap of biz-order.south, anchor=north] (data-db) {
+    {\mod-title MySQL 数据库}
+  };
+
+  \begin{scope}[on background layer]
+    \node[arch-layerbox, fit=(data-db)] (layer3-box) {};
+  \end{scope}
+  \node[arch-layertitle] at ($(layer3-box.north west)+(0,\archTitleOffset)$) {数据访问层};
+
+  % ==========================================================
+  % 层间箭头连接（示例：下行箭头 + 标签）
+  % ==========================================================
+  \draw[arch-arrow-down] (ui-web.south) -- (biz-user.north);
+  \draw[arch-arrow-down] (ui-mobile.south) -- (biz-order.north);
+  \draw[arch-arrow-down] (ui-admin.south) -- (biz-pay.north);
+
+  \draw[arch-arrow-down] (biz-user.south) -- (data-db.north -| biz-user.south);
+  \draw[arch-arrow-down] (biz-order.south) -- (data-db.north);
+  \draw[arch-arrow-down] (biz-pay.south) -- (data-db.north -| biz-pay.south);
+
+  % ==========================================================
+  % 图例（可选，放在右下角）
+  % ==========================================================
+  % \node[arch-legend, anchor=north east] at ($(layer3-box.south east)+(0,-0.8cm)$) {
+  %   \begin{tabular}{@{}c@{\hspace{6pt}}l@{\hspace{14pt}}c@{\hspace{6pt}}l@{}}
+  %     \textcolor{PaperBorder}{\rule[1pt]{14pt}{1.2pt}$>$} & {\sffamily\bfseries\small 请求} &
+  %     \textcolor{PaperMuted}{\rule[1pt]{14pt}{1.2pt}$>$} & {\sffamily\bfseries\small 响应}
+  %   \end{tabular}
+  % };
+
+\end{tikzpicture}
+
+% ============================================================
+% 【常见修改示例】
+% ============================================================
+%
+% 1. 增加第 4 层：
+%    复制一层的代码块，修改节点名称和内容，
+%    below=\archLayerGap of <上一层第一个节点>.south west, anchor=north west。
+%
+% 2. 右侧英文标签：
+%    在 layer-box fit 之后加：
+%    \node[arch-layertag] at ($(box.north east)+(0,\archTitleOffset)$) {English Tag};
+%
+% 3. 带标签的层间箭头：
+%    \draw[arch-arrow-down] (a.south) -- (b.north)
+%      node[midway, arr-label, anchor=west, xshift=3pt] {数据流向};
+%    \draw[arch-arrow-up] (c.north) -- (d.south)
+%      node[midway, arr-label-rev, anchor=east, xshift=-3pt] {反向流};
+%
+% 4. 双向箭头：
+%    \draw[arch-arrow] (node1.south) -- (node2.north);
+%
+% 5. 折线连接（|- 和 -|）：
+%    \draw[arch-arrow-down] (nodeA.south) |- (nodeB.west);
+%    \draw[arch-arrow-down] (nodeA.east) -| (nodeB.north);
+%
+% 6. 模块内容格式（3行推荐）：
+%    {\mod-title 模块名}\\[2pt]
+%    {\mod-desc 功能描述行1}\\[1pt]
+%    {\mod-tech 技术栈}
+%    或 {\mod-desc 功能描述行2} 视内容选择。
+%
+% ============================================================

@@ -1,0 +1,33 @@
+\documentclass[nomath]{harryopo-paper}
+
+\title{加粗映射测试}
+\author{}
+\date{2026年08月05日}
+
+
+\begin{document}
+
+\maketitle
+
+这是一段普通文字，这是\fzht{加粗文字}应该变黑体，这是\textit{斜体文字}保持斜体。
+
+这是\fzht{粗斜体}应该也变黑体（中文无斜体概念）。
+
+\subsection*{表格测试}
+\addcontentsline{toc}{subsection}{表格测试}
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+    \toprule
+    \fzht{列A} & \fzht{列B} & \fzht{列C} \\
+    \midrule
+    数据1 & 数据2 & 数据3 \\
+    \fzht{加粗单元格} & 普通 & \textit{斜体} \\
+    \bottomrule
+  \end{tabularx}
+  \caption{}
+\end{table}
+
+\end{document}

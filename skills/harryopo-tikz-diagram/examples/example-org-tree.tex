@@ -1,0 +1,173 @@
+% ============================================================
+%  示例：软件公司组织架构图
+%  基于 harryopo-tikz-diagram org-tree 模板 v3
+%  Nature 无衬线风格 — 绝对数值坐标防重叠
+%
+%  编译命令：xelatex example-org-tree.tex
+% ============================================================
+
+\documentclass[tikz,border=20pt]{standalone}
+
+\usepackage{ctex}
+\usepackage{tikz}
+\usepackage{fontspec}
+\usepackage{fontawesome5}
+\usepackage{xcolor}
+\usetikzlibrary{positioning, calc}
+
+% ============================================================
+% 字体设置
+% ============================================================
+\setmainfont{Arial}
+\setsansfont{Arial}
+\setmonofont{Consolas}[Scale=0.90]
+\setCJKsansfont{Microsoft YaHei}
+\setCJKmainfont{Microsoft YaHei}
+
+\newcommand{\icon}[1]{{\footnotesize\color{PaperBorder}#1}}
+
+% ============================================================
+% Nature 风格配色
+% ============================================================
+\definecolor{PaperBorder}{HTML}{B0C4DE}
+\definecolor{PaperFill}{HTML}{FFFFFF}
+\definecolor{PaperTitle}{HTML}{2C3E50}
+\definecolor{PaperMuted}{HTML}{5D6D7E}
+\definecolor{AccentOrange}{HTML}{D35400}
+\definecolor{PaperLayerBg}{HTML}{F5F8FA}
+
+% ============================================================
+%  尺寸常量（v3：精确计算防重叠）
+% ============================================================
+\def\DeptStep{5.0cm}    % 部门中心距（≥ 技术部团队半宽 + 产品部团队半宽）
+\def\TeamW{2.2cm}       % 团队节点宽度
+\def\TeamStep{2.6cm}    % 团队中心距 = TeamW + 0.4cm gap
+
+% 部门 X 坐标（直接数值，避免 TikZ calc 问题）
+\def\Xtech{-7.5}   % -1.5 * DeptStep
+\def\Xprod{-2.5}   % -0.5 * DeptStep
+\def\Xmkt{2.5}     %  0.5 * DeptStep
+\def\Xhr{7.5}      %  1.5 * DeptStep
+
+% 层级 Y 坐标
+\def\Ytitle{0}
+\def\Ytop{-1.5}
+\def\Ydept{-4.0}
+\def\Yteam{-6.5}
+\def\Yteam2{-7.8}  % 技术部2x2第二行
+
+\tikzset{
+  org-top/.style = {
+    rounded corners = 8pt,
+    draw = PaperBorder,
+    fill = AccentOrange!10,
+    line width = 1.2pt,
+    font = \normalsize\sffamily\bfseries,
+    minimum width = 3.8cm,
+    minimum height = 1.2cm,
+    inner sep = 6pt,
+    align = center,
+    text = PaperTitle,
+  },
+  org-dept/.style = {
+    rounded corners = 6pt,
+    draw = PaperBorder,
+    fill = PaperFill,
+    line width = 0.9pt,
+    font = \small\sffamily\bfseries,
+    minimum width = 3.2cm,
+    minimum height = 1.0cm,
+    inner sep = 5pt,
+    align = center,
+    text = PaperTitle,
+  },
+  org-team/.style = {
+    rounded corners = 5pt,
+    draw = PaperBorder,
+    fill = PaperLayerBg,
+    line width = 0.7pt,
+    font = \footnotesize\sffamily,
+    minimum width = \TeamW,
+    minimum height = 0.8cm,
+    inner sep = 4pt,
+    align = center,
+    text = PaperTitle,
+  },
+  org-line/.style = {
+    line width = 1.0pt,
+    draw = PaperBorder,
+  },
+  org-title/.style = {
+    font = \Large\bfseries\sffamily\color{PaperTitle},
+  },
+}
+
+\begin{document}
+
+\begin{tikzpicture}
+
+  % ============================================================
+  %  节点（全部用直接数值坐标，避免 \def 展开问题）
+  % ============================================================
+  \node[org-title] at (0, 0) {\icon{\faSitemap}\ 软件公司组织架构};
+
+  % ---- 顶层：总经理 ----
+  \node[org-top] (gm) at (0, -1.5) {\icon{\faUserTie}\ 总经理};
+
+  % ---- 第二层：4个部门 ----
+  \node[org-dept] (tech) at (-7.5, -4.0) {\icon{\faCode}\ 技术部};
+  \node[org-dept] (prod) at (-2.5, -4.0) {\icon{\faLightbulb}\ 产品部};
+  \node[org-dept] (mkt)  at ( 2.5, -4.0) {\icon{\faBullhorn}\ 市场部};
+  \node[org-dept] (hr)   at ( 7.5, -4.0) {\icon{\faUsers}\ 人事部};
+
+  % ---- 第三层：团队 ----
+  % 技术部4个团队：2x2排列
+  \node[org-team] (fe)  at (-8.8, -6.5) {前端};
+  \node[org-team] (be)  at (-6.2, -6.5) {后端};
+  \node[org-team] (qa)  at (-8.8, -7.8) {测试};
+  \node[org-team] (ops) at (-6.2, -7.8) {运维};
+
+  % 产品部2个团队
+  \node[org-team] (pm)  at (-3.8, -6.5) {产品经理};
+  \node[org-team] (ui)  at (-1.2, -6.5) {UI设计};
+
+  % 市场部2个团队
+  \node[org-team] (promo) at (1.2, -6.5) {推广};
+  \node[org-team] (sales) at (3.8, -6.5) {销售};
+
+  % ============================================================
+  %  连接线
+  % ============================================================
+  % 总经理 → 部门
+  \coordinate (mid1) at (0, -2.5);
+  \draw[org-line] (gm.south) -- (mid1);
+  \draw[org-line] (mid1) -| (tech.north);
+  \draw[org-line] (mid1) -| (prod.north);
+  \draw[org-line] (mid1) -| (mkt.north);
+  \draw[org-line] (mid1) -| (hr.north);
+
+  % 技术部 → 4个子团队（2x2）
+  \coordinate (mid2a) at (-7.5, -5.3);
+  \draw[org-line] (tech.south) -- (mid2a);
+  \draw[org-line] (mid2a) -| (fe.north);
+  \draw[org-line] (mid2a) -| (be.north);
+  \coordinate (mid2b) at (-7.5, -7.1);
+  \draw[org-line] (mid2a) -- (mid2b);
+  \draw[org-line] (mid2b) -| (qa.north);
+  \draw[org-line] (mid2b) -| (ops.north);
+
+  % 产品部 → 2个子团队
+  \coordinate (mid3) at (-2.5, -5.3);
+  \draw[org-line] (prod.south) -- (mid3);
+  \draw[org-line] (mid3) -| (pm.north);
+  \draw[org-line] (mid3) -| (ui.north);
+
+  % 市场部 → 2个子团队
+  \coordinate (mid4) at (2.5, -5.3);
+  \draw[org-line] (mkt.south) -- (mid4);
+  \draw[org-line] (mid4) -| (promo.north);
+  \draw[org-line] (mid4) -| (sales.north);
+
+\end{tikzpicture}
+
+\end{document}

@@ -1,0 +1,255 @@
+% ============================================================
+%  示例：用户登录流程图 (Flowchart Example)
+%  基于 harryopo-tikz-diagram flowchart v3 模板
+%  Nature 无衬线风格 — 返回箭头向上绕回（标准UML惯例）
+%  编译命令：xelatex -interaction=nonstopmode example-flowchart.tex
+% ============================================================
+
+\documentclass[12pt,a4paper]{ctexart}
+
+\usepackage{geometry}
+\geometry{left=2.5cm,right=2.5cm,top=2cm,bottom=2cm}
+
+\usepackage{fontspec}
+\usepackage{tikz}
+\usetikzlibrary{positioning, fit, backgrounds, arrows.meta, calc}
+\usetikzlibrary{shapes.geometric, shapes.misc}
+
+% ============================================================
+% Nature 风格配色
+% ============================================================
+\definecolor{PaperBorder}{HTML}{B0C4DE}
+\definecolor{PaperFill}{HTML}{FFFFFF}
+\definecolor{PaperTitle}{HTML}{2C3E50}
+\definecolor{PaperMuted}{HTML}{7F8C8D}
+\definecolor{AccentOrange}{HTML}{D35400}
+\definecolor{PaperLayerBg}{HTML}{F5F8FA}
+\definecolor{PaperLayerBorder}{HTML}{D8E3EE}
+
+% ============================================================
+% 字体设置 — Nature 无衬线风格
+% ============================================================
+\setmainfont{Arial}
+\setsansfont{Arial}
+\setmonofont{Consolas}[Scale=0.90]
+\setCJKsansfont{Microsoft YaHei}
+\setCJKmainfont{Microsoft YaHei}
+
+\definecolor{SuccessGreen}{HTML}{6BAE55}
+\definecolor{SuccessGreenFill}{HTML}{E8F5E4}
+\definecolor{SuccessGreenText}{HTML}{38761D}
+
+% ============================================================
+%  间距常量（v3：分支返回向上绕回）
+% ============================================================
+\def\FlowNodeW{3.6cm}
+\def\FlowNodeH{1.0cm}
+\def\FlowVGap{1.0cm}      % 主流程节点垂直间距
+\def\FlowHGap{3.0cm}      % 分支节点水平偏移（加大留出绕回空间）
+\def\FlowLoopUp{0.7cm}    % 分支返回线上抬高度
+
+\begin{document}
+
+\begin{center}
+  {\Large\sffamily\bfseries\textcolor{PaperTitle}{用户登录流程图}}\\[0.3em]
+  {\small\sffamily\itshape\textcolor{PaperMuted}{User Login Flowchart}}
+\end{center}
+
+\vspace{1em}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance = \FlowVGap and \FlowHGap,
+    >=Stealth,
+    line width = 0.8pt,
+    every node/.style = {inner sep=0pt, outer sep=0pt},
+    % ---- 开始/结束（圆角胶囊） ----
+    startend/.style = {
+        rectangle,
+        draw = AccentOrange,
+        fill = AccentOrange!12,
+        line width = 1.2pt,
+        rounded corners = 16pt,
+        minimum width = 2.6cm,
+        minimum height = 0.9cm,
+        align = center,
+        font = \small\sffamily\bfseries,
+        text = PaperTitle,
+        inner sep = 6pt,
+    },
+    % ---- 输入/输出（平行四边形/梯形） ----
+    io/.style = {
+        trapezium,
+        trapezium left angle = 75,
+        trapezium right angle = 105,
+        draw = PaperBorder,
+        fill = PaperFill,
+        line width = 0.8pt,
+        minimum width = \FlowNodeW,
+        minimum height = \FlowNodeH,
+        align = center,
+        font = \small\sffamily,
+        text = PaperTitle,
+        inner sep = 6pt,
+        trapezium stretches = true,
+    },
+    % ---- 决策（扁平菱形） ----
+    decision/.style = {
+        diamond,
+        draw = PaperBorder,
+        fill = PaperLayerBg,
+        line width = 0.8pt,
+        aspect = 2.2,
+        minimum width = 2.4cm,
+        minimum height = 1.1cm,
+        align = center,
+        font = \small\sffamily\bfseries,
+        text = PaperTitle,
+        inner sep = 2pt,
+    },
+    % ---- 过程（矩形） ----
+    process/.style = {
+        rectangle,
+        draw = PaperBorder,
+        fill = PaperFill,
+        line width = 0.8pt,
+        rounded corners = 5pt,
+        minimum width = 2.8cm,
+        minimum height = 0.9cm,
+        align = center,
+        font = \small\sffamily,
+        text = PaperTitle,
+        inner sep = 6pt,
+    },
+    % ---- 成功过程（高亮绿色） ----
+    success/.style = {
+        rectangle,
+        draw = SuccessGreen,
+        fill = SuccessGreenFill,
+        line width = 1.0pt,
+        rounded corners = 5pt,
+        minimum width = 2.6cm,
+        minimum height = 0.9cm,
+        align = center,
+        font = \small\sffamily\bfseries,
+        text = SuccessGreenText,
+        inner sep = 6pt,
+    },
+    % ---- 主流程箭头 ----
+    arrow-main/.style = {
+        ->, >=Stealth, thick, PaperBorder, line width=1.2pt,
+    },
+    % ---- 分支箭头（否，虚线灰色） ----
+    arrow-branch/.style = {
+        ->, >=Stealth, PaperMuted, dashed, line width=0.9pt, dash pattern=on 5pt off 3pt,
+    },
+    % ---- 返回箭头（绕回，虚线灰色带圆角） ----
+    arrow-loop/.style = {
+        ->, >=Stealth, PaperMuted, dashed, line width=0.9pt, dash pattern=on 5pt off 3pt,
+        rounded corners=4pt,
+    },
+    % ---- 边标签（白色光晕） ----
+    edge-label/.style = {
+        fill = white,
+        font = \footnotesize\sffamily\bfseries,
+        text = PaperMuted,
+        inner sep = 2pt,
+        outer sep = 0pt,
+    },
+    edge-label-yes/.style = {
+        fill = white,
+        font = \footnotesize\sffamily\bfseries,
+        text = SuccessGreen,
+        inner sep = 2pt,
+        outer sep = 0pt,
+    },
+    % ---- 图例 ----
+    legend-box/.style = {
+        draw = PaperLayerBorder,
+        fill = PaperFill,
+        line width = 0.6pt,
+        rounded corners = 5pt,
+        inner sep = 10pt,
+        font = \footnotesize\sffamily,
+        text = PaperTitle,
+    },
+]
+
+    % ============================================================
+    %  主流程节点（居中列，x=0）
+    % ============================================================
+
+    \node[startend] (start) at (0,0) {开始};
+
+    \node[io, below=\FlowVGap of start] (input-account) {输入账号};
+
+    \node[decision, below=\FlowVGap of input-account] (check-format) {账号格式\\正确？};
+
+    \node[io, below=\FlowVGap of check-format] (input-password) {输入密码};
+
+    \node[decision, below=\FlowVGap of input-password] (check-match) {账号密码\\匹配？};
+
+    \node[success, below=\FlowVGap of check-match] (login-success) {登录成功};
+
+    \node[startend, below=\FlowVGap of login-success] (end) {结束};
+
+    % ============================================================
+    %  左侧分支节点（错误处理）
+    % ============================================================
+
+    % 注意：分支节点与决策节点水平对齐（same y）
+    \node[process, left=\FlowHGap of check-format] (reinput-account) {重新输入账号};
+
+    \node[process, left=\FlowHGap of check-match] (error-msg) {提示错误信息};
+
+    % ============================================================
+    %  主流程连线（向下实线）
+    % ============================================================
+
+    \draw[arrow-main] (start.south) -- (input-account.north);
+    \draw[arrow-main] (input-account.south) -- (check-format.north);
+    \draw[arrow-main] (check-format.south) -- (input-password.north)
+        node[edge-label-yes, pos=0.5, anchor=west, xshift=3pt] {是};
+    \draw[arrow-main] (input-password.south) -- (check-match.north);
+    \draw[arrow-main] (check-match.south) -- (login-success.north)
+        node[edge-label-yes, pos=0.5, anchor=west, xshift=3pt] {是};
+    \draw[arrow-main] (login-success.south) -- (end.north);
+
+    % ============================================================
+    %  分支连线（否，水平向左虚线） + 返回线（向上绕回，标准惯例）
+    % ============================================================
+
+    % --- 账号格式错误分支 ---
+    % "否"：菱形 → 分支节点（水平虚线）
+    \draw[arrow-branch] (check-format.west) -- (reinput-account.east)
+        node[edge-label, pos=0.5, anchor=south, yshift=2pt] {否};
+    % 返回：分支节点顶部向上 → 右拐 → 接入 input-account 左侧偏上
+    \draw[arrow-loop] (reinput-account.north) -- ++(0,\FlowLoopUp)
+        -| ($(input-account.west)+(0,0.15cm)$);
+
+    % --- 账号密码不匹配分支 ---
+    % "否"：菱形 → 分支节点（水平虚线）
+    \draw[arrow-branch] (check-match.west) -- (error-msg.east)
+        node[edge-label, pos=0.5, anchor=south, yshift=2pt] {否};
+    % 返回：分支节点 → 向上绕 → 右拐 → 接入 input-password 左侧
+    \draw[arrow-loop] (error-msg.north) -- ++(0,\FlowLoopUp)
+        -| ($(input-password.west)+(0,0.15cm)$);
+
+    % ============================================================
+    %  图例
+    % ============================================================
+
+    \node[legend-box, anchor=north east] at ($(end.south east)+(1.2cm,-0.8cm)$) {
+        \begin{tabular}{@{}c@{\hspace{6pt}}l@{\hspace{16pt}}c@{\hspace{6pt}}l@{}}
+            \textcolor{PaperBorder}{\rule[1pt]{16pt}{1.4pt}$>$} & {\sffamily\bfseries\small 主流程（是）} &
+            \textcolor{PaperMuted}{\rule[0pt]{16pt}{0.9pt}\hspace{-16pt}\makebox[16pt][c]{\color{PaperMuted}\scriptsize$--->$}} & {\sffamily\bfseries\small 分支（否）}
+        \end{tabular}
+    };
+
+\end{tikzpicture}
+\caption{\sffamily 用户登录流程图}
+\label{fig:user-login-flowchart}
+\end{figure}
+
+\end{document}

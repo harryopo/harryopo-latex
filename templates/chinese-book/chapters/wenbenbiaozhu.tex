@@ -1,0 +1,228 @@
+\setchapterpreamble[u]{\margintoc}
+\chapter{文本标注}
+\labch{textnotes}
+
+边栏注释（Sidenote）是 \Class{kaobook} 最具辨识度的特性之一。
+宽大的页边空白不是浪费——它们是展示辅助信息的理想舞台。
+本章将逐一演示边注、脚注、宽段落、边栏图表等文本标注功能。
+
+\section{边注（Sidenote）}
+
+边注\index{边注|see {sidenote}}是 \Class{kaobook} 对传统脚注的改良方案。
+传统的脚注位于页面底部，读者需要不断在正文与页底之间来回跳转；
+而边注被放置在正文旁边，读者无需移动视线即可获取补充信息。
+\sidenote{这就是一个边注！它与正文在同一水平线上，阅读体验流畅自然。}
+
+\subsection{基本用法}
+
+创建一个边注非常简单，只需使用 \Command{sidenote} 命令：
+
+\begin{lstlisting}[style=kaolstplain, caption=基本边注语法]
+\sidenote{这是一条边注，它会被放置在正文旁边的页边空白中。}
+\end{lstlisting}
+
+\sidenote{边注会自动编号，并且可以被交叉引用。如要引用某条边注，
+可以使用 \texttt{\textbackslash label} 和 \texttt{\textbackslash ref} 命令。}
+
+边注的默认行为是「浮动」的——如果当前页面的边栏空间不足，
+它会自动移动到下一页。这确保了两条边注之间不会互相重叠。
+
+\subsection{自定义标记}
+
+你可以为边注指定一个自定义的标记符号\index{边注!自定义标记}，
+替代默认的自动编号：
+
+\begin{lstlisting}[style=kaolstplain, caption=自定义边注标记]
+\sidenote[*]{这个边注用星号标记。}
+\sidenote[\S]{这个边注用节号标记。}
+\end{lstlisting}
+
+\sidenote[*]{这就是一个用星号标记的边注。}
+\sidenote[\ddag]{这是一个用双剑号（\texttt{\textbackslash ddag}）标记的边注。
+请注意，自定义标记的边注不参与自动编号。}
+
+\subsection{垂直偏移}
+
+有时你需要微调边注的垂直位置，使其与正文更加对齐\index{边注!垂直偏移}。
+\Command{sidenote} 的完整语法是：
+
+\begin{lstlisting}[style=kaolstplain, caption=完整的边注语法]
+\sidenote[标记][偏移量]{边注文本}
+\end{lstlisting}
+
+\marginnote[*-8]{偏移量可以是具体数值（如 \texttt{-2mm}），
+也可以是 \texttt{\textbackslash baselineskip} 的倍数（如 \texttt{*-1}）。}
+
+如果只使用偏移量，标记位置留空即可：
+
+\begin{lstlisting}[style=kaolstplain]
+\sidenote[][-2mm]{向下偏移 2mm 的边注}
+\sidenote[][*-1]{向上偏移 1 倍行高的边注}
+\end{lstlisting}
+
+\section{边栏注释（Marginnote）}
+
+\Command{marginnote} 与 \Command{sidenote} 非常相似，但有一个关键区别：
+\textbf{边栏注释没有编号标记}\index{边栏注释}。它仅仅是一段放在边栏中的文字，
+不打扰正文，也不会在正文中留下任何标记符号。
+
+\marginnote{这是一个边栏注释（marginnote）。与边注不同，它在正文中没有任何标记，
+读者只有在关注边栏时才会注意到它。}
+
+\subsection{基本用法}
+
+\Command{marginnote} 的语法比 \Command{sidenote} 更简洁：
+
+\begin{lstlisting}[style=kaolstplain, caption=边栏注释语法]
+\marginnote{这是一个没有编号的边栏注释。}
+\marginnote[*-2]{向上偏移 2 行。}
+\marginnote[-1cm]{向下偏移 1 厘米。}
+\end{lstlisting}
+
+\marginnote[*-12]{边栏注释特别适合放置那些「锦上添花」的信息
+——如果读者跳过它，不会影响对正文的理解；但如果阅读它，
+则能获得额外的洞察。这正是 Tufte 所倡导的信息分层理念。}
+
+\subsection{Sidenote 与 Marginnote 的对比}
+
+\begin{kaobox}[title=何时使用哪种？]
+\begin{itemize}
+    \item \textbf{使用 \Command{sidenote}}：当注释是正文的必要补充，
+        需要被明确引用时。例如：对某个术语的解释、对某句论断的佐证。
+    \item \textbf{使用 \Command{marginnote}}：当注释是附带的背景知识、
+        趣闻、历史掌故，或者纯粹为了撑场面而写的废话时。
+\end{itemize}
+\index{sidenote vs marginnote}
+\end{kaobox}
+
+\section{脚注（Footnote）}
+
+尽管 \Class{kaobook} 鼓励使用边注替代脚注\index{脚注}，
+但传统的 \Command{footnote} 命令仍然可用\footnote{这就是一个传统的脚注！注意
+它在 PDF 中还有回到正文的反向链接，非常方便。}：
+
+\begin{lstlisting}[style=kaolstplain, caption=传统脚注]
+这是一个句子。\footnote{这是页底的脚注。}
+\end{lstlisting}
+
+\sidenote[][*-1]{脚注与边注的核心区别：脚注在页面底部，边注在侧边。
+对于阅读体验而言，边注明显更友好——但这需要版面支持宽边栏。}
+
+\section{宽段落（Widepar）}
+
+宽段落\index{宽段落}环境 \Environment{widepar} 允许某一段落临时扩展到整个页面宽度
+（正文 + 边栏）。这在需要展示大段引文或强调某些重要内容时非常有用：
+
+\begin{widepar}
+传统排版中，引用重要文献的段落往往会使用缩进或不同字体以示区分。
+而在 \Class{kaobook} 的 1.5 列布局中，我们有一个更优雅的解决方案
+——让这段话直接跨越正文区和边栏区，从而在视觉上形成一个完整的「带状」区域。
+这不仅凸显了段落的重要性，还巧妙地利用了边栏空间，使页面布局更加动态和富有趣味。
+\end{widepar}
+
+使用 \Environment{widepar} 的代码非常简单：
+
+\begin{lstlisting}[style=kaolstplain, caption=宽段落]
+\begin{widepar}
+这段话将跨越正文区和边栏区...
+\end{widepar}
+\end{lstlisting}
+
+\section{边栏图（Margin Figure）}
+
+你可以在边栏中插入小型的图片\index{边栏图}，使用 \Environment{marginfigure} 环境：
+
+\begin{marginfigure}
+    \centering
+    \fbox{\parbox{35mm}{\centering 示意图：此处\\应为一幅\\边栏小图}}
+    \caption[边栏图示例]{边栏图示例。在真实使用中，此处应放置一幅小型插图。
+    边栏图的标题位于图片下方，格式与边栏注释一致。}
+    \labfig{margin-demo}
+\end{marginfigure}
+
+边栏图非常适合放置那些与正文密切相关但又不需要占据主栏空间的辅助性图示。
+
+\section{边栏表（Margin Table）}
+
+类似地，你可以在边栏中插入小型表格\index{边栏表}：
+
+\begin{margintable}
+    \caption[边栏表示例]{边栏表示例。边栏表的标题默认位于表格上方。}
+    \labtab{margin-table-demo}
+    \begin{tabular}{c c}
+        \toprule
+        参数 & 取值 \\
+        \midrule
+        $\alpha$ & 0.05 \\
+        $\beta$  & 0.20 \\
+        \bottomrule
+    \end{tabular}
+\end{margintable}
+
+\marginnote[*-15]{边栏图和边栏表都支持可选的垂直偏移参数：
+\texttt{\textbackslash begin\{marginfigure\}[\textit{offset}]}，
+用法与 \texttt{\textbackslash marginnote} 一致。}
+
+边栏表使用 \Environment{margintable}，其语法与 \Environment{marginfigure} 完全一致。
+
+\section{边栏代码（Margin Listing）}
+
+当你有一段非常简短的代码需要展示，但又不想让它打断正文的叙事流时，
+可以使用 \Environment{marginlisting} 环境\index{边栏代码}：
+
+\begin{marginlisting}
+    \caption{一条边栏代码。}
+    \begin{lstlisting}[language=Python, style=kaolstplain]
+print("Hello, kaobook!")
+    \end{lstlisting}
+\end{marginlisting}
+
+边栏代码尤其适合展示命令行调用、短小的函数签名或配置项。
+
+\section{使用 Todo 注释}
+
+\Class{kaobook} 默认加载了 \Package{todonotes} 包\index{todo 注释}，
+你可以在写作过程中插入待办事项标记：
+
+\begin{lstlisting}[style=kaolstplain, caption=Todo 注释用法]
+\todo{这里还需要补充一个例子。}
+\todo[inline]{这里需要用完整段落重写。}
+\end{lstlisting}
+
+\todo{这是一个边栏中的 todo 注释——非常醒目！}
+marginnote 换行再来看看
+
+\section{综合示例}
+
+最后，让我们用一个综合示例来回顾本章介绍的各类文本标注功能：
+
+\sidenote{这是边注 \#1：用于解释正文中提到的「信息分层」概念。}
+
+信息分层（Information Layering）\index{信息分层}是信息设计领域的核心概念之一。
+它主张将信息按照重要性分成不同层级，最重要的信息放在最显眼的位置，
+次要信息放在辅助位置，背景信息则可以折叠或隐藏。
+
+\marginnote[*-3]{这是边栏注释：补充关于 Edward Tufte 的背景。
+Tufte 在其著作 \textit{The Visual Display of Quantitative Information}
+中系统阐述了数据-墨水比（data-ink ratio）和小倍数（small multiples）等
+信息设计原则\cite{tufte2001}。}
+
+这种分层设计在学术写作中尤为重要。读者在阅读学术论文时，
+通常分为「快速浏览」和「深度阅读」两种模式\sidenote[][*-1]{这就是边注 \#2：
+研究表明，大多数学术论文只有不到 20\% 的读者会从头到尾通读全文。
+更多读者采用「标题 $\to$ 摘要 $\to$ 图表 $\to$ 结论」的快速浏策略。}。
+良好的信息分层设计能让两种阅读模式都得到满足。
+
+\begin{widepar}
+\textbf{核心观点}：排版不是装饰，而是信息的结构化表达。
+好的排版让读者自然而然地把握信息的层次结构——
+主栏承载核心叙事，边栏承载补充说明，图片和表格独立展示数据——
+这一切共同构成了一幅层次分明、信息丰富的「知识图景」。
+\end{widepar}
+
+\footnote{这是脚注 \#1。虽然我们提倡使用边注，但传统脚注在引用原始资料时仍然是最合适的。}
+
+至此，你已经掌握了 \Class{kaobook} 的所有文本标注工具。
+在下一章，我们将进入数学排版的世界。
+
+\endinput

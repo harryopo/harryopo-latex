@@ -1,0 +1,95 @@
+\chapter*{前言}
+\addcontentsline{toc}{chapter}{前言}
+\labch{preface}
+
+\section*{关于本模板}
+
+本书并非一本介绍 \LaTeX{} 入门的教材，而是一份系统化的\textbf{中文排版模板参考手册}。
+它基于 \Class{kaobook} 文档类\index{kaobook@\Class{kaobook}}进行了深度中文适配，
+旨在为需要撰写高质量中文书籍、论文、报告的作者提供一套「开箱即用」的排版解决方案。
+
+\marginnote{如果你从未使用过 \LaTeX，建议先阅读 \textit{The Not So Short Introduction
+to \LaTeXe}（即「lshort-zh-cn」），再返回阅读本手册。}
+
+\section*{面向的读者}
+
+本模板主要面向以下用户群体\index{读者群体}：
+
+\begin{description}
+    \item[科技工作者] 需要撰写学术论文、学位论文或研究报告的研究人员，
+        特别是数学、物理、计算机科学等领域，频繁使用公式、定理和交叉引用的用户。
+    \item[教科书作者] 正在编写中文教材或讲义的教育工作者，希望使用优雅的
+        边栏布局来组织正文、注释、例题和插图。
+    \item[\LaTeX{} 爱好者] 对排版美学有追求，希望探索 1.5 列布局在中文环境下
+        效果的用户。
+    \item[模板开发者] 希望了解 \Class{kaobook} 中文适配技术细节，进而二次开发
+        定制模板的高级用户。
+\end{description}
+
+\sidenote{本模板假定读者已具备基本的 \LaTeX 操作能力，如编辑、编译、引用管理等。
+如果遇到编译错误，请首先检查是否正确安装了所需的字体和宏包。}
+
+\section*{阅读指南}
+
+本手册共分为三大部分，建议按顺序阅读：
+
+\subsection*{第一部分：基础入门}
+
+\begin{enumerate}
+    \item \textbf{介绍}（\refch{intro}）—— 概述 \Class{kaobook} 文档类的核心特性，
+        包括边栏布局、章节标题样式、页面布局模式等。即便你已经熟悉 \LaTeX，
+        也建议浏览本章，因为它揭示了该模板与其他文档类的本质区别。
+    \item \textbf{文本标注}（\refch{textnotes}）—— 深入演示边注（\texttt{sidenote}）、
+        脚注、宽段落（\texttt{widepar}）、边栏图表和边栏目录等特色功能。
+    \item \textbf{数学}（\refch{mathematics}）—— 展示定理环境（定义、定理、例题、
+        练习等）、公式排版、矩阵、多行对齐等数学功能。
+    \item \textbf{图像与表格}（\refch{figsntabs}）—— 演示标准浮动体、边栏浮动体、
+        宽版浮动体以及子图的排版技巧。
+\end{enumerate}
+
+\subsection*{第二部分：定制与扩展}
+
+涵盖选项配置、页面布局、参考文献管理等高级主题。
+
+\subsection*{第三部分：附录}
+
+提供字母索引和补充资料。
+
+\marginnote[*-2]{每章开头均设有边栏目录（\texttt{\textbackslash margintoc}），
+方便读者在翻阅时快速定位当前章节结构。}
+
+\section*{编译环境要求}
+
+要编译本模板，你需要满足以下条件：
+
+\begin{description}
+    \item[编译器] \XeLaTeX{}（必须，不得使用 pdf\LaTeX{} 或 Lua\LaTeX{}）
+    \item[字体] 方正字体系列：方正书宋、方正黑体、方正楷体、方正仿宋、方正小标宋
+    \item[\LaTeX{} 发行版] TeX Live 2019+ 或 MikTeX（需安装完整宏包集）
+    \item[编译次数] 至少 3 遍，以确保交叉引用、目录和索引稳定
+\end{description}
+
+\index{编译环境}%
+\index{字体要求}%
+\index{方正字体}%
+
+\section*{约定与符号}
+
+本书采用以下排版约定：
+\begin{itemize}
+    \item \Class{ClassName}：表示文档类名称（如 \Class{kaobook}）
+    \item \Package{PackageName}：表示宏包名称（如 \Package{hyperref}）
+    \item \Environment{EnvName}：表示环境名称（如 \Environment{figure}）
+    \item \Command{commandname}：表示 \LaTeX{} 命令（如 \Command{chapter}）
+    \item \Option{optionname}：表示命令选项（如 \Option{framed}）
+    \item \Path{path/to/file}：表示文件路径
+\end{itemize}
+
+\begin{kaobox}[title=提示]
+如果你在阅读过程中发现任何错误或遗漏，欢迎通过 GitHub Issues 反馈。
+我们珍视每一位读者的贡献。
+\end{kaobox}
+
+好了，让我们翻开下一页，正式走进中文 kaobook 的世界吧！
+
+\endinput

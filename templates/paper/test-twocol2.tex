@@ -1,0 +1,24 @@
+\documentclass[twocolumn]{ctexart}
+\usepackage{booktabs}
+\newenvironment{abstract}{\list{}{\leftmargin=2em}\item\relax\fzht 摘要：\CJKfamily{zhkai}}{\endlist}
+\newcommand{\keywords}[1]{\list{}{\leftmargin=2em}\item\relax\fzht 关键词：\CJKfamily{zhkai} #1\endlist}
+\begin{document}
+\twocolumn[
+  \begin{center}
+  {\LARGE Title\par}
+  \end{center}
+  \begin{abstract}
+  This is the abstract content.
+  \end{abstract}
+  \keywords{test; keywords}
+  \vspace{0.5cm}
+]
+\section{Sec}
+Hello
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{ll}
+    \toprule A & B \\ \midrule 1 & 2 \\ \bottomrule
+  \end{tabular}
+\end{table}
+\end{document}

@@ -1,0 +1,182 @@
+\setchapterimage[8cm]{Paul Pastour (2).jpg}
+\setchapterpreamble[u]{\margintoc}
+\chapter{图像与表格}
+
+\footnotetext{The credits for the image above the chapter title go to:
+	Bushra Feroz, CC~BY-SA~4.0, \url{https://commons.wikimedia.org/w/index.php?curid=68724647}}
+
+\begin{marginfigure}
+	\includegraphics{monalisa}
+	\caption[The Mona Lisa]{蒙娜丽莎。}
+	\labfig{marginmonalisa}
+\end{marginfigure}
+
+\section{普通图像与表格}
+
+图像和表格可以像在任何标准的 \LaTeX\xspace 文档中一样插入。\Package{graphicx}宏包已经载入并配置好了，其设置让图像宽度等于正文宽度，高度则自动调整以保持原始宽高比。正如您可能猜到的，标题将会被放置在边栏中。这是借助 \Package{floatrow} 宏包实现的。
+
+这里有一幅蒙娜丽莎的图片（\reffig{normalmonalisa}）作为例子。其标题格式与边栏和旁注相同；如果您想要改变标题的某些设定，您可以使用来自 \Package{caption} 宏包的 \Command{captsetup} 命令。请记住，如果您想要引用图像，标签必须放在标题\emph{之后}！
+
+\begin{figure}[hb]
+	\includegraphics[width=0.45\textwidth]{monalisa}
+	\caption[Mona Lisa, again]{OK，看又是蒙娜丽莎。\zhlipsum[1]}
+	\labfig{normalmonalisa}
+\end{figure}
+
+题注的格式由\Package{caption}宏包管理，而其位置则由\Package{floatrow}宏包处理。达到这一结果颇费周折，但现在我对此相当满意。在双面模式下，题注会正确地打印在边栏中。
+
+表格的插入和图表一样简单，下面的代码提供了一个示例。
+
+\begin{lstlisting}[caption={listing环境的标题}]
+\begin{table}
+\begin{tabular}{ c c c c }
+	\toprule
+	col1 & col2 & col3 & col 4 \\
+	\midrule
+	\multirow{3}{4em}{Multiple row} & cell2 & cell3 & cell4\\ &
+	cell5 & cell6 & cell7 \\ &
+	cell8 & cell9 & cell10 \\
+	\multirow{3}{4em}{Multiple row} & cell2 & cell3 & cell4 \\ &
+	cell5 & cell6 & cell7 \\ &
+	cell8 & cell9 & cell10 \\
+	\bottomrule
+\end{tabular}
+\end{table}
+\end{lstlisting}
+
+这里引述一个表格的结果。我们将这个表格命名为“一个无意义的表格” \reftab{useless}.
+
+\begin{table}[ht]
+\caption[无意义的表]{一个无意义的表格}
+\labtab{useless}
+\begin{tabular}{ c c c c }
+	\toprule
+	列1 & 列2 & 列3 & 列4 \\
+	\midrule
+	\multirow{3}{4em}{合并行} & 单元格2 & 单元格3 & 单元格4\\ &
+	单元格5 & 单元格6 & 单元格7 \\ &
+	单元格8 & 单元格9 & 单元格10 \\
+	\multirow{3}{4em}{合并行} & 单元格12 & 单元格13 & 单元格14 \\ &
+	单元格5 & 单元格6 & 单元格7 \\ &
+	单元格8 & 单元格9 & 单元格10 \\
+	\bottomrule
+\end{tabular}
+\end{table}
+
+这里没有更多的内容要写，随便写上一些随机文本。\zhlipsum[1]
+
+\section{旁白图像与表格}
+
+可以通过\Environment{marginfigure}环境插入边栏图像。在这种情况下，整个图片将会被强制限制在边栏范围内，并且标题在图片下方。使用类似下面的代码可以得到\reffig{marginmonalisa}这样的效果。
+
+\begin{lstlisting}[caption={另一个标题}]
+\begin{marginfigure}
+	\includegraphics{monalisa}
+	\caption[The Mona Lisa]{美丽的蒙娜丽莎。}
+	\labfig{marginmonalisa}
+\end{marginfigure}
+\end{lstlisting}
+
+还有\Environment{margintable}环境，\reftab{anotheruseless}就是一个示例。请注意，您可以通过将\Command{caption}命令放在\Environment{tabular}环境的开始前面，来将标题放置在表格上方。通常，图形的标题在下方，而表格的标题在上方。这一规则也适用于普通的图形和表格：标题总是在旁边，但对于图形它们是与底部对齐，而对于表格则是与顶部对齐。
+
+\begin{margintable}
+\caption[另一个无意义表]{另一个无意义的表格示例}
+\labtab{anotheruseless}
+\raggedright\small
+\begin{tabular}{ c c }
+	\hline
+	列1 & 列2 \\
+	\hline
+	\multirow{3}{3em}{复合行} & 单元格1 \\ & 单元格2
+	\\ & 单元格3 \\ \hline
+\end{tabular}
+\end{margintable}
+
+边栏图表和表格可以带有一个可选的偏移命令来定位，类似于这样：
+
+\begin{lstlisting}
+\begin{marginfigure}[offset]
+	\includegraphics{seaside}
+\end{marginfigure}
+\end{lstlisting}
+
+偏移量可以是一个具体的尺寸度量，或者是\Command{baselineskip}的倍数，这与\Command{sidenote}、\Command{marginnote}和\Command{margintoc}的使用非常相似。\todo{这一点可以进一步改进} 如果你好奇我是如何插入这个橙色泡泡的，请查阅\Package{todo}宏包。
+
+\section{超宽图像与表格}
+
+通过使用\Environment{figure*}和\Environment{table*}环境，可以插入跨越整个页面宽度的图像和表格。举例来说，这里有一个宽幅图像和宽幅表格。
+
+\begin{figure*}[h!]
+	\includegraphics{seaside}
+	\caption[A wide seaside]{一片广阔的海滨，附带一个宽广的标题。
+	致谢：由 Bushra Feroz 提供，CC BY-SA 4.0许可，\url{https://commons.wikimedia.org/w/index.php?curid=68724647}}
+\end{figure*}
+
+\begin{table*}[h!]
+    \caption{一个宽表格，包含了关于居住在英国的三个人的虚构数据。请注意，宽幅图像和表格居中显示，它们的标题也延伸到边栏。}
+    \small
+    \begin{tabular}{p{1.4cm} p{1.5cm} p{1.5cm} p{1.5cm} p{1.0cm} p{1.3cm} p{1.3cm}}
+        \toprule
+        Name    & Surname   & Job       & Salary           & Age   & Height    & Country \\
+        \midrule
+        Alice   & Red       & Writer    & 4.000 \pounds    & 34    & 167 cm     & England \\
+        Bob     & White     & Bartender & 2.000 \pounds    & 24    & 180 cm     & Scotland \\
+        Drake   & Green     & Scientist & 4.000 \pounds    & 26    & 175 cm     & Wales \\
+        \bottomrule
+    \end{tabular}
+\end{table*}
+
+由用户负责调整表格的宽度，必要时进行调整，直到其外观令人满意。前面提到的表格是通过以下代码得到的：
+
+\begin{lstlisting}[caption=如何设置一个宽宽的表]
+\begin{table*}[h!]
+    \caption{一个宽表格，包含了关于居住在英国的三个人的虚构数据。请注意，宽幅图像和表格居中显示，它们的标题也延伸到边栏。}
+    \begin{tabular}{p{2.0cm} p{2.0cm} p{2.0cm} p{2.0cm} p{2.0cm} p{2.0cm} p{1.5cm}}
+        \toprule
+        Name    & Surname   & Job       & Salary           & Age   & Height    & Country \\
+        \midrule
+        Alice   & Red       & Writer    & 4.000 \pounds    & 34    & 167 cm     & England \\
+        Bob     & White     & Bartender & 2.000 \pounds    & 24    & 180 cm     & Scotland \\
+        Drake   & Green     & Scientist & 4.000 \pounds    & 26    & 175 cm     & Wales \\
+        \bottomrule
+    \end{tabular}
+\end{table*}
+\end{lstlisting}
+
+\Package{floatrow} 宏包提供了\enquote{H} 指示符，它指导\LaTeX 将图形（或表格）精确地定位在源代码中的相同位置。然而，这个指示符不适用于宽幅图形或表格：相反，您应该使用\enquote{h!} ，如：\lstinline|\begin{figure*}[h!]| 。
+
+或许您已经注意到本章开始处的全宽图像：然而，设置它的方式与前文所述完全不同，这一点您将在\vrefch{排版}章节中得到详细解读。
+
+\Class{kaobook} 也支持分页表格（请参阅 \Package{longtable} 宏包）。与 \Environment{table} 有所不同，\Environment{longtable} 环境的表现有些区别，因为它囊括了 \Environment{table} 和 \Environment{tabular}，所以你可以这样写，例如，
+
+\begin{lstlisting}[caption=一个longtable的例子]
+\begin{longtable}{|l c c|}
+    \hline
+    One & Two & Three \\
+    Left & Center & Center \\
+    \hline
+    \caption{一个宽线表的标题。}
+\end{longtable}
+\end{lstlisting}
+
+或者按以下方式制作一个宽线表（longtable）：
+
+\begin{longtable}{|l c c|}
+    \hline
+    One & Two & Three \\
+    Left & Center & Center \\
+    \hline
+    \caption{一个宽线表的标题。}
+\end{longtable}
+
+\Environment{longtable} 的标题始终位于表格下方，并且宽度与文本相同（不会延伸到边栏中）。然而，有时你可能需要一个非常宽的 \Environment{longtable}，以至于它侵入到边栏；在这些情况下，你可能希望增加标题的宽度。要做到这一点，你需要在 \Environment{longtable} 之前和之后各写一个额外的命令：
+
+\begin{lstlisting}[caption=增加 `\Environment{longtable}` 标题的宽度。]
+\floatsetup[longtable]{margins=centering,LTcapwidth=table} % 在 longtable 之前添加这行代码以增加标题宽度
+\begin{longtable}{lp{8cm}p{5cm}p{2cm}}
+...
+\end{longtable}
+\floatsetup[longtable]{margins=raggedright,LTcapwidth=\textwidth} % 在 longtable 之后添加这行代码以还原之前的更改
+\end{lstlisting}
+
+在讨论了图表和表格之后，现在是时候来解决超链接（“引用”）的问题了。

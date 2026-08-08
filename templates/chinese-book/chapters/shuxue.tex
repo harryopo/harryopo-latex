@@ -1,0 +1,274 @@
+\setchapterpreamble[u]{\margintoc}
+\chapter{数学}
+\labch{mathematics}
+
+数学排版是 \LaTeX{} 的看家本领，也是许多用户选择 \LaTeX{} 的首要原因。
+本章将展示 \Class{kaobook} 中文模板中的定理环境、公式排版以及矩阵等数学功能。
+
+\index{数学排版}
+
+\section{定理环境概述}
+
+\Class{kaobook} 通过 \Package{kaotheorems} 宏包提供了一套完整的定理环境体系。
+这些环境共享一个浅黄色背景的彩色盒子（通过 \Package{tcolorbox} 实现），
+使得数学定义和定理在视觉上从正文中凸显出来\sidenote{定理环境的背景颜色可以通过
+\texttt{\textbackslash usepackage[framed,background=red!15!white]\{kaotheorems\}}
+来自定义。每种环境还可以单独配颜色！}。
+
+所有定理环境按编号方式分为两类：
+
+\begin{description}
+    \item[共享计数器] Theorem、Proposition、Lemma、Corollary —— 这四个环境
+        共享同一个计数器，按节（section）重置。例如，如果节 2.1 中有一个 Theorem 2.1.1，
+        那么下一个 Proposition 就是 Proposition 2.1.2。
+    \item[独立计数器] Definition、Assumption、Remark、Example、Exercise ——
+        这些环境各自拥有独立的计数器，同样按节重置。
+\end{description}
+
+\index{定理环境}
+
+\section{定义与定理}
+
+让我们从一个经典的定义开始：
+
+\begin{definition}[度量空间]
+\labdef{metric-space}
+设 $X$ 是一个非空集合。若函数 $d: X \times X \to \mathbb{R}$ 满足以下条件，
+则称 $(X, d)$ 为\textbf{度量空间}\index{度量空间}，$d$ 为 $X$ 上的\textbf{度量}：
+\begin{enumerate}[label=(\roman*)]
+    \item 非负性：$\forall x, y \in X,\; d(x, y) \ge 0$，且 $d(x, y) = 0 \iff x = y$；
+    \item 对称性：$\forall x, y \in X,\; d(x, y) = d(y, x)$；
+    \item 三角不等式：$\forall x, y, z \in X,\; d(x, z) \le d(x, y) + d(y, z)$。
+\end{enumerate}
+\end{definition}
+
+\marginnote{度量空间是泛函分析和拓扑学的基础概念。欧几里得空间
+$\mathbb{R}^{n}$ 上的标准距离 $d(x, y) = \sqrt{\sum (x_i - y_i)^{2}}$
+是最常见的度量空间例子。}
+
+\refdef{metric-space} 是分析学中最重要的基本概念之一\index{分析学}。
+基于此定义，我们可以陈述一系列基本定理：
+
+\begin{theorem}[开集的性质]
+\labthm{open-set-prop}
+设 $(X, d)$ 是一个度量空间。
+\begin{enumerate}[label=(\roman*)]
+    \item 任意多个开集的并集仍然是开集；
+    \item 有限多个开集的交集仍然是开集；
+    \item $X$ 和 $\emptyset$ 都是开集。
+\end{enumerate}
+\end{theorem}
+
+\sidenote[][*-1]{开集的定义请参阅 \refdef{open-set}（稍后定义）。
+这是度量空间理论中最基础的定义之一。}
+
+\begin{definition}[开集]
+\labdef{open-set}
+设 $(X, d)$ 为度量空间。子集 $U \subseteq X$ 称为\textbf{开集}\index{开集}，
+如果对于任意 $x \in U$，都存在 $\varepsilon > 0$ 使得开球
+$B(x, \varepsilon) = \{y \in X : d(x, y) < \varepsilon\}$ 包含于 $U$ 中。
+\end{definition}
+
+\begin{proposition}[柯西序列的有界性]
+\labprop{cauchy-bounded}
+在度量空间 $(X, d)$ 中，每个柯西序列都是有界的。
+\end{proposition}
+
+\begin{proof}
+设 $\{x_n\}$ 是 $X$ 中的柯西序列。取 $\varepsilon = 1$，则存在 $N \in \mathbb{N}$，
+使得当 $m, n \ge N$ 时，$d(x_m, x_n) < 1$。令
+\[
+R = \max\{1, d(x_1, x_N), d(x_2, x_N), \ldots, d(x_{N-1}, x_N)\},
+\]
+则对于所有 $n \in \mathbb{N}$，有 $d(x_n, x_N) \le R$，即序列有界。
+\end{proof}
+
+\index{柯西序列}
+\index{有界性}
+
+\begin{lemma}
+\lablemma{finite-intersection}
+若 $U_1, U_2, \ldots, U_n$ 均为开集，则 $\bigcap_{i=1}^{n} U_i$ 也是开集。
+\end{lemma}
+
+\begin{corollary}
+\labcor{open-ball}
+每个开球 $B(x, \varepsilon)$ 都是开集。特别地，$\mathbb{R}^{n}$ 中的每个开区间都是开集。
+\end{corollary}
+
+\begin{remark}
+注意 \refthm{open-set-prop} 中「有限多个」和「任意多个」之间的区别。
+无限多个开集的交集未必是开集——例如，
+$\bigcap_{n=1}^{\infty} (-1/n,\; 1/n) = \{0\}$，而单点集在 $\mathbb{R}$ 中不是开集。
+这正是度量空间拓扑丰富性的体现。
+\end{remark}
+
+\begin{example}[离散度量空间中的开集]
+\labexample{discrete-metric}
+在离散度量空间\index{离散度量空间}中，对于任意 $x, y \in X$，
+\[
+d(x, y) = \begin{cases}
+    0, & x = y, \\
+    1, & x \neq y.
+\end{cases}
+\]
+此时，$X$ 的\textbf{每一个}子集都是开集。因为对于任意 $x \in U \subseteq X$，
+取 $\varepsilon = 1$，开球 $B(x, 1) = \{x\} \subseteq U$。
+\end{example}
+
+\section{公式排版}
+
+\Class{kaobook} 支持 \LaTeX{} 的所有标准数学环境。本节展示一些常用公式样式。
+
+\subsection{行内公式与行间公式}
+
+行内公式用 \lstinline|$...$| 包裹：如欧拉恒等式 $e^{i\pi} + 1 = 0$，
+它被广泛认为是数学中最优美的公式之一\sidenote{欧拉恒等式将五个最基本的数学常数
+（$e$、$i$、$\pi$、$1$、$0$）联系在一起，堪称数学之美的极致体现。
+参见 \cite{needham1997}。}。行间公式用 \lstinline|\[ ... \]| 或
+\lstinline|\begin{equation} ... \end{equation}|：
+
+\begin{equation}
+    e^{i\theta} = \cos\theta + i\sin\theta
+    \label{eq:euler}
+\end{equation}
+
+\index{欧拉公式}
+
+公式 \refeq{euler} 被称为\textbf{欧拉公式}\index{欧拉公式}，它是复分析中的基石。
+当 $\theta = \pi$ 时，即得欧拉恒等式。
+
+\subsection{多行对齐公式}
+
+使用 \lstinline|align| 环境可以对齐多个公式：
+
+\begin{align}
+    (x + y)^2 &= x^2 + 2xy + y^2 \label{eq:square-sum} \\
+    (x - y)^2 &= x^2 - 2xy + y^2 \label{eq:square-diff} \\
+    x^2 - y^2 &= (x + y)(x - y) \label{eq:diff-squares}
+\end{align}
+
+\index{代数恒等式}
+
+使用 \lstinline|gather| 环境可以居中排列多个公式：
+
+\begin{gather}
+    \int_{0}^{\infty} \frac{\sin x}{x}\,dx = \frac{\pi}{2} \label{eq:dirichlet} \\
+    \sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6} \label{eq:basel}
+\end{gather}
+
+\sidenote[][*-1]{\refeq{dirichlet} 是狄利克雷积分，\refeq{basel} 是巴塞尔问题的解。
+两者都深刻地体现了 $\pi$ 在分析学中的核心地位。}
+
+\subsection{分段函数}
+
+分段函数可以用 \lstinline|cases| 环境：
+
+\begin{equation}
+    f(x) = \begin{cases}
+        x^2 \sin(1/x), & x \neq 0, \\
+        0,              & x = 0.
+    \end{cases}
+    \label{eq:piecewise}
+\end{equation}
+
+\refeq{piecewise} 是一个经典的反例：它处处可导，但导数在 $x = 0$ 处不连续。
+
+\index{分段函数}
+
+\section{矩阵}
+
+\subsection{基础矩阵}
+
+矩阵\index{矩阵}可以通过多种环境排版。最常用的是 \lstinline|pmatrix|（圆括号矩阵）：
+
+\begin{equation}
+    A = \begin{pmatrix}
+        a_{11} & a_{12} & \cdots & a_{1n} \\
+        a_{21} & a_{22} & \cdots & a_{2n} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        a_{m1} & a_{m2} & \cdots & a_{mn}
+    \end{pmatrix}
+    \label{eq:matrix-basic}
+\end{equation}
+
+\subsection{不同类型的矩阵分隔符}
+
+\begin{itemize}
+    \item \texttt{pmatrix}：圆括号 $\begin{pmatrix} a & b \\ c & d \end{pmatrix}$
+    \item \texttt{bmatrix}：方括号 $\begin{bmatrix} a & b \\ c & d \end{bmatrix}$
+    \item \texttt{Bmatrix}：花括号 $\begin{Bmatrix} a & b \\ c & d \end{Bmatrix}$
+    \item \texttt{vmatrix}：行列式 $\begin{vmatrix} a & b \\ c & d \end{vmatrix}$
+    \item \texttt{Vmatrix}：双竖线 $\begin{Vmatrix} a & b \\ c & d \end{Vmatrix}$
+\end{itemize}
+
+\marginnote[*-18]{矩阵维度过大时，可以配合 \texttt{\textbackslash scalebox} 或 
+\texttt{\textbackslash medmath}（需要 \texttt{nccmath}）进行缩放。}
+
+\subsection{增广矩阵与分块矩阵}
+
+增广矩阵\index{增广矩阵}通常使用 \lstinline|array| 环境：
+
+\begin{equation}
+    \left(\begin{array}{ccc|c}
+        1 & 2 & 3 & 4 \\
+        0 & 1 & 5 & 6 \\
+        0 & 0 & 1 & 7
+    \end{array}\right)
+    \label{eq:augmented}
+\end{equation}
+
+\section{综合练习}
+
+让我们通过一个练习题来巩固以上概念：
+
+\begin{exercise}
+\labexercise{intro-exercise}
+考虑度量空间 $(\mathbb{R}^2, d)$，其中 $d$ 是欧几里得距离。
+\begin{enumerate}[label=(\arabic*)]
+    \item 证明（或举反例）：单位开球 $B((0,0), 1)$ 不能写成两个开集的不交并，
+        除非其中一个是空集。
+    \item 计算下列矩阵的行列式：
+    \[
+    \begin{vmatrix}
+        1 & 2 & 3 \\
+        2 & 3 & 1 \\
+        3 & 1 & 2
+    \end{vmatrix}
+    \]
+    \item 在 $\mathbb{R}$ 上考虑度量 $d(x, y) = |\arctan x - \arctan y|$。
+        $(\mathbb{R}, d)$ 是否完备？请说明理由。
+\end{enumerate}
+\index{欧几里得距离}
+\end{exercise}
+
+\sidenote{关于完备度量空间（Complete Metric Space）的更多讨论，
+请参考 Rudin 的 \textit{Principles of Mathematical Analysis}\cite{rudin1976}。}
+
+\begin{kaobox}[title=定理环境速查表]
+下表汇总了 \Class{kaobook} 提供的所有数学定理环境：
+\begin{center}
+\begin{tabular}{l l l}
+    \toprule
+    环境名 & 名称 & 编号方式 \\
+    \midrule
+    \texttt{definition}  & Definition  & 独立计数器 \\
+    \texttt{theorem}     & Theorem     & 共享计数器 \\
+    \texttt{proposition} & Proposition & 共享计数器 \\
+    \texttt{lemma}       & Lemma       & 共享计数器 \\
+    \texttt{corollary}   & Corollary   & 共享计数器 \\
+    \texttt{assumption}  & Assumption  & 独立计数器 \\
+    \texttt{remark}      & Remark      & 独立计数器 \\
+    \texttt{example}     & Example     & 独立计数器 \\
+    \texttt{exercise}    & Exercise    & 独立计数器 \\
+    \bottomrule
+\end{tabular}
+\end{center}
+\end{kaobox}
+
+\index{定理环境速查}
+
+数学是语言的延伸，而排版是思想的容器。有了 \Class{kaobook} 强大的定理环境
+和公式排版功能，你可以将精力集中在数学内容本身，而不必为排版格式分心。
+
+\endinput

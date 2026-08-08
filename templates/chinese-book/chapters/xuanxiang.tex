@@ -1,0 +1,295 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  xuanxiang.tex — 选项与自定义
+%  演示 kaobookCJKsc 文档类的关键选项与可用自定义手段
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setchapterimage[6cm]{seaside}
+\setchapterpreamble[u]{\margintoc}
+\chapter{选项与自定义}
+\labch{xuanxiang}
+
+本章系统介绍 \Class{kaobookCJKsc} 文档类支持的各项选项和自定义功能。
+从字体大小、纸张尺寸等基础设置，到章节样式、PDF 背景色等高级定制，
+帮助你打造最适合自己需求的排版效果。
+
+%----------------------------------------------------------------------------------------
+
+\section{文档类基础选项}
+
+\index{选项!fontsize@\texttt{fontsize}}
+\index{选项!纸张尺寸}
+\index{选项!twoside@\texttt{twoside}}
+\index{选项!secnumdepth@\texttt{secnumdepth}}
+
+\Class{kaobookCJKsc} 基于 \Class{scrbook}，因此继承了 KOMA-Script 的
+全部选项，并在此基础上增加了若干专属选项。以下是最常用的几项：
+
+\subsection{字体大小——\texttt{fontsize}}
+
+\index{选项!fontsize@\texttt{fontsize}}
+通过 \texttt{fontsize} 选项可以设置正文基准字号。可选值包括：
+\texttt{8pt}, \texttt{9pt}, \texttt{10pt}, \texttt{11pt}, \texttt{12pt}。
+默认值为 \texttt{10pt}。
+
+\begin{lstlisting}
+\documentclass[fontsize=11pt]{kaobookCJKsc}   % 11pt 正文
+\end{lstlisting}
+
+\begin{kaobox}[title=排版建议]
+对于正文为方正书宋的中文排版，\texttt{10pt} 或 \texttt{11pt} 是较为舒适
+的选择。字号过小（如 \texttt{8pt}）在 A4 纸上阅读体验不佳。
+\end{kaobox}
+
+\subsection{纸张尺寸}
+
+\index{选项!纸张尺寸}
+\index{选项!a4paper@\texttt{a4paper}}
+与标准 \LaTeX{} 类一样，\Class{kaobookCJKsc} 支持各种纸张尺寸。
+默认使用 A4 纸。支持的常规尺寸包括：
+
+\begin{itemize}
+    \item \texttt{a4paper} —— A4 (210mm × 297mm)，默认
+    \item \texttt{a5paper} —— A5 (148mm × 210mm)
+    \item \texttt{b5paper} —— B5 (176mm × 250mm)
+    \item \texttt{letterpaper} —— 信纸 (216mm × 279mm)
+\end{itemize}
+
+此外还支持若干非标准尺寸（表中列出常用者）：
+
+\begin{margintable}[-4cm]
+\caption{kaobook 支持的特殊纸张尺寸}
+\labtab{papersizes}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+尺寸 & 选项名 \\
+\midrule
+12.0×19.0 cm & \texttt{smallpocketpaper} \\
+13.5×21.5 cm & \texttt{pocketpaper} \\
+15.5×22.0 cm & \texttt{juvenilepaper} \\
+17.0×17.0 cm & \texttt{photopaper} \\
+16.0×24.0 cm & \texttt{f24paper} \\
+\bottomrule
+\end{tabular}
+\end{margintable}
+
+设置示例：
+\begin{lstlisting}
+\documentclass[b5paper,fontsize=10pt]{kaobookCJKsc}
+\end{lstlisting}
+
+\subsection{双面模式——\texttt{twoside}}
+
+\index{选项!twoside@\texttt{twoside}}
+\index{选项!twoside=false@\texttt{twoside=false}}
+
+\texttt{twoside} 选项控制是否启用双面排版模式：
+
+\begin{itemize}
+    \item \texttt{twoside=true}（默认）—— 左右页版式不同，类似印刷书籍
+    \item \texttt{twoside=false} —— 单面模式，所有页面版式一致，适合电子阅读
+\end{itemize}
+
+\begin{kaobox}[title=注意事项]
+在 \texttt{twoside=true} 模式下，\texttt{\textbackslash uppertitleback} %
+和 \texttt{\textbackslash lowertitleback} 命令可用；在 \texttt{twoside=false}
+模式下，这两个命令不可用。此外，双面模式会在前言部分自动插入额外的空白页。
+\end{kaobox}
+
+\subsection{编号深度——\texttt{secnumdepth}}
+
+\index{选项!secnumdepth@\texttt{secnumdepth}}
+
+\texttt{secnumdepth} 控制章节编号的层级深度：
+
+\begin{itemize}
+    \item \texttt{secnumdepth=0} —— 仅 \texttt{\textbackslash part} 编号
+    \item \texttt{secnumdepth=1} —— 编号到 \texttt{\textbackslash section}
+    \item \texttt{secnumdepth=2} —— 编号到 \texttt{\textbackslash subsection}
+    \item \texttt{secnumdepth=3} —— 编号到 \texttt{\textbackslash subsubsection}
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+
+\section{专属选项}
+
+\index{选项!专属选项}
+
+\subsection{背景色选项——\texttt{backgroundcolor}}
+
+\index{选项!backgroundcolor@\texttt{backgroundcolor}}
+加载文档类时传入 \texttt{backgroundcolor} 选项，可将页面背景设置为浅灰色，
+同时页眉页脚文字变为灰色。这有助于营造柔和的阅读体验。
+
+\begin{lstlisting}
+\documentclass[
+    a4paper,
+    fontsize=10pt,
+    backgroundcolor,       % 启用灰色背景
+    twoside=false,
+]{kaobookCJKsc}
+\end{lstlisting}
+
+启用该选项后，页面会呈现类似浅米色纸的柔和背景（颜色定义于
+\Package{kaoWinCJKsc} 包中：\texttt{bg = \#fcfcfc}）。
+
+\subsection{编号后缀——\texttt{numbers}}
+
+\index{选项!numbers@\texttt{numbers}}
+\texttt{numbers} 选项控制章节编号后是否添加圆点：
+\begin{itemize}
+    \item \texttt{numbers=noenddot} —— 编号后无圆点，如「1 引言」
+    \item \texttt{numbers=enddot} —— 编号后有圆点，如「1. 引言」
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+
+\section{章节样式切换}
+
+\index{章节样式}
+\index{章节样式!setchapterstyle@\texttt{\textbackslash setchapterstyle}}
+
+\Class{kaobookCJKsc} 提供了四种预定义的章节标题样式，可通过
+\lstinline|\setchapterstyle{}| 命令灵活切换。
+
+\subsection{kao 样式}
+
+\index{章节样式!kao}
+{}[kao 样式] 是 \Class{kaobook} 的标志性样式：章节编号以大号字体显示在
+页边空白处，标题文字与编号之间以竖线分隔。在 \texttt{twoside=true} 模式下，
+编号会交替出现在外侧页边。
+
+\begin{lstlisting}
+\setchapterstyle{kao}
+\chapter{这种风格的章节标题}
+\end{lstlisting}
+
+正文区域的默认章节样式即为 \texttt{kao}。
+
+\subsection{plain 样式}
+
+\index{章节样式!plain}
+{}[plain 样式] 是 KOMA-Script 的标准章节样式：编号与标题位于同一行，
+简洁朴素。前言（\texttt{\textbackslash frontmatter}）和后记
+（\texttt{\textbackslash backmatter}）自动使用此种样式。
+
+\begin{lstlisting}
+\setchapterstyle{plain}
+\chapter{朴素的章节标题}
+\end{lstlisting}
+
+\subsection{bar 样式}
+
+\index{章节样式!bar}
+{}[bar 样式] 在章节标题后面添加一个横跨页面的灰色横条背景。视觉效果
+醒目，适合需要强调的章节。
+
+\begin{lstlisting}
+\setchapterstyle{bar}
+\chapter{横条风格的章节标题}
+\end{lstlisting}
+
+\subsection{lines 样式}
+
+\index{章节样式!lines}
+{}[lines 样式] 用两条横线包裹章节编号和标题：编号上方一条线，
+标题下方一条线。这种风格简洁而有现代感，适合附录等部分。
+
+\begin{lstlisting}
+\setchapterstyle{lines}
+\chapter{双线风格的章节标题}
+\end{lstlisting}
+
+在本模板的附录部分，我们使用 \texttt{lines} 样式来展示。
+
+%----------------------------------------------------------------------------------------
+
+\section{章节图片——\texttt{\textbackslash setchapterimage}}
+
+\index{章节样式!章节图片}
+\index{setchapterimage@\texttt{\textbackslash setchapterimage}}
+
+\lstinline|\setchapterimage| 命令允许在章节标题顶部添加一张通栏背景图片，
+自动将章节标题放置在图片下方的灰色横条中。
+
+\begin{lstlisting}
+% 用法一：自动高度
+\setchapterimage{images/sunset.jpg}
+% 用法二：指定图片高度（可选参数）
+\setchapterimage[7cm]{images/sunset.jpg}
+\chapter{配图章节标题}
+\end{lstlisting}
+
+\begin{kaobox}[title=技术细节]
+\lstinline|\setchapterimage| 在内部调用了 \lstinline|\chapterstylebar| %
+并重新计算了标题的位置偏移量。因此，使用该命令后无需再手动设置章节样式。
+该设置仅影响当前章节——下一章节会恢复到之前设定的样式。
+\end{kaobox}
+
+\marginnote{本章顶部的风景图就是使用 \texttt{\textbackslash setchapterimage[6cm]\{seaside\}} 生成的。}
+
+\subsection{Part 背景图片——\texttt{\textbackslash setpartimage}}
+
+\index{章节样式!Part 图片}
+类似地，\lstinline|\setpartimage| 命令可以为 \lstinline|\part{}| 页面
+添加背景图片：
+
+\begin{lstlisting}
+\setpartimage{images/part-background.jpg}
+\part{第一部分标题}
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{PDF 配色与超链接}
+
+\index{选项!超链接}
+\index{选项!颜色}
+
+\Package{kaoWinCJKsc} 在中文模板中设置了带颜色的超链接：
+
+\begin{itemize}
+    \item 内部链接（章节、图表等）：深绿色
+    \item 文献引用链接：蓝色
+    \item URL 链接：蓝色
+\end{itemize}
+
+颜色定义如下（可根据需要覆盖）：
+\begin{lstlisting}
+\definecolor{chaptercolor}{HTML}{187d71}  % 内部链接颜色
+\definecolor{citecolor}{...}              % 引用链接颜色
+\definecolor{urlcolor}{...}               % URL 链接颜色
+\end{lstlisting}
+
+如需禁用彩色链接，可在导言区加入：
+\begin{lstlisting}
+\hypersetup{hidelinks} % 隐藏所有链接颜色
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{最佳实践：一个完整的自定义设置示例}
+
+\index{选项!最佳实践}
+以下展示一个完整的 \texttt{main.tex} 开头，集中了常用的选项配置：
+
+\begin{lstlisting}
+\documentclass[
+    a4paper,                % A4 纸
+    fontsize=11pt,          % 11 磅正文字号
+    twoside=false,          % 单面排版（适合屏幕阅读）
+    numbers=noenddot,       % 编号后无圆点
+    secnumdepth=2,          % 编号到 subsection
+    backgroundcolor,        % 柔和灰色背景
+]{kaobookCJKsc}
+
+% 加载中文字体配置
+\usepackage{kaoWinCJKsc}
+
+% 章节默认风格
+\setchapterstyle{kao}
+\end{lstlisting}
+
+通过对文档类选项和样式命令的灵活组合，你可以创建出高度个性化的排版作品。
+建议在项目开始前先确定好纸张尺寸、字号、章节风格等全局设置，
+后续内容创作中根据具体章节需求微调即可。

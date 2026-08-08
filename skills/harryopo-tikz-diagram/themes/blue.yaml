@@ -1,0 +1,18 @@
+name: blue
+display_name: 蓝色主题
+description: 蓝色系，专业技术风，适合技术文档、学术论文、企业系统架构图
+colors:
+  paper_border: "#B0C4DE"      # 柔和灰蓝边框
+  paper_fill: "#FFFFFF"        # 纯白模块填充
+  paper_title: "#2C3E50"       # 深蓝灰标题
+  paper_layer_bg: "#F5F8FA"    # 层背景：极淡蓝灰
+  paper_layer_border: "#D8E3EE" # 层边框：更浅的灰蓝
+  paper_muted: "#5D6D7E"       # 次要文字：灰蓝
+  accent_orange: "#D35400"     # 代码强调：柔和橙
+  layer_title_color: "#2C3E50" # 层标题色
+  shadow_color: "#E0E8F0"      # 阴影色：极淡蓝灰
+mix_examples:
+  - "paper_border!70!white"
+  - "paper_muted!50!white"
+  - "paper_title!80!black"
+  - "accent_orange!90!black"

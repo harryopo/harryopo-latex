@@ -1,0 +1,262 @@
+% ============================================================
+%  示例：智配系统分层架构图
+%  基于 harryopo-tikz-diagram layered-arch v2 模板
+%  Nature 无衬线风格
+%
+%  编译命令：xelatex -interaction=nonstopmode example-layered-arch.tex
+% ============================================================
+
+\documentclass[12pt,a4paper]{ctexart}
+
+\usepackage{geometry}
+\geometry{left=2cm,right=2cm,top=2cm,bottom=2cm}
+
+\usepackage{fontspec}
+\usepackage{tikz}
+\usetikzlibrary{positioning, fit, backgrounds, arrows.meta, calc}
+
+% ============================================================
+% Nature 风格配色
+% ============================================================
+\definecolor{PaperBorder}{HTML}{B0C4DE}
+\definecolor{PaperFill}{HTML}{FFFFFF}
+\definecolor{PaperTitle}{HTML}{2C3E50}
+\definecolor{PaperMuted}{HTML}{7F8C8D}
+\definecolor{AccentOrange}{HTML}{D35400}
+\definecolor{PaperLayerBg}{HTML}{F5F8FA}
+\definecolor{PaperLayerBorder}{HTML}{D8E3EE}
+
+% ============================================================
+% 字体设置 — Nature 无衬线风格
+% ============================================================
+\setmainfont{Arial}
+\setsansfont{Arial}
+\setmonofont{Consolas}[Scale=0.90]
+\setCJKsansfont{Microsoft YaHei}
+\setCJKmainfont{Microsoft YaHei}
+
+% ============================================================
+% 间距常量
+% ============================================================
+\def\ModW{4.0cm}
+\def\ModH{1.5cm}
+\def\WideH{0.95cm}
+\def\ModGap{0.55cm}
+\def\InterGap{1.6cm}
+\def\IntraGap{0.7cm}
+\def\LayerPad{12pt}
+
+\begin{document}
+
+\begin{center}
+  {\Large\sffamily\bfseries\textcolor{PaperTitle}{智配系统分层架构图}}\\[0.3em]
+  {\small\sffamily\itshape\textcolor{PaperMuted}{Zhipei System --- Layered Architecture}}
+\end{center}
+
+\vspace{1em}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance = 0pt and \ModGap,
+    >=Stealth,
+    line width = 0.7pt,
+    every node/.style = {inner sep=0pt, outer sep=0pt},
+    % ---- 模块节点 ----
+    module/.style = {
+        rectangle,
+        draw = PaperBorder,
+        fill = PaperFill,
+        line width = 0.8pt,
+        text width = \ModW,
+        minimum height = \ModH,
+        font = \small\sffamily,
+        align = center,
+        rounded corners = 5pt,
+        inner sep = 8pt,
+        text = PaperTitle,
+    },
+    module-wide/.style = {
+        module,
+        text width = 3*\ModW + 2*\ModGap,
+        minimum height = \WideH,
+    },
+    mod-title/.style = {
+        font = \small\sffamily\bfseries,
+        text = PaperTitle,
+    },
+    mod-desc/.style = {
+        font = \footnotesize\sffamily,
+        text = PaperMuted,
+    },
+    mod-tech/.style = {
+        font = \footnotesize\sffamily\ttfamily,
+        text = AccentOrange,
+    },
+    % ---- 层容器 ----
+    layer-box/.style = {
+        draw = PaperLayerBorder,
+        fill = PaperLayerBg,
+        line width = 0.7pt,
+        dashed,
+        dash pattern = on 4pt off 3pt,
+        rounded corners = 8pt,
+        inner sep = \LayerPad,
+    },
+    layer-title/.style = {
+        font = \normalsize\sffamily\bfseries,
+        text = PaperTitle,
+        anchor = north west,
+        inner sep = 0pt,
+    },
+    layer-tag/.style = {
+        font = \footnotesize\sffamily\itshape,
+        text = PaperMuted,
+        anchor = north east,
+        inner sep = 0pt,
+    },
+    % ---- 箭头 ----
+    arr-down/.style = {
+        ->, >=Stealth, thick, PaperBorder,
+    },
+    arr-dep/.style = {
+        ->, >=Stealth, thick, PaperMuted,
+    },
+    arr-label/.style = {
+        font = \footnotesize\sffamily\bfseries,
+        fill = white,
+        text = PaperBorder,
+        inner sep = 2pt,
+        outer sep = 0pt,
+    },
+    % ---- 图例 ----
+    legend-box/.style = {
+        draw = PaperLayerBorder,
+        fill = PaperFill,
+        line width = 0.6pt,
+        rounded corners = 5pt,
+        inner sep = 8pt,
+        font = \footnotesize\sffamily,
+        text = PaperTitle,
+    },
+]
+
+    % ============================================================
+    %  第一层：智配桌面安装器（含宽模块）
+    % ============================================================
+
+    \node[module] (L1a) {
+        {\mod-title 硬件检测模块}\\[2pt]
+        {\mod-tech GPU / VRAM / RAM}\\[1pt]
+        {\mod-tech CPU / OS}
+    };
+
+    \node[module, right=\ModGap of L1a] (L1b) {
+        {\mod-title 模型推荐引擎}\\[2pt]
+        {\mod-desc 根据硬件推荐}\\[1pt]
+        {\mod-desc 最佳模型方案}
+    };
+
+    \node[module, right=\ModGap of L1b] (L1c) {
+        {\mod-title 一键部署器}\\[2pt]
+        {\mod-desc 自动化安装}\\[1pt]
+        {\mod-tech Ollama + WebUI}
+    };
+
+    \node[module-wide, below=\IntraGap of L1a.south west, anchor=north west] (L1w) {
+        {\mod-title 管理后台（Web Dashboard）}\\[2pt]
+        {\mod-desc 模型管理\quad$\bullet$\quad 运维监控\quad$\bullet$\quad 知识库\quad$\bullet$\quad 日志}
+    };
+
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L1a)(L1b)(L1c)(L1w)] (box1) {};
+    \end{scope}
+
+    \node[layer-title] at ($(box1.north west)+(0,4pt)$) {智配桌面安装器};
+    \node[layer-tag] at ($(box1.north east)+(0,4pt)$) {Electron 桌面应用};
+
+    % ============================================================
+    %  第二层：后端服务
+    % ============================================================
+
+    \node[module, below=\InterGap of L1w.south west, anchor=north west] (L2a) {
+        {\mod-title 部署引擎}\\[2pt]
+        {\mod-tech Ollama 管理}\\[1pt]
+        {\mod-desc 模型生命周期}
+    };
+
+    \node[module, right=\ModGap of L2a] (L2b) {
+        {\mod-title 运维监控}\\[2pt]
+        {\mod-tech GPU / 内存采样}\\[1pt]
+        {\mod-desc 进程守护与告警}
+    };
+
+    \node[module, right=\ModGap of L2b] (L2c) {
+        {\mod-title API 服务}\\[2pt]
+        {\mod-tech FastAPI 框架}\\[1pt]
+        {\mod-tech RESTful 接口}
+    };
+
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L2a)(L2b)(L2c)] (box2) {};
+    \end{scope}
+
+    \node[layer-title] at ($(box2.north west)+(0,4pt)$) {后端服务};
+    \node[layer-tag] at ($(box2.north east)+(0,4pt)$) {Python};
+
+    % ============================================================
+    %  第三层：开源生态
+    % ============================================================
+
+    \node[module, below=\InterGap of L2a.south west, anchor=north west] (L3a) {
+        {\mod-title \ttfamily Ollama}\\[2pt]
+        {\mod-desc 本地大模型推理引擎}\\[1pt]
+        {\mod-desc 多模型管理}
+    };
+
+    \node[module, right=\ModGap of L3a] (L3b) {
+        {\mod-title Open WebUI}\\[2pt]
+        {\mod-desc 可扩展聊天界面}\\[1pt]
+        {\mod-tech RAG / 多模态}
+    };
+
+    \node[module, right=\ModGap of L3b] (L3c) {
+        {\mod-title 模型文件}\\[2pt]
+        {\mod-tech Qwen / Llama 等}\\[1pt]
+        {\mod-tech GGUF 量化格式}
+    };
+
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L3a)(L3b)(L3c)] (box3) {};
+    \end{scope}
+
+    \node[layer-title] at ($(box3.north west)+(0,4pt)$) {开源生态};
+    \node[layer-tag] at ($(box3.north east)+(0,4pt)$) {底层依赖};
+
+    % ============================================================
+    %  层间箭头
+    % ============================================================
+
+    \draw[arr-down] (box1.south) -- (box2.north)
+        node[midway, arr-label, anchor=west, xshift=3pt] {调用};
+
+    \draw[arr-dep] (box2.south) -- (box3.north)
+        node[midway, arr-label, anchor=west, xshift=3pt] {依赖};
+
+    % ============================================================
+    %  图例（嵌入右下角）
+    % ============================================================
+
+    \node[legend-box, anchor=north east] at ($(box3.south east)+(0,-0.8cm)$) {
+        \begin{tabular}{@{}c@{\hspace{6pt}}l@{\hspace{14pt}}c@{\hspace{6pt}}l@{}}
+            \textcolor{PaperBorder}{\rule[1pt]{14pt}{1.4pt}$>$} & {\sffamily\bfseries\small 调用关系} &
+            \textcolor{PaperMuted}{\rule[1pt]{14pt}{1.4pt}$>$} & {\sffamily\bfseries\small 底层依赖}
+        \end{tabular}
+    };
+
+\end{tikzpicture}
+\caption{\sffamily 智配系统分层架构图}
+\label{fig:zhipei-layered-arch}
+\end{figure}
+
+\end{document}

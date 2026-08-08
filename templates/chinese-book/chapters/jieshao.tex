@@ -1,0 +1,200 @@
+\setchapterpreamble[u]{\margintoc}
+\chapter{介绍}
+\labch{intro}
+
+欢迎使用中文 \Class{kaobook} 模板！本章将系统介绍 \Class{kaobook} 文档类的核心特性。
+无论你是第一次接触边栏排版，还是已经在英文环境下使用过原版 \Class{kaobook}，
+本章都将帮助你快速掌握中文适配版的关键功能。
+
+\index{kaobook 特性}
+
+\section{核心设计理念}
+
+\Class{kaobook} 的核心理念可以概括为一句话：\textbf{将次要内容放在主栏旁边，让主线叙事不被打断}。
+这与传统书籍将注释放在页面底部（脚注）或章节末尾（尾注）截然不同。
+在 \Class{kaobook} 中，宽大的页边空白（margin）被用作「第二信息通道」，
+大幅提升了阅读体验。
+
+\marginnote[*-3]{1.5 列布局指：主栏 + 边栏，而不是真正的 1.5 个文字列。主栏宽度被
+适当缩减，为边栏留出约 47.7 mm 的宽度。}
+
+\section{页面布局模式}
+
+\Class{kaobook} 提供了三种页面布局模式\index{页面布局}，用户可以在文档中随时切换。
+只需要调用 \Command{pagelayout} 命令即可：
+
+\begin{lstlisting}[caption=切换页面布局]
+\pagelayout{margin}   % 边栏模式：主栏 + 侧边栏（默认）
+\pagelayout{wide}     % 宽版模式：无侧边栏，正文占满版心
+\pagelayout{fullwidth}% 全宽模式：正文占满整页（无边距）
+\end{lstlisting}
+
+\sidenote{在 \texttt{main.tex} 中，\texttt{\textbackslash frontmatter} 自动使用
+\texttt{wide} 模式，\texttt{\textbackslash mainmatter} 自动使用 \texttt{margin}
+模式。这是最合理的默认设置。}
+
+\begin{description}
+    \item[margin 模式] 正文宽度缩减至约 107 mm，右侧留出约 47.7 mm 的边栏，
+        两者之间间隔 6.2 mm。这是 \Class{kaobook} 的标志性布局，
+        也是本书大部分章节所使用的模式。
+    \item[wide 模式] 正文占满整个版心（约 160.9 mm），无边栏。
+        适用于前言、目录、附录等不需要边栏的场景。
+    \item[fullwidth 模式] 正文无边距地占满整页。适用于特殊设计场景
+        （如章节标题图片）。
+\end{description}
+
+\section{章节标题样式}
+
+\Class{kaobook} 提供了四种章节标题样式\index{章节标题}，通过 \Command{setchapterstyle}
+命令切换：
+
+\begin{lstlisting}[caption=切换章节标题样式]
+\setchapterstyle{kao}   % kao 风格：大号编号 + 竖线分隔
+\setchapterstyle{bar}   % bar 风格：灰色背景条
+\setchapterstyle{lines} % lines 风格：上下双横线
+\setchapterstyle{plain} % plain 风格：KOMA-Script 默认样式
+\end{lstlisting}
+
+\subsection{kao 风格}
+
+这是 \Class{kaobook} 的\textbf{默认风格}，也是最具有辨识度的样式。
+章编号（如「1」）以 2.85 倍缩放显示在边栏中，章标题右对齐（或左对齐，取决于页面奇偶），
+两者之间用一条竖线优雅地分隔。
+
+在 \texttt{margin} 模式下，竖线位于正文区与边栏之间的分隔区；在 \texttt{wide}
+模式下，竖线位于正文区和右侧空白之间。
+
+\subsection{bar 风格}
+
+灰色矩形条横跨页面，章编号和标题显示在条内。这种风格更加稳重，
+适合教科书和学术著作。
+
+\subsection{lines 风格}
+
+上下两条横线（上细下粗）包裹章标题，章编号以 3.5 倍缩放居中显示。
+此风格简洁而有力，适合严肃的学术出版物。
+
+\subsection{plain 风格}
+
+回归 \KOMAScript 的默认样式，章标题居中或左对齐，无特殊装饰。
+适用于后记、参考文献等不那么需要视觉冲击力的章节。
+
+\section{边栏目录}
+
+在每章开头，你可以添加一个边栏目录（\Command{margintoc}），
+显示当前章节的结构概览。典型用法是在章标题之前设置：
+
+\begin{lstlisting}[caption=使用边栏目录]
+\setchapterpreamble[u]{\margintoc}
+\chapter{介绍}
+\end{lstlisting}
+
+\sidenote{边栏目录默认显示 section 和 subsection 两级。
+你可以通过 \texttt{\textbackslash setcounter\{margintocdepth\}\{\textbackslash sectiontocdepth\}}
+将其限制为仅显示 section 一级。}
+
+\index{边栏目录}
+
+\section{章首页图片}
+
+你还可以在章首页设置一幅横跨页宽的背景图片\index{章首页图片}：
+
+\begin{lstlisting}[caption=设置章首页图片]
+\setchapterimage[7.5cm]{images/seaside}
+\chapter{示例章节}
+\end{lstlisting}
+
+这将让图片从页面上方延伸下来，并自动切换到 \texttt{bar} 风格的半透明背景条显示章标题。
+
+\section{页码编排}
+
+\Class{kaobook} 沿用了 \KOMAScript 的 \Command{frontmatter}、\Command{mainmatter}
+和 \Command{backmatter} 三级编排\index{页码编排}：
+
+\begin{description}
+    \item[\texttt{\textbackslash frontmatter}] 前言部分：页码为大写罗马数字（I, II, III...），
+        章不编号。自动使用 \texttt{wide} 布局和 \texttt{plain} 章标题样式。
+    \item[\texttt{\textbackslash mainmatter}] 正文部分：页码为阿拉伯数字（1, 2, 3...），
+        章按序编号。自动使用 \texttt{margin} 布局和 \texttt{kao} 章标题样式。
+    \item[\texttt{\textbackslash backmatter}] 后置部分：页码为阿拉伯数字，章不编号。
+        自动使用 \texttt{wide} 布局和 \texttt{plain} 章标题样式。
+\end{description}
+
+\section{代码清单}
+
+\Class{kaobook} 支持两种代码高亮包：\Package{listings}（默认）和 \Package{minted}。
+你可以在加载文档类时通过选项切换：
+
+\begin{lstlisting}[caption=选择代码包，language=TeX]
+\documentclass[listing=listings]{kaobookCJKsc} % 使用 listings（默认）
+% 或
+\documentclass[listing=minted]{kaobookCJKsc}   % 使用 minted
+\end{lstlisting}
+
+\index{代码清单}
+
+两种方案各有优势：\Package{listings} 不需要外部依赖，\Package{minted} 的语法
+高亮更加精准但需要 Python 和 Pygments。以下是一个 Python 代码示例：
+
+\begin{lstlisting}[language=Python, caption=一个 Python 示例]
+def fibonacci(n: int) -> int:
+    """计算第 n 个斐波那契数（递归版）"""
+    if n <= 1:
+        return n
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+# 打印前 10 个斐波那契数
+for i in range(10):
+    print(f"F({i}) = {fibonacci(i)}")
+\end{lstlisting}
+
+\sidenote[][*-1]{你还可以使用 \texttt{kaolstplain} 样式来获得无行号的简洁代码块，
+或者使用 \texttt{marginlisting} 环境将短代码放在边栏中。}
+
+\section{快速开始}
+
+如果你希望从零开始创建一个中文 kaobook 文档，请参考以下最小工作示例：
+
+\begin{lstlisting}[caption=最小工作示例（main.tex）]
+\documentclass[
+    a4paper,
+    fontsize=10pt,
+    twoside=false,
+    numbers=noenddot,
+]{kaobookCJKsc}
+
+\input{styles/config.tex}
+\usepackage{kaoWinCJKsc}
+\input{styles/packageconfig.tex}
+\usepackage{kaobiblioCJKsc}
+\addbibresource{main.bib}
+\usepackage{kaotheoremsCJKsc}
+\usepackage{kaorefsCJKsc}
+
+\graphicspath{{images/}}
+\makeindex[columns=3, title=索引, intoc]
+
+\begin{document}
+
+\frontmatter
+\maketitle
+\tableofcontents
+
+\mainmatter
+\setchapterstyle{kao}
+\chapter{我的第一章}
+这是我的第一段文字。\sidenote{这是我的第一个边注！}
+
+\backmatter
+\printbibliography
+\printindex
+
+\end{document}
+\end{lstlisting}
+
+\index{最小工作示例}
+
+以上就是 \Class{kaobook} 中文模板的核心功能概览。在后续章节中，我们将深入探讨
+每一种功能的详细用法和最佳实践。让我们继续前进！
+
+\endinput

@@ -1,0 +1,346 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  fulu.tex — 附录：字体与编译
+%  系统讲解 kaobookCJKsc 的字体体系与编译方法
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setchapterstyle{lines}
+\setchapterpreamble[u]{\margintoc}
+\chapter{附：字体与编译}
+\labch{fulu}
+
+本附录面向需要深入了解字体配置和编译流程的用户，系统讲解
+\Class{kaobookCJKsc} 的字体体系、编译环境要求以及常见问题排查方法。
+
+%----------------------------------------------------------------------------------------
+
+\section{字体体系总览}
+
+\index{字体!体系总览}
+
+\Class{kaobookCJKsc} 中文模板采用「方正字库 + 西文字体」双层字体方案：
+
+\subsection{中文字体——方正字库}
+
+\index{字体!方正字库}
+模板要求安装以下六款方正字体（Windows 系统字体目录：
+\lstinline|C:\Windows\Fonts\|）：
+
+\begin{table}[h]
+\centering
+\caption{模板所需的方正字体清单}
+\labtab{font-list}
+\begin{tabular}{@{}lll@{}}
+\toprule
+字体全称 & TTF 文件名 & 用途 \\
+\midrule
+方正书宋\_GBK  & 方正书宋\_GBK.ttf & 正文 \\
+FZHei-B01       & FZHei-B01.ttf    & 标题 \\
+方正楷体\_GBK   & 方正楷体\_GBK.ttf & 引用/致献 \\
+FZFSFW          & FZFSFW.ttf       & 边注 \\
+FZXBSJW         & FZXBSJW.ttf      & 大标题 \\
+FZLiShu-S01S    & FZLiShu-S01S.ttf & 装饰（可选）\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\marginnote{TTF 文件名必须与 \texttt{Fonts} 目录下的实际文件名完全一致。%
+如果字体以 \texttt{.ttc} 格式存在，可能需要转换或寻找对应的 \texttt{.ttf} 文件。}
+
+\subsection{西文等宽代码字体}
+
+\index{字体!等宽字体}
+\index{字体!Cascadia Code}
+\index{字体!Consolas}
+\index{字体!Courier New}
+代码字体按优先级自动选择：\texttt{Cascadia Code}（Windows Terminal 默认字体）优先，其次
+\texttt{Consolas}，最后回退至 \texttt{Courier New}。字体选择逻辑定义在
+\Package{kaoWinCJKsc} 中。
+
+\subsection{西文衬线和无衬线字体（英文模板）}
+
+\index{字体!西文字体}
+原始的 \Class{kaobook} 英文模板使用 Libertinus 字体家族作为衬线和数学字体。
+中文适配版以方正字库为主，英文部分由 \Package{fontspec} 接管。如需
+自定义西文字体，可在 \texttt{config.tex} 中添加如下设置：
+
+\begin{lstlisting}[style=kaolstplain]
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Cascadia Code}
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{字体命令详解}
+
+\index{字体!命令}
+
+\Class{kaobookCJKsc} 的中文字体通过 CJK 字体族命令来切换。以下六个命令
+定义在 \Package{kaoWinCJKsc} 中，每个命令可像 \lstinline|\rmfamily| 一样
+使用，切换后直到作用域结束之前持续有效。
+
+% ── 字体展示表格 ──
+\begin{table}[h]
+\centering
+\caption{方正字体命令一览}
+\labtab{font-commands}
+\begin{tabular}{@{}llp{8cm}@{}}
+\toprule
+命令 & 字体 & 效果（中英混排） \\
+\midrule
+\lstinline|\fzsong{}|         & 书宋 & \fzsong 这是一段中文文本 This is English text. 0123456789 \\
+\lstinline|\fzhei{}|          & 黑体 & \fzhei 这是一段中文文本 This is English text. 0123456789 \\
+\lstinline|\fzkai{}|          & 楷体 & \fzkai 这是一段中文文本 This is English text. 0123456789 \\
+\lstinline|\fzfs{}|           & 仿宋 & \fzfs 这是一段中文文本 This is English text. 0123456789 \\
+\lstinline|\fzxiaobiaosong{}| & 小标宋 & \fzxiaobiaosong 这是一段中文文本 This is English text. 0123456789 \\
+\lstinline|\fzli{}|           & 隶书 & \fzli 这是一段中文文本 This is English text. 0123456789 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{每种字体的详细样张}
+
+以下是每种方正字体的全行展示，包含中文和西文混排：
+
+\subsubsection{方正书宋 —— \texttt{\textbackslash fzsong}}
+\index{字体!方正书宋!样张}
+{\fzsong
+\noindent 方正书宋是中文模板的默认正文字体。The quick brown fox jumps over the lazy dog.\\
+\textbf{学而时习之，不亦说乎？} \textit{Italic: Knowledge is power.} 0123456789 @\#\$\%\textasciicircum\&\*()
+}
+
+\subsubsection{方正黑体 —— \texttt{\textbackslash fzhei}}
+\index{字体!方正黑体!样张}
+{\fzhei
+\noindent 方正黑体用于各级标题，笔画粗细均匀。The quick brown fox jumps over the lazy dog.\\
+\textbf{天行健，君子以自强不息。} \textit{Italic: Practice makes perfect.} 0123456789 @\#\$\%\textasciicircum\&\*()
+}
+
+\subsubsection{方正楷体 —— \texttt{\textbackslash fzkai}}
+\index{字体!方正楷体!样张}
+{\fzkai
+\noindent 方正楷体温润优雅，适合引用和致献词。The quick brown fox jumps over the lazy dog.\\
+\textbf{云山苍苍，江水泱泱。} \textit{Italic: Silence is golden.} 0123456789 @\#\$\%\textasciicircum\&\*()
+}
+
+\subsubsection{方正仿宋 —— \texttt{\textbackslash fzfs}}
+\index{字体!方正仿宋!样张}
+{\fzfs
+\noindent 方正仿宋是边注区域的专用字体，字迹清秀。The quick brown fox jumps over the lazy dog.\\
+\textbf{不积跬步，无以至千里。} \textit{Italic: Time is money.} 0123456789 @\#\$\%\textasciicircum\&\*()
+}
+
+\subsubsection{方正小标宋 —— \texttt{\textbackslash fzxiaobiaosong}}
+\index{字体!方正小标宋!样张}
+{\fzxiaobiaosong
+\noindent 方正小标宋是 Part 和 Chapter 的大标题字体。The quick brown fox jumps over the lazy dog.\\
+\textbf{海纳百川，有容乃大。} \textit{Italic: Life is beautiful.} 0123456789 @\#\$\%\textasciicircum\&\*()
+}
+
+\subsubsection{方正隶书 —— \texttt{\textbackslash fzli}}
+\index{字体!方正隶书!样张}
+{\fzli
+\noindent 方正隶书用于装饰性文字，古韵盎然。The quick brown fox jumps over the lazy dog.\\
+\textbf{以古为镜，可以知兴替。} \textit{Italic: Art is long, life is short.} 0123456789 @\#\$\%\textasciicircum\&\*()
+}
+
+\subsection{等宽代码字体展示}
+
+\index{字体!等宽字体!样张}
+{\ttfamily
+\noindent 等宽代码字体用于展示程序代码、命令行输出和文件路径。\\
+\textbf{The quick brown fox jumps over the lazy dog. 0123456789}\\
+\textit{The quick brown fox jumps over the lazy dog. 0123456789}\\
+\texttt{xelatex main.tex \&\& biber main \&\& xelatex main.tex}
+}
+
+进行以上字体测试时，请确保：方正字体已安装在 Windows 系统的
+\texttt{Fonts} 目录中，或者在 \Package{kaoWinCJKsc} 中修改了
+\lstinline|\fontpath| 宏的定义。
+
+%----------------------------------------------------------------------------------------
+
+\section{编译环境与流程}
+
+\index{编译!环境要求}
+\index{编译!XeLaTeX}
+
+\subsection{编译环境要求}
+
+\Class{kaobookCJKsc} 中文模板 \textbf{必须} 使用 \XeLaTeX{} 编译：
+
+\begin{sidebox}{环境要求}
+\begin{itemize}
+    \item \textbf{TeX 发行版}：TeX Live 2020+（推荐）或 MiKTeX 21+
+    \item \textbf{编译器}：\XeLaTeX{}（必须，支持 CJK 字体）
+    \item \textbf{参考文献后端}：biber（配合 biblatex）
+    \item \textbf{操作系统}：Windows 10/11（字体路径适配）
+\end{itemize}
+\end{sidebox}
+
+\marginnote{本模板不支持 pdfLaTeX 和 LuaLaTeX。pdfLaTeX 无法处理%
+\Package{fontspec} 加载的系统字体；LuaLaTeX 未进行适配测试。}
+
+\subsection{编译命令}
+
+\index{编译!命令}
+完整的编译流程（从命令行执行）：
+
+\begin{lstlisting}[caption={完整编译命令（Windows PowerShell）}, label={lst:compile}]
+# 步骤 1：首次编译，生成 .aux 辅助文件
+xelatex main.tex
+
+# 步骤 2：处理参考文献数据库
+biber main
+
+# 步骤 3：第二次编译，更新引用
+xelatex main.tex
+
+# 步骤 4：编译索引（如需使用 \makeindex）
+makeindex main.idx
+
+# 步骤 5：第三次编译（确保交叉引用、目录稳定）
+xelatex main.tex
+\end{lstlisting}
+
+\subsection{使用项目自带编译脚本}
+
+项目提供了 \texttt{build.ps1} 脚本简化编译流程。该脚本通过
+\texttt{TEXINPUTS} 环境变量让 \XeLaTeX{} 能在 \texttt{templates/}
+目录搜索 \texttt{.cls} 和 \texttt{.sty} 文件，推荐使用：
+
+\begin{lstlisting}[caption={使用 build.ps1 编译}, label={lst:buildps}]
+# 完整编译（含 biber + 3 次 xelatex）
+.\build.ps1
+
+# 快速编译（仅 1 次 xelatex，适合快速预览）
+.\build.ps1 -Quick
+
+# 清理辅助文件（.aux, .log, .out 等）
+.\build.ps1 -Clean
+\end{lstlisting}
+
+\subsection{使用 latexmk}
+
+如果系统已安装 \texttt{latexmk}（TeX Live 自带），可以使用自动编译：
+
+\begin{lstlisting}[style=kaolstplain]
+latexmk -xelatex -interaction=nonstopmode main.tex
+\end{lstlisting}
+
+配合合适的 \texttt{.latexmkrc} 配置文件，\texttt{latexmk} 还可以自动
+处理 \texttt{biber}、\texttt{makeindex} 等步骤。
+
+%----------------------------------------------------------------------------------------
+
+\section{编译后的辅助文件}
+
+\index{编译!辅助文件}
+一次完整编译后，项目目录中会生成以下辅助文件：
+
+\begin{table}[h]
+\centering
+\caption{编译生成的辅助文件}
+\labtab{aux-files}
+\begin{tabular}{@{}ll@{}}
+\toprule
+扩展名 & 用途 \\
+\midrule
+\texttt{.aux}  & 交叉引用辅助信息 \\
+\texttt{.bbl}  & biber 生成的格式化参考文献 \\
+\texttt{.bcf}  & biber 配置信息 \\
+\texttt{.blg}  & biber 日志 \\
+\texttt{.idx}  & 索引原始数据 \\
+\texttt{.ind}  & 格式化后的索引 \\
+\texttt{.ilg}  & makeindex 日志 \\
+\texttt{.log}  & 编译日志（排查错误时查看） \\
+\texttt{.out}  & hyperref 书签数据 \\
+\texttt{.toc}  & 目录数据 \\
+\texttt{.lof}  & 图录数据 \\
+\texttt{.lot}  & 表录数据 \\
+\texttt{.lol}  & 代码录数据（如有 listings）\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+使用 \texttt{build.ps1 -Clean} 可一键清理这些文件。
+
+%----------------------------------------------------------------------------------------
+
+\section{常见问题排查}
+
+\index{编译!常见问题}
+
+\begin{sidebox}{常见问题与解决方案}
+\begin{description}
+    \item[问题1：字体找不到] 错误信息含 \texttt{font-not-found} 或类似提示。
+    请确认方正字体文件（如 \texttt{方正书宋\_GBK.ttf}）已安装在
+    \texttt{C:\textbackslash Windows\textbackslash Fonts\textbackslash} 目录下。
+    可在 \Package{kaoWinCJKsc} 中检查并修正 \lstinline|\fontpath|。
+
+    \item[问题2：参考文献不显示] 确保已运行 \texttt{biber main} 命令。
+    biber 不会随 \XeLaTeX{} 自动运行，必须显式调用。
+
+    \item[问题3：交叉引用显示为「??」] 说明引用标签尚未解析。请多编译一次
+    —\XeLaTeX{} 通常需要 2--3 次编译才能稳定所有引用。
+
+    \item[问题4：边注文字和正文重叠] 这是 kaobook 已知的偶发问题。
+    再多编译一次通常可以解决；如仍有问题，尝试调整 \lstinline|\marginnote|
+    的可选偏移参数。
+
+    \item[问题5：PDF 书签中文乱码] 请使用 \XeLaTeX{} 而非 pdfLaTeX；
+    \Package{hyperref} 配合 \XeLaTeX{} 能正确处理 Unicode 书签。
+
+    \item[问题6：方正小标宋未显示在标题中] 检查 \Package{kaoWinCJKsc}
+    中的 \texttt{\textbackslash fzxiaobiaosong} 定义对应的字体文件名是否
+    与系统中实际存在的文件名一致（\texttt{FZXBSJW.ttf}）。
+\end{description}
+\end{sidebox}
+
+%----------------------------------------------------------------------------------------
+
+\section{自定义字体路径}
+
+\index{字体!自定义路径}
+如果你的方正字体安装在其他目录（例如自定义字体管理工具路径），可以在
+\texttt{kaoWinCJKsc.sty} 或 \texttt{config.tex} 中修改：
+
+\begin{lstlisting}
+% 修改字体搜索路径
+\renewcommand{\fontpath}{D:/MyFonts/FZFonts/}
+
+% 或直接修改每个字体命令
+\newCJKfontfamily[Path=D:/MyFonts/, Extension=.ttf]\fzsong{方正书宋_GBK}
+\end{lstlisting}
+
+如果缺少某款方正字体，可以使用系统自带字体作为备选（已预置）：
+
+\begin{lstlisting}[style=kaolstplain]
+% 系统自带宋体、黑体、楷体、仿宋作为备选
+{\song 宋体}^{英文宋体}
+{\hei 黑体}^{英文黑体}
+{\kai 楷体}^{英文楷体}
+{\fs 仿宋}^{英文仿宋}
+\end{lstlisting}
+
+这些备选字体不需要方正字体支持，但效果可能不如方正字体理想。
+
+%----------------------------------------------------------------------------------------
+
+\section{字体版权说明}
+
+\marginnote{请注意，虽然本模板是开源的，%
+但方正字体本身是商业字体，版权归方正字库所有。}
+
+\begin{kaobox}[title=字体版权]
+本模板使用的方正字体系列（方正书宋、方正黑体、方正楷体、方正仿宋、
+方正小标宋、方正隶书）版权归北京北大方正电子有限公司所有。
+使用者应当遵守方正字库的授权协议。
+
+在使用本模板生成的文档用于商业用途或公开发布前，请确认你拥有上述
+字体的合法授权。如需免费替代方案，可考虑使用思源字体（Source Han）
+或霞鹜文楷等开源中文/日文字体。
+\end{kaobox}
+
+至此，你应该已经全面掌握了 \Class{kaobookCJKsc} 的字体配置和编译方法。
+如有更多问题，请查阅 \Class{kaobook} 原始文档或 KOMA-Script 手册。祝排版愉快！
