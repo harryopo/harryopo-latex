@@ -60,6 +60,7 @@
 15. **longtable 的 \endfirsthead/\endhead 前面不能放 \multicolumn 内容行**——只能放 \hline，否则报错 `\ltcaption@ORI@LT@array was complete`（caption 包修补 longtable 后的兼容性问题）。表头内容应作为数据的第一行输出，而非放在 \endfirsthead 前面
 16. **MinerU DOCX 表格输出是 HTML 格式**——保留 colspan/rowspan，可直接映射到 \multicolumn/\multirow；比 Markdown 表格强大得多
 17. **MinerU 会给 Word 标题标记加粗**——标题样式含 bold 属性，输出为 `# **标题**`，清洗时需去掉 `**`
+18. **`\fzht{文字}` 的花括号不会限制字体切换范围**——`\newcommand{\fzht}{\hrypht}` 定义的是声明式命令（类似 `\bfseries`），`\fzht{文字}` 等价于先全局切换字体再开分组，花括号结束后字体切换仍然有效。解决方案：用 `\@ifnextchar\bgroup` 实现双模式——`\fzht{文字}` 自动包裹分组，`{\fzht 文字}` 保持声明式行为。所有字体快捷命令（`\fzkt`/`\fzfs`/`\fzdbs`/`\fzxb`/`\fzht`）均需此模式
 
 ---
 ## 项目事实

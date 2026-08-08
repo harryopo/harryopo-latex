@@ -1,0 +1,179 @@
+\indexentry{\LaTeX|hyperpage}{iii}
+\indexentry{kaobook@\Class{kaobook}|hyperpage}{iii}
+\indexentry{Tufte-LaTeX@\Class{Tufte-LaTeX}|hyperpage}{iii}
+\indexentry{Tufte, Edward|hyperpage}{iii}
+\indexentry{方正字体|hyperpage}{iii}
+\indexentry{CJK 排版|hyperpage}{iii}
+\indexentry{中文本地化|hyperpage}{iii}
+\indexentry{kaobook@\Class{kaobook}|hyperpage}{iv}
+\indexentry{读者群体|hyperpage}{iv}
+\indexentry{编译环境|hyperpage}{v}
+\indexentry{字体要求|hyperpage}{v}
+\indexentry{方正字体|hyperpage}{v}
+\indexentry{kaobook 特性|hyperpage}{1}
+\indexentry{页面布局|hyperpage}{1}
+\indexentry{章节标题|hyperpage}{1}
+\indexentry{边栏目录|hyperpage}{2}
+\indexentry{章首页图片|hyperpage}{2}
+\indexentry{页码编排|hyperpage}{2}
+\indexentry{代码清单|hyperpage}{3}
+\indexentry{最小工作示例|hyperpage}{3}
+\indexentry{边注|hyperindexformat{\see {sidenote}}}{5}
+\indexentry{边注!自定义标记|hyperpage}{5}
+\indexentry{边注!垂直偏移|hyperpage}{5}
+\indexentry{边栏注释|hyperpage}{5}
+\indexentry{sidenote vs marginnote|hyperpage}{6}
+\indexentry{脚注|hyperpage}{6}
+\indexentry{宽段落|hyperpage}{6}
+\indexentry{边栏图|hyperpage}{6}
+\indexentry{边栏表|hyperpage}{6}
+\indexentry{边栏代码|hyperpage}{7}
+\indexentry{todo 注释|hyperpage}{7}
+\indexentry{信息分层|hyperpage}{7}
+\indexentry{数学排版|hyperpage}{8}
+\indexentry{定理环境|hyperpage}{8}
+\indexentry{度量空间|hyperpage}{8}
+\indexentry{分析学|hyperpage}{8}
+\indexentry{开集|hyperpage}{8}
+\indexentry{柯西序列|hyperpage}{9}
+\indexentry{有界性|hyperpage}{9}
+\indexentry{离散度量空间|hyperpage}{9}
+\indexentry{欧拉公式|hyperpage}{9}
+\indexentry{欧拉公式|hyperpage}{9}
+\indexentry{代数恒等式|hyperpage}{9}
+\indexentry{分段函数|hyperpage}{10}
+\indexentry{矩阵|hyperpage}{10}
+\indexentry{增广矩阵|hyperpage}{10}
+\indexentry{欧几里得距离|hyperpage}{11}
+\indexentry{定理环境速查|hyperpage}{11}
+\indexentry{图像与表格|hyperpage}{12}
+\indexentry{图像|hyperpage}{12}
+\indexentry{边栏图像|hyperpage}{12}
+\indexentry{边栏图像|hyperpage}{12}
+\indexentry{宽版图像|hyperpage}{13}
+\indexentry{表格|hyperpage}{13}
+\indexentry{三线表|hyperpage}{13}
+\indexentry{multirow|hyperpage}{13}
+\indexentry{multicolumn|hyperpage}{13}
+\indexentry{边栏表格|hyperpage}{14}
+\indexentry{宽版表格|hyperpage}{14}
+\indexentry{子图|hyperpage}{14}
+\indexentry{算法排版|hyperpage}{15}
+\indexentry{最佳实践|hyperpage}{15}
+\indexentry{引用!文献引用|hyperpage}{16}
+\indexentry{引用!parencite@\texttt{\textbackslash parencite}|hyperpage}{16}
+\indexentry{引用!textcite@\texttt{\textbackslash textcite}|hyperpage}{16}
+\indexentry{引用!citeauthor@\texttt{\textbackslash citeauthor}|hyperpage}{16}
+\indexentry{引用!citeyear@\texttt{\textbackslash citeyear}|hyperpage}{16}
+\indexentry{引用!cite@\texttt{\textbackslash cite}|hyperpage}{16}
+\indexentry{引用!样式|hyperpage}{16}
+\indexentry{引用!sidecite@\texttt{\textbackslash sidecite}|hyperpage}{16}
+\indexentry{引用!交叉引用|hyperpage}{17}
+\indexentry{引用!label@\texttt{\textbackslash label}|hyperpage}{17}
+\indexentry{引用!ref@\texttt{\textbackslash ref}|hyperpage}{17}
+\indexentry{引用!labch@\texttt{\textbackslash labch}|hyperpage}{17}
+\indexentry{引用!图引用|hyperpage}{17}
+\indexentry{引用!cleveref@\texttt{cleveref}|hyperpage}{18}
+\indexentry{引用!cref@\texttt{\textbackslash cref}|hyperpage}{18}
+\indexentry{引用!Cref@\texttt{\textbackslash Cref}|hyperpage}{18}
+\indexentry{引用!kaorefs 与 cleveref@kaorefs 与 cleveref|hyperpage}{18}
+\indexentry{引用!中文本地化|hyperpage}{18}
+\indexentry{引用!编译|hyperpage}{18}
+\indexentry{编译!biber@biber|hyperpage}{18}
+\indexentry{引用!.bib文件@\texttt{.bib} 文件|hyperpage}{19}
+\indexentry{索引|hyperpage}{19}
+\indexentry{引用!索引|hyperpage}{19}
+\indexentry{选项!fontsize@\texttt{fontsize}|hyperpage}{21}
+\indexentry{选项!纸张尺寸|hyperpage}{21}
+\indexentry{选项!twoside@\texttt{twoside}|hyperpage}{21}
+\indexentry{选项!secnumdepth@\texttt{secnumdepth}|hyperpage}{21}
+\indexentry{选项!fontsize@\texttt{fontsize}|hyperpage}{21}
+\indexentry{选项!纸张尺寸|hyperpage}{21}
+\indexentry{选项!a4paper@\texttt{a4paper}|hyperpage}{21}
+\indexentry{选项!twoside@\texttt{twoside}|hyperpage}{22}
+\indexentry{选项!twoside=false@\texttt{twoside=false}|hyperpage}{22}
+\indexentry{选项!secnumdepth@\texttt{secnumdepth}|hyperpage}{22}
+\indexentry{选项!专属选项|hyperpage}{22}
+\indexentry{选项!backgroundcolor@\texttt{backgroundcolor}|hyperpage}{22}
+\indexentry{选项!numbers@\texttt{numbers}|hyperpage}{22}
+\indexentry{章节样式|hyperpage}{22}
+\indexentry{章节样式!setchapterstyle@\texttt{\textbackslash setchapterstyle}|hyperpage}{22}
+\indexentry{章节样式!kao|hyperpage}{23}
+\indexentry{章节样式!plain|hyperpage}{23}
+\indexentry{章节样式!bar|hyperpage}{23}
+\indexentry{章节样式!lines|hyperpage}{23}
+\indexentry{章节样式!章节图片|hyperpage}{23}
+\indexentry{setchapterimage@\texttt{\textbackslash setchapterimage}|hyperpage}{23}
+\indexentry{章节样式!Part 图片|hyperpage}{24}
+\indexentry{选项!超链接|hyperpage}{24}
+\indexentry{选项!颜色|hyperpage}{24}
+\indexentry{选项!最佳实践|hyperpage}{24}
+\indexentry{排版!页面布局|hyperpage}{25}
+\indexentry{排版!pagelayout@\texttt{\textbackslash pagelayout}|hyperpage}{25}
+\indexentry{排版!wide 布局|hyperpage}{25}
+\indexentry{排版!margin 布局|hyperpage}{25}
+\indexentry{排版!fullwidth 布局|hyperpage}{25}
+\indexentry{排版!内部机制|hyperpage}{26}
+\indexentry{排版!addpart@\texttt{\textbackslash addpart}|hyperpage}{26}
+\indexentry{排版!Part 标题|hyperpage}{26}
+\indexentry{排版!setpartimage@\texttt{\textbackslash setpartimage}|hyperpage}{26}
+\indexentry{排版!sidebox@\texttt{sidebox}|hyperpage}{26}
+\indexentry{排版!sidebox*@\texttt{sidebox*}|hyperpage}{27}
+\indexentry{排版!solutions@\texttt{solutions}|hyperpage}{27}
+\indexentry{排版!代码块|hyperpage}{27}
+\indexentry{排版!lstlisting@\texttt{lstlisting}|hyperpage}{27}
+\indexentry{排版!widepar@\texttt{widepar}|hyperpage}{28}
+\indexentry{内容组织!文件结构|hyperpage}{30}
+\indexentry{内容组织!项目组织|hyperpage}{30}
+\indexentry{内容组织!主文件结构|hyperpage}{30}
+\indexentry{内容组织!frontmatter@\texttt{\textbackslash frontmatter}|hyperpage}{31}
+\indexentry{内容组织!前言|hyperpage}{31}
+\indexentry{内容组织!标题页|hyperpage}{32}
+\indexentry{内容组织!mainmatter@\texttt{\textbackslash mainmatter}|hyperpage}{32}
+\indexentry{内容组织!正文|hyperpage}{32}
+\indexentry{内容组织!章节组织|hyperpage}{32}
+\indexentry{内容组织!排版建议|hyperpage}{33}
+\indexentry{内容组织!appendix@\texttt{\textbackslash appendix}|hyperpage}{33}
+\indexentry{内容组织!附录|hyperpage}{33}
+\indexentry{内容组织!backmatter@\texttt{\textbackslash backmatter}|hyperpage}{34}
+\indexentry{内容组织!后记|hyperpage}{34}
+\indexentry{内容组织!编译工作流|hyperpage}{34}
+\indexentry{编译!工作流|hyperpage}{34}
+\indexentry{字母表!希腊字母|hyperpage}{37}
+\indexentry{希腊字母|hyperpage}{37}
+\indexentry{希腊字母!变体|hyperpage}{37}
+\indexentry{数学符号|hyperpage}{38}
+\indexentry{字体!方正书宋|hyperpage}{39}
+\indexentry{字体!方正黑体|hyperpage}{39}
+\indexentry{字体!方正楷体|hyperpage}{39}
+\indexentry{字体!方正仿宋|hyperpage}{39}
+\indexentry{字体!方正小标宋|hyperpage}{39}
+\indexentry{字体!方正隶书|hyperpage}{39}
+\indexentry{字体!方正书宋|hyperpage}{39}
+\indexentry{字体!方正黑体|hyperpage}{39}
+\indexentry{字体!方正楷体|hyperpage}{39}
+\indexentry{字体!方正仿宋|hyperpage}{39}
+\indexentry{字体!方正小标宋|hyperpage}{40}
+\indexentry{字体!方正隶书|hyperpage}{40}
+\indexentry{字体!速查表|hyperpage}{40}
+\indexentry{字体!体系总览|hyperpage}{41}
+\indexentry{字体!方正字库|hyperpage}{41}
+\indexentry{字体!等宽字体|hyperpage}{41}
+\indexentry{字体!Cascadia Code|hyperpage}{41}
+\indexentry{字体!Consolas|hyperpage}{41}
+\indexentry{字体!Courier New|hyperpage}{41}
+\indexentry{字体!西文字体|hyperpage}{41}
+\indexentry{字体!命令|hyperpage}{41}
+\indexentry{字体!方正书宋!样张|hyperpage}{42}
+\indexentry{字体!方正黑体!样张|hyperpage}{42}
+\indexentry{字体!方正楷体!样张|hyperpage}{42}
+\indexentry{字体!方正仿宋!样张|hyperpage}{42}
+\indexentry{字体!方正小标宋!样张|hyperpage}{42}
+\indexentry{字体!方正隶书!样张|hyperpage}{42}
+\indexentry{字体!等宽字体!样张|hyperpage}{43}
+\indexentry{编译!环境要求|hyperpage}{43}
+\indexentry{编译!XeLaTeX|hyperpage}{43}
+\indexentry{编译!命令|hyperpage}{43}
+\indexentry{编译!辅助文件|hyperpage}{44}
+\indexentry{编译!常见问题|hyperpage}{44}
+\indexentry{字体!自定义路径|hyperpage}{45}
