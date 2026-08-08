@@ -1,0 +1,282 @@
+% ============================================================
+% harryopo-tikz-diagram - 流程图模板 v2 (Flowchart)
+% ============================================================
+%
+% 【用途】
+%   绘制标准流程图，包含开始/结束、过程、决策、输入输出等节点。
+%   支持自上而下（vertical）和自左而右（horizontal）两种方向。
+%
+% 【设计原则】（参考 example-paper-structure 布局经验）
+%   1. 无阴影设计：干净扁平，避免视觉噪音
+%   2. 宽松间距：节点不重叠，决策分支清晰
+%   3. 居中对齐：节点内容居中，层次清晰
+%   4. 全图无衬线：Arial + Microsoft YaHei
+%   5. 图例嵌入内部：避免额外 center 环境
+%   6. 白色标签光晕：edge-label 用 fill=white 防覆盖
+%
+% 【使用方法】
+%   将本文件内容复制到你的 LaTeX 文档中，或使用 \input 命令引入。
+%   修改下方"可调整参数"部分来自定义你的流程图。
+%
+% 【编译要求】
+%   XeLaTeX 编译器，需加载 ctex + fontspec 宏包以支持中文。
+%
+% ============================================================
+
+% ------------------------------------------------------------
+% 必要的宏包（如果文档中已加载可省略）
+% ------------------------------------------------------------
+% \usepackage{tikz}
+% \usetikzlibrary{positioning, fit, backgrounds, arrows.meta, calc}
+% \usetikzlibrary{shapes.geometric, shapes.misc}
+
+% ------------------------------------------------------------
+% 可调整参数 —— 在这里修改你的流程图配置
+% ------------------------------------------------------------
+
+% 主题色定义（Nature 无衬线风格）
+\definecolor{PaperBorder}{HTML}{B0C4DE}      % 柔和灰蓝边框
+\definecolor{PaperFill}{HTML}{FFFFFF}        % 纯白节点填充
+\definecolor{PaperTitle}{HTML}{2C3E50}       % 深蓝灰标题
+\definecolor{PaperMuted}{HTML}{7F8C8D}       % 次要文字：柔和灰
+\definecolor{AccentOrange}{HTML}{D35400}     % 开始/结束强调色
+\definecolor{PaperLayerBg}{HTML}{F5F8FA}     % 决策节点填充
+\definecolor{PaperLayerBorder}{HTML}{D8E3EE} % 图例框边框
+
+% 节点间距（v2 关键：宽松防重叠）
+\def\flowNodeW{3.6cm}       % 节点宽度
+\def\flowNodeH{1.0cm}       % 节点高度
+\def\flowVGap{0.9cm}        % 主流程节点垂直间距
+\def\flowHGap{2.4cm}        % 分支节点水平偏移
+\def\flowLoopBack{0.8cm}    % 分支返回线向内回退距离
+
+% 决策节点尺寸
+\def\flowDecisionW{2.2cm}   % 菱形宽度
+\def\flowDecisionH{1.2cm}   % 菱形高度
+\def\flowDecisionAspect{2.0}% 宽高比（越大越扁平）
+
+% 箭头样式
+\def\flowArrowThickness{1.0pt}
+\def\flowArrowTip{Stealth}
+
+% ------------------------------------------------------------
+% 样式定义（一般不需要修改）
+% ------------------------------------------------------------
+\tikzset{
+  % ===== 开始/结束节点 =====
+  flow-startend/.style = {
+    rectangle,
+    draw = AccentOrange,
+    fill = AccentOrange!12,
+    line width = 1.0pt,
+    rounded corners = 16pt,
+    minimum width = \flowNodeW,
+    minimum height = \flowNodeH,
+    align = center,
+    font = \small\sffamily\bfseries,
+    text = PaperTitle,
+    inner sep = 6pt,
+  },
+  % ===== 过程节点 =====
+  flow-process/.style = {
+    rectangle,
+    draw = PaperBorder,
+    fill = PaperFill,
+    line width = 0.8pt,
+    rounded corners = 5pt,
+    minimum width = \flowNodeW,
+    minimum height = \flowNodeH,
+    align = center,
+    font = \small\sffamily,
+    text = PaperTitle,
+    inner sep = 8pt,
+  },
+  % ===== 决策节点（扁平菱形） =====
+  flow-decision/.style = {
+    diamond,
+    draw = PaperBorder,
+    fill = PaperLayerBg,
+    line width = 0.8pt,
+    aspect = \flowDecisionAspect,
+    minimum width = \flowDecisionW,
+    minimum height = \flowDecisionH,
+    align = center,
+    font = \small\sffamily\bfseries,
+    text = PaperTitle,
+    inner sep = 2pt,
+  },
+  % ===== 输入输出节点（梯形） =====
+  flow-io/.style = {
+    trapezium,
+    trapezium left angle = 70,
+    trapezium right angle = 110,
+    draw = PaperBorder,
+    fill = PaperFill,
+    line width = 0.8pt,
+    minimum width = \flowNodeW,
+    minimum height = \flowNodeH,
+    align = center,
+    font = \small\sffamily,
+    text = PaperTitle,
+    inner sep = 8pt,
+    trapezium stretches = true,
+  },
+  % ===== 主流程箭头 =====
+  flow-arrow/.style = {
+    -\flowArrowTip,
+    draw = PaperBorder,
+    line width = \flowArrowThickness,
+  },
+  % ===== 分支/返回箭头 =====
+  flow-arrow-branch/.style = {
+    -\flowArrowTip,
+    draw = PaperMuted,
+    line width = \flowArrowThickness,
+    dashed,
+  },
+  % ===== 箭头标签（白色光晕防覆盖） =====
+  flow-label/.style = {
+    fill = white,
+    font = \footnotesize\sffamily\bfseries,
+    text = PaperMuted,
+    inner sep = 2pt,
+    outer sep = 0pt,
+  },
+  % ===== 图例框 =====
+  flow-legend/.style = {
+    draw = PaperLayerBorder,
+    fill = PaperFill,
+    line width = 0.6pt,
+    rounded corners = 5pt,
+    inner sep = 8pt,
+    font = \footnotesize\sffamily,
+    text = PaperTitle,
+  },
+}
+
+% ------------------------------------------------------------
+% 模板正文 —— tikzpicture 环境
+% ------------------------------------------------------------
+%
+% 【使用说明】
+%   1. 第一个节点用绝对坐标 at (0,0)
+%   2. 后续节点用 below=\flowVGap of 或 right=\flowHGap of 相对定位
+%   3. 决策分支节点放在决策节点左侧/右侧：left=\flowHGap of decision
+%   4. 分支返回线：从分支节点向下 → 再折回主流程节点
+%   5. 标签用 node[flow-label] 添加，fill=white 自动遮盖下方线条
+%
+% ------------------------------------------------------------
+
+\begin{tikzpicture}[
+    node distance = \flowVGap and \flowHGap,
+    >=Stealth,
+    line width = 0.7pt,
+    every node/.style = {inner sep = 0pt, outer sep = 0pt},
+  ]
+
+  % ==========================================================
+  % 示例：用户登录流程（自上而下）
+  % ==========================================================
+
+  \node[flow-startend] (start) at (0,0) {开始};
+
+  \node[flow-io, below=\flowVGap of start] (input) {输入用户名和密码};
+
+  \node[flow-process, below=\flowVGap of input] (validate) {验证输入格式};
+
+  \node[flow-decision, below=\flowVGap of validate] (check-format) {格式正确？};
+
+  \node[flow-process, left=\flowHGap of check-format] (format-err) {提示格式错误};
+
+  \node[flow-process, below=\flowVGap of check-format] (query-db) {查询用户数据库};
+
+  \node[flow-decision, below=\flowVGap of query-db] (check-user) {用户存在？};
+
+  \node[flow-process, left=\flowHGap of check-user] (user-err) {提示用户不存在};
+
+  \node[flow-process, below=\flowVGap of check-user] (check-pwd) {验证密码};
+
+  \node[flow-decision, below=\flowVGap of check-pwd] (check-pwd2) {密码正确？};
+
+  \node[flow-process, left=\flowHGap of check-pwd2] (pwd-err) {提示密码错误};
+
+  \node[flow-process, below=\flowVGap of check-pwd2] (success) {登录成功};
+
+  \node[flow-startend, below=\flowVGap of success] (end) {结束};
+
+  % ==========================================================
+  % 箭头连接
+  % ==========================================================
+
+  % 主流程
+  \draw[flow-arrow] (start) -- (input);
+  \draw[flow-arrow] (input) -- (validate);
+  \draw[flow-arrow] (validate) -- (check-format);
+  \draw[flow-arrow] (check-format.south) -- (query-db.north)
+    node[flow-label, pos=0.5, anchor=west, xshift=3pt] {是};
+  \draw[flow-arrow] (query-db) -- (check-user);
+  \draw[flow-arrow] (check-user.south) -- (check-pwd.north)
+    node[flow-label, pos=0.5, anchor=west, xshift=3pt] {是};
+  \draw[flow-arrow] (check-pwd) -- (check-pwd2);
+  \draw[flow-arrow] (check-pwd2.south) -- (success.north)
+    node[flow-label, pos=0.5, anchor=west, xshift=3pt] {是};
+  \draw[flow-arrow] (success) -- (end);
+
+  % 错误分支
+  \draw[flow-arrow-branch] (check-format.west) -- (format-err.east)
+    node[flow-label, pos=0.5, anchor=south, yshift=2pt] {否};
+  \draw[flow-arrow-branch] (format-err.south) -- ++(0,-\flowLoopBack) -| ($(input.west)+(-0.5cm,0)$)
+    -- (input.west);
+
+  \draw[flow-arrow-branch] (check-user.west) -- (user-err.east)
+    node[flow-label, pos=0.5, anchor=south, yshift=2pt] {否};
+  \draw[flow-arrow-branch] (user-err.south) -- ++(0,-\flowLoopBack) -| ($(input.west)+(-0.5cm,0)$)
+    -- (input.west);
+
+  \draw[flow-arrow-branch] (check-pwd2.west) -- (pwd-err.east)
+    node[flow-label, pos=0.5, anchor=south, yshift=2pt] {否};
+  \draw[flow-arrow-branch] (pwd-err.south) -- ++(0,-\flowLoopBack) -| ($(check-pwd.west)+(-0.5cm,0)$)
+    -- (check-pwd.west);
+
+  % ==========================================================
+  % 图例（可选，嵌入右下角）
+  % ==========================================================
+  % \node[flow-legend, anchor=north east] at ($(end.south east)+(0.8cm,-0.6cm)$) {
+  %   \begin{tabular}{@{}c@{\hspace{6pt}}l@{\hspace{14pt}}c@{\hspace{6pt}}l@{}}
+  %     \textcolor{PaperBorder}{\rule[1pt]{14pt}{1.2pt}$>$} & {\sffamily\bfseries\small 主流程} &
+  %     \textcolor{PaperMuted}{\rule[1pt]{14pt}{1.2pt}$>$} & {\sffamily\bfseries\small 分支}
+  %   \end{tabular}
+  % };
+
+\end{tikzpicture}
+
+% ============================================================
+% 【常见修改示例】
+% ============================================================
+%
+% 1. 切换为水平方向（自左而右）：
+%    将节点定位从 below=\flowVGap of 改为 right=\flowHGap of
+%    决策分支改为 above=\flowHGap of 或 below=\flowHGap of
+%    连线方向相应调整
+%
+% 2. 添加右侧分支：
+%    \node[flow-process, right=\flowHGap of decision] (branch) {分支处理};
+%    \draw[flow-arrow] (decision.east) -- (branch.west)
+%      node[flow-label, pos=0.5, anchor=south, yshift=2pt] {是};
+%
+% 3. 增大决策节点避免文字换行：
+%    \def\flowDecisionW{2.6cm}
+%    \def\flowDecisionH{1.4cm}
+%    或单独指定：\node[flow-decision, minimum width=3cm] {...};
+%
+% 4. 分支返回线回到更早的节点：
+%    \draw[flow-arrow-branch] (err.south) -- ++(0,-\flowLoopBack)
+%      -| ($(target.west)+(-0.5cm,0)$) -- (target.west);
+%
+% 5. 标签位置微调：
+%    anchor=west, xshift=3pt   （放在箭头右侧）
+%    anchor=east, xshift=-3pt  （放在箭头左侧）
+%    anchor=south, yshift=2pt  （放在箭头上方）
+%    anchor=north, yshift=-2pt （放在箭头下方）
+%
+% ============================================================

@@ -1,0 +1,261 @@
+% ============================================================
+%  示例：知行读书 Agent 编排流水线 (Flowchart v4)
+%  v4 改进：
+%    - 字体缩小（footnotesize 主体）
+%    - 总线汇流法（所有分支汇聚到一条水平线，整齐统一）
+%    - 芯片简化为单行
+%    - 节点宽度收窄
+%
+%  编译命令：xelatex example-zhixing-flowchart.tex
+% ============================================================
+
+\documentclass[tikz,border=14pt]{standalone}
+
+\usepackage{fontspec}
+\usepackage{ctex}
+\usepackage{fontawesome5}
+\usetikzlibrary{positioning, fit, backgrounds, arrows.meta, calc}
+\usetikzlibrary{shapes.geometric}
+
+% ============================================================
+% 字体
+% ============================================================
+\setmainfont{Arial}
+\setsansfont{Arial}
+\setmonofont{Consolas}[Scale=0.85]
+\setCJKsansfont{Microsoft YaHei}
+\setCJKmainfont{Microsoft YaHei}
+
+% ============================================================
+% 配色（蓝色主题）
+% ============================================================
+\definecolor{PaperBorder}{HTML}{B0C4DE}
+\definecolor{PaperFill}{HTML}{FFFFFF}
+\definecolor{PaperTitle}{HTML}{2C3E50}
+\definecolor{PaperMuted}{HTML}{7F8C8D}
+\definecolor{AccentOrange}{HTML}{D35400}
+\definecolor{PaperLayerBg}{HTML}{F5F8FA}
+\definecolor{PaperLayerBorder}{HTML}{D8E3EE}
+\definecolor{BranchChipFill}{HTML}{EFF6FF}
+\definecolor{BranchChipBdr}{HTML}{BFDBFE}
+
+% ============================================================
+% 尺寸常量
+% ============================================================
+\def\NodeW{3.8cm}
+\def\NodeH{0.8cm}
+\def\ChipW{2.4cm}
+\def\ChipH{0.55cm}
+
+\tikzset{
+  % ---- 开始/结束 ----
+  startend/.style = {
+    rectangle,
+    draw = AccentOrange,
+    fill = AccentOrange!8,
+    line width = 0.9pt,
+    rounded corners = 14pt,
+    minimum width = 3.0cm,
+    minimum height = 0.75cm,
+    align = center,
+    font = \footnotesize\sffamily\bfseries,
+    text = PaperTitle,
+    inner sep = 4pt,
+  },
+  % ---- 过程 ----
+  process/.style = {
+    rectangle,
+    draw = PaperBorder,
+    fill = PaperFill,
+    line width = 0.8pt,
+    rounded corners = 4pt,
+    minimum width = \NodeW,
+    minimum height = \NodeH,
+    align = center,
+    font = \footnotesize\sffamily,
+    text = PaperTitle,
+    inner sep = 5pt,
+  },
+  % ---- 决策 ----
+  decision/.style = {
+    diamond,
+    draw = PaperBorder,
+    fill = PaperLayerBg,
+    line width = 0.8pt,
+    aspect = 2.5,
+    minimum width = 1.8cm,
+    minimum height = 0.7cm,
+    align = center,
+    font = \footnotesize\sffamily\bfseries,
+    text = PaperTitle,
+    inner sep = 1pt,
+  },
+  % ---- 分支芯片 ----
+  chip/.style = {
+    rectangle,
+    draw = BranchChipBdr,
+    fill = BranchChipFill,
+    line width = 0.6pt,
+    rounded corners = 3pt,
+    minimum width = \ChipW,
+    minimum height = \ChipH,
+    align = center,
+    font = \tiny\sffamily,
+    text = PaperTitle,
+    inner sep = 3pt,
+  },
+  % ---- 分支组背景框 ----
+  branch-bg/.style = {
+    draw = PaperLayerBorder,
+    fill = PaperLayerBg,
+    line width = 0.5pt,
+    dashed,
+    dash pattern = on 3pt off 2pt,
+    rounded corners = 6pt,
+    inner sep = 8pt,
+  },
+  % ---- 线条样式 ----
+  bus/.style = {
+    PaperBorder, line width = 0.8pt,
+  },
+  bus-merge/.style = {
+    PaperMuted, line width = 0.7pt, dashed, dash pattern = on 3pt off 2pt,
+  },
+  arr/.style = {
+    ->, >=Stealth, bus,
+  },
+  arr-merge/.style = {
+    ->, >=Stealth, bus-merge,
+  },
+}
+
+\begin{document}
+
+\begin{tikzpicture}
+
+  % ==========================================================
+  %  坐标规划（紧凑）
+  %  X: 芯片 4列，中心距 3.0cm
+  %  Y: 主流程每步 1.2cm 间距
+  % ==========================================================
+  \def\CxOne{-4.5}
+  \def\CxTwo{-1.5}
+  \def\CxThr{1.5}
+  \def\CxFou{4.5}
+
+  % ---- 主流程节点 ----
+  \node[startend] (start) at (0, 0) {\faPlay\ 用户输入消息};
+
+  \node[process] (s1) at (0, -1.2)
+    {\faComment\ \textbf{1.~意图分类}\ \ {\tiny\color{PaperMuted}1--5ms}};
+
+  \node[decision] (d1) at (0, -2.6) {意图};
+
+  % ===== 第一组芯片 =====
+  \node[chip] (br1) at (\CxOne, -4.2) {knowledge\_query};
+  \node[chip] (br2) at (\CxTwo, -4.2) {deep\_discussion};
+  \node[chip] (br3) at (\CxThr, -4.2) {teaching\_practice};
+  \node[chip] (br4) at (\CxFou, -4.2) {casual\_chat};
+
+  \node[process] (s3) at (0, -5.8)
+    {\faChartLine\ \textbf{3.~难度调整}\ \ {\tiny\color{PaperMuted}$<$1ms}};
+
+  \node[decision] (d2) at (0, -7.2) {难度};
+
+  % ===== 第二组芯片 =====
+  \node[chip] (act1) at (\CxOne, -8.8) {increase\_bloom};
+  \node[chip] (act2) at (\CxTwo, -8.8) {decrease\_bloom};
+  \node[chip] (act3) at (\CxThr, -8.8) {mark\_mastered};
+  \node[chip] (act4) at (\CxFou, -8.8) {maintain};
+
+  \node[process] (s4) at (0, -10.4)
+    {\faDatabase\ \textbf{4.~上下文构建}};
+
+  \node[process] (s5) at (0, -11.6)
+    {\faCogs\ \textbf{5.~系统提示组装}};
+
+  \node[process] (s6) at (0, -12.8)
+    {\faBolt\ \textbf{6.~流式响应}};
+
+  \node[process, fill=PaperLayerBg, draw=PaperLayerBorder, dashed]
+    (post) at (0, -14.0)
+    {\faCaretDown\ 异步后处理};
+
+  \node[startend] (end) at (0, -15.2) {\faStop\ 返回完整响应};
+
+  % ==========================================================
+  %  分支组背景框
+  % ==========================================================
+  \begin{scope}[on background layer]
+    \node[branch-bg, fit=(br1)(br2)(br3)(br4)] (box1) {};
+    \node[branch-bg, fit=(act1)(act2)(act3)(act4)] (box2) {};
+  \end{scope}
+
+  % ==========================================================
+  %  连接线 — 总线汇流法
+  %  分散：源 → 垂直线 → 水平总线 → 垂直线 → 各芯片
+  %  合并：各芯片 → 垂直线 → 水平总线 → 垂直线 → 目标
+  % ==========================================================
+
+  % --- 主流程 ---
+  \draw[arr] (start) -- (s1);
+  \draw[arr] (s1) -- (d1);
+
+  % --- 决策1 → 总线分散 → 4芯片 ---
+  \def\BusA{-3.5}  % 分散总线 Y
+  \draw[bus] (d1.south) -- (0, \BusA);           % 垂直引线
+  \draw[bus] (\CxOne, \BusA) -- (\CxFou, \BusA);  % 水平总线
+  \draw[arr] (\CxOne, \BusA) -- (br1.north);      % 4条垂直分支线
+  \draw[arr] (\CxTwo, \BusA) -- (br2.north);
+  \draw[arr] (\CxThr, \BusA) -- (br3.north);
+  \draw[arr] (\CxFou, \BusA) -- (br4.north);
+
+  % --- 4芯片 → 总线合并 → s3 ---
+  \def\BusB{-5.0}  % 合并总线 Y
+  \draw[bus-merge] (br1.south) -- (\CxOne, \BusB);
+  \draw[bus-merge] (br2.south) -- (\CxTwo, \BusB);
+  \draw[bus-merge] (br3.south) -- (\CxThr, \BusB);
+  \draw[bus-merge] (br4.south) -- (\CxFou, \BusB);
+  \draw[bus-merge] (\CxOne, \BusB) -- (\CxFou, \BusB);  % 水平合并总线
+  \draw[arr-merge] (0, \BusB) -- (s3.north);             % 统一出线
+
+  \draw[arr] (s3) -- (d2);
+
+  % --- 决策2 → 总线分散 → 4芯片 ---
+  \def\BusC{-8.1}
+  \draw[bus] (d2.south) -- (0, \BusC);
+  \draw[bus] (\CxOne, \BusC) -- (\CxFou, \BusC);
+  \draw[arr] (\CxOne, \BusC) -- (act1.north);
+  \draw[arr] (\CxTwo, \BusC) -- (act2.north);
+  \draw[arr] (\CxThr, \BusC) -- (act3.north);
+  \draw[arr] (\CxFou, \BusC) -- (act4.north);
+
+  % --- 4芯片 → 总线合并 → s4 ---
+  \def\BusD{-9.6}
+  \draw[bus-merge] (act1.south) -- (\CxOne, \BusD);
+  \draw[bus-merge] (act2.south) -- (\CxTwo, \BusD);
+  \draw[bus-merge] (act3.south) -- (\CxThr, \BusD);
+  \draw[bus-merge] (act4.south) -- (\CxFou, \BusD);
+  \draw[bus-merge] (\CxOne, \BusD) -- (\CxFou, \BusD);
+  \draw[arr-merge] (0, \BusD) -- (s4.north);
+
+  % --- 后续主流程 ---
+  \draw[arr] (s4) -- (s5);
+  \draw[arr] (s5) -- (s6);
+  \draw[arr] (s6) -- (post);
+  \draw[arr] (post) -- (end);
+
+  % ==========================================================
+  %  图例（右下角，简洁）
+  % ==========================================================
+  \node[font=\tiny\sffamily, text=PaperTitle, anchor=west]
+    at ($(end.south east)+(0.5cm,-0.6cm)$) {
+    \begin{tabular}{@{}r@{\ }l@{\quad}r@{\ }l@{}}
+      {\color{PaperBorder}\rule[1pt]{10pt}{0.8pt}$>$} & 主流程
+    & {\color{PaperMuted}\rule[1pt]{2pt}{0.8pt}\,{-}\,\rule[1pt]{2pt}{0.8pt}\,{-}\,\rule[1pt]{2pt}{0.8pt}$>$} & 分支合并
+    \end{tabular}
+  };
+
+\end{tikzpicture}
+
+\end{document}

@@ -1,0 +1,335 @@
+% ============================================================
+% harryopo-base.sty — harryopo LaTeX 通用模板共享基础包 (v4.2)
+% 提供字体、颜色、数学、代码高亮、超链接等公共配置
+% 风格：简洁、规范、专业，仅蓝色/黑色色系
+%
+% v4.2 修复清单：
+%   1. 移除 \RequirePackage{ctex}（cls 已通过 ctexart/ctexrep 加载，重复加载致死）
+%   2. CJK 字体族统一用 hrp- 前缀，避免与 ctex 默认 fandol 集冲突
+%   3. unicode-math 改为可选加载（\harryopo@nomath 标记），支持无数学文档
+%   4. XITSMath 字体需配套 XITSMath.otf（无 -Regular 后缀）供 SizeFeatures 使用
+%   5. BoldFont/ItalicFont 显式命名（不可用 * 通配符，黑体/楷体是独立文件）
+% ============================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{harryopo-base}[2026/06/22 v4.2 harryopo LaTeX Base Package]
+
+% ============================================================
+% 第一部分：主题选择
+% ============================================================
+\ifdefined\harryopo@theme\else
+    \def\harryopo@theme{blue}
+\fi
+
+% 数学模式开关：cls 或用户可设 \harryopo@nomath 禁用 unicode-math
+\ifdefined\harryopo@nomath\else
+    \def\harryopo@nomath{0}
+\fi
+
+% ============================================================
+% 第二部分：依赖包加载
+% ============================================================
+
+% --- 基础排版 ---
+\RequirePackage{graphicx}
+\RequirePackage{setspace}
+\RequirePackage{indentfirst}
+\RequirePackage{enumitem}
+
+% 全局段首缩进 2 字符（中文排版规范）
+\setlength{\parindent}{2em}
+
+% --- 页面布局 ---
+\RequirePackage[a4paper]{geometry}
+
+% --- 字体（fontspec 由 ctex 已加载，这里仅确保存在） ---
+\RequirePackage{fontspec}
+
+% --- 数学 ---
+% 注意：不在此处加载 ctex！cls 已通过 ctexart/ctexrep 加载
+% 关键修复：\ifx 不展开宏，\harryopo@nomath 是控制序列而 0 是字符，永远不等。
+% 必须用 \expandafter 先展开 \harryopo@nomath 得到其内容（"0" 或 "1"），再 \ifx 比较。
+\expandafter\ifx\harryopo@nomath0%
+    \RequirePackage{unicode-math}
+\else
+    \RequirePackage{amsmath}
+    \RequirePackage{amssymb}
+\fi
+
+% --- 颜色 ---
+\RequirePackage[svgnames,dvipsnames]{xcolor}
+\RequirePackage{amsthm}
+
+% --- 表格 ---
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{array}
+\RequirePackage{multirow}
+\RequirePackage{longtable}
+
+% --- 浮动体 ---
+\RequirePackage{caption}
+\RequirePackage{subcaption}
+\RequirePackage{float}
+
+% --- 章节标题 ---
+\RequirePackage{titlesec}
+
+% --- 页眉页脚 ---
+\RequirePackage{fancyhdr}
+
+% --- 超链接 ---
+\RequirePackage[colorlinks,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\RequirePackage{cleveref}
+
+% --- 绘图 ---
+\RequirePackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,shapes.geometric}
+
+% --- 工具 ---
+\RequirePackage{ifthen}
+\RequirePackage{calc}
+
+% --- 代码高亮 ---
+\RequirePackage{listings}
+
+% ============================================================
+% 第三部分：颜色定义（仅蓝/黑色系）
+% ============================================================
+
+\def\harryopo@settheme@blue{%
+    \definecolor{MainColor}{HTML}{1A365D}
+    \definecolor{SubColor}{HTML}{2B6CB0}
+    \definecolor{SmallColor}{HTML}{4299E1}
+    \definecolor{TinyColor}{HTML}{EBF8FF}
+    \definecolor{DarkColor}{HTML}{1A202C}
+    \definecolor{AccentColor}{HTML}{C53030}
+}
+\def\harryopo@settheme@dark{%
+    \definecolor{MainColor}{HTML}{322659}
+    \definecolor{SubColor}{HTML}{553C9A}
+    \definecolor{SmallColor}{HTML}{805AD5}
+    \definecolor{TinyColor}{HTML}{FAF5FF}
+    \definecolor{DarkColor}{HTML}{1A202C}
+    \definecolor{AccentColor}{HTML}{C53030}
+}
+\csname harryopo@settheme@\harryopo@theme\endcsname
+
+% ============================================================
+% 第四部分：字体配置
+% ============================================================
+
+% --- 字体路径 ---
+% 默认 ../fonts/ 相对于 cls/sty 文件位置
+% 若从其他目录编译，可在 \documentclass 之前重新定义：
+%   \def\harryopofontpath{你的字体路径}
+\providecommand{\harryopofontpath}{../fonts/}
+
+% --- 英文主字体 — XITS（Times 风格） ---
+\setmainfont{XITS}[
+    Extension = .otf,
+    UprightFont = *-Regular,
+    BoldFont = *-Bold,
+    ItalicFont = *-Italic,
+    BoldItalicFont = *-BoldItalic,
+    Path = \harryopofontpath
+]
+
+% --- 数学字体（可选） ---
+% 同上的 \ifx 展开修复
+\expandafter\ifx\harryopo@nomath0%
+    \setmathfont{XITSMath}[
+        Extension = .otf,
+        UprightFont = *-Regular,
+        BoldFont = *-Bold,
+        Path = \harryopofontpath
+    ]
+\fi
+
+% --- 无衬线/等宽 ---
+\setsansfont{texgyreheros}[
+    Extension = .otf,
+    UprightFont = *-regular,
+    BoldFont = *-bold,
+    ItalicFont = *-italic,
+    BoldItalicFont = *-bolditalic,
+    Path = \harryopofontpath
+]
+\setmonofont{lmmono10-regular}[
+    Extension = .otf,
+    Path = \harryopofontpath
+]
+
+% --- 中文字体 — 方正系列 ---
+% 关键：使用 hrp- 前缀避免与 ctex 默认 fandol 字体族冲突
+%       ctex 默认定义了 zhkai/zhfs/zhhei/zhyahei 等，此处覆盖为方正系列
+% 关键：fontspec 语法必须是 \setCJKmainfont{字体名}[options]（name 在前），
+%       之前写成 [options]{name} 导致 fontspec 把整个 options 串当作字体名
+%       → 触发 "Extension=, Path=../fonts/ cannot be found" → 回退到 ctex 默认
+\xeCJKsetup{AutoFallBack=true}
+\setCJKmainfont{FZSSJW}[
+    Extension = .TTF,
+    BoldFont = FZHTJW,
+    ItalicFont = FZKTJW,
+    Path = \harryopofontpath
+]
+\setCJKsansfont{FZHTJW}[
+    Extension = .TTF,
+    Path = \harryopofontpath
+]
+
+% 用 ctex 提供的接口覆盖默认 CJK 字体族（而非直接 \setCJKfamilyfont 重复定义）
+% 这样避免 "already defined" 冲突
+% 同样：字体名放到 [] 前面
+% BoldFont/ItalicFont 指向自身避免 "Font shape ... undefined" 警告
+\newfontfamily\harryopo@fzkt{FZKTJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZKTJW, ItalicFont=FZKTJW]
+\newfontfamily\harryopo@fzfs{FZFSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZFSJW, ItalicFont=FZFSJW]
+\newfontfamily\harryopo@fzdbs{FZDBSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZDBSJW, ItalicFont=FZDBSJW]
+\newfontfamily\harryopo@fzxb{FZXBSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZXBSJW, ItalicFont=FZXBSJW]
+\newfontfamily\harryopo@fzht{FZHTJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZHTJW, ItalicFont=FZHTJW]
+
+% 用 \newCJKfontfamily 创建独立族（hrp- 前缀，不与 ctex 默认冲突）
+% 同样：字体名放到 [] 前面
+\newCJKfontfamily\hrypkai{FZKTJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZKTJW, ItalicFont=FZKTJW]
+\newCJKfontfamily\hrypfs{FZFSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZFSJW, ItalicFont=FZFSJW]
+\newCJKfontfamily\hrypdbs{FZDBSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZDBSJW, ItalicFont=FZDBSJW]
+\newCJKfontfamily\hrypxb{FZXBSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZXBSJW, ItalicFont=FZXBSJW]
+\newCJKfontfamily\hrypht{FZHTJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZHTJW, ItalicFont=FZHTJW]
+
+% 快捷命令
+\newcommand{\fzkt}{\hrypkai}       % 楷体
+\newcommand{\fzfs}{\hrypfs}         % 仿宋
+\newcommand{\fzdbs}{\hrypdbs}       % 大标宋
+\newcommand{\fzxb}{\hrypxb}         % 小标宋
+\newcommand{\fzht}{\hrypht}         % 黑体
+
+% ============================================================
+% 第五部分：数学与定理环境
+% ============================================================
+
+\theoremstyle{definition}
+\newtheorem{definition}{定义}[section]
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}{引理}[section]
+\newtheorem{proposition}{命题}[section]
+\newtheorem{corollary}{推论}[section]
+\newtheorem{example}{例}[section]
+\newtheorem*{remark}{注}
+\numberwithin{equation}{section}
+
+% ============================================================
+% 第六部分：代码高亮配置
+% ============================================================
+
+\lstdefinestyle{pystyle}{
+    language=Python,
+    backgroundcolor=\color{gray!5},
+    commentstyle=\color{green!50!black},
+    keywordstyle=\color{blue!60!black}\bfseries,
+    numberstyle=\tiny\ttfamily\color{gray},
+    stringstyle=\color{orange!80!black},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=8pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    framesep=4pt,
+    framerule=0.5pt,
+    rulecolor=\color{gray!30},
+    xleftmargin=2em,
+    xrightmargin=0pt,
+    framexleftmargin=2em,
+    aboveskip=8pt,
+    belowskip=8pt,
+}
+\lstdefinestyle{bashstyle}{
+    language=bash,
+    backgroundcolor=\color{gray!5},
+    commentstyle=\color{green!50!black},
+    keywordstyle=\color{blue!60!black}\bfseries,
+    numberstyle=\tiny\ttfamily\color{gray},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    numbers=left,
+    numbersep=8pt,
+    frame=single,
+    framesep=4pt,
+    framerule=0.5pt,
+    rulecolor=\color{gray!30},
+    xleftmargin=2em,
+    aboveskip=8pt,
+    belowskip=8pt,
+    captionpos=b,
+}
+\lstdefinestyle{plainstyle}{
+    backgroundcolor=\color{gray!5},
+    numberstyle=\tiny\ttfamily\color{gray},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    numbers=left,
+    numbersep=8pt,
+    frame=single,
+    framesep=4pt,
+    framerule=0.5pt,
+    rulecolor=\color{gray!30},
+    xleftmargin=2em,
+    aboveskip=8pt,
+    belowskip=8pt,
+    captionpos=b,
+}
+\newcommand{\inlinecode}[1]{%
+    \texttt{\color{MainColor!80!black}#1}%
+}
+
+% ============================================================
+% 第七部分：图表配置
+% ============================================================
+
+\captionsetup{
+    font=small,
+    labelfont=bf,
+    margin=10pt,
+    format=hang
+}
+
+% ============================================================
+% 第八部分：杂项
+% ============================================================
+
+\setstretch{1.25}
+\tolerance=1000
+\emergencystretch=3em
+
+% ============================================================
+% 第九部分：统一页眉页脚配置
+% ============================================================
+
+% 统一的页眉配置命令（供各文档类调用）
+% 参数 #1: 章节标记命令名称（sectionmark / chaptermark）
+% 注意：若需自定义章节标记格式（如 chaptermark 显示"第X章"），
+%       应在调用本命令之后再 \renewcommand{\chaptermark}[1]{...}，
+%       否则本命令内部的 \renewcommand 会覆盖先前的定义。
+\newcommand{\harryopo@setup@header}[1]{%
+    \fancypagestyle{fancy}{%
+        \fancyhf{}%
+        \fancyhead[L]{\small\fzkt\@date\quad\ifx\leftmark\@empty\else\textperiodcentered\quad\leftmark\fi}%
+        \fancyhead[R]{\small\thepage}%
+        \renewcommand{\headrulewidth}{0pt}%
+    }%
+    \fancypagestyle{plain}{%
+        \fancyhf{}%
+        \fancyhead[L]{\small\fzkt\@date}%
+        \fancyhead[R]{\small\thepage}%
+        \renewcommand{\headrulewidth}{0pt}%
+    }%
+    \expandafter\renewcommand\csname #1\endcsname[1]{\markboth{##1}{}}%
+    \pagestyle{fancy}%
+}
+
+\endinput

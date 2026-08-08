@@ -1,0 +1,252 @@
+% ============================================================
+% harryopo-tikz-diagram - 组织架构图模板 (Organization Tree)
+% ============================================================
+%
+% 【用途】
+%   绘制树形组织架构图，支持 2-3 层级，每个节点包含职位和姓名。
+%   使用 TikZ 的 trees 库，连接线为直角分叉。
+%
+% 【使用方法】
+%   将本文件内容复制到你的 LaTeX 文档中，或使用 \input 命令引入。
+%   修改下方"可调整参数"部分来自定义你的组织架构图。
+%
+% 【编译要求】
+%   XeLaTeX 编译器，需加载 ctex 宏包以支持中文。
+%
+% ============================================================
+
+% ------------------------------------------------------------
+% 必要的宏包（如果文档中已加载可省略）
+% ------------------------------------------------------------
+% \usepackage{tikz}
+% \usetikzlibrary{positioning, fit, backgrounds, arrows.meta}
+% \usetikzlibrary{trees}
+
+% ------------------------------------------------------------
+% 可调整参数 —— 在这里修改你的组织架构图配置
+% ------------------------------------------------------------
+
+% 主题色定义（Nature 风格）
+\definecolor{PaperBorder}{HTML}{B0C4DE}      % 柔和灰蓝边框
+\definecolor{PaperFill}{HTML}{FFFFFF}        % 纯白节点填充
+\definecolor{PaperTitle}{HTML}{2C3E50}       % 深蓝灰标题
+\definecolor{PaperLayerBg}{HTML}{F5F8FA}     % 极淡蓝灰背景
+\definecolor{PaperLayerBorder}{HTML}{D8E3EE} % 层边框：更浅的灰蓝
+\definecolor{PaperMuted}{HTML}{5D6D7E}       % 次要文字：灰蓝
+\definecolor{AccentOrange}{HTML}{D35400}     % 强调色：柔和橙
+\definecolor{ShadowColor}{HTML}{E0E8F0}      % 阴影色：极淡蓝灰
+
+% 树的方向
+%   down  = 自上而下（默认，根在顶部）
+%   up    = 自下而上（根在底部）
+%   right = 从左到右（根在左侧）
+%   left  = 从右到左（根在右侧）
+\def\orgTreeGrow{down}
+
+% 层级间距
+\def\orgLevelOneSep{60pt}     % 第一层到第二层的距离
+\def\orgLevelTwoSep{50pt}     % 第二层到第三层的距离
+\def\orgSiblingOneSep{20pt}   % 第一层子节点间距
+\def\orgSiblingTwoSep{15pt}   % 第二层子节点间距
+
+% 节点尺寸
+\def\orgNodeWidth{90pt}       % 节点宽度（text width）
+\def\orgNodeHeight{50pt}      % 节点最小高度
+\def\orgRootWidth{120pt}      % 根节点宽度
+
+% 连接线样式
+\def\orgLineThickness{1.2pt}  % 连接线粗细
+\def\orgLineColor{PaperBorder}  % 连接线颜色
+
+% ------------------------------------------------------------
+% 样式定义（一般不需要修改）
+% ------------------------------------------------------------
+\tikzset{
+  % ===== 根节点样式（Nature 风格） =====
+  org-root/.style = {
+    draw = PaperBorder,
+    fill = PaperTitle,
+    text = PaperFill,
+    line width = 0.8pt,
+    rounded corners = 6pt,
+    text width = \orgRootWidth,
+    minimum height = \orgNodeHeight,
+    align = center,
+    font = \small\bfseries\sffamily,
+    inner sep = 6pt,
+  },
+  % ===== 二级节点样式 =====
+  org-level2/.style = {
+    draw = PaperBorder,
+    fill = PaperFill,
+    line width = 0.8pt,
+    rounded corners = 4pt,
+    text width = \orgNodeWidth,
+    minimum height = \orgNodeHeight,
+    align = center,
+    font = \small\sffamily,
+    text = PaperTitle,
+    inner sep = 5pt,
+  },
+  % ===== 三级节点样式 =====
+  org-level3/.style = {
+    draw = PaperLayerBorder,
+    fill = PaperFill,
+    line width = 0.6pt,
+    rounded corners = 3pt,
+    text width = \orgNodeWidth,
+    minimum height = \orgNodeHeight,
+    align = center,
+    font = \footnotesize\sffamily,
+    text = PaperTitle,
+    inner sep = 4pt,
+  },
+  % ===== 部门组背景框 =====
+  org-groupbox/.style = {
+    draw = PaperLayerBorder,
+    fill = PaperLayerBg,
+    dashed,
+    line width = 0.6pt,
+    rounded corners = 6pt,
+    inner sep = 10pt,
+  },
+  % ===== 连接线 =====
+  org-edge/.style = {
+    draw = PaperBorder,
+    line width = \orgLineThickness,
+  },
+}
+
+% ------------------------------------------------------------
+% 模板正文 —— tikzpicture 环境
+% ------------------------------------------------------------
+%
+% 【使用说明】
+%   1. 使用 TikZ 的 tree 语法：child { node { ... } child { ... } }
+%   2. 根节点放在 (0,0) 位置
+%   3. 节点内容用 \textbf{职位} \\ 姓名 格式
+%   4. 使用 edge from parent fork down 实现直角分叉
+%
+% 【节点内容格式】
+%   每个节点包含两行：
+%   第一行：职位（加粗）
+%   第二行：姓名（常规）
+%
+% ------------------------------------------------------------
+
+\begin{tikzpicture}[
+    % 树的全局设置
+    grow = \orgTreeGrow,
+    edge from parent fork down,
+    % 第一层子节点
+    level 1/.style = {
+      sibling distance = \orgSiblingOneSep,
+      level distance = \orgLevelOneSep,
+      edge from parent/.style = {org-edge},
+      nodes = {org-level2},
+    },
+    % 第二层子节点
+    level 2/.style = {
+      sibling distance = \orgSiblingTwoSep,
+      level distance = \orgLevelTwoSep,
+      edge from parent/.style = {org-edge},
+      nodes = {org-level3},
+    },
+    % 所有节点的默认设置
+    every node/.style = {inner sep = 0pt, outer sep = 0pt},
+  ]
+
+  % ==========================================================
+  % 示例：软件公司团队组织结构
+  % ==========================================================
+
+  % 根节点：总经理（第一个节点用绝对坐标 at (0,0)）
+  \node[org-root] at (0,0) {
+    \textbf{总经理} \\
+    张总
+  }
+  % ===== 一级部门：技术部 =====
+  child {
+    node {
+      \textbf{技术总监} \\
+      李工
+    }
+    child { node {\textbf{前端组} \\ 王小明} }
+    child { node {\textbf{后端组} \\ 陈大华} }
+    child { node {\textbf{测试组} \\ 刘芳} }
+    child { node {\textbf{运维组} \\ 赵强} }
+  }
+  % ===== 一级部门：产品部 =====
+  child {
+    node {
+      \textbf{产品总监} \\
+      孙敏
+    }
+    child { node {\textbf{产品设计} \\ 周杰} }
+    child { node {\textbf{UI 设计} \\ 吴丽} }
+  }
+  % ===== 一级部门：运营部 =====
+  child {
+    node {
+      \textbf{运营总监} \\
+      郑华
+    }
+    child { node {\textbf{市场运营} \\ 钱伟} }
+    child { node {\textbf{用户运营} \\ 冯静} }
+  }
+  % ===== 一级部门：行政部 =====
+  child {
+    node {
+      \textbf{行政总监} \\
+      马琳
+    }
+    child { node {\textbf{人事行政} \\ 朱琳} }
+    child { node {\textbf{财务} \\ 徐峰} }
+  };
+
+  % ==========================================================
+  % 可选：部门分组背景框（使用 fit 库）
+  % ==========================================================
+  % 如需给某个部门加背景框，取消下方注释并修改节点名
+  %
+  % \begin{scope}[on background layer]
+  %   \node[org-groupbox, fit=(tech-node1)(tech-node2)(tech-node3)] (tech-group) {};
+  %   \node[below right=6pt of tech-group.north west, font=\small\bfseries, text=SubColor]
+  %     {技术中心};
+  % \end{scope}
+
+\end{tikzpicture}
+
+% ============================================================
+% 【常见修改示例】
+% ============================================================
+%
+% 1. 增加/减少层级：
+%    在 child 中再嵌套 child 即可增加层级。
+%    最多建议 3 层，再多会导致排版拥挤。
+%
+% 2. 调整子节点数量：
+%    增加或删除 child { node { ... } } 块。
+%    同步调整 sibling distance 以适应节点数量。
+%
+% 3. 修改树的生长方向：
+%    将 \def\orgTreeGrow 改为 down / up / left / right
+%
+% 4. 自定义节点内容：
+%    节点内可以是任意内容，不一定非要是 职位+姓名。
+%    例如：node {部门名称} 或 node {团队代号}
+%
+% 5. 调整节点大小：
+%    修改 \orgNodeWidth, \orgNodeHeight, \orgRootWidth
+%    或在节点上单独指定：
+%    node[org-level2, text width=100pt] { ... }
+%
+% 6. 添加部门标题：
+%    使用 fit 库在背景层添加分组框和标题，见模板中的示例。
+%
+% 7. 改变连接方式：
+%    - 直角分叉：edge from parent fork down（默认）
+%    - 直线连接：移除 fork 样式，使用默认直线
+%    - 曲线连接：edge from parent/.style={bend left}
+%
+% ============================================================

@@ -1,0 +1,37 @@
+% config.tex — 中文版配置与本土化字符串
+
+% ── CJK 默认字体 ──
+\setCJKmainfont[Path=C:/Windows/Fonts/, Extension=.ttf]{方正书宋_GBK}
+\setCJKsansfont[Path=C:/Windows/Fonts/, Extension=.ttf]{FZHei-B01}
+\setCJKmonofont[Path=C:/Windows/Fonts/, Extension=.ttf]{FZHei-B01}
+
+% ── 中文本土化字符串 ──
+\renewcommand{\contentsname}{目\quad 录}
+\renewcommand{\listfigurename}{图\quad 录}
+\renewcommand{\listtablename}{表\quad 录}
+\renewcommand{\lstlistlistingname}{代码\quad 录}
+\renewcommand{\indexname}{索\quad 引}
+\renewcommand{\bibname}{主要参考文献}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\renewcommand{\partname}{第}
+\renewcommand{\chaptername}{}
+\renewcommand{\appendixname}{附\quad 录}
+\renewcommand{\abstractname}{摘\quad 要}
+
+% ── 禁用连字符 ──
+\defaultfontfeatures{Ligatures={NoCommon, NoContextual, NoHistoric, NoDiscretionary}}
+\righthyphenmin=62
+\lefthyphenmin=62
+\emergencystretch=1em
+\tolerance=400
+
+% ── 页眉页脚设置 ──
+\clearscrheadfoot
+\automark[section]{chapter}
+\addtokomafont{pagehead}{\small\fzhei}
+\addtokomafont{pagenumber}{\small\fzhei}
+
+% twoside=false 时页眉显示
+\lehead{\leftmark}
+\rohead{\leftmark}

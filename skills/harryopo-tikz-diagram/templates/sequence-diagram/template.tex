@@ -1,0 +1,456 @@
+% ============================================================
+% harryopo-tikz-diagram - 时序图模板 v5.1 (UML Sequence Diagram · 三阶段紧凑布局)
+% ============================================================
+%
+% 【用途】
+%   绘制标准 UML 时序图（序列图），展示对象之间按时间顺序的消息交互。
+%   适用于 API 调用流程、部署流程、业务流程、系统交互等场景。
+%
+% 【v5.1 紧凑版改进】
+%   - 间距常量全面优化，内容密度提升约40%，同等内容高度减少约35%
+%   - 标题内嵌tikzpicture底部，消除LaTeX排版额外间距，精确控制bbox
+%   - 五边形折角标签尺寸精确校准，文字不溢出
+%   - 图例术语表更紧凑，inner sep/字号/行间距优化
+%   - 激活条高度与间距联动，避免空隙过大
+%
+% 【v5 三阶段智能布局（彻底解决文字遮盖）】
+%   Pass 1 (Dry Run):   仅推进Y游标、标记片段边界coordinate，不绘制任何可见元素
+%   Pass 2 (Geometry):  重置Y，绘制所有几何元素（生命线/激活条/箭头/片段框/分隔线），NO TEXT
+%   Pass 3 (Labels):    重置Y，只绘制文字标签（fill=white光晕在最顶层，遮盖一切）
+%   Final Layer:        参与者头部、片段名文字、条件标签、图例术语表、标题（最最顶层）
+%
+%   核心原理：同一消息序列在3个Pass中重复调用，通过\ifgeom/\iflbl开关
+%            决定每次绘制什么内容。标签最后绘制→白色光晕100%遮盖下方线条。
+%
+% 【UML 标准元素支持】
+%   - 激活条(Activation)、组合片段(alt/loop/opt/par)
+%   - 标题嵌入图底部居中，中英文分两行
+%   - 组合片段使用虚线圆角框+左上角折角五边形标签
+%   - 激活条显示在消息接收者生命线上（第一个参与者/User不画激活条）
+%   - alt 多分支用虚线水平分隔，各分支条件文本在Final Layer定位
+%   - 自关联 U 型箭头+下方标签
+%   - 左侧阶段分组标签，右下角图例+术语表（不嵌套tikzpicture）
+%
+% 【编译要求】
+%   XeLaTeX 编译器，需加载 fontspec + ctex 宏包配置字体。
+%   需要 TikZ 库：arrows.meta, backgrounds, fit, calc, positioning
+%
+% 【使用方法】
+%   将本文件内容复制到你的 LaTeX 文档中，或使用 \input 命令引入。
+%   颜色定义、\tikzset样式、宏定义在导言区或document开头定义一次即可，
+%   多个时序图共用。每个时序图需要自己的 Pass1/2/3 代码块。
+%
+% ============================================================
+
+% ------------------------------------------------------------
+% 必要的宏包（如果文档中已加载可省略）
+% ------------------------------------------------------------
+% \usepackage{tikz}
+% \usetikzlibrary{arrows.meta, backgrounds, fit, calc, positioning}
+% \usepackage{fontspec}
+%
+% 字体配置（在导言区设置一次即可）：
+%   \setmainfont{Arial}[Ligatures=TeX]
+%   \setsansfont{Arial}[Ligatures=TeX]
+%   \setmonofont{Consolas}[Scale=0.90]
+%   \setCJKsansfont{Microsoft YaHei}
+%   \setCJKmainfont{Microsoft YaHei}
+
+% ------------------------------------------------------------
+% 颜色定义（Nature 风格低饱和蓝灰，统一所有模板，定义一次）
+% ------------------------------------------------------------
+\definecolor{PaperBorder}{HTML}{B0C4DE}
+\definecolor{PaperFill}{HTML}{FFFFFF}
+\definecolor{PaperBg}{HTML}{F8FAFC}
+\definecolor{PaperTitle}{HTML}{2C3E50}
+\definecolor{PaperMuted}{HTML}{7F8C8D}
+\definecolor{AccentOrange}{HTML}{D35400}
+\definecolor{LifeLine}{HTML}{D5DBDB}
+\definecolor{ArrowSync}{HTML}{2C3E50}
+\definecolor{ArrowReturn}{HTML}{95A5A6}
+\definecolor{PhaseLine}{HTML}{E8ECEF}
+\definecolor{ActColor}{HTML}{D5DDE5}
+
+% 代码术语样式（等宽字体+橙色，定义一次）
+\newcommand{\code}[1]{{\ttfamily\color{AccentOrange}#1}}
+
+% ------------------------------------------------------------
+% TikZ 样式定义（紧凑版 v5.1，定义一次）
+% ------------------------------------------------------------
+\tikzset{
+  >=Stealth,
+  seq-actor/.style = {
+    rectangle, draw=PaperBorder, fill=PaperFill, text=PaperTitle,
+    line width=0.9pt, minimum width=2.1cm, minimum height=0.70cm,
+    font=\small\sffamily\bfseries, align=center,
+    rounded corners=5pt, inner sep=2pt,
+  },
+  seq-lifeline/.style = {draw=LifeLine, line width=0.6pt, dashed, dash pattern=on 4pt off 3pt},
+  seq-act/.style = {rectangle, fill=ActColor, draw=none, inner sep=0pt, minimum width=5pt, rounded corners=1pt},
+  seq-fragbox-fill/.style = {fill=PaperBg, draw=none, rounded corners=5pt, inner sep=6pt},
+  seq-msg-line/.style = {-{Stealth[length=6pt, width=5pt]}, draw=ArrowSync, line width=0.9pt},
+  seq-ret-line/.style = {-{Stealth[length=5pt, width=4pt, open]}, draw=ArrowReturn, line width=0.7pt, dashed, dash pattern=on 4pt off 3pt},
+  seq-self-line/.style = {draw=ArrowSync, line width=0.8pt, rounded corners=3pt},
+  seq-pline/.style = {draw=PhaseLine, line width=0.7pt},
+  seq-fragbox-border/.style = {draw=PaperBorder, fill=none, dashed, line width=0.7pt, rounded corners=5pt, inner sep=6pt},
+  seq-lbl/.style = {font=\footnotesize\sffamily, text=PaperTitle, fill=white, inner sep=2pt, outer sep=0pt},
+  seq-rlbl/.style = {font=\footnotesize\sffamily, text=PaperMuted, fill=white, inner sep=2pt, outer sep=0pt},
+  seq-slbl/.style = {font=\footnotesize\sffamily, text=PaperTitle, fill=white, inner sep=2pt, outer sep=0pt, align=center},
+  seq-phase-lbl/.style = {font=\footnotesize\sffamily\bfseries, text=PaperMuted, anchor=east,
+                        fill=white, inner sep=2pt, outer sep=0pt},
+  seq-cond/.style = {font=\scriptsize\sffamily\itshape, text=PaperMuted, anchor=west,
+                     fill=white, inner sep=2pt, outer sep=0pt},
+  seq-fragname/.style = {font=\footnotesize\sffamily\bfseries, text=PaperTitle, fill=PaperBg, inner sep=2pt},
+}
+
+% ------------------------------------------------------------
+% 三阶段绘制基础设施（每个文档定义一次，多图共用）
+% ------------------------------------------------------------
+% 绘制开关
+\newif\ifgeom
+\newif\iflbl
+
+% Y坐标游标
+\newdimen\y
+
+% 推进Y游标
+\newcommand{\seqadv}[1]{\advance\y by -#1 cm}
+
+% 标记片段边界点
+\newcommand{\seqmarkpt}[2]{\coordinate (#1) at (#2);}
+
+% 阶段线+标签
+\newcommand{\seqphase}[1]{
+  \ifgeom
+    \draw[seq-pline] (\seqLeftEdge-0.1,\y) -- (\seqRightEdge+0.1,\y);
+  \fi
+  \iflbl
+    \node[seq-phase-lbl] at (\seqLeftEdge+0.1,\y) {#1};
+  \fi
+  \seqadv{\seqGapPhase}
+}
+
+% 同步消息（几何层画箭头+激活条，标签层画文字）
+% #1=from X, #2=to X, #3=标签文字
+\newcommand{\seqmsg}[3]{
+  \ifgeom
+    % 第一个参与者（最左侧，通常是User/外部Actor）不画激活条
+    \pgfmathsetmacro\tmpTo{#2}
+    \pgfmathsetmacro\firstX{\seqFirstActor}
+    \pgfmathparse{abs(\tmpTo-\firstX)<0.01}
+    \ifnum\pgfmathresult=0
+      \node[seq-act, anchor=north, minimum height=0.58cm] at (#2,\y) {};
+    \fi
+    \draw[seq-msg-line] (#1,\y) -- (#2,\y);
+  \fi
+  \iflbl
+    \node[seq-lbl, anchor=south] at ($(#1,\y)!0.5!(#2,\y)+(0,2pt)$) {#3};
+  \fi
+  \seqadv{\seqGapMsg}
+}
+
+% 返回消息（几何层画虚线箭头，标签层画文字；不画激活条）
+\newcommand{\seqret}[3]{
+  \ifgeom
+    \draw[seq-ret-line] (#1,\y) -- (#2,\y);
+  \fi
+  \iflbl
+    \node[seq-rlbl, anchor=north] at ($(#1,\y)!0.5!(#2,\y)+(0,-2pt)$) {#3};
+  \fi
+  \seqadv{\seqGapRet}
+}
+
+% 自关联（U型箭头+下方标签）
+\newcommand{\seqself}[2]{
+  \ifgeom
+    \draw[seq-self-line] (#1,\y) -- (#1+0.55,\y) -- (#1+0.55,\y-\seqSelfLoopH cm) -- (#1,\y-\seqSelfLoopH cm);
+  \fi
+  \iflbl
+    \node[seq-slbl, anchor=north] at (#1+0.275,\y-\seqSelfLoopH cm-1pt) {#2};
+  \fi
+  \seqadv{\seqGapSelf}
+}
+
+% ============================================================
+%  示例：4参与者时序图（含alt+loop完整UML元素演示）
+% ============================================================
+%
+% 纸张估算公式：
+%   paperwidth ≈ 最右参与者X坐标 + 4cm（含图例+边距）
+%   paperheight ≈ 消息数 × 1.1cm + 12cm（含头部/图例/标题）
+%   7参与者完整流程约需 23cm × 31cm
+%
+% 使用方法：复制整个 \begin{tikzpicture}...\end{tikzpicture} 块，
+%           修改参与者坐标和消息序列即可。
+
+% ===== 间距常量（紧凑版 v5.1，每张图开头定义） =====
+\def\seqGapMsg{0.88}    % 同步消息间距（cm）
+\def\seqGapRet{1.00}    % 返回消息间距（cm）
+\def\seqGapSelf{1.40}   % 自关联间距（cm）
+\def\seqGapPhase{0.28}  % 阶段分隔线间距（cm）
+\def\seqFragPad{0.15}   % 片段框内边距（cm）
+\def\seqSelfLoopH{0.50} % 自关联U型高度（cm）
+
+% ===== 参与者X坐标（按需增删，间距统一2.85cm） =====
+\def\seqFirstActor{0}
+\def\ax{0}    \def\bx{2.85} \def\cx{5.70} \def\dx{8.55}
+\def\seqRightEdge{9.5}
+\def\seqLeftEdge{-0.9}
+
+\begin{tikzpicture}
+
+% ============================================================
+%  Pass 1: Dry Run —— 仅标记片段边界点、推进Y到最终位置
+% ============================================================
+\geomfalse
+\lblfalse
+\y=-0.9cm
+
+\seqadv{\seqGapPhase}
+\seqphase{阶段一}
+
+\seqmsg{\ax}{\bx}{发送请求}
+\seqself{\bx}{内部校验}
+\seqmsg{\bx}{\cx}{验证数据}
+
+% alt顶部标记
+\seqmarkpt{alt-nw}{\seqLeftEdge,\y}
+\seqmarkpt{alt-ne}{\seqRightEdge,\y}
+\seqadv{\seqFragPad}
+
+\seqmsg{\cx}{\dx}{执行业务处理}
+
+% loop顶部标记（在alt内部）
+\seqadv{\seqFragPad}
+\seqmarkpt{loop-nw}{8.1,\y}
+\seqmarkpt{loop-ne}{\seqRightEdge,\y}
+
+\seqself{\dx}{重试请求}
+
+\seqmarkpt{loop-sw}{8.1,\y}
+\seqmarkpt{loop-se}{\seqRightEdge,\y}
+\seqadv{\seqFragPad}
+
+\seqret{\dx}{\cx}{处理结果}
+\seqret{\cx}{\bx}{处理成功}
+
+% alt分支分隔线（紧凑版间距）
+\seqadv{0.35}
+\seqmarkpt{alt-mid}{\seqLeftEdge,\y}
+\seqadv{0.08}
+
+\seqret{\cx}{\bx}{验证失败}
+
+\seqadv{0.22}
+\seqmarkpt{alt-sw}{\seqLeftEdge,\y}
+\seqmarkpt{alt-se}{\seqRightEdge,\y}
+
+% 生命线结束位置
+\newdimen\yLifeEnd
+\yLifeEnd=\y
+\advance\yLifeEnd by -0.4cm
+
+% ============================================================
+%  Pass 2: Geometry —— 绘制所有几何元素（无文字）
+% ============================================================
+\geomtrue
+\lblfalse
+\y=-0.9cm
+
+% Layer 0 (background): 片段框fill + 生命线
+\begin{scope}[on background layer]
+  \node[seq-fragbox-fill, fit=(alt-nw)(alt-se)] {};
+  \node[seq-fragbox-fill, fit=(loop-nw)(loop-se)] {};
+  \draw[seq-lifeline] (\ax,-0.6) -- (\ax,\yLifeEnd);
+  \draw[seq-lifeline] (\bx,-0.6) -- (\bx,\yLifeEnd);
+  \draw[seq-lifeline] (\cx,-0.6) -- (\cx,\yLifeEnd);
+  \draw[seq-lifeline] (\dx,-0.6) -- (\dx,\yLifeEnd);
+\end{scope}
+
+% Layer 1: 消息几何（phase线、激活条、箭头、自关联）
+\seqadv{\seqGapPhase}
+\seqphase{阶段一}
+
+\seqmsg{\ax}{\bx}{发送请求}
+\seqself{\bx}{内部校验}
+\seqmsg{\bx}{\cx}{验证数据}
+
+\seqadv{\seqFragPad}
+
+\seqmsg{\cx}{\dx}{执行业务处理}
+
+\seqadv{\seqFragPad}
+
+\seqself{\dx}{重试请求}
+
+\seqadv{\seqFragPad}
+
+\seqret{\dx}{\cx}{处理结果}
+\seqret{\cx}{\bx}{处理成功}
+
+\seqadv{0.35}
+\seqadv{0.08}
+
+\seqret{\cx}{\bx}{验证失败}
+
+\seqadv{0.22}
+
+% Layer 2: 片段边框 + 分隔线 + 五边形折角（紧凑尺寸）
+\node[seq-fragbox-border, fit=(alt-nw)(alt-se)] (alt-box) {};
+\draw[draw=PaperBorder, dashed, line width=0.6pt]
+  let \p1=(alt-box.west), \p2=(alt-box.east), \p3=(alt-mid) in
+  (\x1,\y3) -- (\x2,\y3);
+\fill[PaperBg]
+  (alt-box.north west) -- ++(0.60,0) -- ++(0,-0.32) -- ++(-0.18,-0.18) -- ++(-0.42,0) -- cycle;
+\draw[draw=PaperBorder, dashed, line width=0.6pt]
+  (alt-box.north west) -- ++(0.60,0) -- ++(0,-0.32) -- ++(-0.18,-0.18) -- ([yshift=-0.50cm]alt-box.north west) -- cycle;
+
+\node[seq-fragbox-border, fit=(loop-nw)(loop-se)] (loop-box) {};
+\fill[PaperBg]
+  (loop-box.north west) -- ++(0.95,0) -- ++(0,-0.32) -- ++(-0.18,-0.18) -- ++(-0.77,0) -- cycle;
+\draw[draw=PaperBorder, dashed, line width=0.6pt]
+  (loop-box.north west) -- ++(0.95,0) -- ++(0,-0.32) -- ++(-0.18,-0.18) -- ([yshift=-0.50cm]loop-box.north west) -- cycle;
+
+% ============================================================
+%  Pass 3: Labels —— 只绘制文字标签（最顶层，fill=white光晕）
+% ============================================================
+\geomfalse
+\lbltrue
+\y=-0.9cm
+
+\seqadv{\seqGapPhase}
+\seqphase{阶段一}
+
+\seqmsg{\ax}{\bx}{发送请求}
+\seqself{\bx}{内部校验}
+\seqmsg{\bx}{\cx}{验证数据}
+
+\seqadv{\seqFragPad}
+
+\seqmsg{\cx}{\dx}{执行业务处理}
+
+\seqadv{\seqFragPad}
+
+\seqself{\dx}{重试请求}
+
+\seqadv{\seqFragPad}
+
+\seqret{\dx}{\cx}{处理结果}
+\seqret{\cx}{\bx}{处理成功}
+
+\seqadv{0.35}
+\seqadv{0.08}
+
+\seqret{\cx}{\bx}{验证失败}
+
+\seqadv{0.22}
+
+% ============================================================
+%  Final Layer (最最顶层): 参与者头部 + 片段名 + 条件标签 + 图例 + 标题
+% ============================================================
+
+% 参与者头部（盖住生命线顶端）
+\node[seq-actor] (A) at (\ax cm,0)    {参与者A};
+\node[seq-actor] (B) at (\bx cm,0)    {参与者B};
+\node[seq-actor] (C) at (\cx cm,0)    {参与者C};
+\node[seq-actor] (D) at (\dx cm,0)    {参与者D};
+
+% 片段名 + 条件标签（基于已画好的fragbox坐标精确定位）
+\node[seq-fragname] at ($(alt-box.north west)+(0.16,-0.24)$) {alt};
+\node[seq-cond, anchor=west] at ($(alt-box.north west)+(0.20,-0.48)$) {[条件1]};
+\draw let \p1=(alt-mid) in
+  node[seq-cond, anchor=west] at (\seqLeftEdge+0.12,\y1-0.08) {[条件2]};
+
+\node[seq-fragname] at ($(loop-box.north west)+(0.30,-0.24)$) {loop};
+\node[seq-cond, anchor=west, text=PaperTitle] at ($(loop-box.north west)+(0.56,-0.24)$) {循环条件};
+
+% 图例 + 术语表（紧凑版，不嵌套tikzpicture）
+\advance\y by -0.5cm
+
+\node[draw=PaperBorder, fill=PaperFill, rounded corners=4pt, inner sep=4pt,
+      text width=5.5cm, anchor=north east, font=\scriptsize\sffamily,
+      line width=0.6pt] at (\seqRightEdge+0.0,\y) (glossary) {
+    \textbf{\footnotesize 术语表}\\[1pt]
+    \code{alt}：条件分支组合片段\\[0.5pt]
+    \code{loop}：循环组合片段\\[0.5pt]
+    \code{opt}：可选组合片段\\[0.5pt]
+    \code{par}：并行组合片段
+};
+
+\node[draw=PaperBorder, fill=PaperFill, rounded corners=4pt, inner sep=4pt,
+      text width=3.5cm, anchor=north east, font=\scriptsize\sffamily,
+      line width=0.6pt] at ([xshift=-0.15cm]glossary.north west) (legend) {
+    \textbf{\footnotesize 图例}\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ArrowSync}{\rule[-0.5pt]{0.7cm}{0.8pt}$\rightarrow$}}同步调用\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ArrowReturn}{\rule[-0.5pt]{0.7cm}{0.4pt}\,$\rightarrow$}}返回消息\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ArrowSync}{$\cap$}}自关联\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ActColor}{\rule{2.5pt}{5pt}}}激活条
+};
+
+% ===== 标题（图底部居中，glossary下方）=====
+\path (glossary.south) ++(0,-0.3cm) coordinate (title-pos);
+\coordinate (title-cx) at ({(\seqLeftEdge+\seqRightEdge)/2+0.2cm},0);
+\node[font=\normalsize\bfseries\sffamily, text=PaperTitle, anchor=north]
+  at (title-cx |- title-pos) {时序图示例标题};
+\path (title-pos) ++(0,-0.5cm) coordinate (title-en-pos);
+\node[font=\scriptsize\itshape\sffamily, text=PaperMuted, anchor=north]
+  at (title-cx |- title-en-pos)
+  {Example Sequence Diagram --- UML 2.x Standard};
+
+% ===== Bounding Box（精确贴合内容）=====
+\path (title-en-pos) ++(0,-0.4cm) coordinate (bb-bottom);
+\coordinate (bb-tl) at (\seqLeftEdge-0.3cm,0.4cm);
+\coordinate (bb-br) at (\seqRightEdge+0.5cm,0);
+\path[use as bounding box] (bb-tl) rectangle (bb-br |- bb-bottom);
+
+\end{tikzpicture}%
+
+% ============================================================
+% 【时序图设计铁律（v5.1 紧凑版 · 10条）】
+% ============================================================
+%
+% 1. 【三阶段架构】消息序列必须在 Pass1/2/3 中保持完全相同的调用顺序，
+%    仅通过\ifgeom/\iflbl开关控制绘制内容，Y坐标才会一致。
+% 2. 【标签最后绘制】所有文字标签都在Pass3/Final Layer绘制，
+%    fill=white+inner sep=2pt白色光晕遮盖一切几何元素。
+% 3. 【禁止嵌套tikzpicture】图例中不能用\begin{tikzpicture}，用\makebox+\rule
+%    简单符号代替，否则bounding box计算错误导致布局错乱。
+% 4. 【第一个参与者不画激活条】\seqmsg宏自动判断#2是否=\seqFirstActor，
+%    如果是则跳过激活条（User/外部Actor不显示激活条）。
+% 5. 【条件标签在Final Layer定位】分支条件不要通过Y游标在消息流中绘制，
+%    而是在Final Layer基于fragbox坐标精确定位。
+% 6. 【标签偏移量】同步消息标签在箭头中点上方2pt，返回消息标签在中点
+%    下方2pt，自关联标签在U型底下方1pt。
+% 7. 【组合片段边界】Pass1中用\seqmarkpt标记nw/ne/sw/se四角，Pass2在
+%    background layer用fit库自动包裹，禁止硬编码矩形坐标。
+% 8. 【alt分支分隔（紧凑版）】上分支结束后\seqadv{0.35}→\seqmarkpt{alt-mid}→
+%    \seqadv{0.08}→下分支消息→\seqadv{0.22}→标记sw/se。
+% 9. 【间距常量（紧凑版）】\seqGapMsg=0.88 / \seqGapRet=1.00 / \seqGapSelf=1.40，
+%    如需更宽松可乘1.3系数，更紧凑乘0.85。
+% 10.【标题内嵌bbox】标题放在tikzpicture内部底部，用(title-cx |- title-pos)
+%     语法精确定位，bounding box通过bb-bottom坐标精确控制。
+%
+% ============================================================
+% 【三阶段宏使用速查】
+% ============================================================
+%
+% \seqphase{名称}        → 阶段横线+左侧标签
+% \seqmsg{from}{to}{文字} → 同步消息（实线实心箭头+目标激活条+上方标签）
+% \seqret{from}{to}{文字} → 返回消息（虚线空心箭头+下方标签，无激活条）
+% \seqself{x}{文字}       → 自关联（U型实线+下方标签）
+% \seqadv{厘米数}        → 手动推进Y（用于片段padding/分支间距）
+% \seqmarkpt{名}{x,y}    → 标记coordinate点（供fit包裹用）
+%
+% 【增加参与者步骤】
+% 1. 添加\def\ex{X}坐标（+2.85cm）
+% 2. 更新\seqRightEdge
+% 3. Final Layer添加\node[seq-actor] (E) at (\ex cm,0) {名称};
+% 4. Pass2 background layer添加\draw[seq-lifeline] (\ex,-0.6) -- (\ex,\yLifeEnd);
+% 5. Pass1/2/3三个Pass中添加相关消息
+%
+% 【纸张尺寸速查】
+%   4参与者(10cm宽) → paperwidth=14cm, 10消息 → paperheight≈20cm
+%   5参与者(12cm宽) → paperwidth=17cm, 15消息 → paperheight≈25cm
+%   7参与者(18cm宽) → paperwidth=23cm, 20消息 → paperheight≈31cm
+%
+% ============================================================

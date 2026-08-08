@@ -1,0 +1,150 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% kaoWinCJKsc.sty — 方正字体配置 + 增强样式
+% 字体规范：
+%   最大标题：方正小标宋  |  次级标题：方正黑体
+%   正文：方正书宋        |  其他板块：方正楷体
+%   侧边注释：方正仿宋    |  代码：等宽代码字体
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ProvidesPackage{kaoWinCJKsc}[2024/01/01 v2.0 FZ Font Config]
+
+% ── 字体路径 ──
+\newcommand{\fontpath}{C:/Windows/Fonts/}
+
+% ── 方正核心字体 ──
+\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzsong{方正书宋_GBK}    %方正书宋  fzsong
+\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzhei{FZHei-B01}       %方正黑体  fzhei
+\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzkai{方正楷体_GBK}     %方正楷体  fzkai
+\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzfs{FZFSFW}           %方正仿宋  fzfs
+%
+% ── 方正小标宋（最大标题专用） ──
+\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzxiaobiaosong{FZXBSJW}  %方正小标宋  fzxiaobiaosong
+%
+% ── 方正黑体（标题用，别名 yh 兼容旧代码） ──
+\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\yh{FZHei-B01}           %方正黑体  yh
+
+% ── 装饰字体（可选） ──
+\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzli{FZLiShu-S01S}      %方正隶书  fzli
+\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzshti{FZShuTi-S05S}    %方正舒体  fzshti
+\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzyao{FZYaoTi-M06S}     %方正姚体  fzyao
+
+% ── 备用系统字体 ──
+\newCJKfontfamily\song{SimSun}                                 %宋体  song
+\newCJKfontfamily\hei{SimHei}                                  %黑体  hei
+\newCJKfontfamily\kai{KaiTi}                                   %楷体  kai
+\newCJKfontfamily\fs{FangSong}                                %仿宋  fs
+
+%----------------------------------------------------------------------------------------
+% 等宽代码字体（公式/代码用，优先级：Cascadia Code > Consolas > Courier New）
+\IfFontExistsTF{Cascadia Code}{%
+    \setmonofont[Scale=MatchLowercase]{Cascadia Code}%
+}{%
+    \IfFontExistsTF{Consolas}{%
+        \setmonofont[Scale=MatchLowercase]{Consolas}%
+    }{%
+        \setmonofont[Scale=MatchLowercase]{Courier New}%
+    }%
+}
+%
+% 边注字体：方正仿宋
+\renewcommand*{\marginfont}{\fzfs\footnotesize\justifying\frenchspacing}
+
+% ── 修正 @margin@par 中的 normalfont → fzfs ──
+\renewcommand{\@margin@par}{%
+    \justifying%
+    \setlength{\RaggedRightParIndent}{0em}%
+    \setlength{\parindent}{0em}%
+    \setlength{\parskip}{0.5pc}%
+    \frenchspacing%
+    \fzfs% 方正仿宋
+    \footnotesize%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 彩色盒子
+
+\RequirePackage{tcolorbox}
+\tcbuselibrary{breakable,skins,hooks,xparse}
+
+\newcommand*\sideboxstyle[1]{%
+    \ifstrequal{#1}{simple}{%
+        \tikzstyle{boxstyle}=[%
+        inner sep=2mm,
+        ]%
+    }{%
+        \ifstrequal{#1}{kao}{%
+            \tikzstyle{boxstyle}=[%
+            inner sep=2mm,
+            rounded corners,
+            ]%
+        }{%
+            \PackageError{kao}{Unknown style given for sidebox: `#1`}{}
+        }%
+    }%
+}
+
+% kaobook 风格双线框
+\sideboxstyle{kao}
+\tcbset{kaobox/.style={
+    enhanced,
+    breakable,
+    sharp corners,
+    frame hidden,
+    coltitle=black,
+    fonttitle=\bfseries,
+    boxrule=0pt,
+    boxsep=0pt,
+    left=4mm,
+    right=2mm,
+    top=2mm,
+    bottom=2mm,
+    borderline horizontal={0.5pt}{0pt}{black},
+    borderline horizontal={0.5pt}{3pt}{black},
+    attach boxed title to top center={yshift=-2.25mm},%yshift=-2.25mm
+    boxed title style={boxrule=0pt,frame hidden,colback=white,left=2mm,right=2mm,top=1mm,bottom=1mm},
+}}
+
+\newtcolorbox{sidebox}[2][]{kaobox,title=#2,#1}
+\newtcolorbox{sidebox*}[2][]{kaobox,title=#2,#1,float=htb}
+
+\NewDocumentCommand{\solutions}{O{解答}}{%
+    \tcbset{kaobox/.append style={borderline horizontal={0.5pt}{0pt}{black!50!white}}}%
+    \begin{sidebox}{#1}
+}
+\NewDocumentCommand{\endsolutions}{}{\end{sidebox}}
+
+% PDF 元数据配色
+\definecolor{titlecolorcoverpage}{HTML}{e6bf29}
+\definecolor{chaptercolor}{HTML}{187d71}
+\definecolor{sectioncolor}{HTML}{0c5248}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=chaptercolor,
+    citecolor=blue!60!black,
+    urlcolor=blue!70!black,
+    bookmarksnumbered=true,
+    pdfcreator={XeLaTeX + kaobookCJK},
+    pdfstartview={FitV},
+}
+
+% 灰色背景色设置
+\if@backgroundcolor
+    \definecolor{bg}{HTML}{fcfcfc}
+    \pagecolor{bg}
+    \setkomafont{pageheadfoot}{\color{gray}}
+\fi
+
+% 代码块增强
+\RequirePackage{listings}
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    backgroundcolor=\color{gray!5},
+    keywordstyle=\color{blue!70!black},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red!70!black},
+    showstringspaces=false,
+}
+\endinput

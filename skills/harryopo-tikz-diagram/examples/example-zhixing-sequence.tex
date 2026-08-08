@@ -1,0 +1,348 @@
+% ============================================================
+%  示例：知行读书 Agent 编排时序图 (Sequence Diagram Example)
+%  Nature 风格 —— 低饱和蓝灰配色 · v5.1 三阶段紧凑布局
+%  编译命令：xelatex example-zhixing-sequence.tex
+%
+%  演示：5参与者 · 自关联 · 4阶段分组 · 标题内嵌图底居中
+% ============================================================
+
+\documentclass[12pt]{ctexart}
+
+\usepackage{geometry}
+\geometry{paperwidth=22cm, paperheight=32cm, left=0.2cm, right=0.2cm, top=0.2cm, bottom=0.2cm}
+
+\usepackage{fontspec}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, backgrounds, fit, calc, positioning}
+
+\setmainfont{Arial}[Ligatures=TeX]
+\setsansfont{Arial}[Ligatures=TeX]
+\setmonofont{Consolas}[Scale=0.90]
+\setCJKsansfont{Microsoft YaHei}
+\setCJKmainfont{Microsoft YaHei}
+
+\definecolor{PaperBorder}{HTML}{B0C4DE}
+\definecolor{PaperFill}{HTML}{FFFFFF}
+\definecolor{PaperBg}{HTML}{F8FAFC}
+\definecolor{PaperTitle}{HTML}{2C3E50}
+\definecolor{PaperMuted}{HTML}{7F8C8D}
+\definecolor{AccentOrange}{HTML}{D35400}
+\definecolor{LifeLine}{HTML}{D5DBDB}
+\definecolor{ArrowSync}{HTML}{2C3E50}
+\definecolor{ArrowReturn}{HTML}{95A5A6}
+\definecolor{PhaseLine}{HTML}{E8ECEF}
+\definecolor{ActColor}{HTML}{D5DDE5}
+\definecolor{AccentGreen}{HTML}{10a37f}
+\definecolor{AccentBlue}{HTML}{1d4ed8}
+
+\newcommand{\code}[1]{{\ttfamily\color{AccentOrange}#1}}
+
+\newif\ifgeom
+\newif\iflbl
+
+\begin{document}
+\pagestyle{empty}
+\noindent
+
+\def\ux{0}    \def\rx{2.85} \def\px{5.70} \def\mx{8.55} \def\aix{11.40}
+\def\rightEdge{12.3}
+\def\leftEdge{-0.9}
+
+\newdimen\y
+
+\def\GapMsg{0.88}
+\def\GapRet{1.00}
+\def\GapSelf{1.40}
+\def\GapPhase{0.28}
+\def\FragPad{0.15}
+\def\SelfLoopH{0.50}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    actor/.style={
+        rectangle, draw=PaperBorder, fill=PaperFill, text=PaperTitle,
+        line width=0.9pt, minimum width=2.1cm, minimum height=0.70cm,
+        font=\small\sffamily\bfseries, align=center,
+        rounded corners=5pt, inner sep=2pt,
+    },
+    lifeline/.style={draw=LifeLine, line width=0.6pt, dashed, dash pattern=on 4pt off 3pt},
+    act/.style={rectangle, fill=ActColor, draw=none, inner sep=0pt, minimum width=5pt, rounded corners=1pt},
+    fragbox-fill/.style={fill=PaperBg, draw=none, rounded corners=5pt, inner sep=6pt},
+    msg-line/.style={-{Stealth[length=6pt, width=5pt]}, draw=ArrowSync, line width=0.9pt},
+    ret-line/.style={-{Stealth[length=5pt, width=4pt, open]}, draw=ArrowReturn, line width=0.7pt, dashed, dash pattern=on 4pt off 3pt},
+    self-line/.style={draw=ArrowSync, line width=0.8pt, rounded corners=3pt},
+    pline/.style={draw=PhaseLine, line width=0.7pt},
+    fragbox-border/.style={draw=PaperBorder, fill=none, dashed, line width=0.7pt, rounded corners=5pt, inner sep=6pt},
+    lbl/.style={font=\footnotesize\sffamily, text=PaperTitle, fill=white, inner sep=2pt, outer sep=0pt},
+    rlbl/.style={font=\footnotesize\sffamily, text=PaperMuted, fill=white, inner sep=2pt, outer sep=0pt},
+    slbl/.style={font=\footnotesize\sffamily, text=PaperTitle, fill=white, inner sep=2pt, outer sep=0pt, align=center},
+    phase-lbl/.style={font=\footnotesize\sffamily\bfseries, text=PaperMuted, anchor=east,
+                      fill=white, inner sep=2pt, outer sep=0pt},
+    cond/.style={font=\scriptsize\sffamily\itshape, text=PaperMuted, anchor=west,
+                 fill=white, inner sep=2pt, outer sep=0pt},
+    fragname/.style={font=\footnotesize\sffamily\bfseries, text=PaperTitle, fill=PaperBg, inner sep=2pt},
+]
+
+\newcommand{\adv}[1]{\advance\y by -#1 cm}
+
+\newcommand{\dophase}[1]{
+  \ifgeom
+    \draw[pline] (\leftEdge-0.1,\y) -- (\rightEdge+0.2,\y);
+  \fi
+  \iflbl
+    \node[phase-lbl] at (\leftEdge+0.1,\y) {#1};
+  \fi
+  \adv{\GapPhase}
+}
+
+\newcommand{\domsg}[3]{
+  \ifgeom
+    \pgfmathsetmacro\tmpx{#2}
+    \pgfmathsetmacro\firstx{\ux}
+    \pgfmathparse{abs(\tmpx-\firstx)<0.01}
+    \ifnum\pgfmathresult=0
+      \node[act, anchor=north, minimum height=0.58cm] at (#2,\y) {};
+    \fi
+    \draw[msg-line] (#1,\y) -- (#2,\y);
+  \fi
+  \iflbl
+    \node[lbl, anchor=south] at ($(#1,\y)!0.5!(#2,\y)+(0,2pt)$) {#3};
+  \fi
+  \adv{\GapMsg}
+}
+
+\newcommand{\doret}[3]{
+  \ifgeom
+    \draw[ret-line] (#1,\y) -- (#2,\y);
+  \fi
+  \iflbl
+    \node[rlbl, anchor=north] at ($(#1,\y)!0.5!(#2,\y)+(0,-2pt)$) {#3};
+  \fi
+  \adv{\GapRet}
+}
+
+\newcommand{\doself}[2]{
+  \ifgeom
+    \draw[self-line] (#1,\y) -- (#1+0.55,\y) -- (#1+0.55,\y-\SelfLoopH cm) -- (#1,\y-\SelfLoopH cm);
+  \fi
+  \iflbl
+    \node[slbl, anchor=north] at (#1+0.275,\y-\SelfLoopH cm-1pt) {#2};
+  \fi
+  \adv{\GapSelf}
+}
+
+% 自关联消息（无激活条，纯U型线）
+\newcommand{\doselfplain}[2]{
+  \ifgeom
+    \draw[self-line] (#1,\y) -- (#1+0.55,\y) -- (#1+0.55,\y-\SelfLoopH cm) -- (#1,\y-\SelfLoopH cm);
+  \fi
+  \iflbl
+    \node[slbl, anchor=north] at (#1+0.275,\y-\SelfLoopH cm-1pt) {#2};
+  \fi
+  \adv{\GapSelf}
+}
+
+\newcommand{\domarkpt}[2]{
+  \coordinate (#1) at (#2);
+}
+
+% ===== Pass 1: Dry Run =====
+\geomfalse
+\lblfalse
+\y=-0.9cm
+
+\adv{\GapPhase}
+\dophase{用户输入}
+
+\domsg{\ux}{\rx}{输入消息}
+\domsg{\rx}{\px}{invoke agent streamChatWithContext}
+\domsg{\px}{\mx}{ipcRenderer.invoke}
+
+\adv{\GapPhase}
+\dophase{Agent 编排}
+
+\domsg{\mx}{\mx}{1. 意图分类 (1-5ms)}
+\domsg{\mx}{\mx}{2. 策略选择 (<1ms)}
+\domsg{\mx}{\mx}{3. 难度调整 (<1ms)}
+\domsg{\mx}{\mx}{4. 上下文构建 (50-200ms)}
+\domsg{\mx}{\mx}{5. 系统提示组装 (<1ms)}
+
+\adv{\GapPhase}
+\dophase{AI 服务}
+
+\domsg{\mx}{\aix}{6. 流式请求 HTTPS}
+\doret{\aix}{\mx}{首 token 500-2000ms}
+
+\adv{\GapPhase}
+\dophase{流式响应}
+
+\domsg{\mx}{\px}{STREAM.CHUNK}
+\domsg{\px}{\rx}{逐字显示}
+\domsg{\mx}{\px}{STREAM.COMPLETE}
+\domsg{\px}{\rx}{完成}
+
+\adv{\GapPhase}
+\dophase{后处理}
+
+\doself{\mx}{更新概念掌握度}
+\doself{\mx}{提取记忆}
+\doself{\mx}{更新方法论掌握度}
+\doret{\mx}{\px}{返回完整响应}
+\doret{\px}{\rx}{保存到 DB}
+\doret{\rx}{\ux}{显示完整响应}
+
+\adv{0.35}
+
+\newdimen\yLifeEnd
+\yLifeEnd=\y
+\advance\yLifeEnd by -0.4cm
+
+% ===== Pass 2: Geometry =====
+\geomtrue
+\lblfalse
+\y=-0.9cm
+
+\begin{scope}[on background layer]
+  \draw[lifeline] (\ux,-0.6)  -- (\ux,\yLifeEnd);
+  \draw[lifeline] (\rx,-0.6)  -- (\rx,\yLifeEnd);
+  \draw[lifeline] (\px,-0.6)  -- (\px,\yLifeEnd);
+  \draw[lifeline] (\mx,-0.6)  -- (\mx,\yLifeEnd);
+  \draw[lifeline] (\aix,-0.6) -- (\aix,\yLifeEnd);
+\end{scope}
+
+\adv{\GapPhase}
+\dophase{用户输入}
+
+\domsg{\ux}{\rx}{输入消息}
+\domsg{\rx}{\px}{invoke agent streamChatWithContext}
+\domsg{\px}{\mx}{ipcRenderer.invoke}
+
+\adv{\GapPhase}
+\dophase{Agent 编排}
+
+\domsg{\mx}{\mx}{1. 意图分类 (1-5ms)}
+\domsg{\mx}{\mx}{2. 策略选择 (<1ms)}
+\domsg{\mx}{\mx}{3. 难度调整 (<1ms)}
+\domsg{\mx}{\mx}{4. 上下文构建 (50-200ms)}
+\domsg{\mx}{\mx}{5. 系统提示组装 (<1ms)}
+
+\adv{\GapPhase}
+\dophase{AI 服务}
+
+\domsg{\mx}{\aix}{6. 流式请求 HTTPS}
+\doret{\aix}{\mx}{首 token 500-2000ms}
+
+\adv{\GapPhase}
+\dophase{流式响应}
+
+\domsg{\mx}{\px}{STREAM.CHUNK}
+\domsg{\px}{\rx}{逐字显示}
+\domsg{\mx}{\px}{STREAM.COMPLETE}
+\domsg{\px}{\rx}{完成}
+
+\adv{\GapPhase}
+\dophase{后处理}
+
+\doselfplain{\mx}{更新概念掌握度}
+\doselfplain{\mx}{提取记忆}
+\doselfplain{\mx}{更新方法论掌握度}
+\doret{\mx}{\px}{返回完整响应}
+\doret{\px}{\rx}{保存到 DB}
+\doret{\rx}{\ux}{显示完整响应}
+
+\adv{0.35}
+
+% ===== Pass 3: Labels =====
+\geomfalse
+\lbltrue
+\y=-0.9cm
+
+\adv{\GapPhase}
+\dophase{用户输入}
+
+\domsg{\ux}{\rx}{输入消息}
+\domsg{\rx}{\px}{invoke agent streamChatWithContext}
+\domsg{\px}{\mx}{ipcRenderer.invoke}
+
+\adv{\GapPhase}
+\dophase{Agent 编排}
+
+\domsg{\mx}{\mx}{1. 意图分类 (1-5ms)}
+\domsg{\mx}{\mx}{2. 策略选择 (<1ms)}
+\domsg{\mx}{\mx}{3. 难度调整 (<1ms)}
+\domsg{\mx}{\mx}{4. 上下文构建 (50-200ms)}
+\domsg{\mx}{\mx}{5. 系统提示组装 (<1ms)}
+
+\adv{\GapPhase}
+\dophase{AI 服务}
+
+\domsg{\mx}{\aix}{6. 流式请求 HTTPS}
+\doret{\aix}{\mx}{首 token 500-2000ms}
+
+\adv{\GapPhase}
+\dophase{流式响应}
+
+\domsg{\mx}{\px}{STREAM.CHUNK}
+\domsg{\px}{\rx}{逐字显示}
+\domsg{\mx}{\px}{STREAM.COMPLETE}
+\domsg{\px}{\rx}{完成}
+
+\adv{\GapPhase}
+\dophase{后处理}
+
+\doself{\mx}{更新概念掌握度}
+\doself{\mx}{提取记忆}
+\doself{\mx}{更新方法论掌握度}
+\doret{\mx}{\px}{返回完整响应}
+\doret{\px}{\rx}{保存到 DB}
+\doret{\rx}{\ux}{显示完整响应}
+
+\adv{0.35}
+
+% ===== Final Layer =====
+\node[actor] (U)   at (\ux cm,0)     {用户};
+\node[actor] (R)   at (\rx cm,0)     {Renderer};
+\node[actor] (P)   at (\px cm,0)     {Preload};
+\node[actor] (M)   at (\mx cm,0)     {Main Orchestrator};
+\node[actor] (AI)  at (\aix cm,0)    {AI 服务商};
+
+\advance\y by -0.5cm
+
+\node[draw=PaperBorder, fill=PaperFill, rounded corners=4pt, inner sep=4pt,
+      text width=6.5cm, anchor=north east, font=\scriptsize\sffamily,
+      line width=0.6pt] at (\rightEdge+0.0,\y) (glossary) {
+    \textbf{\footnotesize 术语表}\\[1pt]
+    \code{streamChatWithContext}：Agent 流式对话接口\\[0.5pt]
+    \code{ipcRenderer.invoke}：Electron IPC 调用\\[0.5pt]
+    \code{STREAM.CHUNK}：流式文本分片\\[0.5pt]
+    \code{STREAM.COMPLETE}：流式完成信号\\[0.5pt]
+    \code{Vercel AI SDK}：\code{streamText()} 实现
+};
+
+\node[draw=PaperBorder, fill=PaperFill, rounded corners=4pt, inner sep=4pt,
+      text width=3.8cm, anchor=north east, font=\scriptsize\sffamily,
+      line width=0.6pt] at ([xshift=-0.15cm]glossary.north west) (legend) {
+    \textbf{\footnotesize 图例}\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ArrowSync}{\rule[-0.5pt]{0.7cm}{0.8pt}$\rightarrow$}}同步调用\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ArrowReturn}{\rule[-0.5pt]{0.7cm}{0.4pt}\,$\rightarrow$}}返回消息\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ArrowSync}{$\cap$}}自关联\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ActColor}{\rule{2.5pt}{5pt}}}激活条
+};
+
+\path (glossary.south) ++(0,-0.3cm) coordinate (title-pos);
+\coordinate (title-cx) at ({(\leftEdge+\rightEdge)/2+0.2cm},0);
+\node[font=\normalsize\bfseries\sffamily, text=PaperTitle, anchor=north]
+  at (title-cx |- title-pos) {知行读书 · Agent 编排时序图};
+\path (title-pos) ++(0,-0.5cm) coordinate (title-en-pos);
+\node[font=\scriptsize\itshape\sffamily, text=PaperMuted, anchor=north]
+  at (title-cx |- title-en-pos)
+  {Zhixing Reader Agent Orchestration --- Sequence Diagram};
+
+\path (title-en-pos) ++(0,-0.4cm) coordinate (bb-bottom);
+\coordinate (bb-tl) at (\leftEdge-0.3cm,1.2cm);
+\coordinate (bb-br) at (\rightEdge+0.5cm,0);
+\path[use as bounding box] (bb-tl) rectangle (bb-br |- bb-bottom);
+
+\end{tikzpicture}%
+
+\end{document}

@@ -1,0 +1,75 @@
+\chapter*{译者序}
+\addcontentsline{toc}{chapter}{译者序}
+
+亲爱的读者朋友们：
+
+当你翻开这本排版精美的中文技术书籍时，也许未曾想到，它背后的排版系统
+\index{\LaTeX}有着一段激动人心的开源故事。这本模板脱胎于 Federico Marotta
+发起的 \Class{kaobook} 项目\index{kaobook@\Class{kaobook}}——一个致力于将宽边栏
+（1.5 列布局）引入书籍排版的 \LaTeX 文档类。
+
+\section*{kaobook 的起源}
+
+\Class{kaobook} 的核心理念来源于 Ken Arroyo Ohori 的博士论文\cite{ohori2016}，他在其中优雅地
+运用了宽边栏排版，将插图、表格、注释等辅助内容放置在正文旁边的留白区域，使
+读者能够一目了然地获取信息，而无需频繁翻页。Federico 深受启发，并获得了 Ken
+的许可，将这一设计理念封装成了一个通用的 \LaTeX 文档类。
+
+\marginnote[*-4]{kaobook 项目的 GitHub 仓库：\\\url{https://github.com/fmarotta/kaobook}}
+
+同时，\Class{kaobook} 也从 \Class{Tufte-LaTeX}\index{Tufte-LaTeX@\Class{Tufte-LaTeX}}
+汲取了大量灵感——后者由 Edward Tufte\index{Tufte, Edward} 的信息设计理念驱动，
+倡导「用边栏承载信息，用主栏保持叙事流」的排版哲学\cite{tufte2001}。
+但 \Class{kaobook} 更加灵活：它基于 \KOMAScript 的 \Class{scrbook}，采用了标准
+\LaTeX 包（如 \Package{sidenotes}、\Package{marginnote}、\Package{floatrow}），
+使得用户可以在不深度侵入核心代码的前提下进行定制。
+
+\section*{中文适配之路}
+
+将 \Class{kaobook} 引入中文排版的挑战远比想象中要大。首先是字体：kaobook
+原版使用 Libertinus 系列（Serif、Sans、Mono）作为默认西文字体，但中文排版
+需要对中文字体进行精细配置。我们选定了「规范字体体系」：
+\begin{itemize}
+    \item 最大标题：方正小标宋（\texttt{FZXiaoBiaoSong-B05S}）
+    \item 次级标题：方正黑体（\texttt{FZHei-B01}）
+    \item 正文：方正书宋（\texttt{方正书宋\_GBK}）
+    \item 侧边栏注释：方正仿宋（\texttt{FZFangSong-Z02}）
+    \item 代码块：等宽字体（\texttt{FZHei-B01} 作为兜底）
+\end{itemize}
+
+其次是中文特有的排版习惯：首行缩进两个汉字宽度、无单词间连字符（通过
+\lstinline|\righthyphenmin=62| 和 \lstinline|\lefthyphenmin=62| 实现）、
+以及中文化与本地化字符串（目录标题、图表标题等）。
+
+\index{方正字体}%
+\index{CJK 排版}%
+\index{中文本地化}%
+
+\sidenote{中文 \LaTeX{} 排版还有一个隐形难题——标点符号。我们使用 \Package{xeCJK}
+自动处理了中文标点的间距，确保逗号、句号与前后文字保持正确的距离。}
+
+最后，我们还兼容了数学定理样式、参考文献侧边标注、算法排版、长表格等高级功能。
+本次中文本土化并非简单的「翻译字符串」，而是从字体、版式、命名空间
+（\texttt{kaobookCJKsc}、\texttt{kaoCJKsc}、\texttt{kaoWinCJKsc} 等）各层面
+重新构建了一套独立的模板体系，与原版 \Class{kaobook} 并行存在，互不冲突。
+
+\section*{致谢}
+
+本模板的诞生离不开以下项目的贡献：
+\begin{itemize}
+    \item \Class{kaobook} 原作者 Federico Marotta，感谢他开源了这一优雅的文档类；
+    \item \KOMAScript 团队，提供了强大的 \Class{scrbook} 基类；
+    \item \LaTeX 中文社区，特别是 \Package{ctex} 和 \Package{xeCJK} 的开发者；
+    \item 方正字库，提供了符合国家标准的优质中文字体。
+\end{itemize}
+
+\marginnote{本模板采用 LPPL 许可证发布，您可以自由使用、修改和分发。}
+
+希望这本模板能够帮助您在中文科技写作中事半功倍。排版不仅仅是「把字打在纸上」，
+而是通过对版心、字体、留白、层级等细节的考究，让内容和形式达成和谐的统一。
+这，正是我们孜孜以求的目标。
+
+\begin{flushright}
+    \textit{中文KaoBook项目组}\\
+    \today
+\end{flushright}

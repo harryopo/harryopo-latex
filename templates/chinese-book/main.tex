@@ -1,0 +1,165 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 中文KaoBook模板 — 基于 kaobook + CJK 适配
+% 字体规范：
+%   最大标题：方正小标宋  |  次级标题：方正黑体  |  正文：方正书宋
+%   其他板块：方正楷体    |  侧边注释：方正仿宋  |  代码：等宽代码字体
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[
+    a4paper,
+    fontsize=10pt,
+    twoside=false,
+    numbers=noenddot,
+]{kaobookCJKsc}
+
+% ── 中文配置（字体 + 本土化） ──
+\input{styles/config.tex}
+
+% ── 方正字体 + 彩色盒子 + 边注 ──
+\usepackage{kaoWinCJKsc}
+
+% ── 扩展包 ──
+\input{styles/packageconfig.tex}
+
+% ── 参考文献 ──
+\usepackage{kaobiblioCJKsc}
+\addbibresource{main.bib}
+
+% ── 数学定理 ──
+\usepackage{kaotheoremsCJKsc}
+
+% ── 交叉引用 ──
+\usepackage{kaorefsCJKsc}
+
+\graphicspath{{images/}}
+
+\makeindex[columns=3, title=索引, intoc]
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	文档信息
+%----------------------------------------------------------------------------------------
+
+\titlehead{中文KaoBook模板 \\[0.5ex] \Large — CJK Adaptation of the \texttt{kaobook} Class —}
+\subject{方正字体排版示例}
+
+\title[中文KaoBook模板]{中文KaoBook模板\\A \LaTeX{} Template for Books in Chinese}
+\subtitle{对一个惊艳的报告样式的复刻}
+\author{模板作者}
+\date{\today}
+\publishers{中文KaoBook项目组}
+
+%----------------------------------------------------------------------------------------
+
+\frontmatter
+
+% ── 版权页 ──
+\makeatletter
+\uppertitleback{\@titlehead}
+\lowertitleback{
+    \textbf{版权声明}\\
+    本模板基于 kaobook 类，采用 LPPL 许可证发布。\\
+    字体采用方正家族字体，版权归方正字库所有。\\
+    
+    \medskip
+    
+    \textbf{开源地址} \\
+    \url{https://github.com/fmarotta/kaobook}
+    
+    \medskip
+    
+    \textbf{编译环境} \\
+    本文档使用 \XeLaTeX{} 编译，需安装方正字体家族。
+}
+\makeatother
+
+% ── 致献 ──
+\dedication{
+    ``工欲善其事，必先利其器。''\\
+    \flushright ——《论语·卫灵公》
+}
+
+% ── 输出标题页 ──
+\maketitle
+
+%----------------------------------------------------------------------------------------
+%	前言
+%----------------------------------------------------------------------------------------
+
+\input{chapters/yizhexu.tex}
+\input{chapters/qianyan.tex}
+
+%----------------------------------------------------------------------------------------
+%	目录
+%----------------------------------------------------------------------------------------
+
+\begingroup
+\setlength{\textheight}{230\hscale}
+\etocstandarddisplaystyle
+\etocstandardlines
+\tableofcontents
+\listoffigures
+\let\cleardoublepage\bigskip
+\let\clearpage\bigskip
+\listoftables
+\listoflstlistings
+\endgroup
+
+%----------------------------------------------------------------------------------------
+%	正文
+%----------------------------------------------------------------------------------------
+
+\mainmatter
+\setchapterstyle{kao}
+
+\input{chapters/jieshao.tex}
+
+\pagelayout{wide}
+\addpart{排版要素}
+\pagelayout{margin}
+
+\input{chapters/wenbenbiaozhu.tex}
+\input{chapters/shuxue.tex}
+\input{chapters/tuxiangyubiaoge.tex}
+\input{chapters/yinyong.tex}
+
+\pagelayout{wide}
+\addpart{定制与扩展}
+\pagelayout{margin}
+
+\input{chapters/xuanxiang.tex}
+\input{chapters/paiban.tex}
+\input{chapters/zhuyaoneirong.tex}
+
+%----------------------------------------------------------------------------------------
+%	附录
+%----------------------------------------------------------------------------------------
+
+\appendix
+\pagelayout{wide}
+\addpart{附\quad 录}
+\pagelayout{margin}
+
+\input{chapters/zimubiao.tex}
+\input{chapters/fulu.tex}
+
+%----------------------------------------------------------------------------------------
+%	后置
+%----------------------------------------------------------------------------------------
+
+\backmatter
+\setchapterstyle{plain}
+
+% ── 参考文献 ──
+\defbibnote{bibnote}{以下为主要参考文献，按引用顺序排列。\par\bigskip}
+\printbibliography[heading=bibintoc, title=主要参考文献, prenote=bibnote]
+
+% ── 索引 ──
+\printindex
+
+%----------------------------------------------------------------------------------------
+
+\end{document}

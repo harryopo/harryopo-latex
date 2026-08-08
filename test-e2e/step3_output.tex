@@ -1,0 +1,49 @@
+\documentclass[nomath]{harryopo-paper}
+
+\title{基于深度学习的图像识别研究}
+\author{张三}
+\date{2026年08月05日}
+
+
+\begin{document}
+
+\maketitle
+
+\section*{一、引言}
+\addcontentsline{toc}{section}{一、引言}
+
+\subsection*{1.1 研究背景}
+\addcontentsline{toc}{subsection}{1.1 研究背景}
+
+\subsubsection*{1.1.1 深度学习发展}
+\addcontentsline{toc}{subsubsection}{1.1.1 深度学习发展}
+
+这是普通文字，\fzht{这是加粗文字}，这是\textit{斜体文字}。
+
+其中损失函数为 L = -Σ y_i log(p_i)，其中 y_i 是真实标签。
+
+\section*{二、实验结果}
+\addcontentsline{toc}{section}{二、实验结果}
+
+实验结果如下表所示：
+
+| 方法 | 准确率(%) | 召回率(%) | F1分数 |
+| --- | --- | --- | --- |
+| ResNet-50 | 94.2 | 92.1 | 93.1 |
+| VGG-16 | 91.5 | 89.3 | 90.4 |
+| 我们的方法 | 96.8 | 95.2 | 96.0 |
+
+消融实验（含水平合并表头）：
+
+<table><tr><td colspan="2"><p>主干网络</p></td><td><p>性能</p></td></tr><tr><td><p>ResNet</p></td><td><p>ImageNet</p></td><td><p>94.2%</p></td></tr><tr><td><p>VGG</p></td><td><p>ImageNet</p></td><td><p>91.5%</p></td></tr><tr><td><p>EfficientNet</p></td><td><p>ImageNet</p></td><td><p>95.1%</p></td></tr></table>
+
+多数据集对比（含垂直合并）：
+
+<table><tr><td><p>模型</p></td><td><p>数据集</p></td><td><p>准确率</p></td></tr><tr><td rowspan="2"><p>Ours</p></td><td><p>CIFAR-10</p></td><td><p>98.5%</p></td></tr><tr><td><p>CIFAR-100</p></td><td><p>85.3%</p></td></tr><tr><td rowspan="2"><p>Baseline</p></td><td><p>CIFAR-10</p></td><td><p>95.2%</p></td></tr><tr><td><p>CIFAR-100</p></td><td><p>78.9%</p></td></tr></table>
+
+\section*{三、结论}
+\addcontentsline{toc}{section}{三、结论}
+
+本文提出的方法在多个数据集上取得了优异的性能。
+
+\end{document}

@@ -1,0 +1,82 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{test-base}[2026/06/21 test]
+
+\RequirePackage{fontspec}
+\RequirePackage[UTF8]{ctex}
+\RequirePackage{unicode-math}
+
+\RequirePackage{graphicx}
+\RequirePackage{setspace}
+\RequirePackage{indentfirst}
+\RequirePackage{enumitem}
+\RequirePackage[a4paper]{geometry}
+\RequirePackage[svgnames,dvipsnames]{xcolor}
+\RequirePackage{amsthm}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{array}
+\RequirePackage{multirow}
+\RequirePackage{longtable}
+\RequirePackage{caption}
+\RequirePackage{subcaption}
+\RequirePackage{float}
+\RequirePackage{titlesec}
+\RequirePackage{fancyhdr}
+\RequirePackage[colorlinks,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+\RequirePackage{cleveref}
+\RequirePackage{tikz}
+\RequirePackage{ifthen}
+\RequirePackage{calc}
+\RequirePackage{listings}
+
+% colors
+\definecolor{MainColor}{HTML}{1A365D}
+\definecolor{SubColor}{HTML}{2B6CB0}
+\definecolor{SmallColor}{HTML}{4299E1}
+\definecolor{TinyColor}{HTML}{EBF8FF}
+\definecolor{DarkColor}{HTML}{1A202C}
+\definecolor{AccentColor}{HTML}{C53030}
+
+% fonts
+\setmainfont{XITS}[Extension=.otf,UprightFont=*-Regular,BoldFont=*-Bold,ItalicFont=*-Italic,BoldItalicFont=*-BoldItalic,Path=../fonts/]
+\setmathfont{XITSMath}[Extension=.otf,UprightFont=*-Regular,BoldFont=*-Bold,Path=../fonts/]
+\setsansfont{texgyreheros}[Extension=.otf,UprightFont=*-regular,BoldFont=*-bold,ItalicFont=*-italic,BoldItalicFont=*-bolditalic,Path=../fonts/]
+\setmonofont{lmmono10-regular}[Extension=.otf,Path=../fonts/]
+
+\xeCJKsetup{AutoFallBack=true}
+\setCJKmainfont[Extension=.TTF,BoldFont=FZHTJW,ItalicFont=FZKTJW,Path=../fonts/]{FZSSJW}
+\setCJKfamilyfont{zhkai}[Extension=.TTF,Path=../fonts/]{FZKTJW}
+\setCJKfamilyfont{zhfs}[Extension=.TTF,Path=../fonts/]{FZFSJW}
+\setCJKfamilyfont{zhdbs}[Extension=.TTF,Path=../fonts/]{FZDBSJW}
+\setCJKfamilyfont{zhxiaobiao}[Extension=.TTF,Path=../fonts/]{FZXBSJW}
+\setCJKfamilyfont{zhhei}[Extension=.TTF,Path=../fonts/]{FZHTJW}
+
+\newcommand{\fzkt}{\CJKfamily{zhkai}}
+\newcommand{\fzfs}{\CJKfamily{zhfs}}
+\newcommand{\fzdbs}{\CJKfamily{zhdbs}}
+\newcommand{\fzxb}{\CJKfamily{zhxiaobiao}}
+\newcommand{\fzht}{\CJKfamily{zhhei}}
+
+% theorems
+\theoremstyle{definition}
+\newtheorem{definition}{定义}[section]
+\newtheorem{theorem}{定理}[section]
+\newtheorem{lemma}{引理}[section]
+\newtheorem{corollary}{推论}[section]
+\numberwithin{equation}{section}
+
+% lst styles
+\lstdefinestyle{pystyle}{language=Python,basicstyle=\ttfamily\small,numbers=left}
+\lstdefinestyle{bashstyle}{language=bash,basicstyle=\ttfamily\small,numbers=left}
+\lstdefinestyle{plainstyle}{basicstyle=\ttfamily\small,numbers=left}
+
+% captions
+\captionsetup{font=small,labelfont=bf,margin=10pt,format=hang}
+
+% lengths
+\setlength{\parindent}{2em}
+\setstretch{1.25}
+\tolerance=1000
+\emergencystretch=3em
+
+\endinput

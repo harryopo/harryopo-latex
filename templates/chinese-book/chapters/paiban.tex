@@ -1,0 +1,303 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  paiban.tex — 排版技巧
+%  演示 kaobookCJKsc 的高级排版功能与布局控制
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setchapterpreamble[u]{\margintoc}
+\chapter{排版技巧}
+\labch{paiban}
+
+本章深入介绍 \Class{kaobookCJKsc} 的高级排版功能：页面布局切换、
+Part 标题定制、彩色提示框（\texttt{sidebox}）、解答环境（\texttt{solutions}）
+以及代码块展示。掌握这些技巧，可以让你的书籍排版兼具专业感与美观性。
+
+%----------------------------------------------------------------------------------------
+
+\section{页面布局——\texttt{\textbackslash pagelayout}}
+
+\index{排版!页面布局}
+\index{排版!pagelayout@\texttt{\textbackslash pagelayout}}
+
+\Class{kaobookCJKsc} 提供了三种页面布局模式，通过
+\lstinline|\pagelayout{}| 命令切换：
+
+\subsection{wide 布局——全宽模式}
+
+\index{排版!wide 布局}
+在 \texttt{wide} 布局下，页面边注区域被压缩为零，正文占据几乎全部页面宽度。
+这种布局适合以下场景：
+\begin{itemize}
+    \item 前言（frontmatter）、后记（backmatter）——自动使用
+    \item Part 标题页面
+    \item 大幅图表或全宽代码展示
+\end{itemize}
+
+\begin{lstlisting}
+\pagelayout{wide}   % 切换为全宽布局
+% ... 放置全宽内容 ...
+\pagelayout{margin} % 恢复边注布局
+\end{lstlisting}
+
+\subsection{margin 布局——边注模式（默认）}
+
+\index{排版!margin 布局}
+\texttt{margin} 布局是正文（mainmatter）的默认模式。页面右侧保留了宽度约
+47.7mm 的边注区域，用于放置页边注释（\texttt{\textbackslash marginnote}）、
+侧边引用（\texttt{\textbackslash sidecite}）和页边目录
+（\texttt{\textbackslash margintoc}）。
+
+\begin{lstlisting}
+\pagelayout{margin}  % 切换为边注布局
+\end{lstlisting}
+
+\subsection{fullwidth 布局——无边距模式}
+
+\index{排版!fullwidth 布局}
+\texttt{fullwidth} 布局完全去除页边距，页面内容铺满纸张。适合用于特殊
+插图页或封面类内容。
+
+\begin{lstlisting}
+\pagelayout{fullwidth}
+\end{lstlisting}
+
+\subsection{页面布局的内部机制}
+
+\index{排版!内部机制}
+在底层，\lstinline|\pagelayout{margin}| 调用 \lstinline|\marginlayout|，
+后者通过 \Package{geometry} 的 \lstinline|\newgeometry| 设置精确的页面
+尺寸。你可以通过重定义 \lstinline|\marginlayout| 来微调版心参数：
+
+\begin{lstlisting}
+\renewcommand{\marginlayout}{%
+    \newgeometry{
+        top=27.4mm,
+        bottom=27.4mm,
+        inner=24.8mm,
+        textwidth=117mm,        % 加宽 10mm
+        marginparsep=8.2mm,
+        marginparwidth=39.4mm,  % 减窄 10mm
+    }%
+}
+\end{lstlisting}
+
+\marginnote{修改 \texttt{\textbackslash marginlayout} 后，%
+还需相应调整 \texttt{\textbackslash widelayout} 以保证一致性。}
+
+%----------------------------------------------------------------------------------------
+
+\section{Part 标题——\texttt{\textbackslash addpart}}
+
+\index{排版!addpart@\texttt{\textbackslash addpart}}
+\index{排版!Part 标题}
+
+在 \Class{kaobookCJKsc} 中，\lstinline|\part{}| 用于创建结构化的部分标题。
+由于 \Class{scrbook} 的 \lstinline|\part{}| 会单独占据一页，通常建议在
+切换页面布局的语境下使用。本模板提供了 \lstinline|\addpart{}| 命令，
+可以创建一个不产生单独页码的 Part 标题页。
+
+推荐的使用模式：
+\begin{lstlisting}
+\pagelayout{wide}           % 先用全宽布局
+\addpart{第一部分：基础篇}  % 添加 Part 标题
+\pagelayout{margin}         % 恢复边注布局
+% 后续章节...
+\input{chapters/chapter1}
+\end{lstlisting}
+
+\index{排版!setpartimage@\texttt{\textbackslash setpartimage}}
+Part 页面还可以搭配背景图片：
+\begin{lstlisting}
+\setpartimage{images/part-bg.jpg}
+\part{第二部分：进阶篇}
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{彩色提示框——\texttt{sidebox} 环境}
+
+\index{排版!sidebox@\texttt{sidebox}}
+
+\texttt{sidebox} 是 \Package{kaoWinCJKsc} 提供的高颜值彩色提示框环境，
+采用双横线设计风格，非常适合展示注意事项、小贴士、补充说明等内容。
+
+\subsection{基本用法}
+
+\begin{lstlisting}
+\begin{sidebox}{提示}
+这是一个重要的提示信息。sidebox 环境会自动添加双横线边框和居中的标题。
+\end{sidebox}
+\end{lstlisting}
+
+效果如下：
+
+\begin{sidebox}{提示}
+这是一个重要的提示信息。\Env{sidebox} 环境会自动添加双横线边框和居中的标题。
+它打破常规文本框的思维定式，以极简的双线设计让读者的注意力聚焦在内容本身。
+\end{sidebox}
+
+\subsection{浮动 sidebox——\texttt{sidebox*}}
+
+\index{排版!sidebox*@\texttt{sidebox*}}
+如果需要将提示框作为浮动体（类似图表），可使用带星号的版本：
+
+\begin{lstlisting}
+\begin{sidebox*}{关键发现}
+本模板基于 kaobook 体系，专为中文排版优化。
+所有方正字体命令可在 \texttt{kaoWinCJKsc.sty} 中找到定义。
+\end{sidebox*}
+\end{lstlisting}
+
+\begin{sidebox*}{关键发现}
+本模板基于 kaobook 体系，专为中文排版优化。
+所有方正字体命令可在 \Package{kaoWinCJKsc} 中找到定义。
+\end{sidebox*}
+
+\subsection{自定义 sidebox 样式}
+
+\texttt{sidebox} 实际上是对 \Package{tcolorbox} 的封装，因此可以传递
+\Package{tcolorbox} 的所有选项：
+
+\begin{lstlisting}
+\begin{sidebox}[colback=blue!5!white, colframe=blue!50!black]{技术说明}
+蓝色风格的提示框，适合技术性内容的补充说明。
+\end{sidebox}
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{解答环境——\texttt{solutions}}
+
+\index{排版!solutions@\texttt{solutions}}
+
+\texttt{solutions} 环境是 \texttt{sidebox} 的一个特殊变体，专门用于
+书写习题解答或分步操作指南。它的标题默认为「解答」，边框线颜色稍浅，
+视觉上与正文形成柔和区分。
+
+\begin{lstlisting}
+\begin{solutions}
+第一步：编译模板文件。
+第二步：检查输出 PDF。
+第三步：根据需要调整选项。
+\end{solutions}
+\end{lstlisting}
+
+\begin{solutions}
+第一步：编译模板文件。
+第二步：检查输出 PDF。如果遇到字体缺失问题，请确认方正字库已正确安装。
+第三步：根据需要调整 \texttt{main.tex} 中的文档类选项和配置参数。
+\end{solutions}
+
+你也可以通过可选参数自定义解答环境的标题：
+
+\begin{lstlisting}
+\begin{solutions}[详细步骤]
+% ... 解答内容 ...
+\end{solutions}
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{代码块展示}
+
+\index{排版!代码块}
+\index{排版!lstlisting@\texttt{lstlisting}}
+
+\Package{listings}（由 \Package{kaoWinCJKsc} 预配置）提供了强大的
+代码展示能力。预设样式包括：
+
+\subsection{fancy 样式（kaolst）——默认}
+
+带有行号、左侧框线和语法高亮的代码样式：
+
+\begin{lstlisting}[caption={XeLaTeX 编译脚本示例}, label={lst:build}]
+# PowerShell 编译脚本
+$texfile = "main.tex"
+for ($i = 0; $i -lt 3; $i++) {
+    xelatex $texfile
+}
+Write-Host "编译完成！"
+\end{lstlisting}
+
+\subsection{plain 样式（kaolstplain）}
+
+无行号、无边框的简洁样式，适合展示短代码片段：
+
+\begin{lstlisting}[style=kaolstplain]
+\documentclass[a4paper,fontsize=10pt]{kaobookCJKsc}
+\usepackage{kaoWinCJKsc}
+\begin{document}
+\chapter{你好，世界！}
+\end{document}
+\end{lstlisting}
+
+\subsection{自定义样式}
+
+你可以创建自己的代码样式：
+
+\begin{lstlisting}
+\lstdefinestyle{mystyle}{
+    basicstyle=\ttfamily\small,
+    numbers=none,
+    frame=none,
+    backgroundcolor=\color{gray!5},
+    keywordstyle=\color{blue!60!black},
+}
+% 使用：\begin{lstlisting}[style=mystyle] ... \end{lstlisting}
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{全宽段落——\texttt{widepar} 环境}
+
+\index{排版!widepar@\texttt{widepar}}
+
+有时你需要将某个段落扩展到页面的全宽显示，但又不希望改变全局布局。
+\texttt{widepar} 环境正是为此设计：
+
+\begin{lstlisting}
+\begin{widepar}
+这段文字将占据整个页面的宽度，包括通常留给边注的区域。
+这对于展示宽表格、长公式或需要特别强调的段落非常有用。
+\end{widepar}
+\end{lstlisting}
+
+\begin{widepar}
+\noindent\color{chaptercolor}\rule{\textwidth+\marginparsep+\marginparwidth}{1pt}
+\medskip
+
+这段话占据了页面的全宽——它不仅填满了正文区域，还延伸到了边注区域。
+对于需要特别关注的「重要提示」或宽幅引用，\Environment{widepar} 是一个极佳的选择。
+
+\medskip
+\color{chaptercolor}\rule{\textwidth+\marginparsep+\marginparwidth}{1pt}
+\end{widepar}
+
+%----------------------------------------------------------------------------------------
+
+\section{排版技巧速查表}
+
+以下表格汇总了本章涉及的排版命令：
+
+\begin{table}[h]
+\centering
+\caption{排版命令速查}
+\labtab{paiban-quick}
+\begin{tabular}{@{}ll@{}}
+\toprule
+功能 & 命令/环境 \\
+\midrule
+切换为全宽布局 & \lstinline|\pagelayout{wide}| \\
+切换为边注布局 & \lstinline|\pagelayout{margin}| \\
+添加 Part 标题 & \lstinline|\addpart{标题}| \\
+提示框 & \lstinline|\begin{sidebox}{标题}...\end{sidebox}| \\
+解答环境 & \lstinline|\begin{solutions}...\end{solutions}| \\
+代码块 & \lstinline|\begin{lstlisting}...\end{lstlisting}| \\
+全宽段落 & \lstinline|\begin{widepar}...\end{widepar}| \\
+页边注释 & \lstinline|\marginnote{文本}| \\
+页边目录 & \lstinline|\setchapterpreamble[u]{\margintoc}| \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+掌握以上排版工具后，你可以轻松构建出层次分明、视觉优雅的中文书籍。
+下一章将介绍如何从零开始组织自己的书籍结构和内容。

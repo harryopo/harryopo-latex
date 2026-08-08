@@ -1,0 +1,167 @@
+\setchapterimage[8cm]{Paul Pastour (2).jpg}
+\setchapterpreamble[u]{\margintoc}
+\chapter{数学}
+\labch{数学}
+
+\section{定理}
+
+尽管大多数人看到充满方程式的书时会抱怨，但数学是许多书籍的重要部分。在这里，我们将展示一些可能性。我们认为定理、定义、评论和例子应该用阴影背景来强调；然而，颜色不应对眼睛过于沉重，所以我们选择了一种淡黄色。\sidenote{这里的所有盒子都是同样的颜色，因为我们不想让我们的文档看起来像 \href{https://en.wikipedia.org/wiki/Harlequin}{Harlequin}。}
+
+\begin{Definition}
+	\labdef{openset}
+	Let $(X, d)$ be a metric space. A subset $U \subset X$ is an open set
+	if, for any $x \in U$ there exists $r > 0$ such that $B(x, r) \subset
+		U$. We call the topology associated to d the set $\tau\textsubscript{d}$
+	of all the open subsets of $(X, d).$
+\end{Definition}
+
+\refdef{openset} 是非常重要的。我不是在开玩笑，但我插入这句话只是为了展示如何引用定义。以下声明在不同的环境中反复出现。
+
+\begin{Theorem}
+	一个有限个(X, d)的开集的交集是(X, d)的一个开集，即 $\tau\textsubscript{d}$ 在有限交集下是封闭的。任何(X, d)的开集的并集都是(X, d)的一个开集。
+\end{Theorem}
+
+\begin{Proposition}
+	一个有限个(X, d)的开集的交集是(X, d)的一个开集，即 $\tau\textsubscript{d}$ 在有限交集下是封闭的。任何(X, d)的开集的并集都是(X, d)的一个开集。
+\end{Proposition}
+
+\marginnote{您甚至可以在定理环境内插入脚注；它们将显示在箱子的底部。}
+
+\begin{Lemma}
+	一个有限个(X, d)的开集的交集\footnote{我是一个脚注}是(X, d)的一个开集，即 $\tau\textsubscript{d}$ 在有限交集下是封闭的。任何(X, d)的开集的并集都是(X, d)的一个开集。
+\end{Lemma}
+
+您可以放心地忽略这些定理的内容……我假设如果您对在您的书中加入定理感兴趣，您已经对如何传统地添加它们有所了解。这些示例应该只是展示您在这个类中可以做的所有事情。
+
+\begin{Corollary}[有限交集，可数并集]
+	一个有限个(X, d)的开集的交集是(X, d)的一个开集，即 $\tau\textsubscript{d}$ 在有限交集下是封闭的。任何(X, d)的开集的并集都是(X, d)的一个开集。
+\end{Corollary}
+
+\begin{Proof*}
+	证明留给读者作为一个简单的练习。
+\end{Proof*}
+
+\begin{Definition}
+	设 $(X, d)$ 是一个度量空间。如果对于任何 $x \in U$ 存在 $r > 0$ 使得 $B(x, r) \subset U$，那么子集 $U \subset X$ 是一个开集。我们称与 d 相关的拓扑为集合 $\tau\textsubscript{d}$，它包含所有 $(X, d)$ 的开子集。
+\end{Definition}
+
+\marginnote{
+	Here is a random equation, just because we can:
+	\begin{equation*}
+		x = a_0 + \cfrac{1}{a_1
+			+ \cfrac{1}{a_2
+				+ \cfrac{1}{a_3 + \cfrac{1}{a_4} } } }
+	\end{equation*}
+}
+
+\begin{Example}
+	设 $(X, d)$ 是一个度量空间。如果对于任何 $x \in U$ 存在 $r > 0$ 使得 $B(x, r) \subset U$，那么子集 $U \subset X$ 是一个开集。我们称与 d 相关的拓扑为集合 $\tau\textsubscript{d}$，它包含所有 $(X, d)$ 的开子集。
+\end{Example}
+
+\begin{remark}
+	设 $(X, d)$ 是一个度量空间。如果对于任何 $x \in U$ 存在 $r > 0$ 使得 $B(x, r) \subset U$，那么子集 $U \subset X$ 是一个开集。我们称与 d 相关的拓扑为集合 $\tau\textsubscript{d}$，它包含所有 $(X, d)$ 的开子集。
+\end{remark}
+
+您可能已经注意到，定义、示例和注解有独立的计数器；定理、命题、引理和推论共享相同的计数器。
+
+\begin{remark}
+	这里是一个内联的积分的样子：$\int_{a}^{b} x^2 dx$，下面是同一个积分单独显示在自己的段落中：
+	\[\int_{a}^{b} x^2 dx\]
+\end{remark}
+
+还有一个用于习题的环境。
+
+\begin{exercise}
+	证明（或反驳）黎曼假设。
+\end{exercise}
+
+我们提供了一个用于定理样式的包：\href{kaotheoremsCJK.sty}{kaotheoremsCJK.sty}，您可以传递 \Option{framed} 选项，如果您希望定理周围有彩色框，就像在这个文档中一样。\sidenote{没有 \Option{framed} 的样式没有展示出来，但实际上唯一的区别是它们没有黄色框。} 您可能想根据您的喜好和书籍的总体样式编辑这些文件。然而，如果您使用 \Option{framed} 选项，有一个自定义框背景颜色的选项：当您加载这个包时，您可以传递 \Option{background=mycolour} 选项（将“mycolour”替换为实际颜色，例如，“red!35!white”）。这将改变所有框的颜色，但也可以覆盖某些元素的默认颜色。例如，\Option{propositionbackground=mycolour} 选项将只改变命题的颜色。定理、定义、引理、推论、注释和示例都有类似的选项。
+
+\section[块]{块
+  \sidenote[][*1.8]{请注意，在目录和页眉中，本节的名称是 \enquote{Boxes \& Environments};
+  我们通过使用了 \texttt{section} 命令。}}
+
+  假设您想插入一个特殊的章节、一个可选的内容或者只是某些您想强调的东西。我们认为在这些情况下，没有什么比一个框更有效了。我们使用了 \Package{mdframed} 来构建下面展示的框。您可以通过编辑提供的文件 \href{kaoCJK.sty}{kaoCJK.sty} 来创建和修改这样的环境。
+
+\begin{kaobox}[frametitle=Box的标题]
+	\zhlipsum[2]
+\end{kaobox}
+
+如果您设置了一个计数器，甚至可以创建您自己的编号环境。
+
+\begin{kaocounter}
+	\zhlipsum[1]
+\end{kaocounter}
+
+\section{实验特性}
+
+也可以将边注包裹在框内。鼓励大胆的读者尝试自己的实验，并告知我结果。
+
+\marginnote[-2.2cm]{
+	\begin{kaobox}[frametitle=边注的标题]
+		边注内的 kaobox。\\
+		（实际上，是在 marginnote 内部的 kaobox！）
+	\end{kaobox}
+}
+
+我相信使用 \Class{kaobook} 类可以实现许多其他特殊的事情。在它的开发过程中，我努力保持尽可能的灵活性，这样就可以在不投入太大努力的情况下添加新特性。因此，我希望您能够找到用这个类书写书籍、报告或论文的最佳方式，我也很期待看到您可能尝试的任何实验的结果。
+
+下面尝试一些彩色的边框：
+
+在数学中，毕达哥拉斯定理（也称为毕达哥拉斯的定理，该是欧几里得几何中关于直角三角形三边的一个关系。
+
+% 这是对Bézout引理（示例标签：\texttt{lem:bezout}）的引用 —— 实际使用时需要先定义该引理并添加 \verb|\label{lem:bezout}|。
+
+证明如下：
+
+如果 $x=y=\sqrt{2}$ 是一个例子，那么我们完成了；否则 $\sqrt{2}^{\sqrt{2}}$ 是无理数，在这种情况下取 $x=\sqrt{2}^{\sqrt{2}}$ 和 $y=\sqrt{2}$ 给我们：
+\[\bigg(\sqrt{2}^{\sqrt{2}}\bigg)^{\sqrt{2}}=\sqrt{2}^{\sqrt{2}\sqrt{2}}=\sqrt{2}^{2}=2.\]
+
+解答如下：
+
+如果 $x=y=\sqrt{2}$ 是一个例子，那么我们完成了；否则 $\sqrt{2}^{\sqrt{2}}$ 是无理数，在这种情况下取 $x=\sqrt{2}^{\sqrt{2}}$ 和 $y=\sqrt{2}$ 给我们：
+\[\bigg(\sqrt{2}^{\sqrt{2}}\bigg)^{\sqrt{2}}=\sqrt{2}^{\sqrt{2}\sqrt{2}}=\sqrt{2}^{2}=2.\]
+
+\section{高等数学风格}
+
+模仿同济版高等数学经典风格。
+
+\begin{Definition}
+	设 $(X, d)$ 是一个度量空间。如果对于任何 $x \in U$ 存在 $r > 0$ 使得 $B(x, r) \subset U$，那么子集 $U \subset X$ 是一个开集。我们称与 d 相关的拓扑为集合 $\tau\textsubscript{d}$，它包含所有 $(X, d)$ 的开子集。
+\end{Definition}
+
+\begin{Theorem}[某个定理]\label{thm:some-theorem}
+	这是一个重要的定理。
+\end{Theorem}
+
+\begin{Corollary}[某个定理]
+	这是一个重要的推论。
+\end{Corollary}
+
+\begin{Definition}
+	设 $(X, d)$ 是一个度量空间。如果对于任何 $x \in U$ 存在 $r > 0$ 使得 $B(x, r) \subset U$，那么子集 $U \subset X$ 是一个开集。我们称与 d 相关的拓扑为集合 $\tau\textsubscript{d}$，它包含所有 $(X, d)$ 的开子集。
+\end{Definition}
+
+\begin{Theorem}[某个定理]
+	这是一个重要的定理。
+\end{Theorem}
+
+\setcounter{Corollary}{0} % 重新编号
+\begin{Corollary}[某个定理]
+	这是一个重要的推论。
+\end{Corollary}
+
+\begin{Proof*}
+	如果 $x=y=\sqrt{2}$ 是一个例子，那么我们完成了；否则 $\sqrt{2}^{\sqrt{2}}$ 是无理数，在这种情况下取 $x=\sqrt{2}^{\sqrt{2}}$ 和 $y=\sqrt{2}$ 给我们：
+	\[\bigg(\sqrt{2}^{\sqrt{2}}\bigg)^{\sqrt{2}}=\sqrt{2}^{\sqrt{2}\sqrt{2}}=\sqrt{2}^{2}=2。\qedhere\]
+\end{Proof*}
+
+\begin{Solution}
+	如果 $x=y=\sqrt{2}$ 是一个例子，那么我们完成了；否则 $\sqrt{2}^{\sqrt{2}}$ 是无理数，在这种情况下取 $x=\sqrt{2}^{\sqrt{2}}$ 和 $y=\sqrt{2}$ 给我们：
+	\[\bigg(\sqrt{2}^{\sqrt{2}}\bigg)^{\sqrt{2}}=\sqrt{2}^{\sqrt{2}\sqrt{2}}=\sqrt{2}^{2}=2。\qedhere\]
+\end{Solution}
+
+\begin{Proof}
+	如果 $x=y=\sqrt{2}$ 是一个例子，那么我们完成了；否则 $\sqrt{2}^{\sqrt{2}}$ 是无理数，在这种情况下取 $x=\sqrt{2}^{\sqrt{2}}$ 和 $y=\sqrt{2}$ 给我们：
+	\[\bigg(\sqrt{2}^{\sqrt{2}}\bigg)^{\sqrt{2}}=\sqrt{2}^{\sqrt{2}\sqrt{2}}=\sqrt{2}^{2}=2。\qedhere\]
+\end{Proof}

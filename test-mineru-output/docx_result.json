@@ -1,0 +1,114 @@
+{
+  "pdf_info": [
+    {
+      "para_blocks": [
+        {
+          "type": "title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "测试论文标题"
+                }
+              ]
+            }
+          ],
+          "index": 0,
+          "is_numbered_style": false,
+          "level": 1
+        },
+        {
+          "type": "title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "一、引言",
+                  "style": [
+                    "bold"
+                  ]
+                }
+              ]
+            }
+          ],
+          "index": 1,
+          "is_numbered_style": false,
+          "level": 1
+        },
+        {
+          "type": "text",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "这是一段测试文字，包含一些加粗文本和普通文本。"
+                }
+              ]
+            }
+          ],
+          "index": 2
+        },
+        {
+          "type": "title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "1.1 研究背景",
+                  "style": [
+                    "bold"
+                  ]
+                }
+              ]
+            }
+          ],
+          "index": 3,
+          "is_numbered_style": false,
+          "level": 2
+        },
+        {
+          "type": "text",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "数学公式测试：E=mc^2 是质能方程。"
+                }
+              ]
+            }
+          ],
+          "index": 4
+        },
+        {
+          "type": "table",
+          "blocks": [
+            {
+              "lines": [
+                {
+                  "spans": [
+                    {
+                      "type": "table",
+                      "html": "<table><tr><td><p>表头A</p></td><td><p>表头B</p></td><td><p>表头C</p></td></tr><tr><td><p>数据10</p></td><td><p>数据11</p></td><td><p>数据12</p></td></tr><tr><td><p>数据20</p></td><td><p>数据21</p></td><td><p>数据22</p></td></tr></table>"
+                    }
+                  ]
+                }
+              ],
+              "index": 5,
+              "type": "table_body"
+            }
+          ],
+          "index": 5
+        }
+      ],
+      "discarded_blocks": [],
+      "page_idx": 0
+    }
+  ],
+  "_backend": "office",
+  "_version_name": "3.0.4"
+}

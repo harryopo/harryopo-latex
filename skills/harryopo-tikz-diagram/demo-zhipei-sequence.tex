@@ -1,0 +1,462 @@
+% ============================================================
+%  智配桌面安装器 —— 一键部署时序图（智能布局版 v5，纯 TikZ）
+%
+%  【三次遍历架构】（彻底解决文字遮盖问题）
+%  Pass 1 (dry run):      仅推进Y游标、标记片段边界coordinate、不绘制任何可见元素
+%  Pass 2 (geometry):     重置Y，绘制所有几何（生命线/激活条/箭头/片段框/分隔线），NO TEXT
+%  Pass 3 (labels):       重置Y，只绘制文字标签（fill=white光晕在最顶层，遮盖一切）
+%  Final (top):           参与者头部、图例术语表（最最顶层）
+%
+%  核心原理：标签最后绘制 → 白色光晕100%遮盖下方线条/激活条/边框
+% ============================================================
+
+\documentclass[12pt]{ctexart}
+
+\usepackage{geometry}
+\geometry{paperwidth=23cm, paperheight=31.5cm, left=0.2cm, right=0.2cm, top=0.2cm, bottom=0.2cm}
+
+\usepackage{fontspec}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, backgrounds, fit, calc, positioning}
+
+\setmainfont{Arial}[Ligatures=TeX]
+\setsansfont{Arial}[Ligatures=TeX]
+\setmonofont{Consolas}[Scale=0.90]
+\setCJKsansfont{Microsoft YaHei}
+\setCJKmainfont{Microsoft YaHei}
+
+\definecolor{PaperBorder}{HTML}{B0C4DE}
+\definecolor{PaperFill}{HTML}{FFFFFF}
+\definecolor{PaperBg}{HTML}{F8FAFC}
+\definecolor{PaperTitle}{HTML}{2C3E50}
+\definecolor{PaperMuted}{HTML}{7F8C8D}
+\definecolor{AccentOrange}{HTML}{D35400}
+\definecolor{LifeLine}{HTML}{D5DBDB}
+\definecolor{ArrowSync}{HTML}{2C3E50}
+\definecolor{ArrowReturn}{HTML}{95A5A6}
+\definecolor{PhaseLine}{HTML}{E8ECEF}
+\definecolor{ActColor}{HTML}{D5DDE5}
+
+\newcommand{\code}[1]{{\ttfamily\color{AccentOrange}#1}}
+
+% 绘制模式开关
+\newif\ifgeom    % Pass 2: 几何元素（无文字）
+\newif\iflbl     % Pass 3: 文字标签（最顶层）
+
+\begin{document}
+\pagestyle{empty}
+\noindent
+
+% ===== 参与者X坐标（7个） =====
+\def\ux{0}    \def\zx{2.85} \def\dx{5.70} \def\rx{8.55}
+\def\dex{11.40}\def\bx{14.25} \def\ox{17.10}
+\def\rightEdge{18.0}
+\def\leftEdge{-0.9}
+
+% ===== Y坐标游标 =====
+\newdimen\y
+
+% 间距常量（超紧凑版：标签不重叠前提下最小化）
+\def\GapMsg{0.88}   % 同步消息间距
+\def\GapRet{1.00}   % 返回消息间距
+\def\GapSelf{1.40}  % 自关联间距（U型+标签）
+\def\GapPhase{0.28} % 阶段分隔线间距
+\def\FragPad{0.15}  % 片段框内边距
+\def\SelfLoopH{0.50}% 自关联U型高度
+
+\begin{tikzpicture}[
+    >=Stealth,
+    actor/.style={
+        rectangle, draw=PaperBorder, fill=PaperFill, text=PaperTitle,
+        line width=0.9pt, minimum width=2.1cm, minimum height=0.70cm,
+        font=\small\sffamily\bfseries, align=center,
+        rounded corners=5pt, inner sep=2pt,
+    },
+    lifeline/.style={draw=LifeLine, line width=0.6pt, dashed, dash pattern=on 4pt off 3pt},
+    act/.style={rectangle, fill=ActColor, draw=none, inner sep=0pt, minimum width=5pt, rounded corners=1pt},
+    fragbox-fill/.style={fill=PaperBg, draw=none, rounded corners=5pt, inner sep=6pt},
+    msg-line/.style={-{Stealth[length=6pt, width=5pt]}, draw=ArrowSync, line width=0.9pt},
+    ret-line/.style={-{Stealth[length=5pt, width=4pt, open]}, draw=ArrowReturn, line width=0.7pt, dashed, dash pattern=on 4pt off 3pt},
+    self-line/.style={draw=ArrowSync, line width=0.8pt, rounded corners=3pt},
+    pline/.style={draw=PhaseLine, line width=0.7pt},
+    fragbox-border/.style={draw=PaperBorder, fill=none, dashed, line width=0.7pt, rounded corners=5pt, inner sep=6pt},
+    % 标签样式：fill=white光晕，在最顶层绘制
+    lbl/.style={font=\footnotesize\sffamily, text=PaperTitle, fill=white, inner sep=2pt, outer sep=0pt},
+    rlbl/.style={font=\footnotesize\sffamily, text=PaperMuted, fill=white, inner sep=2pt, outer sep=0pt},
+    slbl/.style={font=\footnotesize\sffamily, text=PaperTitle, fill=white, inner sep=2pt, outer sep=0pt, align=center},
+    phase-lbl/.style={font=\footnotesize\sffamily\bfseries, text=PaperMuted, anchor=east,
+                      fill=white, inner sep=2pt, outer sep=0pt},
+    cond/.style={font=\scriptsize\sffamily\itshape, text=PaperMuted, anchor=west,
+                 fill=white, inner sep=2pt, outer sep=0pt},
+    fragname/.style={font=\footnotesize\sffamily\bfseries, text=PaperTitle, fill=PaperBg, inner sep=2pt},
+]
+
+% ===== 统一消息流宏（三次遍历共用，根据开关决定绘制内容）=====
+% 设计：同一套消息序列调用3次，每次\geom/\lbl开关决定画什么
+\newcommand{\adv}[1]{\advance\y by -#1 cm}
+
+\newcommand{\dophase}[1]{
+  \ifgeom
+    \draw[pline] (\leftEdge-0.1,\y) -- (\rightEdge+0.2,\y);
+  \fi
+  \iflbl
+    \node[phase-lbl] at (\leftEdge+0.1,\y) {#1};
+  \fi
+  \adv{\GapPhase}
+}
+
+\newcommand{\domsg}[3]{
+  \ifgeom
+    \pgfmathsetmacro\tmpx{#2}
+    \pgfmathsetmacro\userx{\ux}
+    \pgfmathparse{abs(\tmpx-\userx)<0.01}
+    \ifnum\pgfmathresult=0
+      \node[act, anchor=north, minimum height=0.58cm] at (#2,\y) {};
+    \fi
+    \draw[msg-line] (#1,\y) -- (#2,\y);
+  \fi
+  \iflbl
+    \node[lbl, anchor=south] at ($(#1,\y)!0.5!(#2,\y)+(0,2pt)$) {#3};
+  \fi
+  \adv{\GapMsg}
+}
+
+\newcommand{\doret}[3]{
+  \ifgeom
+    \draw[ret-line] (#1,\y) -- (#2,\y);
+  \fi
+  \iflbl
+    \node[rlbl, anchor=north] at ($(#1,\y)!0.5!(#2,\y)+(0,-2pt)$) {#3};
+  \fi
+  \adv{\GapRet}
+}
+
+\newcommand{\doself}[2]{
+  \ifgeom
+    \draw[self-line] (#1,\y) -- (#1+0.55,\y) -- (#1+0.55,\y-\SelfLoopH cm) -- (#1,\y-\SelfLoopH cm);
+  \fi
+  \iflbl
+    \node[slbl, anchor=north] at (#1+0.275,\y-\SelfLoopH cm-1pt) {#2};
+  \fi
+  \adv{\GapSelf}
+}
+
+\newcommand{\docond}[1]{
+  \ifgeom
+    % 几何层不画条件标签
+  \fi
+  \iflbl
+    \node[cond] at (\leftEdge+0.15,\y) {#1};
+  \fi
+  \adv{\FragPad}
+}
+
+\newcommand{\domarkpt}[2]{
+  \coordinate (#1) at (#2);
+}
+
+% ===================================================================
+%  Pass 1: Dry Run —— 仅标记片段边界点、推进Y到最终位置（不画任何可见元素）
+% ===================================================================
+\geomfalse
+\lblfalse
+\y=-0.9cm
+
+\adv{\GapPhase}
+\dophase{推荐}
+
+\domsg{\ux}{\zx}{启动应用}
+\domsg{\zx}{\dx}{扫描硬件参数}
+\doself{\dx}{执行检测}
+\doret{\dx}{\zx}{硬件参数}
+\domsg{\zx}{\rx}{传递硬件参数}
+\doret{\rx}{\zx}{推荐方案}
+
+\dophase{确认}
+
+\domsg{\zx}{\ux}{展示推荐方案}
+
+% alt顶部标记
+\domarkpt{alt-nw}{\leftEdge,\y}
+\domarkpt{alt-ne}{\rightEdge,\y}
+\adv{\FragPad}
+
+\domsg{\ux}{\zx}{确认部署}
+
+\adv{\FragPad}
+
+\domsg{\zx}{\dex}{下发部署任务}
+\doself{\dex}{编排部署流程}
+\domsg{\dex}{\bx}{\code{POST /api/install}}
+
+\dophase{安装}
+
+\domsg{\bx}{\ox}{安装 \code{Ollama}}
+\doret{\ox}{\bx}{\code{200 OK}}
+\doret{\bx}{\dex}{核心服务就绪}
+
+% loop顶部标记
+\adv{\FragPad}
+\domarkpt{loop-nw}{13.8,\y}
+\domarkpt{loop-ne}{\rightEdge,\y}
+
+\domsg{\bx}{\ox}{\code{POST /api/pull}}
+\doret{\ox}{\bx}{流式进度回调}
+
+\domarkpt{loop-sw}{13.8,\y}
+\domarkpt{loop-se}{\rightEdge,\y}
+\adv{\FragPad}
+
+\dophase{WebUI}
+
+\domsg{\bx}{\ox}{启动 \code{Open WebUI}}
+\doret{\ox}{\bx}{\code{Ready:11434}}
+\doret{\bx}{\dex}{全部服务就绪}
+
+\dophase{完成}
+
+\doret{\dex}{\zx}{更新部署状态}
+\doret{\zx}{\ux}{部署成功，请访问}
+
+% alt分支分隔线（上分支结束后留间距）
+\adv{0.35}
+\domarkpt{alt-mid}{\leftEdge,\y}
+
+% [用户取消]条件标签在Final Layer基于alt-mid定位，这里只推进Y
+\adv{0.08}
+
+\doret{\zx}{\ux}{取消，返回推荐页}
+
+\adv{0.22}
+\domarkpt{alt-sw}{\leftEdge,\y}
+\domarkpt{alt-se}{\rightEdge,\y}
+
+% 生命线结束位置
+\newdimen\yLifeEnd
+\yLifeEnd=\y
+\advance\yLifeEnd by -0.4cm
+
+% ===================================================================
+%  Pass 2: Geometry —— 绘制所有几何元素（无文字）
+% ===================================================================
+\geomtrue
+\lblfalse
+\y=-0.9cm
+
+% ----- Layer 0 (background): 片段框fill + 生命线 -----
+\begin{scope}[on background layer]
+  \node[fragbox-fill, fit=(alt-nw)(alt-se)] {};
+  \node[fragbox-fill, fit=(loop-nw)(loop-se)] {};
+  \draw[lifeline] (\ux,-0.6)  -- (\ux,\yLifeEnd);
+  \draw[lifeline] (\zx,-0.6)  -- (\zx,\yLifeEnd);
+  \draw[lifeline] (\dx,-0.6)  -- (\dx,\yLifeEnd);
+  \draw[lifeline] (\rx,-0.6)  -- (\rx,\yLifeEnd);
+  \draw[lifeline] (\dex,-0.6) -- (\dex,\yLifeEnd);
+  \draw[lifeline] (\bx,-0.6)  -- (\bx,\yLifeEnd);
+  \draw[lifeline] (\ox,-0.6)  -- (\ox,\yLifeEnd);
+\end{scope}
+
+% ----- Layer 1: 消息几何（phase线、激活条、箭头、自关联）-----
+\adv{\GapPhase}
+\dophase{推荐}
+
+\domsg{\ux}{\zx}{启动应用}
+\domsg{\zx}{\dx}{扫描硬件参数}
+\doself{\dx}{执行检测}
+\doret{\dx}{\zx}{硬件参数}
+\domsg{\zx}{\rx}{传递硬件参数}
+\doret{\rx}{\zx}{推荐方案}
+
+\dophase{确认}
+
+\domsg{\zx}{\ux}{展示推荐方案}
+
+\adv{\FragPad}
+
+\domsg{\ux}{\zx}{确认部署}
+
+\adv{\FragPad}
+
+\domsg{\zx}{\dex}{下发部署任务}
+\doself{\dex}{编排部署流程}
+\domsg{\dex}{\bx}{\code{POST /api/install}}
+
+\dophase{安装}
+
+\domsg{\bx}{\ox}{安装 \code{Ollama}}
+\doret{\ox}{\bx}{\code{200 OK}}
+\doret{\bx}{\dex}{核心服务就绪}
+
+\adv{\FragPad}
+
+\domsg{\bx}{\ox}{\code{POST /api/pull}}
+\doret{\ox}{\bx}{流式进度回调}
+
+\adv{\FragPad}
+
+\dophase{WebUI}
+
+\domsg{\bx}{\ox}{启动 \code{Open WebUI}}
+\doret{\ox}{\bx}{\code{Ready:11434}}
+\doret{\bx}{\dex}{全部服务就绪}
+
+\dophase{完成}
+
+\doret{\dex}{\zx}{更新部署状态}
+\doret{\zx}{\ux}{部署成功，请访问}
+
+\adv{0.35}
+
+% [用户取消]条件标签在Final Layer绘制，这里只推进Y
+\adv{0.08}
+
+\doret{\zx}{\ux}{取消，返回推荐页}
+
+\adv{0.22}
+
+% ----- Layer 2: 片段边框 + 分隔线 + 五边形 -----
+\node[fragbox-border, fit=(alt-nw)(alt-se)] (alt-box) {};
+\draw[draw=PaperBorder, dashed, line width=0.6pt]
+  let \p1=(alt-box.west), \p2=(alt-box.east), \p3=(alt-mid) in
+  (\x1,\y3) -- (\x2,\y3);
+\fill[PaperBg]
+  (alt-box.north west) -- ++(0.60,0) -- ++(0,-0.32) -- ++(-0.18,-0.18) -- ++(-0.42,0) -- cycle;
+\draw[draw=PaperBorder, dashed, line width=0.6pt]
+  (alt-box.north west) -- ++(0.60,0) -- ++(0,-0.32) -- ++(-0.18,-0.18) -- ([yshift=-0.50cm]alt-box.north west) -- cycle;
+
+\node[fragbox-border, fit=(loop-nw)(loop-se)] (loop-box) {};
+\fill[PaperBg]
+  (loop-box.north west) -- ++(0.95,0) -- ++(0,-0.32) -- ++(-0.18,-0.18) -- ++(-0.77,0) -- cycle;
+\draw[draw=PaperBorder, dashed, line width=0.6pt]
+  (loop-box.north west) -- ++(0.95,0) -- ++(0,-0.32) -- ++(-0.18,-0.18) -- ([yshift=-0.50cm]loop-box.north west) -- cycle;
+
+% ===================================================================
+%  Pass 3: Labels —— 只绘制文字标签（最顶层，fill=white光晕遮盖所有几何）
+% ===================================================================
+\geomfalse
+\lbltrue
+\y=-0.9cm
+
+\adv{\GapPhase}
+\dophase{推荐}
+
+\domsg{\ux}{\zx}{启动应用}
+\domsg{\zx}{\dx}{扫描硬件参数}
+\doself{\dx}{执行检测}
+\doret{\dx}{\zx}{硬件参数}
+\domsg{\zx}{\rx}{传递硬件参数}
+\doret{\rx}{\zx}{推荐方案}
+
+\dophase{确认}
+
+\domsg{\zx}{\ux}{展示推荐方案}
+
+\adv{\FragPad}
+
+\domsg{\ux}{\zx}{确认部署}
+
+\adv{\FragPad}
+
+\domsg{\zx}{\dex}{下发部署任务}
+\doself{\dex}{编排部署流程}
+\domsg{\dex}{\bx}{\code{POST /api/install}}
+
+\dophase{安装}
+
+\domsg{\bx}{\ox}{安装 \code{Ollama}}
+\doret{\ox}{\bx}{\code{200 OK}}
+\doret{\bx}{\dex}{核心服务就绪}
+
+\adv{\FragPad}
+
+\domsg{\bx}{\ox}{\code{POST /api/pull}}
+\doret{\ox}{\bx}{流式进度回调}
+
+\adv{\FragPad}
+
+\dophase{WebUI}
+
+\domsg{\bx}{\ox}{启动 \code{Open WebUI}}
+\doret{\ox}{\bx}{\code{Ready:11434}}
+\doret{\bx}{\dex}{全部服务就绪}
+
+\dophase{完成}
+
+\doret{\dex}{\zx}{更新部署状态}
+\doret{\zx}{\ux}{部署成功，请访问}
+
+\adv{0.35}
+
+% [用户取消]标签在Final Layer基于alt-mid坐标定位
+\adv{0.08}
+
+\doret{\zx}{\ux}{取消，返回推荐页}
+
+\adv{0.22}
+
+% ===================================================================
+%  Final Layer (最最顶层): 参与者头部 + 片段名 + 图例术语表
+% ===================================================================
+
+% 参与者头部（盖住生命线顶端）
+\node[actor] (U)  at (\ux cm,0)     {User};
+\node[actor] (Z)  at (\zx cm,0)     {智配安装器};
+\node[actor] (D)  at (\dx cm,0)     {硬件检测};
+\node[actor] (R)  at (\rx cm,0)     {推荐引擎};
+\node[actor] (De) at (\dex cm,0)    {一键部署器};
+\node[actor] (B)  at (\bx cm,0)     {后端 API};
+\node[actor] (O)  at (\ox cm,0)     {Ollama};
+
+% 片段名文字（五边形内）+ 条件标签
+\node[fragname] at ($(alt-box.north west)+(0.16,-0.24)$) {alt};
+\node[cond, anchor=west] at ($(alt-box.north west)+(0.20,-0.48)$) {[用户确认]};
+\draw let \p1=(alt-mid) in
+  node[cond, anchor=west] at (\leftEdge+0.12,\y1-0.08) {[用户取消]};
+
+\node[fragname] at ($(loop-box.north west)+(0.30,-0.24)$) {loop};
+\node[cond, anchor=west, text=PaperTitle] at ($(loop-box.north west)+(0.56,-0.24)$) {直到下载完成};
+
+% 图例 + 术语表（不嵌套tikzpicture，用纯文字+简单标记）
+\advance\y by -0.5cm
+
+\node[draw=PaperBorder, fill=PaperFill, rounded corners=4pt, inner sep=4pt,
+      text width=6.5cm, anchor=north east, font=\scriptsize\sffamily,
+      line width=0.6pt] at (\rightEdge+0.0,\y) (glossary) {
+    \textbf{\footnotesize 术语表}\\[1pt]
+    \code{POST /api/install}：后端一键部署接口\\[0.5pt]
+    \code{POST /api/pull}：后端拉取模型接口（流式）\\[0.5pt]
+    \code{Ollama}：本地大模型推理引擎，端口 \code{11434}\\[0.5pt]
+    \code{Open WebUI}：类 ChatGPT 对话前端\\[0.5pt]
+    \code{Ready:11434}：Ollama 就绪信号
+};
+
+\node[draw=PaperBorder, fill=PaperFill, rounded corners=4pt, inner sep=4pt,
+      text width=3.8cm, anchor=north east, font=\scriptsize\sffamily,
+      line width=0.6pt] at ([xshift=-0.15cm]glossary.north west) (legend) {
+    \textbf{\footnotesize 图例}\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ArrowSync}{\rule[-0.5pt]{0.7cm}{0.8pt}$\rightarrow$}}同步调用\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ArrowReturn}{\rule[-0.5pt]{0.7cm}{0.4pt}\,$\rightarrow$}}返回消息\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ArrowSync}{$\cap$}}自关联\\[1pt]
+    \makebox[0.9cm][l]{\textcolor{ActColor}{\rule{2.5pt}{5pt}}}激活条
+};
+
+% ===== 标题（图底部居中，glossary下方）=====
+\path (glossary.south) ++(0,-0.3cm) coordinate (title-pos);
+\coordinate (title-cx) at ({(\leftEdge+\rightEdge)/2+0.2cm},0);
+\node[font=\normalsize\bfseries\sffamily, text=PaperTitle, anchor=north]
+  at (title-cx |- title-pos) {一键部署模型时序图};
+\path (title-pos) ++(0,-0.5cm) coordinate (title-en-pos);
+\node[font=\scriptsize\itshape\sffamily, text=PaperMuted, anchor=north]
+  at (title-cx |- title-en-pos)
+  {One-Click Model Deployment --- Sequence Diagram};
+
+% ===== Bounding Box（精确贴合内容）=====
+\path (title-en-pos) ++(0,-0.4cm) coordinate (bb-bottom);
+\coordinate (bb-tl) at (\leftEdge-0.3cm,0.4cm);
+\coordinate (bb-br) at (\rightEdge+0.5cm,0);
+\coordinate (bb-bl) at (\leftEdge-0.3cm,0);
+\path[use as bounding box] (bb-tl) rectangle (bb-br |- bb-bottom);
+
+\end{tikzpicture}%
+
+\end{document}

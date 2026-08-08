@@ -1,0 +1,75 @@
+\documentclass[nomath]{harryopo-paper}
+
+\title{图像识别研究报告}
+\author{研究员}
+\date{2026年08月08日}
+
+
+\begin{document}
+
+\maketitle
+
+\section*{一、引言}
+\addcontentsline{toc}{section}{一、引言}
+
+本文研究\fzht{深度学习}在图像识别中的应用。
+
+\subsection*{1.1 方法}
+\addcontentsline{toc}{subsection}{1.1 方法}
+
+实验配置如下表：
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+    \toprule
+    \fzht{模型} & \fzht{准确率} & \fzht{速度} \\
+    \midrule
+    ResNet-50 & 94.2\% & 1.2s \\
+    EfficientNet & 95.1\% & 0.8s \\
+    \bottomrule
+  \end{tabularx}
+  \caption{表1}
+\end{table}
+
+消融实验：
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \begin{tabular}{p{0.317\textwidth} p{0.317\textwidth} p{0.317\textwidth}}
+    \toprule
+    \multicolumn{2}{c}{\fzht{配置}} & \fzht{结果} \\
+    \midrule
+    baseline & 90.5\% & 无增强 \\
+    full & 96.8\% & 完整方案 \\
+    \bottomrule
+  \end{tabular}
+  \caption{表2}
+\end{table}
+
+多数据集：
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \begin{tabular}{p{0.475\textwidth} p{0.475\textwidth}}
+    \toprule
+    \fzht{模型} & \fzht{准确率} \\
+    \midrule
+    \multirow{2}{*}{Ours} & 98.5\% \\
+     & 85.3\% \\
+    \multirow{2}{*}{Base} & 95.2\% \\
+     & 78.9\% \\
+    \bottomrule
+  \end{tabular}
+  \caption{表3}
+\end{table}
+
+\section*{二、结论}
+\addcontentsline{toc}{section}{二、结论}
+
+实验证明所提方法有效。
+
+\end{document}

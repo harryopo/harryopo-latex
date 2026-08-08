@@ -1,0 +1,248 @@
+% ============================================================
+%  论文框架结构图 v2 — 统一宽度分层架构
+%  修复要点：
+%    1. 所有层 fit box 统一 minimum width → 左右边界完全对齐
+%    2. 所有模块相对于 x=0 对称排列 → box 中心永远在 x=0
+%    3. 箭头从 box.south 到 box.north，全在 x=0 上 → 永远垂直
+%    4. 方框高度由 fit 自动适应内容
+%
+%  编译命令：xelatex -interaction=nonstopmode example-paper-structure.tex
+% ============================================================
+
+\documentclass[12pt,a4paper]{ctexart}
+
+\usepackage{geometry}
+\geometry{left=1.5cm,right=1.5cm,top=2cm,bottom=2cm}
+
+\usepackage{fontspec}
+\usepackage{tikz}
+\usetikzlibrary{positioning, fit, backgrounds, arrows.meta, calc}
+
+% ============================================================
+% 蓝色主题配色
+% ============================================================
+\definecolor{PaperBorder}{HTML}{B0C4DE}
+\definecolor{PaperFill}{HTML}{FFFFFF}
+\definecolor{PaperTitle}{HTML}{2C3E50}
+\definecolor{PaperMuted}{HTML}{7F8C8D}
+\definecolor{AccentOrange}{HTML}{D35400}
+\definecolor{PaperLayerBg}{HTML}{F5F8FA}
+\definecolor{PaperLayerBorder}{HTML}{D8E3EE}
+
+% ============================================================
+% 字体
+% ============================================================
+\setmainfont{Arial}
+\setsansfont{Arial}
+\setmonofont{Consolas}[Scale=0.90]
+\setCJKsansfont{Microsoft YaHei}
+\setCJKmainfont{Microsoft YaHei}
+
+% ============================================================
+% 文本样式命令
+% ============================================================
+\newcommand{\modtitle}{\small\sffamily\bfseries\color{PaperTitle}}
+\newcommand{\moddesc}{\footnotesize\sffamily\color{PaperMuted}}
+
+% ============================================================
+% 统一宽度常量
+% ============================================================
+\def\TotalW{14.0cm}     % 所有层 fit box 的统一宽度
+\def\LayerGap{1.2cm}    % 层间距
+
+\begin{document}
+
+\begin{center}
+  {\Large\sffamily\bfseries\textcolor{PaperTitle}{论文框架结构图}}\\[0.3em]
+  {\small\sffamily\itshape\textcolor{PaperMuted}{边缘计算环境下基于Flink的实时数据流处理与动态资源调度优化}}
+\end{center}
+
+\vspace{0.8em}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    >=Stealth,
+    line width = 0.7pt,
+    every node/.style = {inner sep=0pt, outer sep=0pt},
+    % ---- 模块 ----
+    module/.style = {
+        rectangle,
+        draw = PaperBorder,
+        fill = PaperFill,
+        text = PaperTitle,
+        line width = 0.8pt,
+        font = \small\sffamily,
+        align = center,
+        rounded corners = 5pt,
+        inner sep = 8pt,
+    },
+    % ---- 层容器 ----
+    layer-box/.style = {
+        draw = PaperLayerBorder,
+        fill = PaperLayerBg,
+        line width = 0.7pt,
+        dashed,
+        dash pattern = on 4pt off 3pt,
+        inner sep = 12pt,
+        rounded corners = 8pt,
+    },
+    layer-title/.style = {
+        font = \normalsize\sffamily\bfseries,
+        text = PaperTitle,
+        anchor = north west,
+        inner sep = 0pt,
+    },
+    layer-tag/.style = {
+        font = \footnotesize\sffamily\itshape,
+        text = PaperMuted,
+        anchor = north east,
+        inner sep = 0pt,
+    },
+    % ---- 箭头 ----
+    arr-down/.style = {
+        ->, >=Stealth, thick, PaperBorder,
+    },
+    arr-label/.style = {
+        font = \footnotesize\sffamily\bfseries,
+        fill = white,
+        text = PaperMuted,
+        inner sep = 2pt,
+        outer sep = 0pt,
+    },
+]
+
+    % ============================================================
+    %  层 0：论文概述（单模块，中心 x=0）
+    % ============================================================
+    \node[module, text width=12.8cm] (L0a) at (0, 0) {
+        {\modtitle 论文标题}\\[2pt]
+        {\moddesc 作者 / 摘要 / 关键词}
+    };
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L0a), minimum width=\TotalW] (box0) {};
+    \end{scope}
+    \node[layer-title] at ($(box0.north west)+(0,4pt)$) {论文概述};
+    \node[layer-tag] at ($(box0.north east)+(0,4pt)$) {Title \& Abstract};
+
+    % ============================================================
+    %  层 1：引言（单模块）
+    % ============================================================
+    \coordinate (y1) at ($(box0.south)+(0,-\LayerGap)$);
+    \node[module, text width=12.8cm, anchor=north] (L1a) at (y1) {
+        {\modtitle 一、引言}\\[2pt]
+        {\moddesc 研究背景 · 问题定义}\\[1pt]
+        {\moddesc 研究目标 · 论文组织}
+    };
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L1a), minimum width=\TotalW] (box1) {};
+    \end{scope}
+    \node[layer-title] at ($(box1.north west)+(0,4pt)$) {第一章};
+    \node[layer-tag] at ($(box1.north east)+(0,4pt)$) {Introduction};
+
+    % ============================================================
+    %  层 2：系统架构（双模块，中心 ±3.5）
+    % ============================================================
+    \coordinate (y2) at ($(box1.south)+(0,-\LayerGap)$);
+    \node[module, text width=5.9cm, anchor=north] (L2a) at ($(y2)+(-3.5,0)$) {
+        {\modtitle 2.1 云-边-端架构}\\[2pt]
+        {\moddesc 三层协同模型}\\[1pt]
+        {\moddesc 边缘节点职责}
+    };
+    \node[module, text width=5.9cm, anchor=north] (L2b) at ($(y2)+(3.5,0)$) {
+        {\modtitle 2.2 Flink 引擎}\\[2pt]
+        {\moddesc 流处理核心机制}\\[1pt]
+        {\moddesc 窗口与状态管理}
+    };
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L2a)(L2b), minimum width=\TotalW] (box2) {};
+    \end{scope}
+    \node[layer-title] at ($(box2.north west)+(0,4pt)$) {第二章：系统架构};
+    \node[layer-tag] at ($(box2.north east)+(0,4pt)$) {System Architecture};
+
+    % ============================================================
+    %  层 3：调度策略（双模块）
+    % ============================================================
+    \coordinate (y3) at ($(box2.south)+(0,-\LayerGap)$);
+    \node[module, text width=5.9cm, anchor=north] (L3a) at ($(y3)+(-3.5,0)$) {
+        {\modtitle 3.1 问题建模}\\[2pt]
+        {\moddesc 多目标优化模型}\\[1pt]
+        {\moddesc 约束条件分析}
+    };
+    \node[module, text width=5.9cm, anchor=north] (L3b) at ($(y3)+(3.5,0)$) {
+        {\modtitle 3.2 算法设计}\\[2pt]
+        {\moddesc 启发式调度策略}\\[1pt]
+        {\moddesc 自适应参数调节}
+    };
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L3a)(L3b), minimum width=\TotalW] (box3) {};
+    \end{scope}
+    \node[layer-title] at ($(box3.north west)+(0,4pt)$) {第三章：调度策略};
+    \node[layer-tag] at ($(box3.north east)+(0,4pt)$) {Scheduling Strategy};
+
+    % ============================================================
+    %  层 4：实验评估（四模块，中心 -5.25, -1.75, 1.75, 5.25）
+    % ============================================================
+    \coordinate (y4) at ($(box3.south)+(0,-\LayerGap)$);
+    \node[module, text width=2.4cm, anchor=north] (L4a) at ($(y4)+(-5.25,0)$) {
+        {\modtitle 4.1}\\[1pt]
+        {\moddesc 实验环境}
+    };
+    \node[module, text width=2.4cm, anchor=north] (L4b) at ($(y4)+(-1.75,0)$) {
+        {\modtitle 4.2}\\[1pt]
+        {\moddesc 吞吐量对比}
+    };
+    \node[module, text width=2.4cm, anchor=north] (L4c) at ($(y4)+(1.75,0)$) {
+        {\modtitle 4.3}\\[1pt]
+        {\moddesc 延迟分析}
+    };
+    \node[module, text width=2.4cm, anchor=north] (L4d) at ($(y4)+(5.25,0)$) {
+        {\modtitle 4.4}\\[1pt]
+        {\moddesc 资源利用率}
+    };
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L4a)(L4b)(L4c)(L4d), minimum width=\TotalW] (box4) {};
+    \end{scope}
+    \node[layer-title] at ($(box4.north west)+(0,4pt)$) {第四章：实验评估};
+    \node[layer-tag] at ($(box4.north east)+(0,4pt)$) {Experiments};
+
+    % ============================================================
+    %  层 5：总结（双模块）
+    % ============================================================
+    \coordinate (y5) at ($(box4.south)+(0,-\LayerGap)$);
+    \node[module, text width=5.9cm, anchor=north] (L5a) at ($(y5)+(-3.5,0)$) {
+        {\modtitle 五、相关工作}\\[2pt]
+        {\moddesc 边缘计算研究现状}\\[1pt]
+        {\moddesc 流处理调度方案}
+    };
+    \node[module, text width=5.9cm, anchor=north] (L5b) at ($(y5)+(3.5,0)$) {
+        {\modtitle 六、结论与展望}\\[2pt]
+        {\moddesc 研究总结}\\[1pt]
+        {\moddesc 未来方向}
+    };
+    \begin{scope}[on background layer]
+        \node[layer-box, fit=(L5a)(L5b), minimum width=\TotalW] (box5) {};
+    \end{scope}
+    \node[layer-title] at ($(box5.north west)+(0,4pt)$) {总结};
+    \node[layer-tag] at ($(box5.north east)+(0,4pt)$) {Related Work \& Conclusion};
+
+    % ============================================================
+    %  层间箭头（全部在 x=0 垂直线上，永远不会歪）
+    % ============================================================
+    \draw[arr-down] (box0.south) -- (box1.north)
+        node[arr-label, midway] {引入};
+    \draw[arr-down] (box1.south) -- (box2.north)
+        node[arr-label, midway] {架构设计};
+    \draw[arr-down] (box2.south) -- (box3.north)
+        node[arr-label, midway] {策略优化};
+    \draw[arr-down] (box3.south) -- (box4.north)
+        node[arr-label, midway] {验证};
+    \draw[arr-down] (box4.south) -- (box5.north)
+        node[arr-label, midway] {总结};
+
+\end{tikzpicture}
+\caption{\sffamily 论文框架结构图}
+\label{fig:paper-structure}
+\end{figure}
+
+\end{document}

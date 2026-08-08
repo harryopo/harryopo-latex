@@ -1,0 +1,280 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% kaoWinCJKsc.sty — 方正字体配置 + 彩色盒子 + 定理样式
+% 字体规范：
+%   最大标题：方正小标宋  |  次级标题：方正黑体
+%   正文：方正书宋        |  其他板块：方正楷体
+%   侧边注释：方正仿宋    |  代码：等宽代码字体
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ProvidesPackage{styles/kaoWinCJKsc}
+
+\RequirePackage{kvoptions}
+\SetupKeyvalOptions{
+	family = kaowincjksc,
+	prefix = kaowincjksc@
+}
+
+\DeclareBoolOption{testMathBox}
+
+\ProcessKeyvalOptions{kaowincjksc}
+
+%----------------------------------------------------------------------------------------
+% ── 字体路径与 xeCJK ──
+\RequirePackage{xeCJK}
+
+\newcommand{\fontpath}{C:/Windows/Fonts/}
+
+% ── CJK 主字体：方正书宋（正文） ──
+\setCJKmainfont[Path=\fontpath, Extension=.ttf, BoldFont=方正小标宋_GBK, AutoFakeSlant=0.15]{方正书宋_GBK}
+% ── CJK 无衬线字体：方正黑体（标题） ──
+\setCJKsansfont[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{FZHei-B01}
+% ── CJK 等宽字体：方正黑体（备用） ──
+\setCJKmonofont[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{FZHei-B01}
+
+% ── 等宽代码字体（仅代码/程序清单使用） ──
+\IfFontExistsTF{Cascadia Code}{%
+    \setmonofont[Scale=MatchLowercase]{Cascadia Code}%
+}{%
+    \IfFontExistsTF{Consolas}{%
+        \setmonofont[Scale=MatchLowercase]{Consolas}%
+    }{%
+        \setmonofont[Scale=MatchLowercase]{Courier New}%
+    }%
+}
+
+% ── 方正家族字体命令 ──
+\setCJKfamilyfont{fzsong}[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{方正书宋_GBK}       %方正书宋
+\newcommand{\fzsong}{\CJKfamily{fzsong}}
+\setCJKfamilyfont{fzhei}[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{FZHei-B01}         %方正黑体
+\newcommand{\fzhei}{\CJKfamily{fzhei}}
+\setCJKfamilyfont{fzkai}[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{方正楷体_GBK}       %方正楷体
+\newcommand{\fzkai}{\CJKfamily{fzkai}}
+\setCJKfamilyfont{fzfs}[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{方正仿宋_GBK}             %方正仿宋(简体)
+\newcommand{\fzfs}{\CJKfamily{fzfs}}
+%
+% ── 方正小标宋（最大标题专用） ──
+\setCJKfamilyfont{fzxiaobiaosong}[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{FZXBSJW}  %方正小标宋
+\newcommand{\fzxiaobiaosong}{\CJKfamily{fzxiaobiaosong}}
+%
+% ── 方正黑体（标题用，别名 yh 兼容旧代码） ──
+\setCJKfamilyfont{yh}[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{FZHei-B01}            %方正黑体
+\newcommand{\yh}{\CJKfamily{yh}}
+%
+% ── 装饰字体 ──
+\setCJKfamilyfont{fzli}[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{FZLSJW}              %方正隶书
+\newcommand{\fzli}{\CJKfamily{fzli}}
+\setCJKfamilyfont{fzshti}[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{FZSTJW}            %方正舒体
+\newcommand{\fzshti}{\CJKfamily{fzshti}}
+\setCJKfamilyfont{fzyao}[Path=\fontpath, Extension=.ttf, AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{FZYTJW}            %方正姚体
+\newcommand{\fzyao}{\CJKfamily{fzyao}}
+%
+% ── 备用系统字体 ──
+\setCJKfamilyfont{song}[AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{SimSun}                                             %宋体
+\newcommand{\song}{\CJKfamily{song}}
+\setCJKfamilyfont{hei}[AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{SimHei}                                              %黑体
+\newcommand{\hei}{\CJKfamily{hei}}
+\setCJKfamilyfont{kai}[AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{KaiTi}                                               %楷体
+\newcommand{\kai}{\CJKfamily{kai}}
+\setCJKfamilyfont{fs}[AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{FangSong}                                             %仿宋
+\newcommand{\fs}{\CJKfamily{fs}}
+%
+% ── Windows 10 系统旧字体（兼容旧版模板） ──
+\setCJKfamilyfont{dx}[AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{DengXian}                                             %等线
+\newcommand{\dx}{\CJKfamily{dx}}
+\setCJKfamilyfont{xs}[AutoFakeBold={2.5}, AutoFakeSlant={0.15}]{NSimSun}                                              %新宋体
+\newcommand{\xs}{\CJKfamily{xs}}
+
+% 首行缩进
+\RequirePackage{indentfirst}
+\setlength{\parindent}{2em}
+
+% 颜色与日期
+\RequirePackage{zhnumber}
+
+% ── 边注字体：方正仿宋（修补 @margin@par 绕过 marginfont 的 bug） ──
+\renewcommand*{\@margin@par}{%
+    \justifying
+    \setlength{\RaggedRightParindent}{0em}
+    \setlength{\parindent}{0em}
+    \setlength{\parskip}{0.5pc}
+    \frenchspacing
+    \fzfs % 方正仿宋（CJK），拉丁自动继承 XITS
+    \footnotesize
+}
+\renewcommand*{\marginfont}{\fzfs\footnotesize\justifying\frenchspacing}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 彩色盒子
+\ifkaowincjksc@testMathBox
+\RequirePackage{tikz} % Required by mdframed
+\RequirePackage[framemethod=TikZ]{mdframed} % Required for colorful boxes
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Theorem
+% define a counter for continuous numbering of the environment
+% by chapter or by section
+\newcounter{theo}[section] \setcounter{theo}{0}
+%\renewcommand{\thetheo}{\arabic{chapter}.\arabic{theo}} %显示章节名
+\renewcommand{\thetheo}{\arabic{theo}} %不显示章节名
+\newenvironment{theo}[2][]{%
+\refstepcounter{theo}%
+\ifstrempty{#1}%
+{\mdfsetup{%
+frametitle={%
+\tikz[baseline=(current bounding box.east),outer sep=0pt]
+\node[anchor=east,rectangle,fill=blue!20]
+{\strut Theorem~\thetheo};}}
+}%
+{\mdfsetup{%
+frametitle={%
+\tikz[baseline=(current bounding box.east),outer sep=0pt]
+\node[anchor=east,rectangle,fill=blue!20]
+{\strut Theorem~\thetheo:~#1};}}%
+}%
+\mdfsetup{innertopmargin=10pt,linecolor=blue!20,%
+linewidth=2pt,topline=true,%
+frametitleaboveskip=\dimexpr-\ht\strutbox\relax
+}
+\begin{mdframed}[]\relax%
+\label{#2}}{\end{mdframed}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Lemma
+\newcounter{lem}[section] \setcounter{lem}{0}
+\renewcommand{\thelem}{\arabic{lem}}
+\newenvironment{lem}[2][]{%
+\refstepcounter{lem}%
+\ifstrempty{#1}%
+{\mdfsetup{%
+frametitle={%
+\tikz[baseline=(current bounding box.east),outer sep=0pt]
+\node[anchor=east,rectangle,fill=green!20]
+{\strut Lemma~\thelem};}}
+}%
+{\mdfsetup{%
+frametitle={%
+\tikz[baseline=(current bounding box.east),outer sep=0pt]
+\node[anchor=east,rectangle,fill=green!20]
+{\strut Lemma~\thelem:~#1};}}%
+}%
+\mdfsetup{innertopmargin=10pt,linecolor=green!20,%
+linewidth=2pt,topline=true,%
+frametitleaboveskip=\dimexpr-\ht\strutbox\relax
+}
+\begin{mdframed}[]\relax%
+\label{#2}}
+{\end{mdframed}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Proof
+% [begin]define a new environment for proof
+\newenvironment{prf}[2][]{%
+    % box style
+    \ifstrempty{#1}
+    % if condition (without title)
+    {
+        \mdfsetup{%
+        frametitle={%
+        \tikz[baseline=(current bounding box.east),outer sep=0pt]
+        \node[anchor=east,rectangle,fill=red!20]
+        {\strut Proof~};}}
+    }% else condition (with title)
+    {
+        \mdfsetup{%
+        frametitle={%
+        \tikz[baseline=(current bounding box.east),outer sep=0pt]
+        \node[anchor=east,rectangle,fill=red!20]
+        {\strut Proof~:~#1};}}%
+    }%
+    % Both conditions
+    \mdfsetup{
+        innertopmargin=10pt,linecolor=red!20,%
+        linewidth=2pt,topline=true,%
+        frametitleaboveskip=\dimexpr-\ht\strutbox\relax
+    }
+
+    % [begin]define a new environment for proof
+    \begin{mdframed}[]\relax%
+    \label{#2}
+}
+{\qed\end{mdframed}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%soln
+% [begin]define a new environment for proof
+\newenvironment{soln}[2][]{%
+    % box style
+    \ifstrempty{#1}
+    % if condition (without title)
+    {
+        \mdfsetup{%
+        frametitle={%
+        \tikz[baseline=(current bounding box.east),outer sep=0pt]
+        \node[anchor=east,rectangle,fill=red!20]
+        {\strut Solution~};}}
+    }% else condition (with title)
+    {
+        \mdfsetup{%
+        frametitle={%
+        \tikz[baseline=(current bounding box.east),outer sep=0pt]
+        \node[anchor=east,rectangle,fill=red!20]
+        {\strut Solution~:~#1};}}%
+    }%
+    % Both conditions
+    \mdfsetup{
+        innertopmargin=10pt,linecolor=red!20,%
+        linewidth=2pt,topline=true,%
+        frametitleaboveskip=\dimexpr-\ht\strutbox\relax
+    }
+
+    % [begin]define a new environment for proof
+    \begin{mdframed}[]\relax%
+    \label{#2}
+}
+{\qed\end{mdframed}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\fi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 高等数学风格
+\usepackage{amsthm}
+\usepackage{thmtools}
+\usepackage[unq]{unique}
+
+\declaretheoremstyle[%
+    headindent=\parindent,
+    headfont=\normalfont\bfseries,%
+    notefont=\normalfont\bfseries, notebraces={(}{)},
+    bodyfont=\normalfont,
+    postheadspace=1em,%
+    %qed=\qedsymbol,%空心
+    qed=$\blacksquare$,%实心
+    headpunct={}
+]{mathstyle}
+
+\theoremstyle{mathstyle}
+% 使用 amsthm 定义
+\newtheorem*{Definition*}{定义}
+\newtheorem{Definition}{定义}[section]
+\renewcommand{\theDefinition}{\arabic{Definition}}
+
+\newtheorem*{Theorem*}{定理}
+\newtheorem{Theorem}{定理}[section]
+\renewcommand{\theTheorem}{\arabic{Theorem}}
+
+\newtheorem{Corollary}{推论}
+\renewcommand{\theCorollary}{\arabic{Corollary}}
+
+\newtheorem*{Lemma*}{引理}
+\newtheorem{Lemma}{引理}[section]
+\renewcommand{\theLemma}{\arabic{Lemma}}
+
+\newtheorem*{Proposition*}{命题}
+\newtheorem{Proposition}{命题}[section]
+\renewcommand{\theProposition}{\arabic{Proposition}}
+
+\newtheorem*{Proof*}{证}
+\newtheorem{Proof}{证}[section]
+\renewcommand{\theProof}{\arabic{Proof}}
+
+\newtheorem*{Example*}{例}
+\newtheorem{Example}{例}[section]
+\renewcommand{\theExample}{\arabic{Example}}
+
+\newtheorem*{Solution*}{解}
+\newtheorem{Solution}{解}[section]
+\renewcommand{\theSolution}{\arabic{Solution}}

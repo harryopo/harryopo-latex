@@ -1,0 +1,83 @@
+% ============================================================
+%  harryopo-tikz-diagram 主题加载器
+%  用法：\input{theme-loader.tex} 然后 \loadtikzsiztheme{blue}
+%  支持主题：blue, green
+%  默认主题：blue
+% ============================================================
+
+\RequirePackage{xcolor}
+
+\makeatletter
+
+% ------------------------------------------------------------
+%  内部辅助：字符串比较
+% ------------------------------------------------------------
+\def\harryopo@theme@compare#1#2{%
+  \def\harryopo@tmpa{#1}%
+  \def\harryopo@tmpb{#2}%
+  \ifx\harryopo@tmpa\harryopo@tmpb
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+}
+
+% ------------------------------------------------------------
+%  主题加载命令
+%  参数：#1 = 主题名称（blue/green）
+% ------------------------------------------------------------
+\newcommand{\loadtikzsiztheme}[1]{%
+  \def\currenttheme{#1}%
+  \harryopo@theme@compare{#1}{blue}{%
+    % 蓝色主题（默认）
+    \definecolor{PaperBorder}{HTML}{B0C4DE}%
+    \definecolor{PaperFill}{HTML}{FFFFFF}%
+    \definecolor{PaperTitle}{HTML}{2C3E50}%
+    \definecolor{PaperLayerBg}{HTML}{F5F8FA}%
+    \definecolor{PaperLayerBorder}{HTML}{D8E3EE}%
+    \definecolor{PaperMuted}{HTML}{5D6D7E}%
+    \definecolor{AccentOrange}{HTML}{D35400}%
+    \definecolor{LayerTitleColor}{HTML}{2C3E50}%
+    \definecolor{ShadowColor}{HTML}{E0E8F0}%
+  }{%
+  \harryopo@theme@compare{#1}{green}{%
+    % 清新绿色主题
+    \definecolor{PaperBorder}{HTML}{9AE6B4}%
+    \definecolor{PaperFill}{HTML}{FFFFFF}%
+    \definecolor{PaperTitle}{HTML}{22543D}%
+    \definecolor{PaperLayerBg}{HTML}{F0FFF4}%
+    \definecolor{PaperLayerBorder}{HTML}{C6F6D5}%
+    \definecolor{PaperMuted}{HTML}{276749}%
+    \definecolor{AccentOrange}{HTML}{DD6B20}%
+    \definecolor{LayerTitleColor}{HTML}{22543D}%
+    \definecolor{ShadowColor}{HTML}{E0E8F0}%
+  }{%
+    % 默认回退到蓝色主题
+    \definecolor{PaperBorder}{HTML}{B0C4DE}%
+    \definecolor{PaperFill}{HTML}{FFFFFF}%
+    \definecolor{PaperTitle}{HTML}{2C3E50}%
+    \definecolor{PaperLayerBg}{HTML}{F5F8FA}%
+    \definecolor{PaperLayerBorder}{HTML}{D8E3EE}%
+    \definecolor{PaperMuted}{HTML}{5D6D7E}%
+    \definecolor{AccentOrange}{HTML}{D35400}%
+    \definecolor{LayerTitleColor}{HTML}{2C3E50}%
+    \definecolor{ShadowColor}{HTML}{E0E8F0}%
+  }}%
+}
+
+% ------------------------------------------------------------
+%  默认加载蓝色主题
+% ------------------------------------------------------------
+\loadtikzsiztheme{blue}
+
+\makeatother
+
+% ------------------------------------------------------------
+%  颜色混合快捷命令
+%  用法：\BorderMix{70} 表示 PaperBorder!70!white
+% ------------------------------------------------------------
+\newcommand{\BorderMix}[1]{PaperBorder!#1!white}
+\newcommand{\FillMix}[1]{PaperFill!#1!white}
+\newcommand{\TitleMix}[1]{PaperTitle!#1!black}
+\newcommand{\MutedMix}[1]{PaperMuted!#1!white}
+\newcommand{\AccentMix}[1]{AccentOrange!#1!black}

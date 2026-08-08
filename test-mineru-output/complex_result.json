@@ -1,0 +1,289 @@
+{
+  "pdf_info": [
+    {
+      "para_blocks": [
+        {
+          "type": "title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "基于深度学习的图像识别研究"
+                }
+              ]
+            }
+          ],
+          "index": 0,
+          "is_numbered_style": false,
+          "level": 1
+        },
+        {
+          "type": "title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "一、引言",
+                  "style": [
+                    "bold"
+                  ]
+                }
+              ]
+            }
+          ],
+          "index": 1,
+          "is_numbered_style": false,
+          "level": 1
+        },
+        {
+          "type": "title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "1.1 研究背景",
+                  "style": [
+                    "bold"
+                  ]
+                }
+              ]
+            }
+          ],
+          "index": 2,
+          "is_numbered_style": false,
+          "level": 2
+        },
+        {
+          "type": "title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "1.1.1 深度学习发展",
+                  "style": [
+                    "bold"
+                  ]
+                }
+              ]
+            }
+          ],
+          "index": 3,
+          "is_numbered_style": false,
+          "level": 3
+        },
+        {
+          "type": "text",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "这是普通文字，"
+                },
+                {
+                  "type": "text",
+                  "content": "这是加粗文字",
+                  "style": [
+                    "bold"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": "，这是"
+                },
+                {
+                  "type": "text",
+                  "content": "斜体文字",
+                  "style": [
+                    "italic"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "content": "。"
+                }
+              ]
+            }
+          ],
+          "index": 4
+        },
+        {
+          "type": "text",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "其中损失函数为 L = -Σ y_i log(p_i)，其中 y_i 是真实标签。"
+                }
+              ]
+            }
+          ],
+          "index": 5
+        },
+        {
+          "type": "title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "二、实验结果",
+                  "style": [
+                    "bold"
+                  ]
+                }
+              ]
+            }
+          ],
+          "index": 6,
+          "is_numbered_style": false,
+          "level": 1
+        },
+        {
+          "type": "text",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "实验结果如下表所示："
+                }
+              ]
+            }
+          ],
+          "index": 7
+        },
+        {
+          "type": "table",
+          "blocks": [
+            {
+              "lines": [
+                {
+                  "spans": [
+                    {
+                      "type": "table",
+                      "html": "<table><tr><td><p>方法</p></td><td><p>准确率(%)</p></td><td><p>召回率(%)</p></td><td><p>F1分数</p></td></tr><tr><td><p>ResNet-50</p></td><td><p>94.2</p></td><td><p>92.1</p></td><td><p>93.1</p></td></tr><tr><td><p>VGG-16</p></td><td><p>91.5</p></td><td><p>89.3</p></td><td><p>90.4</p></td></tr><tr><td><p>我们的方法</p></td><td><p>96.8</p></td><td><p>95.2</p></td><td><p>96.0</p></td></tr></table>"
+                    }
+                  ]
+                }
+              ],
+              "index": 8,
+              "type": "table_body"
+            }
+          ],
+          "index": 8
+        },
+        {
+          "type": "text",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "消融实验（含水平合并表头）："
+                }
+              ]
+            }
+          ],
+          "index": 9
+        },
+        {
+          "type": "table",
+          "blocks": [
+            {
+              "lines": [
+                {
+                  "spans": [
+                    {
+                      "type": "table",
+                      "html": "<table><tr><td colspan=\"2\"><p>主干网络</p></td><td><p>性能</p></td></tr><tr><td><p>ResNet</p></td><td><p>ImageNet</p></td><td><p>94.2%</p></td></tr><tr><td><p>VGG</p></td><td><p>ImageNet</p></td><td><p>91.5%</p></td></tr><tr><td><p>EfficientNet</p></td><td><p>ImageNet</p></td><td><p>95.1%</p></td></tr></table>"
+                    }
+                  ]
+                }
+              ],
+              "index": 10,
+              "type": "table_body"
+            }
+          ],
+          "index": 10
+        },
+        {
+          "type": "text",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "多数据集对比（含垂直合并）："
+                }
+              ]
+            }
+          ],
+          "index": 11
+        },
+        {
+          "type": "table",
+          "blocks": [
+            {
+              "lines": [
+                {
+                  "spans": [
+                    {
+                      "type": "table",
+                      "html": "<table><tr><td><p>模型</p></td><td><p>数据集</p></td><td><p>准确率</p></td></tr><tr><td rowspan=\"2\"><p>Ours</p></td><td><p>CIFAR-10</p></td><td><p>98.5%</p></td></tr><tr><td><p>CIFAR-100</p></td><td><p>85.3%</p></td></tr><tr><td rowspan=\"2\"><p>Baseline</p></td><td><p>CIFAR-10</p></td><td><p>95.2%</p></td></tr><tr><td><p>CIFAR-100</p></td><td><p>78.9%</p></td></tr></table>"
+                    }
+                  ]
+                }
+              ],
+              "index": 12,
+              "type": "table_body"
+            }
+          ],
+          "index": 12
+        },
+        {
+          "type": "title",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "三、结论",
+                  "style": [
+                    "bold"
+                  ]
+                }
+              ]
+            }
+          ],
+          "index": 13,
+          "is_numbered_style": false,
+          "level": 1
+        },
+        {
+          "type": "text",
+          "lines": [
+            {
+              "spans": [
+                {
+                  "type": "text",
+                  "content": "本文提出的方法在多个数据集上取得了优异的性能。"
+                }
+              ]
+            }
+          ],
+          "index": 14
+        }
+      ],
+      "discarded_blocks": [],
+      "page_idx": 0
+    }
+  ],
+  "_backend": "office",
+  "_version_name": "3.0.4"
+}

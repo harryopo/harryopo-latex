@@ -1,0 +1,218 @@
+\setchapterimage[8cm]{Paul Pastour (2).jpg}
+\setchapterpreamble[u]{\margintoc}
+\chapter{页面设计}
+\labch{排版}
+
+\section{章节标题}
+
+在这份文件中，到目前为止我使用了两种不同的章节标题样式：一种是章节名称下有一条横线，并在边缘显示章节编号；另一种是页面顶部有一幅图片，章节标题打印在一个框内（就像本章一样）。还有一种额外的样式，我只在 \nrefch{附录} 中使用了；在那里，章节标题被两条水平线包围，章节编号（或者在附录里是字母）在它上面。\sidenote[][.7cm]{老实说，我不认为像这样混合标题样式是一个明智的选择，但在这个文件中我这样做只是为了展示它们的外观。}
+
+每本书都是独一无二的，所以有不同的样式可以选择是有意义的。实际上，如果任何一个 \Class{kao} 用户设计了一种新的标题样式，他或她添加到已有的三种样式中，以便新用户和新书籍也可以使用，那将会非常棒。
+
+通过 \Command{setchapterstyle} 命令可以简单地进行样式选择。它接受一个选项，即样式的名称，可以是：“plain”，"kao"，"bar"，或者 "lines"。\sidenote{Plain 是默认的 \LaTeX\xspace 标题样式；其他的则是不言自明的。}如果你想要图片样式，你必须使用 \Command{setchapterimage} 命令，它接受图像路径作为参数；你也可以提供一个可选的参数在方括号中来指定图片的高度。\Command{setchapterimage} 会自动设置该章节的章节样式为 "bar"（以及后续的章节）。
+
+让我们举一些例子。在这本书中，我开始一个普通的章节，使用以下行：
+
+
+\begin{lstlisting}
+\setchapterstyle{kao}
+\setchapterpreamble[u]{\margintoc}
+\chapter{章节标题}
+\labch{title} % 标签 title 为链接 id
+\end{lstlisting}
+
+第 1 行选择 \enquote{kao} 样式的标题，然后定义了边注目录。其他的就是 \LaTeX 原始命令，除了我自定义的 \Command{labch} 命令，用来标记章节。实际上，\Command{setchapterpreamble} 命令就是 \KOMAScript 中的，所以我建议你读一读它的文档。一旦章节样式设置，除非你重新修改，否则后续所有的章节都保持同样的风格。\sidenote[][2cm]{\Command{margintoc} 命令必须每一章都要设置，也许未来会有所调整，这主要取决于用户的反馈。所以对于你喜欢的风格，可以与我分享！}如果想在章节开头设置图片背景，只需要这样做：
+
+\begin{lstlisting}
+\setchapterimage[7cm]{path/to/image.png} % 可选高度
+\setchapterpreamble[u]{\margintoc}
+\chapter{章节标题} % 无需设置章节样式
+\labch{catchy}
+\end{lstlisting}
+
+如果你愿意，也可以在正文开头就设置章节标题样式，后续再根据需要修改。
+
+\section{页眉页脚}
+
+在 \KOMAScript\xspace 中，页眉和页脚由 \Package{scrlayer-scrpage} 包处理。有两种基本样式：“scrheadings”和“plain.scrheadings”。前者用于正常页面，而后者用于标题页面（例如，一个新章节开始的地方）以及至少在这本书中的前言部分。无论如何，样式可以用 \Command{pagestyle} 命令更改，例如 \lstinline|\pagestyle{plain.scrheadings}|。
+
+在这两种样式中，页脚完全为空。在 plain.scrheadings 中，页眉也不存在（否则它就不会这么“plain”……），但在正常样式中，设计让人想起章节标题的“kao”样式。
+
+\section{双页 \Option{twoside} 模式}
+
+\begin{kaobox}[frametitle=To Do]
+\Option{twoside} 类选项仍然不稳定，可能会导致意外行为。自 \Class{kaobook} 的首个版本以来，已经取得了长足的进步，但仍需进行一些工作。一如既往，任何帮助都将非常感激。
+\end{kaobox}
+
+通过将 \Option{twoside} 选项传递给 \Class{kaobook}，左右页面的样式将不同，类似于印刷书籍。在数字书籍中，左右页面对称布局的重要性较低，您可能会倾向于使用 \Option{twoside=false} 选项。但是，请记住，在“oneside”模式中，\Command{uppertitleback} 和 \Command{lowertitleback} 命令是不可用的。\sidenote{另一个需要记住的有用信息是，当 \Option{twoside=true} 时，前言部分会额外添加一个空白页。}如果您想在单面文档中拥有上/下标题背面，只需手动添加您使用上/下标题背面命令时会放入的内容。
+
+\section{目录}
+
+书籍的另一个重要部分是目录。在 \Class{kaobook} 默认情况下，一切都有相应的条目：插图列表、表格列表、参考文献，甚至目录本身。并不是每个人都会喜欢这样，因此我们将提供需要进行的更改描述，以启用或禁用这些条目中的每一个。在接下来的 \reftab{tocentries} 中，每个项目对应一个可能出现在 目录 中的条目，其描述是您需要提供的命令，以便有这样的条目。这些命令在附带的 \href{style/style.sty}{样式包} 中指定\sidenote[][0.5cm]{在同一个文件中，您也可以选择这些条目的标题。}，所以如果您不想要这些条目，只需注释掉相应的行。
+
+当然，一些包，如那些用于词汇表和索引的包，会尝试添加它们自己的条目。\marginnote{在后面的章节中，我们将看到如何定义您自己的浮动环境，并赋予它一个在 目录 中的条目。}在这种情况下，您必须遵循该包的特定说明。这里，由于我们在 \refch{引用} 中讨论了词汇表和符号注释，我们将简要看看如何配置它们。
+
+\begin{table}
+\footnotesize
+\caption{向目录中添加特定条目的命令。}
+\labtab{tocentries}
+\begin{tabular}{ l@{\hspace{1mm}}l }
+	\toprule
+	Entry & Command to Activate \\
+	\midrule
+	Table of Contents & \lstinline|\setuptoc{toc}{totoc}| \\
+    List of Figs/Tabs & \lstinline|\PassOptionsToClass| \\
+	Bibliography & \lstinline|\PassOptionsToClass| \\
+	\bottomrule
+\end{tabular}
+\end{table}
+
+对于 \Package{glossaries} 包，在您加载它时使用“toc”选项：\lstinline|\usepackage[toc]{glossaries}|。对于 \Package{nomencl}，在加载包时传递“intoc”选项。这两个包 \Package{glossaries} 和 \Package{nomencl} 都在附带的 \href{style/packages.sty}{“packages” 包} 中加载。
+
+可以通过 \Package{etoc} 包对目录进行额外配置，它被加载因为它是边缘目录所需的，或者是更传统的 \Package{tocbase} 包。阅读这两者的文档，如果您想能够更改默认 目录 样式。\sidenote[][*-1]{（并且请，把您完成的东西给我一份复印，我很好奇！）}
+
+\section{页面大小}
+
+Kaobook 的新版本支持与默认 A4 不同的纸张尺寸。可以将纸张的名称作为选项传递给类，如同我们对任何其他 \LaTeX 类所习惯的那样。例如，类选项 \Option{b5paper} 会将纸张尺寸设置为 B5 格式。
+
+我们还支持在 \href{https://www.bod.de/hilfe/hilfe-und-service.html?cmd=SINGLE\&entryID=2494\_GER\_WSS\&eo=2\&title=welche-buchformate-gibt-es}{这个网页} 中指定的纸张尺寸和用户请求的一些其他尺寸，选项名称在 \reftab{papersizes} 中有说明。
+
+\begin{table}[h!]
+	\caption{Kaobook 支持的一些非标准纸张尺寸。}
+	\labtab{papersizes}
+	\begin{tabular}{ll}
+		\toprule
+		Dimension & Option name \\
+		\midrule
+		12.0cm x 19.0cm & smallpocketpaper \\
+		13.5cm x 21.5cm & pocketpaper \\
+		14.8cm x 21.0cm & a5paper \\
+		15.5cm x 22.0cm & juvenilepaper \\
+		17.0cm x 17.0cm & smallphotopaper \\
+		21.0cm x 15.0cm & appendixpaper \\
+		17.0cm x 22.0cm & cookpaper \\
+		19.0cm x 27.0cm & illustratedpaper \\
+		17.0cm x 17.0cm & photopaper \\
+		16.0cm x 24.0cm & f24paper \\
+		%21.0cm x 29.7cm & a4paper \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+例如，要使用“smallpocketpaper”，请在 documentclass 指令的开始处添加正确的描述：
+
+\begin{lstlisting}
+\documentclass[
+		smallpocketpaper,
+		fontsize=10pt,
+		twoside=false,
+		%open=any,
+		secnumdepth=1,
+]{kaobook}
+\end{lstlisting}
+
+\section{页面排版}
+
+除了页面样式，您还可以更改页面内容的宽度。这对于专门用于部分标题的页面特别有用，在这些页面上使用 1.5 列布局可能有些尴尬，或者对于您只放置图表的页面，在这些页面上利用所有可用空间是很重要的。
+
+实际上，有两种布局：“wide”和“margin”。前者抑制边距，为内容分配整个页面，而后者是本书大多数页面使用的布局，包括此页。前言和后记部分也会自动使用 wide 布局。
+
+\marginnote{有时候，我们希望只增加一段或几段文字的宽度；\Environment{widepar} 环境可以做到这一点：将您的段落包裹在这个环境中，它们将占据整个页面的宽度。}
+
+要更改页面布局，请使用 \Command{pagelayout} 命令。例如，当我开始一个新部分时，我会写：
+
+\begin{lstlisting}
+\pagelayout{wide}
+\addpart{这是一个新的部分}
+\pagelayout{margin}
+\end{lstlisting}
+
+除了这两种基本布局外，也可以通过重新定义 \Command{marginlayout} 命令来精细调整页面布局。这个命令是由更高级别的 \Command{pagelayout} 内部调用的，并负责设置边距和文本的宽度。默认定义是：
+
+\begin{lstlisting}
+\newcommand{\marginlayout}{%
+	\newgeometry{
+		top=27.4mm,				% height of the top margin
+		bottom=27.4mm,			% height of the bottom margin
+		inner=24.8mm,			% width of the inner margin
+		textwidth=107mm,		% width of the text
+		marginparsep=8.2mm,		% width between text and margin
+		marginparwidth=49.4mm,	% width of the margin
+	}%
+}
+\end{lstlisting}
+
+所以，如果您想减小边距的宽度同时增加文本的宽度，您可以在文档的前导区写类似以下内容：
+
+\begin{lstlisting}
+\renewcommand{\marginlayout}{%
+	\newgeometry{
+		top=27.4mm,				% height of the top margin
+		bottom=27.4mm,			% height of the bottom margin
+		inner=24.8mm,			% width of the inner margin
+		textwidth=117mm,		% width of the text
+		marginparsep=8.2mm,		% width between text and margin
+		marginparwidth=39.4mm,	% width of the margin
+	}%
+}
+\end{lstlisting}
+
+在这个例子中，文本宽度增加了 10mm，而边距宽度减少了 10mm。
+
+\section{编号与计数}
+
+在这个简短的章节中，我们将看到在 \Class{kaobook} 类中如何对布局、边注和图表进行编号。
+
+默认情况下，\Class{kaobook} 中的布局编号到“section”，而在 \Class{kaohandtCJK} 中编号到“subsection”。这可以通过传递 \Option{secnumdepth} 选项给 \Class{kaobook} 或 \Class{kaohandtCJK} 来更改（例如，1 对应“section”，2 对应“subsection”）。
+
+边注的计数器在整个文档中是相同的，但是如果你想让它在每一章重置，只需取消注释这行代码即可：
+
+\begin{lstlisting}[style=kaolstplain]
+\counterwithin*{sidenote}{chapter}
+\end{lstlisting}
+
+在这个类提供的 \Package{styles/style.sty} 包中。
+
+图表和表格的编号也是按章节进行的；要更改它，可以使用类似以下的代码：
+
+\begin{lstlisting}[style=kaolstplain]
+\renewcommand{\thefigure}{\arabic{section}.\arabic{figure}}
+\end{lstlisting}
+
+\section{留白}
+
+在 \LaTeX\xspace 中，我发现最难的事情之一是精确调整对象周围的空白区域。没有固定的规则，每个对象都需要自己的调整。在这里，我们将看到这个类目前是如何定义一些空间的。\marginnote{注意！这部分内容可能不完整。}
+
+\textbf{边注和引用标记周围的空间}
+
+边注和引用标记的前后不应有空格，如下所示：
+
+边注\sidenote{这段话可用于诊断任何问题：如果你看到边注或引用标记周围有空白，那么在类宏定义中可能缺少一个 \% 符号。}边注\newline
+引用\cite{James2013}引用
+
+\textbf{围绕图表和表格的空间}
+
+\begin{lstlisting}[style=kaolstplain]
+\renewcommand\FBaskip{.4\topskip}
+\renewcommand\FBbskip{\FBaskip}
+\end{lstlisting}
+
+\textbf{围绕标题的空间}
+
+\begin{lstlisting}[style=kaolstplain]
+\captionsetup{
+	aboveskip=6pt,
+	belowskip=6pt
+}
+\end{lstlisting}
+
+\textbf{围绕展示内容（例如公式）的空间}
+
+\begin{lstlisting}[style=kaolstplain]
+\setlength\abovedisplayskip{6pt plus 2pt minus 4pt}
+\setlength\belowdisplayskip{6pt plus 2pt minus 4pt}
+\abovedisplayskip 10\p@ \@plus2\p@ \@minus5\p@
+\abovedisplayshortskip \z@ \@plus3\p@
+\belowdisplayskip \abovedisplayskip
+\belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
+\end{lstlisting}

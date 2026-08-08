@@ -1,0 +1,522 @@
+% ============================================================
+%  main.tex — harryopo-mathnotes 通用示例
+%  演示：封面 / 目录 / 边注 / 公式 / 定义块 / 定理 / 图表
+%        习题 / 标注 / 浮动体 / 交叉引用 / 附录 / 参考文献
+%  编译：xelatex main.tex × 3（生成目录+交叉引用需要3次）
+% ============================================================
+\documentclass{harryopo-mathnotes}
+\usepackage{mwe}                    % 仅示例用途——占位图片
+
+% ===================== 文档元信息 =====================
+
+\renewcommand{\mathtitle}{数理笔记模板}
+\renewcommand{\mathauthor}{张三}
+\renewcommand{\mathaffiliation}{harryopo · 数学教研室}
+
+% 封面附加信息（方正仿宋排版）
+\renewcommand{\mathinfo}{%
+  {\Large\fzfs 学科: 高等数学}
+
+  \vspace{0.6cm}
+  {\Large\fzfs 字体: 西文~XITS \quad 中文~方正家族系列}
+
+  \vspace{0.6cm}
+  {\Large\fzfs 排版: \LaTeX{} \quad harryopo-mathnotes}
+
+  \vspace{0.6cm}
+  {\Large\fzfs 日期: \today}
+
+  \vspace{2.5cm}
+}
+
+\begin{document}
+
+% ===================== 封面 =====================
+\newgeometry{top=3cm,bottom=2.5cm,left=4cm,right=4cm}
+\maketitle
+\thispagestyle{empty}
+\cleardoublepage
+
+% ===================== 前言 =====================
+\newgeometry{top=3cm,bottom=2.5cm,left=3cm,right=5cm}
+\vspace*{2cm}
+
+\noindent
+\begin{minipage}[t]{0.55\textwidth}
+  \phantom{x}
+\end{minipage}%
+\begin{minipage}[t]{0.45\textwidth}
+  {\TitleFontc\fzdbs\color{DeepSkyBlue} 前言}
+  \\[1cm]
+  {\hrule width 3cm height 1.5pt\color{DeepSkyBlue!60}}
+\end{minipage}
+
+\vspace{2cm}
+
+\noindent
+\begin{minipage}[t]{0.15\textwidth}\end{minipage}%
+\begin{minipage}[t]{0.85\textwidth}
+{\large\fzfs
+本模板基于 \texttt{harryopo-mathnotes} 文档类，适用于高等数学、数学分析、线性代数等数理类学习笔记的排版。
+
+\vspace{1em}
+\textbf{核心特性：}
+\begin{itemize}
+  \item \textbf{色块 + 侧边竖线} 定义/定理/性质/推论块
+  \item \textbf{宽边注栏}（6cm），支持文字、表格、图片
+  \item \textbf{方正字体}（书宋/黑体/楷体/仿宋/大标宋）+ XITS 数学字体
+  \item \textbf{蓝色系标注}：注意（深蓝）/ 提示（中蓝）/ 警告（浅蓝）
+  \item \textbf{习题环境}：按节自动编号
+  \item \textbf{浮动体}：图片/表格/子图 + 中文 caption
+  \item \textbf{交叉引用}：公式/图表/定义 一键跳转
+  \item \textbf{附录 + 参考文献}
+  \item 淡蓝解答框、奇偶页对称边距、自动目录
+\end{itemize}
+}
+\end{minipage}
+\thispagestyle{empty}
+\cleardoublepage
+
+% ===================== 目录 =====================
+{\Large
+  \tableofcontents
+}
+\thispagestyle{empty}
+\cleardoublepage
+
+\strictpagecheck
+\setcounter{page}{1}
+\restoregeometry
+\onehalfspacing
+
+% ============================================================
+%  第一节：模板功能总览
+% ============================================================
+\section{模板功能总览}
+
+\subsection{基础元素}
+
+\subsubsection{边注（侧边注解）}
+
+下面这段文字演示了最基础的侧边注解用法：\bianzhu[边注标题]{这是边注的正文，使用\fzfs 方正仿宋排版。边注可以包含多行文字，自动换行。}
+
+边注支持可选的标题参数，若省略标题则仅有正文内容：
+
+\bianzhu{这是无标题的边注，仅有正文内容。适合简短的提示或注释。}
+
+这两种用法可以灵活配合，为正文提供即时批注。
+
+\subsubsection{带图片的边注}
+
+\bianzhutu[函数图像示意]{example-image-a}{%
+  图片宽度自动适配边注栏宽度（约5.3cm）。
+  此处使用 \texttt{mwe} 宏包提供的占位图作为示例。}
+
+此处文字与右侧的函数图像一一对应。图片可以是对正文内容的图形化说明，如函数曲线、几何图形等。在实际使用中，图片应放入 \texttt{image/} 文件夹，通过 \texttt{\textbackslash bianzhutu} 命令引用。
+
+当边注需要配合较长的解释段落时，建议在边注前后保留充足的正文内容，避免多张图片或表格在边栏中相互挤压。
+
+\subsubsection{边注中的表格}
+
+\marginpar{%
+  \raggedright\footnotesize
+  {\color{DeepSkyBlue}\fzht 数据对比表}\\[4pt]
+  \centering\fzfs
+  \begin{tabular}[t]{c|c}
+    {\fzht 类别}  & {\fzht 数值} \\
+    \hline
+    A             & $3.14$      \\
+    B             & $2.71$      \\
+    C             & $1.62$      \\
+  \end{tabular}}
+
+表格也可以放在边注栏中，使用 \texttt{footnotesize} 字号以保证可读性。边注表格适合展示紧凑的对照信息。
+
+\subsection{定义与定理块}
+
+\subsubsection{定义块（色块 + 侧边竖线）}
+
+\bianzhu[formal 环境]{%
+  \texttt{formal} 环境包裹定理类环境使用。\\
+  特点：灰色竖线 + 浅灰背景。}
+
+\begin{formal}
+\begin{definition}[函数的极限]\label{def:limit}
+设函数 $f(x)$ 在点 $x_0$ 的某个去心邻域内有定义。若存在常数 $A$，使得对任意给定的正数 $\varepsilon$，总存在正数 $\delta$，当 $0<|x-x_0|<\delta$ 时，有
+$$|f(x)-A|<\varepsilon$$
+则称 $A$ 是 $f(x)$ 当 $x\to x_0$ 时的极限，记作
+$$\lim_{x\to x_0}f(x)=A$$
+\end{definition}
+\end{formal}
+
+如定义~\ref{def:limit} 所示，$\varepsilon$-$\delta$ 语言是极限概念的形式化表述。
+
+\subsubsection{定理、性质与推论}
+
+\begin{formal}
+\begin{theorem}[极限的四则运算]\label{thm:limit-op}
+设 $\displaystyle\lim_{x\to x_0}f(x)=A$，$\displaystyle\lim_{x\to x_0}g(x)=B$，则：
+\begin{enumerate}
+  \item $\displaystyle\lim_{x\to x_0}[f(x)\pm g(x)]=A\pm B$
+  \item $\displaystyle\lim_{x\to x_0}[f(x)\cdot g(x)]=A\cdot B$
+  \item $\displaystyle\lim_{x\to x_0}\frac{f(x)}{g(x)}=\frac{A}{B}\quad(B\neq 0)$
+\end{enumerate}
+\end{theorem}
+\end{formal}
+
+\begin{formal}
+\begin{lemma}[夹逼准则]\label{lem:squeeze}
+如果数列 $\{x_n\},\{y_n\},\{z_n\}$ 满足：
+\begin{enumerate}
+  \item $y_n\leq x_n\leq z_n\quad(n=1,2,3,\ldots)$
+  \item $\displaystyle\lim_{n\to\infty}y_n=\lim_{n\to\infty}z_n=a$
+\end{enumerate}
+那么数列 $\{x_n\}$ 的极限存在，且 $\displaystyle\lim_{n\to\infty}x_n=a$。
+\end{lemma}
+\end{formal}
+
+\begin{formal}
+\begin{corollary}[极限的保号性]\label{cor:sign}
+若 $\displaystyle\lim_{x\to x_0}f(x)=A>0$，则存在 $x_0$ 的某个去心邻域，使得在该邻域内恒有 $f(x)>0$。
+\end{corollary}
+\end{formal}
+
+定理~\ref{thm:limit-op} 给出了极限四则运算的完整规则，性质~\ref{lem:squeeze} 是证明极限存在性的有力工具，推论~\ref{cor:sign} 给出了极限值与函数值的保号关系。
+
+\subsection{例题与解答}
+
+\begin{example}\label{ex:sinxx}
+  求极限 $\displaystyle\lim_{x\to 0}\frac{\sin x}{x}$
+\end{example}
+\begin{answer}
+  \textbf{答：}
+  {\fzkt 由重要极限公式：
+  $$\lim_{x\to 0}\frac{\sin x}{x}=1$$
+  这是微积分中最基本的极限之一，可通过几何方法证明。}
+
+  \textbf{几何解释：}在单位圆中，当 $x\to 0$ 时，$\sin x$ 与 $x$ 是等价无穷小。
+\end{answer}
+
+例~\ref{ex:sinxx} 是微积分中最经典的基础例题。在解答中使用了蓝色背景的 \texttt{answer} 环境。
+
+\begin{example}
+  求导数 $\displaystyle\frac{d}{dx}\bigl(x^3\sin x\bigr)$
+\end{example}
+\begin{answer}
+  \textbf{答：}
+  {\fzkt 使用乘积法则 $(uv)'=u'v+uv'$：
+  \begin{align*}
+    \frac{d}{dx}\bigl(x^3\sin x\bigr)
+    &= (x^3)'\cdot\sin x + x^3\cdot(\sin x)' \\
+    &= 3x^2\sin x + x^3\cos x
+  \end{align*}}
+\end{answer}
+
+% ============================================================
+%  第二节：公式排版
+% ============================================================
+\section{公式排版示例}
+
+\subsection{行内与行间公式}
+
+行内公式如 $E=mc^2$ 和 $\int_a^b f(x)\,\mathrm{d}x$ 自然融入文字。
+
+行间公式（不编号）：
+$$ \frac{d}{dx}\int_a^x f(t)\,\mathrm{d}t = f(x) $$
+
+带编号的公式（可交叉引用）：
+\begin{equation}
+  \oint_{\partial\Omega} \mathbf{F}\cdot\mathrm{d}\mathbf{S}
+  = \iiint_\Omega \nabla\cdot\mathbf{F}\,\mathrm{d}V
+  \label{eq:divergence}
+\end{equation}
+
+公式~\eqref{eq:divergence} 是高维空间中的散度定理（Gauss公式）。
+
+\subsection{多行对齐公式}
+
+\begin{align}
+  \frac{d}{dx}\sin x    &= \cos x \label{eq:sin-deriv} \\
+  \frac{d}{dx}\cos x    &= -\sin x \label{eq:cos-deriv} \\
+  \frac{d}{dx}\tan x    &= \sec^2 x
+\end{align}
+
+公式~\eqref{eq:sin-deriv} 和 \eqref{eq:cos-deriv} 是基本的三角函数导数公式。
+
+\subsection{矩阵与分段函数}
+
+\begin{equation}
+  A = \begin{pmatrix}
+    a_{11} & a_{12} & \cdots & a_{1n} \\
+    a_{21} & a_{22} & \cdots & a_{2n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    a_{n1} & a_{n2} & \cdots & a_{nn}
+  \end{pmatrix}
+  \label{eq:matrix}
+\end{equation}
+
+矩阵~\eqref{eq:matrix} 是一个 $n\times n$ 的一般矩阵。
+
+分段函数示例：
+$$ f(x) = \begin{cases}
+  x^2,                 & x \geq 0 \\
+  -x,                  & x < 0
+\end{cases} $$
+
+% ============================================================
+%  第三节：浮动体与交叉引用
+% ============================================================
+\section{浮动体与交叉引用}
+
+\subsection{图片浮动体}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.55\textwidth]{example-image-b}
+  \caption{模板示例插图（使用 mwe 占位图）。图片使用 \texttt{figure} 浮动体，\texttt{caption} 自动编号为中文格式。}\label{fig:example}
+\end{figure}
+
+图~\ref{fig:example} 展示了标准的图片浮动体用法。浮动体通过 \texttt{[htbp]} 参数自动寻找最佳位置。
+
+\subsection{子图排版}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{example-image-a}
+    \caption{子图 A}
+    \label{fig:sub-a}
+  \end{subfigure}
+  \hspace{1cm}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{example-image-b}
+    \caption{子图 B}
+    \label{fig:sub-b}
+  \end{subfigure}
+  \caption{并排子图示例：左侧为图~\ref{fig:sub-a}，右侧为图~\ref{fig:sub-b}。}\label{fig:sub}
+\end{figure}
+
+图~\ref{fig:sub} 使用 \texttt{subcaption} 宏包实现并排子图，每个子图可独立引用。
+
+\subsection{表格浮动体}
+
+\begin{table}[htbp]
+  \centering
+  \rowcolors{2}{gray!15}{white}
+  \begin{tabular}{p{3cm}|p{2.8cm}|p{2.8cm}}
+    \hline
+    {\fzht 极限}        & {\fzht 表达式}                       & {\fzht 结果} \\
+    \hline
+    重要极限 I           & $\displaystyle\lim_{x\to 0}\frac{\sin x}{x}$      & $1$ \\
+    重要极限 II          & $\displaystyle\lim_{x\to\infty}\left(1+\frac{1}{x}\right)^x$ & $e$ \\
+    等价无穷小           & $\displaystyle\lim_{x\to 0}\frac{\tan x}{x}$      & $1$ \\
+    对数极限             & $\displaystyle\lim_{x\to 0}\frac{\ln(1+x)}{x}$    & $1$ \\
+    \hline
+  \end{tabular}
+  \caption{常见极限公式表}\label{tab:limits}
+\end{table}
+
+表~\ref{tab:limits} 使用 \texttt{table} 浮动体 + 隔行着色，\texttt{caption} 同样输出中文 ``表1''。
+
+% ============================================================
+%  第四节：标注与习题
+% ============================================================
+\section{标注与习题}
+
+\subsection{注解标注}
+
+模板提供三种标注环境，与 \texttt{formal} 风格统一（竖线 + 淡色背景）：
+
+\begin{attention}
+  极限存在的充要条件是左右极限存在且相等：$\displaystyle\lim_{x\to x_0^-}f(x)=\lim_{x\to x_0^+}f(x)=A$。
+
+  使用 \texttt{attention} 环境（天蓝竖线 + 淡蓝背景）标记需要特别注意的知识点。
+\end{attention}
+
+\begin{tips}
+  求解 $\frac{0}{0}$ 型极限时，优先考虑因式分解、有理化或洛必达法则。
+
+  使用 \texttt{tips} 环境（浅蓝竖线 + 极淡蓝背景）标记解题技巧与方法提示。
+\end{tips}
+
+\begin{warns}
+  使用洛必达法则前，必须验证是否满足 $\frac{0}{0}$ 或 $\frac{\infty}{\infty}$ 不定型条件。
+  若盲目套用，可能导致错误结果。
+
+  使用 \texttt{warns} 环境（冰蓝竖线 + 微蓝背景）标记常见错误与注意事项。
+\end{warns}
+
+\subsection{习题}
+
+\begin{exercise}[极限计算]
+  计算极限 $\displaystyle\lim_{x\to 0}\frac{e^x-1}{x}$。
+\end{exercise}
+
+\begin{exercise}[导数应用]
+  求函数 $f(x)=x^3-3x$ 在闭区间 $[-2,2]$ 上的最大值与最小值。
+\end{exercise}
+
+\begin{exercise}[积分求面积]
+  计算由曲线 $y=x^2$ 和 $y=x$ 围成区域的面积。
+\end{exercise}
+
+习题自动按节编号，支持可选的题目描述参数。配合 \texttt{\textbackslash label\{...\}} 和 \texttt{\textbackslash ref\{...\}} 可实现交叉引用。
+
+% ============================================================
+%  第五节：高等数学选讲
+% ============================================================
+\section{高等数学选讲}
+
+\subsection{导数的定义}
+
+\bianzhutu[切线几何意义]{example-image-a}{%
+  导数 $f'(x_0)$ 的几何意义：\\
+  曲线在点 $(x_0,f(x_0))$ 处切线的斜率。}
+
+\begin{formal}
+\begin{definition}[导数]\label{def:derivative}
+设函数 $f(x)$ 在点 $x_0$ 的某个邻域内有定义，当自变量 $x$ 在 $x_0$ 处有增量 $\Delta x$，相应地函数取得增量 $\Delta y=f(x_0+\Delta x)-f(x_0)$。如果极限
+$$f'(x_0)=\lim_{\Delta x\to 0}\frac{\Delta y}{\Delta x}
+  =\lim_{\Delta x\to 0}\frac{f(x_0+\Delta x)-f(x_0)}{\Delta x}$$
+存在，则称 $f(x)$ 在点 $x_0$ 处可导，此极限值称为 $f(x)$ 在 $x_0$ 处的导数。
+\end{definition}
+\end{formal}
+
+% 基本导数公式表（边注）
+\marginpar{%
+  \raggedright\footnotesize
+  {\color{DeepSkyBlue}\fzht 基本导数公式}\\[4pt]
+  \centering\fzfs
+  \begin{tabular}[t]{c|c}
+    {\fzht 原函数}  & {\fzht 导函数}        \\
+    \hline
+    $C$             & $0$                    \\
+    $x^n$           & $n x^{n-1}$            \\
+    $e^x$           & $e^x$                  \\
+    $\ln x$         & $\frac{1}{x}$          \\
+    $\sin x$        & $\cos x$               \\
+    $\cos x$        & $-\sin x$              \\
+    $\tan x$        & $\sec^{2}x$            \\
+  \end{tabular}}
+
+\subsection{求导法则与复合函数}
+
+\bianzhu[乘积法则]{$(uv)'=u'v+uv'$\\
+  商法则：$\displaystyle\left(\frac{u}{v}\right)'=\frac{u'v-uv'}{v^2}$}
+
+\textbf{基本求导法则：}
+\begin{enumerate}
+  \item $(u\pm v)'=u'\pm v'$
+  \item $(Cu)'=Cu'$（$C$ 为常数）
+  \item $(uv)'=u'v+uv'$
+  \item $\displaystyle\left(\frac{u}{v}\right)'=\frac{u'v-uv'}{v^2}\;(v\neq 0)$
+  \item 复合函数求导（链式法则）：若 $y=f(u),\;u=g(x)$，则
+    $$\frac{dy}{dx}=\frac{dy}{du}\cdot\frac{du}{dx}=f'(g(x))\cdot g'(x)$$
+\end{enumerate}
+
+\begin{exercise}[链式法则练习]
+  求 $y=\cos^2(3x+1)$ 的导数。
+\end{exercise}
+\begin{answer}
+  \textbf{答：}
+  {\fzkt 令 $y=u^2,\;u=\cos v,\;v=3x+1$，由链式法则：
+  \begin{align*}
+    y' &= (u^2)'_u\cdot(\cos v)'_v\cdot(3x+1)'_x \\
+       &= 2u\cdot(-\sin v)\cdot 3 \\
+       &= -6\cos(3x+1)\sin(3x+1) \\
+       &= -3\sin(6x+2)
+  \end{align*}}
+\end{answer}
+
+\subsection{函数的极值}
+
+\begin{formal}
+\begin{theorem}[费马定理]\label{thm:fermat}
+设函数 $f(x)$ 在点 $x_0$ 处可导，且在 $x_0$ 处取得极值，则 $f'(x_0)=0$。
+\end{theorem}
+\end{formal}
+
+\begin{attention}
+  定理~\ref{thm:fermat} 的逆命题不成立！$f'(x_0)=0$ 并不保证 $x_0$ 是极值点。
+  例如 $f(x)=x^3$ 在 $x=0$ 处 $f'(0)=0$，但 $x=0$ 不是极值点（是拐点）。
+\end{attention}
+
+\subsection{积分基础}
+
+\begin{formal}
+\begin{definition}[定积分]\label{def:integral}
+设函数 $f(x)$ 在区间 $[a,b]$ 上有界，将 $[a,b]$ 任意分为 $n$ 个子区间，在每个子区间上任取一点 $\xi_i$，作积分和。若当最大子区间长度趋于零时，积分和的极限存在，则称此极限为 $f(x)$ 在 $[a,b]$ 上的定积分：
+$$\int_a^b f(x)\,\mathrm{d}x=\lim_{\lambda\to 0}\sum_{i=1}^{n}f(\xi_i)\Delta x_i$$
+\end{definition}
+\end{formal}
+
+%\subsection{脚注示例}
+%
+%拉格朗日中值定理\footnote{拉格朗日（Joseph-Louis Lagrange，1736--1813），法国数学家、力学家。}是微分学中的重要定理。
+
+% ============================================================
+%  附录
+% ============================================================
+\cleardoublepage
+{
+  \thispagestyle{empty}
+  \begin{spacing}{3}
+    {\noindent\TitleFontc\fzdbs 附录}
+  \end{spacing}
+}
+
+\appendix
+
+\section{常用公式表}
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{c|c|c}
+    \hline
+    {\fzht 公式编号} & {\fzht 公式名称} & {\fzht 表达式} \\
+    \hline
+    A.1 & 三角函数导数  & $(\sin x)'=\cos x$ \\
+    A.2 & 指数导数      & $(e^x)'=e^x$ \\
+    A.3 & 对数导数      & $(\ln x)'=1/x$ \\
+    A.4 & 积分公式      & $\int x^n\,\mathrm{d}x=\frac{x^{n+1}}{n+1}+C$ \\
+    \hline
+  \end{tabular}
+  \caption{附录：常用导数与积分公式}
+\end{table}
+
+\begin{exercise}[附录习题]
+  求函数的导数：$f(x)=x\cdot e^x\cdot\sin x$。
+\end{exercise}
+
+\begin{answer}
+  \textbf{答：}
+  {\fzkt 使用乘积法则：
+  \begin{align*}
+    f'(x) &= (x)'e^x\sin x + x(e^x)'\sin x + xe^x(\sin x)' \\
+          &= e^x\sin x + xe^x\sin x + xe^x\cos x \\
+          &= e^x[\sin x + x(\sin x + \cos x)]
+  \end{align*}}
+\end{answer}
+
+% ============================================================
+%  参考文献
+% ============================================================
+\cleardoublepage
+{
+  \thispagestyle{empty}
+  \begin{spacing}{3}
+    {\noindent\TitleFontc\fzdbs 参考文献}
+  \end{spacing}
+}
+
+\begin{thebibliography}{99}
+  \bibitem{tao} Terence Tao, \textit{Analysis I}, Hindustan Book Agency, 2006.
+  \bibitem{rudin} Walter Rudin, \textit{Principles of Mathematical Analysis}, McGraw-Hill, 1976.
+  \bibitem{spivak} Michael Spivak, \textit{Calculus}, Publish or Perish, 2008.
+  \bibitem{aptecharov} V.\,V.\ Apte\v{c}arov, \textit{高等数学教程}, 高等教育出版社, 2006.
+  \bibitem{zjgsu} 同济大学数学系, \textit{高等数学（第七版）}, 高等教育出版社, 2014.
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,262 @@
+\setchapterpreamble[u]{\margintoc}
+\chapter{图像与表格}
+\labch{figsntabs}
+
+图文并茂是高质量技术文档的标志。
+\Class{kaobook} 在图像和表格排版方面提供了丰富的选项：
+标准浮动体、边栏浮动体、宽版浮动体，以及子图和子表支持。
+本章将通过实例逐一演示。
+
+\index{图像与表格}
+
+\section{标准图像}
+
+\Class{kaobook} 中的标准图像使用 \Environment{figure} 环境\index{图像}，
+其用法与其他 \LaTeX{} 文档类基本一致——但有一个重要区别：
+\textbf{图像的标题（caption）显示在边栏中}，而非图像下方。
+
+\begin{lstlisting}[style=kaolstplain, caption=标准图像的基本语法]
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=0.6\textwidth]{example-image}
+    \caption[图录标题]{这是图片的完整标题，它将显示在边栏中。}
+    \label{fig:my-figure}
+\end{figure}
+\end{lstlisting}
+
+\sidenote{标题的边栏位置由 \Package{floatrow} 的 \texttt{kaofloat} 样式控制。
+在双面排版（\texttt{twoside=true}）时，标题会自动出现在外缘边栏中。}
+
+由于我们的模板图片目录中可能还没有真实图片，这里我们先使用一个占位框
+来演示标准图像的排版效果：
+
+\begin{figure}[h!]
+    \centering
+    \fbox{\parbox{0.5\textwidth}{\centering\vspace{3cm}
+    示例图片\\
+    （此处应为 \texttt{monalisa.jpg} 或其他插图）\vspace{3cm}}}
+    \caption[标准图像示例]{一幅标准图像示例。在真实文档中，
+    此处应使用 \texttt{\textbackslash includegraphics} 命令插入实际图片。
+    注意标题出现在右侧边栏中，而不是图片下方。}
+    \labfig{standard-fig}
+\end{figure}
+
+如 \reffig{standard-fig} 所示，标准图像的标题显示在边栏中。
+这使得正文区更加干净，而标题信息仍然唾手可得。
+
+\section{边栏图像}
+
+小型插图可以放在边栏中\index{边栏图像}，使用 \Environment{marginfigure} 环境：
+
+\begin{marginfigure}
+    \centering
+    \fbox{\parbox{38mm}{\centering\vspace{1.5cm}
+    边栏\\
+    图像\vspace{1.5cm}}}
+    \caption[边栏图像示例]{一幅边栏图像。注意其宽度被限制在边栏宽度
+    （约 47.7 mm）以内。}
+    \labfig{margin-fig-demo}
+\end{marginfigure}
+
+边栏图像特别适合放置图标、小型示意图、作者照片等内容。
+因为它们在边栏中，不会打断正文的叙事流。\reffig{margin-fig-demo}
+展示了一幅边栏图像的效果。
+
+\index{边栏图像}
+
+\section{宽版图像}
+
+当你需要展示一幅宽图（如时间线、架构图、大尺寸照片）时，
+可以使用 \Environment{figure*} 环境创建一幅跨越整个页面宽度的宽版图像\index{宽版图像}：
+
+\begin{figure*}[h!]
+    \centering
+    \fbox{\parbox{0.85\textwidth}{\centering\vspace{2.5cm}
+    宽版图像示例\\
+    此图跨越正文区和边栏区\vspace{2.5cm}}}
+    \caption[宽版图像示例]{一幅宽版图像。它横跨正文和边栏区域，标题显示在图像下方，
+    并与图像同宽。适合展示大尺寸图表。}
+    \labfig{wide-fig}
+\end{figure*}
+
+宽版图像使用 \lstinline|\begin{figure*}[h!]|（注意星号），
+建议使用 \texttt{[h!]} 作为位置参数以确保图片出现在代码所在位置。
+
+\section{标准表格}
+
+表格\index{表格}是学术写作中不可或缺的元素。\Class{kaobook} 配合
+\Package{booktabs}（三线表）使用，能够创建出专业美观的表格。
+
+\begin{table}[h!]
+    \caption[学生成绩表]{某班级期末考试成绩统计。注意表标题显示在边栏中，
+    位于表格的侧上方。}
+    \labtab{student-scores}
+    \centering
+    \begin{tabular}{l c c c c r}
+        \toprule
+        姓名   & 数学 & 物理 & 英语 & 编程 & 总分 \\
+        \midrule
+        张三   & 92 & 88 & 85 & 95 & 360 \\
+        李四   & 78 & 90 & 92 & 88 & 348 \\
+        王五   & 85 & 76 & 90 & 91 & 342 \\
+        赵六   & 95 & 93 & 88 & 97 & 373 \\
+        \midrule
+        平均   & 87.5 & 86.8 & 88.8 & 92.8 & 355.8 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\reftab{student-scores} 展示了一个典型的三线表\index{三线表}。
+\Package{booktabs} 提供了 \lstinline|\toprule|、\lstinline|\midrule| 和
+\lstinline|\bottomrule| 命令来绘制不同粗细的横线。
+
+\sidenote{学术表格的最佳实践：(1) 尽量使用三线表而非网格表；(2) 避免使用竖线；
+(3) 数据对齐方式需统一（数字右对齐、文字左对齐）；(4) 表标题在上，图标题在下。}
+
+以下是另一个更复杂的表格示例，演示了 \lstinline|\multirow|（跨行）和
+\lstinline|\multicolumn|（跨列）的用法：
+
+\begin{table}[h!]
+    \caption[复杂表格示例]{一个使用跨行和跨列功能的复杂表格。}
+    \labtab{complex-table}
+    \centering
+    \begin{tabular}{l c c c}
+        \toprule
+        & \multicolumn{2}{c}{实验组} & 对照组 \\
+        \cmidrule(lr){2-3}
+        指标 & 方法A & 方法B & 方法C \\
+        \midrule
+        精确率 & 0.92 & 0.89 & 0.85 \\
+        召回率 & 0.88 & 0.91 & 0.83 \\
+        \multirow{2}{*}{综合} & \multicolumn{3}{c}{— 综合得分 —} \\
+        & \multicolumn{3}{c}{0.90\quad0.90\quad0.84} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\index{multirow}
+\index{multicolumn}
+
+\section{边栏表格}
+
+类似边栏图像，你可以使用 \Environment{margintable} 将小型表格放在边栏中\index{边栏表格}：
+
+\begin{margintable}
+    \caption[边栏表格]{参数设置。}
+    \labtab{margin-table-params}
+    \begin{tabular}{c c}
+        \toprule
+        $n$ & $S_n$ \\
+        \midrule
+        1   & 1.000 \\
+        2   & 1.500 \\
+        3   & 1.833 \\
+        4   & 2.083 \\
+        5   & 2.283 \\
+        \bottomrule
+    \end{tabular}
+\end{margintable}
+
+边栏表格非常适合展示配置参数、符号说明、小型统计数据等辅助信息。
+
+\section{宽版表格}
+
+超宽表格使用 \Environment{table*} 环境，配合 \Package{tabularx} 实现等宽列\index{宽版表格}：
+
+\begin{table*}[h!]
+    \caption[宽版表格示例]{一个跨越正文和边栏的宽版表格。注意它需要使用
+    \texttt{table*} 环境（带星号），并设置 \texttt{[h!]} 防止浮动到其他页面。}
+    \labtab{wide-table}
+    \begin{tabularx}{\textwidth}{l X X X}
+        \toprule
+        名称   & 描述 & 优点 & 缺点 \\
+        \midrule
+        \LaTeX  & 一种基于 \TeX 的文档排版系统 & 
+            数学公式精美、引用管理方便、输出稳定 &
+            学习曲线陡峭、所见非所得 \\
+        Markdown & 一种轻量级标记语言 &
+            语法简洁、易于上手、跨平台 &
+            排版能力有限、缺乏专业引用支持 \\
+        Word    & 微软的文字处理软件 &
+            所见即所得、协作方便、用户基数大 &
+            排版稳定性差、数学公式体验不佳 \\
+        \bottomrule
+    \end{tabularx}
+\end{table*}
+
+\section{子图与子表}
+
+使用 \Package{subcaption} 宏包\index{子图}（已由 \Package{floatrow} 自动加载）
+可以创建并列的子图：
+
+\begin{figure}[h!]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{2cm}
+        子图 A\vspace{2cm}}}
+        \caption{第一个子图。}
+        \labfig{subfig-a}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \fbox{\parbox{0.85\textwidth}{\centering\vspace{2cm}
+        子图 B\vspace{2cm}}}
+        \caption{第二个子图。}
+        \labfig{subfig-b}
+    \end{subfigure}
+    \caption[子图示例]{包含两个子图的图像。子图由 \texttt{subfigure} 环境
+    创建，每个子图可以有独立的标题和标签。}
+    \labfig{subfig-main}
+\end{figure}
+
+\marginnote[*-17]{子图标签的格式可以通过 \texttt{\textbackslash captionsetup[subfigure]}
+进行自定义，例如修改标签字体大小或括号样式。}
+
+\reffig{subfig-main} 展示了并列的两个子图，每个子图标签分别为 (a) 和 (b)。
+你还可以通过 \lstinline|\ContinuedFloat| 命令将子图分布在连续多个页面中。
+
+\section{算法排版}
+
+\Class{kaobook} 默认加载了 \Package{algorithm2e} 宏包\index{算法排版}，
+其 \texttt{ruled}、\texttt{lined} 选项提供了美观的算法排版：
+
+% 需要预先定义 \newcounter{chapter} 来避免 algorithm2e 错误（ctexart 无 chapter 计数器）
+\begin{algorithm}[H]
+    \SetAlgoLined
+    \caption{快速排序（Quick Sort）}
+    \KwIn{数组 $A$，左边界 $l$，右边界 $r$}
+    \KwOut{排序后的数组 $A$}
+    \If{$l \ge r$}{\Return\;}
+    $p \gets \text{Partition}(A, l, r)$\;
+    $\text{QuickSort}(A, l, p-1)$\;
+    $\text{QuickSort}(A, p+1, r)$\;
+\end{algorithm}
+
+\sidenote[][*-1]{\Package{algorithm2e} 支持多种样式：\texttt{plain}（默认）、
+\texttt{boxed}、\texttt{ruled}（三线框）、\texttt{algoruled} 等。
+更多细节请参考 \Package{algorithm2e} 官方文档。}
+
+\section{最佳实践}
+
+总结一下在 \Class{kaobook} 中编排图像与表格的最佳实践\index{最佳实践}：
+
+\begin{kaobox}[title=图像与表格最佳实践]
+\begin{enumerate}
+    \item \textbf{图像格式}：推荐使用 PDF/PNG（矢量图优先），JPG 适用于照片。
+    \item \textbf{表格样式}：首选三线表（\Package{booktabs}），避免竖线。
+    \item \textbf{标题位置}：图表标题在边栏中，宽版图表标题在图表下方。
+    \item \textbf{浮动控制}：使用 \texttt{[h!]} 或 \texttt{[htb]} 控制浮动体位置。
+    \item \textbf{标签位置}：\texttt{\textbackslash label} 必须放在
+        \texttt{\textbackslash caption} 之后（或作为其参数的一部分）。
+    \item \textbf{子图}：使用 \texttt{subfigure} 环境，每个子图可以有独立标题。
+    \item \textbf{边栏图表}：仅放置小型、辅助性的图表，避免拥挤。
+    \item \textbf{宽图表}：使用 \texttt{figure*} 和 \texttt{table*} 跨越全页宽度。
+\end{enumerate}
+\end{kaobox}
+
+至此，我们已经涵盖了 \Class{kaobook} 中文模板在图像与表格排版方面的所有主要功能。
+合理运用这些工具，你将能够创建出专业、美观、信息密度高的中文技术文档。
+
+\endinput

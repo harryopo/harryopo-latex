@@ -1,0 +1,34 @@
+# LaTeX 临时编译产物
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+texput.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE
+*.swp
+*.swo
+*~
+
+# 备份
+*.bak

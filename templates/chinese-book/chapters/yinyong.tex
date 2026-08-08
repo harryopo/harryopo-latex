@@ -1,0 +1,288 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  yinyong.tex — 引用与参考文献
+%  演示 kaobook + biblatex 引用体系的核心用法
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setchapterpreamble[u]{\margintoc}
+\chapter{引用与参考文献}
+\labch{yinyong}
+
+在学术写作中，引用与参考文献是至关重要的一环。本章系统介绍本模板基于
+\Package{biblatex}（通过 \Package{kaobiblioCJKsc} 加载）和
+\Package{kaorefsCJKsc} 所提供的中文引用体系，涵盖文献引用、图表交叉引用、
+以及 \Package{cleveref} 智能引用三大板块。
+
+%----------------------------------------------------------------------------------------
+
+\section{文献引用基础}
+
+\index{引用!文献引用}
+本模板使用 \Package{biblatex} 作为参考文献引擎，后端为 \texttt{biber}。
+所有参考文献命令均继承自 \Package{biblatex}，支持多种引用风格。
+
+\subsection{基本引用命令}
+
+\index{引用!parencite@\texttt{\textbackslash parencite}}
+\index{引用!textcite@\texttt{\textbackslash textcite}}
+\index{引用!citeauthor@\texttt{\textbackslash citeauthor}}
+\index{引用!citeyear@\texttt{\textbackslash citeyear}}
+\index{引用!cite@\texttt{\textbackslash cite}}
+
+以下是 \Package{biblatex} 最常用的引用命令及其示例：
+
+\begin{table}[h]
+\caption{常用文献引用命令一览}
+\labtab{yinyong-commands}
+\begin{tabular}{@{}llp{6cm}@{}}
+\toprule
+命令 & 输出格式 & 说明 \\
+\midrule
+\lstinline|\cite{key}| & [1] 或 (作者, 年份) & 基本引用，取决于样式 \\
+\lstinline|\parencite{key}| & (作者, 年份) & 带括号引用 \\
+\lstinline|\textcite{key}| & 作者 (年份) & 文中引用，作者名融入句子 \\
+\lstinline|\citeauthor{key}| & 作者 & 仅引用作者名 \\
+\lstinline|\citeyear{key}| & 年份 & 仅引用年份 \\
+\lstinline|\citeitle{key}| & 标题 & 仅引用文献标题 \\
+\lstinline|\footcite{key}| & 脚注引用 & 在脚注中给出完整信息 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\marginnote[-2cm]{在实际编译时，你需要将上表中的 \lstinline|key| 替换为%
+\lstinline|.bib| 文件中的文献条目键值。}
+
+例如，文中引用可以写作：\lstinline|\textcite{Author2024} 提出了一种新方法|，
+这将生成类似「张三 (2024) 提出了一种新方法」的输出。
+
+\subsection{biblatex 引用样式}
+
+\index{引用!样式}
+\Package{biblatex} 支持多种引用和参考文献样式，可通过加载
+\Package{kaobiblioCJKsc} 时传入选项来指定。常用样式包括：
+
+\begin{itemize}
+    \item \texttt{style=numeric} —— 数字编号，如 [1], [2], \ldots{}
+    \item \texttt{style=authoryear} —— 作者-年份，如 (张三, 2024)
+    \item \texttt{style=authortitle} —— 作者-标题
+    \item \texttt{style=verbose} —— 详尽脚注式
+    \item \texttt{style=reading} —— 阅读型，适合人文学科
+    \item \texttt{style=chicago-authordate} —— Chicago 格式
+\end{itemize}
+
+加载方式示例：
+\begin{lstlisting}
+% 使用数字编号样式
+\usepackage[style=numeric]{kaobiblioCJKsc}
+% 或使用作者-年份样式
+\usepackage[style=authoryear]{kaobiblioCJKsc}
+\end{lstlisting}
+
+\index{引用!sidecite@\texttt{\textbackslash sidecite}}
+此外，本模板提供了 \lstinline|\sidecite{key}| 命令，它会将引用信息和
+文献标题显示在页边注中——这是 kaobook 体系的标志性特征。
+
+默认的侧边引用格式由 \lstinline|\formatmargincitation| 命令控制：
+\begin{lstlisting}
+\newcommand{\formatmargincitation}[1]{%
+    \parencite{#1}: \citeauthor*{#1} (\citeyear{#1}), \citetitle{#1}%
+}
+\end{lstlisting}
+
+你可以通过 \lstinline|\renewcommand{\formatmargincitation}| 来自定义
+侧边引用的显示格式。
+
+%----------------------------------------------------------------------------------------
+
+\section{图表与定理交叉引用}
+
+\index{引用!交叉引用}
+\index{引用!label@\texttt{\textbackslash label}}
+\index{引用!ref@\texttt{\textbackslash ref}}
+
+\subsection{基本引用命令}
+
+\Package{kaorefsCJKsc} 提供了一套层次化的引用命令，用于引用章节、
+图表、公式和定理等元素。每种元素都有四种引用深度：
+
+\begin{table}[h]
+\caption{交叉引用命令体系}
+\labtab{kaorefs-commands}
+\begin{tabular}{@{}lll@{}}
+\toprule
+引用深度 & 命令前缀 & 示例（用于章节）\\
+\midrule
+纯编号 & \texttt{\textbackslash ref} & \lstinline|\refch{yinyong}| $\rightarrow$ 章~\refch{yinyong} \\
+编号 + 页码 & \texttt{\textbackslash vref} & \lstinline|\vrefch{yinyong}| \\
+编号 + 标题 & \texttt{\textbackslash nref} & \lstinline|\nrefch{yinyong}| \\
+完整（编号+标题+页码） & \texttt{\textbackslash fref} & \lstinline|\frefch{yinyong}| \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{标签规约}
+
+\index{引用!labch@\texttt{\textbackslash labch}}
+为保持一致性，\Package{kaorefsCJKsc} 为每种元素定义了专用标签命令，
+它们自动添加前缀以避免冲突：
+
+\begin{multicols}{2}
+\begin{itemize}
+    \item \lstinline|\labch{name}| $\rightarrow$ \lstinline|ch:name| （章节）
+    \item \lstinline|\labsec{name}| $\rightarrow$ \lstinline|sec:name| （节）
+    \item \lstinline|\labfig{name}| $\rightarrow$ \lstinline|fig:name| （图）
+    \item \lstinline|\labtab{name}| $\rightarrow$ \lstinline|tab:name| （表）
+    \item \lstinline|\labeq{name}| $\rightarrow$ \lstinline|eq:name| （公式）
+    \item \lstinline|\labthm{name}| $\rightarrow$ \lstinline|thm:name| （定理）
+    \item \lstinline|\labdef{name}| $\rightarrow$ \lstinline|def:name| （定义）
+\end{itemize}
+\end{multicols}
+
+相应的引用命令也有对应后缀，例如：
+\begin{itemize}
+    \item 引用图：\lstinline|\reffig{name}|, \lstinline|\vreffig{name}|
+    \item 引用表：\lstinline|\reftab{name}|, \lstinline|\vreftab{name}|
+    \item 引用公式：\lstinline|\refeq{name}|, \lstinline|\vrefeq{name}|
+\end{itemize}
+
+\subsection{图表示例}
+
+\index{引用!图引用}
+以下是一个带标签的示意表格：
+
+\begin{table}[h]
+\centering
+\caption{引用命令速查——kaorefs 体系}
+\labtab{ref-quick}
+\begin{tabular}{@{}lll@{}}
+\toprule
+元素 & 标签命令 & 引用命令（纯编号）\\
+\midrule
+章 & \lstinline|\labch{}| & \lstinline|\refch{}| \\
+节 & \lstinline|\labsec{}| & \lstinline|\refsec{}| \\
+图 & \lstinline|\labfig{}| & \lstinline|\reffig{}| \\
+表 & \lstinline|\labtab{}| & \lstinline|\reftab{}| \\
+公式 & \lstinline|\labeq{}| & \lstinline|\refeq{}| \\
+定理 & \lstinline|\labthm{}| & \lstinline|\refthm{}| \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+引用上表：\reftab{ref-quick}（这里展示的是纯编号引用）。
+使用 \lstinline|\vreftab{ref-quick}| 还会附加页码信息。
+
+%----------------------------------------------------------------------------------------
+
+\section{cleveref 智能引用}
+
+\index{引用!cleveref@\texttt{cleveref}}
+
+\Package{cleveref} 是 \LaTeX{} 社区广泛使用的智能引用宏包，它能自动判断
+被引用对象的类型并生成对应的文字前缀。中文模板已通过
+\Package{kaorefsCJKsc} 自动加载 \Package{cleveref}。
+
+\subsection{cleveref 基本用法}
+
+\index{引用!cref@\texttt{\textbackslash cref}}
+\index{引用!Cref@\texttt{\textbackslash Cref}}
+
+\Package{cleveref} 的核心命令是 \lstinline|\cref{}| 和 \lstinline|\Cref{}|：
+
+\begin{itemize}
+    \item \lstinline|\cref{label1,label2,...}| —— 小写开头，如「图~1 和 2」
+    \item \lstinline|\Cref{label1,label2,...}| —— 大写开头（句首使用），如「Figure~1 and 2」
+\end{itemize}
+
+\marginnote{中文环境中 \texttt{\textbackslash Cref} 与 \texttt{\textbackslash cref} %
+的区别主要体现在英文标题的句首大小写上；中文本身没有大小写问题。}
+
+\Package{cleveref} 优势在于它能自动识别标签类型，并处理多标签的并列关系。
+例如，\lstinline|\cref{fig:A,fig:B,fig:C}| 将输出「图~1--3」，
+而 \lstinline|\cref{fig:A,tab:X}| 将输出「图~1 和 表~1」。
+
+\subsection{cleveref 与 kaorefs 的配合}
+
+\index{引用!kaorefs 与 cleveref@kaorefs 与 cleveref}
+由于 \Package{kaorefsCJKsc} 的标签命令（如 \lstinline|\labfig{}|）本质上
+就是 \lstinline|\label{}|，因此 \Package{cleveref} 的 \lstinline|\cref{}|
+可以直接作用于这些标签。
+
+\begin{lstlisting}
+% 使用 kaorefs 标签 + cleveref 引用
+\labfig{sample} % 等价于 \label{fig:sample}
+% ... 图的内容 ...
+如 \cref{fig:sample} 所示，这个方法是有效的。
+\end{lstlisting}
+
+\subsection{中文本地化}
+
+\index{引用!中文本地化}
+在中文模板中，\Package{kaorefsCJKsc} 已通过 \lstinline|config.tex| 设置了
+中文本地化字符串（如「图」「表」「章」等）。如需自定义 \Package{cleveref}
+的类型名称，可使用：
+
+\begin{lstlisting}
+\crefname{figure}{图}{图}
+\Crefname{figure}{图}{图}
+\crefname{table}{表}{表}
+\Crefname{table}{表}{表}
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{编译参考文献}
+
+\index{引用!编译}
+\index{编译!biber@biber}
+使用 \Package{biblatex} 时，需要额外运行 \texttt{biber} 来处理参考文献数据库。
+典型的编译流程如下：
+
+\begin{lstlisting}[style=kaolstplain]
+xelatex main
+biber main
+xelatex main
+xelatex main   % 第三次编译以确保交叉引用稳定
+\end{lstlisting}
+
+或者使用 \texttt{latexmk} 自动化编译：
+
+\begin{lstlisting}[style=kaolstplain]
+latexmk -xelatex main
+\end{lstlisting}
+
+在 \texttt{main.tex} 中，参考文献通过以下方式引入：
+
+\begin{lstlisting}
+\usepackage{kaobiblioCJKsc}          % 加载 biblatex + 中文适配
+\addbibresource{main.bib}            % 添加 .bib 文献库
+% ... 文档主体 ...
+\printbibliography[heading=bibintoc] % 打印参考文献列表
+\end{lstlisting}
+
+\index{引用!.bib文件@\texttt{.bib} 文件}
+参考文献数据存放在 \texttt{.bib} 文件中，每条记录形如：
+
+\begin{lstlisting}
+@article{Author2024,
+  author  = {张三 and 李四},
+  title   = {关于××的研究},
+  journal = {××学报},
+  year    = {2024},
+  volume  = {42},
+  pages   = {1--10},
+}
+\end{lstlisting}
+
+%----------------------------------------------------------------------------------------
+
+\section{索引条目}
+
+\index{索引}
+\index{引用!索引}
+本模板使用 \Package{imakeidx} 生成索引。在正文中插入
+\lstinline|\index{关键词}| 即可将相应条目加入索引。
+编译索引需要额外运行 \texttt{makeindex}（\Package{imakeidx} 可在编译时
+自动完成这一步骤）。
+
+至此，你应该已经掌握了本模板提供的引用体系：文献引用（\Package{biblatex}）、
+交叉引用（\Package{kaorefsCJKsc}）和智能引用（\Package{cleveref}）三管齐下，
+能够满足绝大多数中文学术写作的需求。

@@ -1,0 +1,32 @@
+%----------------------------------------------------------------------------------------
+%	包以及文档配置，新项目可以直接复制粘贴
+%----------------------------------------------------------------------------------------
+
+% 加载排版包（不支持 chinese）
+\usepackage{polyglossia}
+\setmainlanguage{english}
+\SetLanguageKeys{english}{indentfirst=true}
+% 加载引号风格包（不支持 chinese）
+\usepackage[style=english]{csquotes}
+% 加载参考文献相关设置
+\usepackage[style=gb7714-2015ms,backref=false]{styles/kaobiblioCJKsc} % 默认使用 GB 标准
+\addbibresource{main.bib} % 参考文献文本
+% 加载数学相关设置
+\usepackage[framed]{styles/kaotheoremsCJKsc}
+% 加载超链接相关设置
+\usepackage{styles/kaorefsCJKsc}
+% 加载平台中文字体及相关设置
+\usepackage[testMathBox]{styles/kaoWinCJKsc}
+% ── 中文日期（需要 zhnumber） ──
+\providecommand{\zhtoday}{\zhdate{\today}}
+% 加载测试包
+\usepackage{blindtext}
+\usepackage{zhlipsum} % 中文随机文本
+
+%----------------------------------------------------------------------------------------
+%	以下用来在首页中加入封面图的宏包（可直接复制粘贴）
+%----------------------------------------------------------------------------------------
+\usepackage{eso-pic}
+\usepackage{graphicx} % 绘制图片所需宏包
+\usepackage{adjustbox} % 图片缩放所需宏包
+\usepackage{changepage} % 调整页面宽度所需宏包，用来调整\tableofcontents的minipage宽度

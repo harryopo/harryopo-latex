@@ -1,0 +1,3934 @@
+{
+  "paragraph_count": 294,
+  "image_count": 15,
+  "table_count": 19,
+  "images": [
+    {
+      "index": 0,
+      "filename": "img_000.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_000.png",
+      "width_px": 3840,
+      "height_px": 3000,
+      "paragraph_index": 67,
+      "nearby_text": ""
+    },
+    {
+      "index": 1,
+      "filename": "img_001.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_001.png",
+      "width_px": 683,
+      "height_px": 566,
+      "paragraph_index": 69,
+      "nearby_text": ""
+    },
+    {
+      "index": 2,
+      "filename": "img_002.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_002.png",
+      "width_px": 889,
+      "height_px": 208,
+      "paragraph_index": 74,
+      "nearby_text": ""
+    },
+    {
+      "index": 3,
+      "filename": "img_003.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_003.png",
+      "width_px": 3840,
+      "height_px": 1964,
+      "paragraph_index": 84,
+      "nearby_text": ""
+    },
+    {
+      "index": 4,
+      "filename": "img_004.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_004.png",
+      "width_px": 861,
+      "height_px": 1161,
+      "paragraph_index": 86,
+      "nearby_text": ""
+    },
+    {
+      "index": 5,
+      "filename": "img_005.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_005.png",
+      "width_px": 2550,
+      "height_px": 1365,
+      "paragraph_index": 131,
+      "nearby_text": ""
+    },
+    {
+      "index": 6,
+      "filename": "img_006.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_006.png",
+      "width_px": 2558,
+      "height_px": 1374,
+      "paragraph_index": 132,
+      "nearby_text": ""
+    },
+    {
+      "index": 7,
+      "filename": "img_007.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_007.png",
+      "width_px": 2554,
+      "height_px": 1345,
+      "paragraph_index": 133,
+      "nearby_text": ""
+    },
+    {
+      "index": 8,
+      "filename": "img_008.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_008.png",
+      "width_px": 2554,
+      "height_px": 1373,
+      "paragraph_index": 134,
+      "nearby_text": ""
+    },
+    {
+      "index": 9,
+      "filename": "img_009.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_009.png",
+      "width_px": 2553,
+      "height_px": 1377,
+      "paragraph_index": 135,
+      "nearby_text": ""
+    },
+    {
+      "index": 10,
+      "filename": "img_010.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_010.png",
+      "width_px": 2548,
+      "height_px": 1376,
+      "paragraph_index": 136,
+      "nearby_text": ""
+    },
+    {
+      "index": 11,
+      "filename": "img_011.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_011.png",
+      "width_px": 2554,
+      "height_px": 1371,
+      "paragraph_index": 137,
+      "nearby_text": ""
+    },
+    {
+      "index": 12,
+      "filename": "img_012.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_012.png",
+      "width_px": 2528,
+      "height_px": 1362,
+      "paragraph_index": 139,
+      "nearby_text": ""
+    },
+    {
+      "index": 13,
+      "filename": "img_013.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_013.png",
+      "width_px": 2559,
+      "height_px": 1365,
+      "paragraph_index": 140,
+      "nearby_text": ""
+    },
+    {
+      "index": 14,
+      "filename": "img_014.png",
+      "path": "d:\\ai\\latex\\蒸馏区\\distill-output\\distill-images\\img_014.png",
+      "width_px": 2556,
+      "height_px": 1369,
+      "paragraph_index": 142,
+      "nearby_text": ""
+    }
+  ],
+  "tables": [
+    {
+      "index": 0,
+      "row_count": 4,
+      "col_count": 3,
+      "rows": [
+        [
+          "创新性与创意度",
+          "“为什么是这个智能体？”",
+          "知行读书把\"读了就忘、笔记散乱、想问无门、知道做不到\"四大阅读痛点，用 5 大创新（方法论自动注入、5维 ContextBuilder、FSRS v5 同源记忆、本地优先、ECDICT 语境化英语）打成\"读→记→懂→用\"闭环，跨学科融合独此一家。"
+        ],
+        [
+          "技术实现与复杂度",
+          "“它是怎么跑起来的？”",
+          "Electron 三进程 + 6 步 Agent 编排（意图→策略→难度→5维上下文→提示→流式），集成本地关键词打分、4 维工具调用（字典/RAG/方法论/卡片）、三模型 reasoning 归一化，52,000 + 行 TS strict，深度远超普通 API 调用。"
+        ],
+        [
+          "实用价值与落地性",
+          "“它好用吗？”",
+          "v1.0.0 安装包已开源发布，围绕学习工作阅读的真实场景设计应用，阅读→复习→应用全闭环，覆盖读书全生命成长周期，长期价值已被使用者验证，零门槛上手安装"
+        ],
+        [
+          "用户体验与交互设计",
+          "“用起来顺手吗？”",
+          "Trae IDE/work 全程辅助开发，期间利用Trae Design重构设计前端，翠绿设计 + AI对话三栏对话布局 + 流式输出 + 知识卡片方法论可视化 + 悬停查词，15 模块路由清晰，本地决策AI对话 52-207ms 启动 < 1 秒，应用独立运行零门槛。"
+        ]
+      ]
+    },
+    {
+      "index": 1,
+      "row_count": 8,
+      "col_count": 3,
+      "rows": [
+        [
+          "痛点",
+          "现状",
+          "知行读书解决方案"
+        ],
+        [
+          "读了就忘",
+          "笔记、划线、想法分散，无法形成知识体系",
+          "FSRS v5 间隔重复 + Anki 风格学习阶段，划线自动变卡片"
+        ],
+        [
+          "笔记散乱",
+          "笔记、划线、想法分散，无法形成知识体系",
+          "微信读书skill一键同步 → 本地 SQLite → AI 蒸馏知识卡片、方法论，让笔记和想法真正成为知行合一的行事指南"
+        ],
+        [
+          "想问无门",
+          "读不懂的内容无人可解，ai不懂上下文环境",
+          "AI 智能体多意图识别 + 五维方法论知识库RAG上下文自动注入，配置苏格拉底追问、费曼复述学习法"
+        ],
+        [
+          "知道做不到",
+          "学到的概念从未真正应用，知道了做不到",
+          "知识卡片\"内容+解读+应用\"三段式 + 方法论场景化标签 + 掌握度追踪"
+        ],
+        [
+          "英语学习脱节",
+          "单独背单词效率低、脱离语境",
+          "每日英文外刊 + 悬停查词（ECDICT 离线词典）+ 右键加生词本、中英结合"
+        ],
+        [
+          "Token 浪费",
+          "提示词无管理，重复扣费",
+          "五维上下文懒加载（Token 省 33%-55%）+ 用量可视化监控"
+        ],
+        [
+          "隐私担忧",
+          "笔记上传云端 AI，数据被平台锁定",
+          "本地优先架构，数据永远在自己硬盘上，零遥测"
+        ]
+      ]
+    },
+    {
+      "index": 2,
+      "row_count": 8,
+      "col_count": 3,
+      "rows": [
+        [
+          "Skill 接口",
+          "开放能力",
+          "知行读书的挖掘方式"
+        ],
+        [
+          "/shelf/sync",
+          "书架列表",
+          "增量同步引擎 + 连接测试双复用"
+        ],
+        [
+          "/book/bookmarklist",
+          "划线/笔记",
+          "自动喂 FSRS 复习卡片与知识卡片的原料流水线"
+        ],
+        [
+          "/review/list/mine",
+          "书评/想法",
+          "注入 AI 对话上下文，让 AI 懂你的思考"
+        ],
+        [
+          "/book/chapterinfo",
+          "章节目录",
+          "划线精确定位到章节，按章复习"
+        ],
+        [
+          "/store/search",
+          "书城搜索",
+          "书籍元数据补全 + 同类/同作者衍生推荐"
+        ],
+        [
+          "/readdata/detail",
+          "阅读数据（周/月/年/总）",
+          "统计看板的真实阅读时长数据源"
+        ],
+        [
+          "/book/recommend",
+          "个性化推荐（与 App「为你推荐」同源）",
+          "发现好书，失败时自动降级为基于阅读偏好的衍生推荐"
+        ]
+      ]
+    },
+    {
+      "index": 3,
+      "row_count": 17,
+      "col_count": 4,
+      "rows": [
+        [
+          "#",
+          "模块",
+          "路由",
+          "核心能力"
+        ],
+        [
+          "1",
+          "主页",
+          "/",
+          "数据卡片 + 今日待复习 + 推荐文章"
+        ],
+        [
+          "2",
+          "书架",
+          "/bookshelf",
+          "微信读书同步 + 阅读进度"
+        ],
+        [
+          "3",
+          "书籍详情",
+          "/bookshelf/:id",
+          "笔记/卡片/方法论/讨论 多 Tab"
+        ],
+        [
+          "4",
+          "笔记",
+          "/notes",
+          "全书笔记检索 + 高亮原文 + Markdown 导出"
+        ],
+        [
+          "5",
+          "复习",
+          "/review",
+          "FSRS v5 智能调度 + 主动回忆两段法 + 4 评分预览"
+        ],
+        [
+          "6",
+          "AI 对话",
+          "/chat",
+          "多会话 + 流式 + 深度思考 + 方法论注入 + RAG 溯源"
+        ],
+        [
+          "7",
+          "方法论",
+          "/methodologies",
+          "独立方法论管理 + 掌握度追踪"
+        ],
+        [
+          "8",
+          "每日学习",
+          "/daily-learning",
+          "英文外刊 + AI 翻译对照 + 悬停查词"
+        ],
+        [
+          "9",
+          "生词本",
+          "/vocabulary",
+          "ECDICT 查询 + 学习阶段 + CSV/Anki 导出"
+        ],
+        [
+          "10",
+          "数据统计",
+          "/stats",
+          "阅读趋势 + 学习热力图"
+        ],
+        [
+          "11",
+          "Token 监控",
+          "/token-usage",
+          "服务商/功能双维用量 + 成本核算"
+        ],
+        [
+          "12",
+          "个人中心",
+          "/profile",
+          "阅读画像 + 微信读书资料继承"
+        ],
+        [
+          "13",
+          "设置",
+          "/settings",
+          "AI 多服务商热切换 + 数据导入导出"
+        ],
+        [
+          "14",
+          "智能体编排",
+          "/agent-orchestration",
+          "六步流水线可视化 + 意图/策略矩阵 + 提示词模板（设置内独立入口）"
+        ],
+        [
+          "15",
+          "Skill 生成",
+          "对话/方法论内",
+          "方法论一键导出Agent通用的Skill"
+        ],
+        [
+          "16",
+          "学习热力图",
+          "/stats/heatmap",
+          "12 周复习热力图 + 本周节奏可视化"
+        ]
+      ]
+    },
+    {
+      "index": 4,
+      "row_count": 12,
+      "col_count": 2,
+      "rows": [
+        [
+          "书架",
+          ""
+        ],
+        [
+          "书籍详情",
+          ""
+        ],
+        [
+          "笔记",
+          ""
+        ],
+        [
+          "AI 对话",
+          ""
+        ],
+        [
+          "方法论/知识卡片",
+          "\n"
+        ],
+        [
+          "每日学习",
+          ""
+        ],
+        [
+          "生词本",
+          ""
+        ],
+        [
+          "数据统计",
+          ""
+        ],
+        [
+          "Token 监控",
+          ""
+        ],
+        [
+          "个人中心",
+          ""
+        ],
+        [
+          "设置",
+          "\n\n\n\n\n"
+        ],
+        [
+          "智能体编排",
+          "\n"
+        ]
+      ]
+    },
+    {
+      "index": 5,
+      "row_count": 6,
+      "col_count": 4,
+      "rows": [
+        [
+          "优先级",
+          "构建器",
+          "数据源",
+          "Token 预算"
+        ],
+        [
+          "90",
+          "BookContextBuilder",
+          "Vectra 语义搜索 + 关键词回退",
+          "1500"
+        ],
+        [
+          "80",
+          "MethodologyContextBuilder",
+          "相关性评分 Top 5",
+          "1000"
+        ],
+        [
+          "70",
+          "KnowledgeCardContextBuilder",
+          "相关性评分 Top 10",
+          "800"
+        ],
+        [
+          "50",
+          "MemoryContextBuilder",
+          "相关记忆 3 条 + 摘要",
+          "500"
+        ],
+        [
+          "40",
+          "UserProfileContextBuilder",
+          "动态生成画像",
+          "200"
+        ]
+      ]
+    },
+    {
+      "index": 6,
+      "row_count": 8,
+      "col_count": 3,
+      "rows": [
+        [
+          "关键表",
+          "用途",
+          "设计亮点"
+        ],
+        [
+          "books / highlights",
+          "书籍与划线",
+          "与微信读书增量合并、内容指纹去重"
+        ],
+        [
+          "cards / reviews",
+          "FSRS 卡片与复习日志",
+          "schema 与 Anki 对齐"
+        ],
+        [
+          "knowledge_cards / methodologies",
+          "知识卡片与方法论",
+          "AI 蒸馏 + 掌握度追踪"
+        ],
+        [
+          "memories",
+          "AI 长期记忆",
+          "偏好/事实/反馈三类，按重要度检索"
+        ],
+        [
+          "vocabulary / articles",
+          "生词本与每日外刊",
+          "独立调度、CEFR 分级（欧洲语言能力标准）"
+        ],
+        [
+          "conversations / chat_messages",
+          "对话",
+          "点赞/收藏/意图/Bloom 层级全记录"
+        ],
+        [
+          "token_usage / daily_stats",
+          "用量与学习统计",
+          "成本核算到每次请求"
+        ]
+      ]
+    },
+    {
+      "index": 7,
+      "row_count": 11,
+      "col_count": 3,
+      "rows": [
+        [
+          "层",
+          "选型",
+          "说明"
+        ],
+        [
+          "桌面壳",
+          "Electron 35 + electron-vite 2",
+          "三进程隔离，Vite HMR"
+        ],
+        [
+          "UI",
+          "React 19 + React Router 7 + Tailwind CSS 4",
+          "路由懒加载，启动 < 1 秒"
+        ],
+        [
+          "状态",
+          "Zustand 5",
+          "乐观更新 + 流式控制"
+        ],
+        [
+          "类型",
+          "TypeScript 5.6 strict",
+          "52,000+ 行全量严格模式"
+        ],
+        [
+          "数据",
+          "sql.js（SQLite WASM）+ Vectra 向量索引",
+          "双引擎全本地"
+        ],
+        [
+          "记忆算法",
+          "ts-fsrs 5.4.1",
+          "Anki 同源 FSRS v5"
+        ],
+        [
+          "AI",
+          "Vercel AI SDK + 自研 SSE 引擎（服务器逐字推送协议）",
+          "多服务商热切换 + 思考过程格式归一化"
+        ],
+        [
+          "图表",
+          "Apache ECharts（按需引入）",
+          "第三方库独立打包，主入口体积不受影响"
+        ],
+        [
+          "质量",
+          "Vitest 2 + coverage-v8",
+          "667 用例 / 85% 覆盖率"
+        ],
+        [
+          "打包",
+          "electron-builder 25 + NSIS",
+          "v1.0.0 已发布"
+        ]
+      ]
+    },
+    {
+      "index": 8,
+      "row_count": 5,
+      "col_count": 3,
+      "rows": [
+        [
+          "意图",
+          "教学模式",
+          "初始 Bloom 层级"
+        ],
+        [
+          "知识查询",
+          "direct_answer 直接回答",
+          "1（记忆）"
+        ],
+        [
+          "深度讨论",
+          "socratic 苏格拉底追问",
+          "3（应用）"
+        ],
+        [
+          "教学实践",
+          "feynman 费曼复述",
+          "2（理解）"
+        ],
+        [
+          "闲聊",
+          "direct_answer",
+          "1"
+        ]
+      ]
+    },
+    {
+      "index": 9,
+      "row_count": 6,
+      "col_count": 3,
+      "rows": [
+        [
+          "步骤",
+          "延迟",
+          "类型"
+        ],
+        [
+          "意图分类",
+          "1-5ms",
+          "本地计算"
+        ],
+        [
+          "策略选择 / 难度调整 / 提示组装",
+          "<1ms ×3",
+          "本地计算"
+        ],
+        [
+          "五维上下文构建",
+          "50-200ms",
+          "本地 DB + 向量检索"
+        ],
+        [
+          "流式首 token",
+          "500-2000ms",
+          "唯一的网络环节"
+        ],
+        [
+          "本地决策链路合计",
+          "52-207ms",
+          "第①-⑤步全本地"
+        ]
+      ]
+    },
+    {
+      "index": 10,
+      "row_count": 12,
+      "col_count": 2,
+      "rows": [
+        [
+          "指标",
+          "数值"
+        ],
+        [
+          "TypeScript 代码总量",
+          "52,000+ 行\n（源码 44,285 + 测试 7,921），全量 strict"
+        ],
+        [
+          "自动化测试",
+          "667 个用例 / 28 个测试文件，100% 通过"
+        ],
+        [
+          "覆盖率",
+          "整体 85%，ai-service 94.6%，6 个模块 100%"
+        ],
+        [
+          "IPC 通道",
+          "150+ 通道 / 25 个业务域，统一错误处理"
+        ],
+        [
+          "页面/路由",
+          "20 个路由页面（12 主导航 + 7 设置 + 智能体编排），React 19 SPA"
+        ],
+        [
+          "数据库",
+          "16 张表 + 幂等迁移 + 事务"
+        ],
+        [
+          "质量门禁",
+          "lint + typecheck + test + build 四关全绿才提交"
+        ],
+        [
+          "发布状态",
+          "v1.0.0：GitHub Release（125MB 安装包）+ 产品官网 + 全套社区文档"
+        ],
+        [
+          "体验三入口",
+          "① NSIS 安装包一键安装 ② GitHub 源码自行构建 ③ 产品官网在线了解，评审零门槛"
+        ],
+        [
+          "运行成本",
+          "本地优先 + ECDICT 离线词典 + AI 按需调用（可用火山引擎免费额度），近乎零成本运行"
+        ],
+        [
+          "真实使用数据",
+          "开发者本人 30 天深度使用，累计 128 万 Token，复习曲线稳定上升"
+        ]
+      ]
+    },
+    {
+      "index": 11,
+      "row_count": 4,
+      "col_count": 3,
+      "rows": [
+        [
+          "层次",
+          "收获",
+          "依托的能力"
+        ],
+        [
+          "知道",
+          "读过的概念真正记住了（课题分离、目的论不再是书里的名词，而是随时能调用的工具）",
+          "FSRS 科学复习 + 知识卡片"
+        ],
+        [
+          "想通",
+          "遇到困惑时有一个读过我所有笔记的 AI 陪我把问题想深，而不是给标准答案",
+          "五维上下文 + 苏格拉底/费曼策略"
+        ],
+        [
+          "做到",
+          "行为真的改了：敢于拒绝不再内耗、少了很多对别人眼光的焦虑——这是人际关系处理方式的实质改观",
+          "方法论场景标签 + 掌握度追踪"
+        ]
+      ]
+    },
+    {
+      "index": 12,
+      "row_count": 7,
+      "col_count": 3,
+      "rows": [
+        [
+          "竞品",
+          "它是什么",
+          "知行读书的差异"
+        ],
+        [
+          "微信读书",
+          "阅读平台",
+          "我们是它的\"第二大脑\"——它管读，我们管记住和会用；生态互补而非竞争"
+        ],
+        [
+          "Anki",
+          "间隔重复工具",
+          "同一算法（FSRS），但卡片自动从阅读生成，零手工录入；卡片还带原文上下文"
+        ],
+        [
+          "Obsidian",
+          "笔记工具",
+          "数据自动流入，无需手动迁移；复习和 AI 开箱即用"
+        ],
+        [
+          "ChatGPT",
+          "通用 AI 对话（$20/月）",
+          "我们的 AI 读过你读的书、带教学策略、有长期记忆；本地零成本 + API 按需"
+        ],
+        [
+          "Notion AI",
+          "云端知识管理",
+          "我们本地优先、离线可用、数据永远在你硬盘上"
+        ],
+        [
+          "微信读书内置 AI",
+          "单章节问答",
+          "我们是全书笔记 + 方法论 + 历史记忆的跨书检索，且有科学复习闭环"
+        ]
+      ]
+    },
+    {
+      "index": 13,
+      "row_count": 6,
+      "col_count": 2,
+      "rows": [
+        [
+          "创新点",
+          "评分依据"
+        ],
+        [
+          "方法论自动注入 Agent",
+          "行业首创，AI 回答自动引用书中方法论 + 实时更新掌握度 + Skill一键导出"
+        ],
+        [
+          "5 维 ContextBuilder",
+          "预算制懒加载 + fail-soft，Token 节省 33%-55%"
+        ],
+        [
+          "FSRS v5 同源记忆引擎",
+          "ts-fsrs 官方库 + DSR模型，保持率高20-30%，自动喂卡零手工成本"
+        ],
+        [
+          "本地优先架构",
+          "数据全本地（含 RAG 向量索引）+ AI 云端热切换，数据主权还给用户"
+        ],
+        [
+          "ECDICT 离线词典",
+          "13.6MB JSON，悬停查词 O(1)，6 类词形还原，语境化英语学习"
+        ]
+      ]
+    },
+    {
+      "index": 14,
+      "row_count": 7,
+      "col_count": 2,
+      "rows": [
+        [
+          "技术亮点",
+          "说明"
+        ],
+        [
+          "Electron 三进程架构",
+          "contextIsolation 最严安全模型，非简单网页套壳"
+        ],
+        [
+          "52,000+ 行 TS strict",
+          "667 测试 / 85% 覆盖率 / 四关质量门禁"
+        ],
+        [
+          "智能体编排",
+          "意图分类 + 策略选择 + 五维上下文 + 状态追踪 + 对话后自动学习"
+        ],
+        [
+          "间隔重复引擎",
+          "ts-fsrs 5.4.1 官方库 + 100% API 兼容适配层零破坏升级"
+        ],
+        [
+          "微信读书 Skill",
+          "7 大接口深度集成 + 增量同步 + 指纹去重"
+        ],
+        [
+          "多 AI 服务商",
+          "火山引擎/DeepSeek/OpenAI/Anthropic/热切换+三家 reasoning 归一化"
+        ]
+      ]
+    },
+    {
+      "index": 15,
+      "row_count": 6,
+      "col_count": 2,
+      "rows": [
+        [
+          "落地优势",
+          "说明"
+        ],
+        [
+          "真实用户",
+          "开发者本人即核心用户，年读 50+ 本，真实使用"
+        ],
+        [
+          "真实场景",
+          "阅读 → 笔记 → 复习 → 应用全闭环"
+        ],
+        [
+          "可运行可体验",
+          "v1.0.0 已发布，安装包/源码/官网三入口"
+        ],
+        [
+          "零成本",
+          "本地优先 + 离线词典 + 免费额度可用"
+        ],
+        [
+          "开源可持续",
+          "MIT + 全套社区文档，接受社区共建"
+        ]
+      ]
+    },
+    {
+      "index": 16,
+      "row_count": 6,
+      "col_count": 2,
+      "rows": [
+        [
+          "体验亮点",
+          "说明"
+        ],
+        [
+          "淡雅翠绿设计系统",
+          "emerald 主色 + 暗色模式，阅读友好"
+        ],
+        [
+          "三栏对话布局",
+          "会话/消息/上下文面板，方法论注入可视"
+        ],
+        [
+          "流式 + 深度思考",
+          "逐 token 打字机 + reasoning 折叠面板"
+        ],
+        [
+          "悬停查词 tooltip",
+          "音标/词性/释义/一键加词本，离线毫秒响应"
+        ],
+        [
+          "路由懒加载",
+          "启动 < 1 秒，ECharts vendor 仅进后台才加载"
+        ]
+      ]
+    },
+    {
+      "index": 17,
+      "row_count": 4,
+      "col_count": 2,
+      "rows": [
+        [
+          "阶段",
+          "计划"
+        ],
+        [
+          "短期（3-6 月）",
+          "持续迭代优化，修复bug，扩大开源生态，多宣传，后续看看能否导入本地/Kindle / Apple Books 等更多数据源、社区方法论分享、macOS端适配，尝试与微信读书企业协作"
+        ],
+        [
+          "中期（6-12 月）",
+          "知识图谱可视化、协作学习小组MCP开发"
+        ],
+        [
+          "长期（1-2 年）",
+          "插件生态与开放 API、个性化模型微调、企业团队知识管理版"
+        ]
+      ]
+    },
+    {
+      "index": 18,
+      "row_count": 5,
+      "col_count": 4,
+      "rows": [
+        [
+          "数据类别",
+          "说明",
+          "存储位置",
+          "是否上传"
+        ],
+        [
+          "用户主动输入",
+          "聊天消息 / 笔记 / 复习评分",
+          "本地 SQLite",
+          "否"
+        ],
+        [
+          "微信读书同步",
+          "书架 / 划线 / 笔记 / 书评",
+          "本地 SQLite",
+          "否"
+        ],
+        [
+          "AI 服务请求",
+          "对话上下文 / 模型响应",
+          "AI 服务商",
+          "是（按需）"
+        ],
+        [
+          "系统生成数据",
+          "知识卡 / 方法论 / 记忆",
+          "本地 SQLite",
+          "否"
+        ]
+      ]
+    }
+  ],
+  "paragraphs": [
+    {
+      "paragraph_index": 0,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 1,
+      "style": "Heading 1",
+      "text": "知行读书—AI 驱动的阅读成长Agent",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "方正小标宋_GBK",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 2,
+      "style": "Normal",
+      "text": "——帮每一位读者构建自我成长型系统",
+      "first_line_indent_pt": null,
+      "font_size_pt": 20.0,
+      "bold": null,
+      "font_name": "方正小标宋_GBK",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 3,
+      "style": "Normal",
+      "text": "张三",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 4,
+      "style": "Normal",
+      "text": "计算机应用技术专业 2025000101",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 5,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 6,
+      "style": "Normal",
+      "text": "摘 要：知行读书是一款基于微信读书生态的 AI 驱动阅读成长Agent桌面应用，面向所有阅读者，帮助每一位读者构建起属于自己的自我成长型系统。作品以“同步→理解→复习→应用”完整闭环为核心，通过方法论自动注入智能体、五维上下文构建器、六步 Agent 编排流水线、FSRS v5 间隔重复、本地优先混合架构与 ECDICT 离线词典等五大创新，系统性解决“读了就忘、笔记散乱、想问无门、知道做不到”四大阅读痛点。",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 7,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 8,
+      "style": "Normal",
+      "text": "关键词：AI 阅读智能体；Agent编排；间隔重复；本地优先ContextBuilder；方法论自动注入；微信读书Skill；Electron",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 9,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 10,
+      "style": "Heading 2",
+      "text": "1\t项目概述",
+      "first_line_indent_pt": null,
+      "font_size_pt": 16.0,
+      "bold": null,
+      "font_name": "方正小标宋_GBK",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 11,
+      "style": "Normal",
+      "text": "一句话定位：把「微信读书 → Anki 同源科学记忆 → AI Aagent」装进一个本地优先的桌面应用，具有16大功能模块和5大核心创新；面向所有阅读者，帮每一位读者构建起属于自己的自我成长型系统；在同类产品中，首次将微信读书生态同步、FSRS v5 间隔重复算法与教学策略驱动型 AI Agent 三者深度整合。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 12,
+      "style": "题目小标题",
+      "text": "是什么：基于微信读书生态的 AI 驱动阅读成长智能体（Electron 桌面应用）",
+      "first_line_indent_pt": null,
+      "font_size_pt": 11.0,
+      "bold": false,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 13,
+      "style": "题目小标题",
+      "text": "解决什么：笔记散落、读了就忘、想问无门、知道做不到的四大阅读痛点",
+      "first_line_indent_pt": null,
+      "font_size_pt": 11.0,
+      "bold": false,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 14,
+      "style": "题目小标题",
+      "text": "怎么做：同步→蒸馏→复习→应用的闭环；本地 SQLite 存储 + API云端调用",
+      "first_line_indent_pt": null,
+      "font_size_pt": 11.0,
+      "bold": false,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 15,
+      "style": "Normal",
+      "text": "表1：评审标准 × 知行读书对标回答（详见目录评审标准对标板块）",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 16,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 17,
+      "style": "Heading 2",
+      "text": "2\t详细介绍",
+      "first_line_indent_pt": null,
+      "font_size_pt": 16.0,
+      "bold": null,
+      "font_name": "方正小标宋_GBK",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 18,
+      "style": "Heading 2",
+      "text": "2.1  解决的问题",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 19,
+      "style": "Normal",
+      "text": "信息爆炸时代，人们读得越来越多，记住的越来越少。现有工具链是断裂的：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "方正楷体_GBK",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 20,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 21,
+      "style": "Normal",
+      "text": "表2：痛点、现状、知行读书解决方案",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 22,
+      "style": "Heading 2",
+      "text": "2.2  核心功能全景（16大模块）",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 23,
+      "style": "Heading 3",
+      "text": "2.2.1 依托微信读书 Skill，充分挖掘开放能力深度集成",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 24,
+      "style": "Normal",
+      "text": "知行读书的数据底座完全构建在微信读书开放平台的Agent Gateway（Skill API）之上。我们没有停留在拉个书架\"的浅层集成，而是系统性地挖掘了7大开放接口，让 Skill 能力贯穿产品全链路：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 25,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 26,
+      "style": "Normal",
+      "text": "表3：微信读书skill接口能力分析挖掘",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 27,
+      "style": "Normal",
+      "text": "从读什么\"（推荐/搜索）到\"读了什么\"（书架/划线/书评）再到\"读得怎么样\"（阅读数据），Skill 开放能力支撑起了完整的阅读成长数据闭环——这也是本项目能把\"第二大脑\"做实的前提。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 28,
+      "style": "Heading 3",
+      "text": "2.2.2 16大核心功能模块详情",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 29,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 30,
+      "style": "Normal",
+      "text": "表4：16大核心功能模块详情",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 31,
+      "style": "Normal",
+      "text": "下文为软件的部分使用截图",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 32,
+      "style": "Heading 2",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 33,
+      "style": "Heading 2",
+      "text": "2.3  五大核心创新点",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 34,
+      "style": "Heading 3",
+      "text": "创新点 1：方法论自动注入 Agent（行业首创）",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 35,
+      "style": "Normal",
+      "text": "传统 AI 阅读工具只能基于用户输入的上下文生成回答，无法主动调用书中的结构化方法论。知行读书引入 MethodologyContextBuilder：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 36,
+      "style": "Normal",
+      "text": "从书籍对应的 methodology 表检索相关方法论",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 37,
+      "style": "Normal",
+      "text": "按意图相关性排序后注入 system prompt",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 38,
+      "style": "Normal",
+      "text": "AI 回答时自动引用具体章节与方法论名称",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 39,
+      "style": "Normal",
+      "text": "对话结束后回调更新掌握度（mastery level），实现\"用一次、深一层\"",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 40,
+      "style": "Normal",
+      "text": "效果：回答不再泛泛而谈，而是基于书籍知识框架给出可操作建议，并持续追踪用户对每条方法论的掌握程度。用户还可将任意方法论一键导出为Skill 文件，实现\"读书 → 方法论 → Skill → AI 实践\"的知识二次流通。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 41,
+      "style": "Heading 3",
+      "text": "创新点 2：5 维 ContextBuilder（预算制懒加载）",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 42,
+      "style": "Normal",
+      "text": "为降低 Token 消耗并提升回答相关性，构建 5 个上下文维度，按优先级懒加载：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 43,
+      "style": "Normal",
+      "text": "表5：ContextBuilder详情图",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 44,
+      "style": "Normal",
+      "text": "三条硬规则：预算不足时低优先级自动跳过；每个构建器独立失败不拖垮整体（fail-soft 柔性容错）；超预算截断并显式标记。实测对比全量加载方案，50 次中等复杂度对话平均节省 Token（AI 按文本量计费的单位） 33%-55%，中位数 38%。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 45,
+      "style": "Heading 3",
+      "text": "创新点 3：FSRS v5 (DSR) 间隔复习 · 同源科学记忆引擎",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 46,
+      "style": "Normal",
+      "text": "不是自己拍脑袋写的\"复习提醒\"，而是直接集成 ts-fsrs 5.4.1（open-spaced-repetition 官方实现，与 Anki 23.10+ 同一算法）：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 47,
+      "style": "Normal",
+      "text": "FSRS v5 DSR 模型：19 组标准权重（DSR = 难度-稳定性-可提取性，描述记忆状态的三个变量），基于海量真实复习记录训练，记忆保持率比传统算法（SM-2、Leitner 卡盒法）高 20-30%，有效避免 \"ease hell\"（简易度地狱：传统算法中卡片越复习间隔越短的恶性循环）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 48,
+      "style": "Normal",
+      "text": "零手工成本：微信读书划线自动生成卡片——这是 Anki 用户梦寐以求的\"自动喂卡\"",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 49,
+      "style": "Normal",
+      "text": "repeat() 预览：评分前即可看到 4 种评分各自的未来间隔",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 50,
+      "style": "Normal",
+      "text": "数据互通：卡片 schema（数据结构定义）与 Anki 对齐，可导出到 Anki 跨平台复习",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 51,
+      "style": "Normal",
+      "text": "零破坏升级：从自实现引擎切换到官方库时，通过适配层做到对外 API 100% 兼容，38 个引擎测试全绿",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 52,
+      "style": "Heading 3",
+      "text": "创新点 4：本地优先架构 · 数据主权还给用户",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 53,
+      "style": "Normal",
+      "text": "全部核心数据在本地：sql.js（SQLite WASM，即嵌入应用内部运行的数据库引擎，无需额外安装）16 张表，3 秒防抖持久化 + 退出强制保存",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 54,
+      "style": "Normal",
+      "text": "RAG 也在本地：RAG（检索增强生成：先从你的笔记里检索相关内容，再让 AI 据此回答）采用 Vectra 纯 TypeScript 向量索引，语义搜索不出本机；向量检索失败自动回退 SQLite 关键词搜索",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 55,
+      "style": "Normal",
+      "text": "密钥系统级加密：Electron safeStorage（调用操作系统自带的加密能力）加密存储 API Key，仅主进程可解密",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 56,
+      "style": "Normal",
+      "text": "AI 可热切换：火山引擎 / DeepSeek / OpenAI / Anthropic /任意切换，请求直连不过中转",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 57,
+      "style": "Normal",
+      "text": "零遥测：不含任何分析/追踪/广告 SDK",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 58,
+      "style": "Normal",
+      "text": "离线可用：除同步和 AI 对话外，复习/笔记/卡片/词典全部离线可用",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 59,
+      "style": "Heading 3",
+      "text": "创新点 5：ECDICT 离线词典 + 语境化英语学习",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 60,
+      "style": "Normal",
+      "text": "内置从开源 ECDICT（开源英汉词典数据库）提取的 13.6 MB JSON 词典（近 6 万词条）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 61,
+      "style": "List Paragraph",
+      "text": "悬停查词 O(1) 内存缓存（毫秒级即时响应）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 62,
+      "style": "List Paragraph",
+      "text": "支持动词时态、名词单复数等 6 类词形变化还原（动词时态、名词单复数、形容词比较级、副词变形、-ing 形式、-ed 形式）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 63,
+      "style": "List Paragraph",
+      "text": "配合每日英文外刊（RSS 订阅源聚合 + AI 翻译对照 + CET-4/6/考研三级难度）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 64,
+      "style": "List Paragraph",
+      "text": "实现\"在真实语境中学单词\"，右键加入生词本后由 FSRS 算法统一安排复习",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 65,
+      "style": "Heading 2",
+      "text": "2.4  整体技术架构",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 66,
+      "style": "Heading 3",
+      "text": "2.4.1 系统架构总览",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 67,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_000.png"
+      ]
+    },
+    {
+      "paragraph_index": 68,
+      "style": "Normal",
+      "text": "图1：知行读书·系统架构图",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 69,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_001.png"
+      ]
+    },
+    {
+      "paragraph_index": 70,
+      "style": "Normal",
+      "text": "图2：三进程架构总览",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 71,
+      "style": "Normal",
+      "text": "注：多模型深度思考归一化：一套代码兼容三家模型的\"深度思考\"输出格式（即 AI 在正式回答前展示的推理过程，三家厂商的字段名各不相同）：DeepSeek R1 的 `reasoning_content`、OpenAI o 系列的 `reasoning.summary`、Claude 的 `thinking_delta`。归一化层统一转换后，一套折叠面板 UI 通吃，并支持随时中断生成（立即中止 + 柔性停止双模式）。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 72,
+      "style": "Heading 3",
+      "text": "2.4.2  IPC 通信架构（150+ 通道 / 25 业务域）",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 73,
+      "style": "Normal",
+      "text": "所有通道走统一注册器，天然获得一致的错误处理与类型安全：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 74,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_002.png"
+      ]
+    },
+    {
+      "paragraph_index": 75,
+      "style": "Normal",
+      "text": "流式场景（AI 对话）采用反向推送 4 类事件（CHUNK / REASONING_CHUNK / COMPLETE / ERROR），Preload 用 Map<callback, handler> 隔离订阅者、组件卸载即清理，杜绝监听器泄漏。主要业务域：knowledgeCards 13、vocabulary 13、cards 11、articles 10、weread 8、admin 18……",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 76,
+      "style": "Heading 3",
+      "text": "2.4.3  IPC 数据库设计（16 张表）",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 77,
+      "style": "Normal",
+      "text": "表6：数据库设计表",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 78,
+      "style": "Normal",
+      "text": "工程细节：sql.js 全内存运行 + 3 秒防抖落盘 + 退出强制保存；迁移采用 PRAGMA table_info 幂等 ALTER TABLE，用户升级版本零感知。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 79,
+      "style": "Heading 3",
+      "text": "2.4.4  IPC 技术栈层次",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 80,
+      "style": "Normal",
+      "text": "表7：IPC 技术栈层次详情",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 81,
+      "style": "Heading 2",
+      "text": "2.5  Agent 编排架构专章（核心）",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 82,
+      "style": "Normal",
+      "text": "这是知行读书的灵魂模块。它回答一个问题：为什么同样接大模型，知行读书的 AI 是\"私教\"而别人的是\"问答机\"？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 83,
+      "style": "Heading 3",
+      "text": "2.5.1  六步编排流水线全景",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 84,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": 21.3,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_003.png"
+      ]
+    },
+    {
+      "paragraph_index": 85,
+      "style": "Normal",
+      "text": "图3：Agent智能体编排流程图",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 86,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_004.png"
+      ]
+    },
+    {
+      "paragraph_index": 87,
+      "style": "Normal",
+      "text": "图4：Agent智能体编排时序图",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 88,
+      "style": "Heading 3",
+      "text": "2.5.2  每一步的设计细节",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 89,
+      "style": "Normal",
+      "text": "① 意图分类（intent-classifier）——纯本地关键词打分引擎，零网络依赖：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Cambria Math",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 90,
+      "style": "Normal",
+      "text": "4 类意图关键词库（可从提示词中心热更新）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 91,
+      "style": "Normal",
+      "text": "负向模式惩罚（\"怎么用\"会压低 knowledge_query 得分）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 92,
+      "style": "Normal",
+      "text": "对话上下文分析：follow-up 检测（\"然后呢\"）、affirmative 检测（\"对的\"）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 93,
+      "style": "Normal",
+      "text": "延迟 1-5ms——这是\"响应快\"和\"隐私好\"的双重保证",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 94,
+      "style": "Normal",
+      "text": "② 策略选择（strategy-selector）——意图到教学模式的映射表：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Cambria Math",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 95,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 96,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 97,
+      "style": "Normal",
+      "text": "③ 难度自适应（state-tracker）——基于会话状态机的 Bloom 认知层级调整：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Cambria Math",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 98,
+      "style": "Normal",
+      "text": "连续答对 3 次 → 升层级（AI 提问变难）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 99,
+      "style": "Normal",
+      "text": "连续答错 2 次 → 降层级（AI 放慢节奏、多给例子）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 100,
+      "style": "Normal",
+      "text": "连续答对 5 次且已到 Bloom 6 → 标记该概念\"已掌握\"",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 101,
+      "style": "Normal",
+      "text": "Bloom 4+ 自动切苏格拉底模式，2- 自动切直接回答——难度和教法双联动",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 102,
+      "style": "Normal",
+      "text": "④ 五维上下文构建（context-manager）——见创新点 2，预算制 + fail-soft + 懒加载三大机制。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Cambria Math",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 103,
+      "style": "Normal",
+      "text": "⑤ 系统提示组装（system-prompt）——四段动态拼装：基础人设（提示词中心可自定义）+ 策略提示 + 难度提示 + 已掌握概念列表（告诉 AI\"这些不用再讲了\"）。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Cambria Math",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 104,
+      "style": "Normal",
+      "text": "⑥ 流式响应（ai-sdk-service）——Vercel AI SDK streamText()：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Cambria Math",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 105,
+      "style": "Normal",
+      "text": "消息归一化（system 合并到首条 user，兼容不支持 system role 的模型）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 106,
+      "style": "Normal",
+      "text": "三家 reasoning 格式统一解析",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 107,
+      "style": "Normal",
+      "text": "逐 token 转发到渲染进程打字机渲染",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 108,
+      "style": "Heading 3",
+      "text": "2.5.3  对话后自动学习（闭环的关键）",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 109,
+      "style": "Normal",
+      "text": "每轮对话完成后自动执行三件事（用户零感知）：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 110,
+      "style": "Normal",
+      "text": "updateConceptMastery —— 更新本轮涉及概念的掌握度",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 111,
+      "style": "Normal",
+      "text": "extractMemoriesFromConversation —— 提取偏好/事实/反馈三类长期记忆入库",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 112,
+      "style": "Normal",
+      "text": "updateMethodologyMastery —— 若引用了方法论，更新其掌握度",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 113,
+      "style": "Normal",
+      "text": "这让 Agent 拥有了\"成长性\"：记忆系统喂给下一轮的 MemoryContextBuilder，掌握度喂给难度自适应和提示组装——系统越用越懂你，形成个性化飞轮。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 114,
+      "style": "Heading 3",
+      "text": "2.5.4  性能画像",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 115,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 116,
+      "style": "Heading 3",
+      "text": "2.5.5  智能体编排可视化中枢",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 117,
+      "style": "Normal",
+      "text": "Agent 不是黑盒——知行读书提供了专门的智能体编排可视化页面（设置 → 智能体编排），把整条六步流水线搞成可见、可懂、可配置的控制中枢，且页面所有配置与后端 electron/agent/* 实现严格同源：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 118,
+      "style": "Normal",
+      "text": "六步流水线卡片：意图分类 → 策略选择 → 难度调整 → 上下文构建 → 系统提示 → 流式响应，每步带实时在线状态徽章",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 119,
+      "style": "Normal",
+      "text": "四种意图配置：知识查询/深度讨论/教学练习/闲聊问候的关键词库展示（与 intent-classifier 同源）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 120,
+      "style": "Normal",
+      "text": "策略矩阵热力图：4 教学模式 × 6 Bloom 层级的命中频次可视化",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 121,
+      "style": "Normal",
+      "text": "升降级规则面板：概念掌握度 ≥ 85% 触发升级等规则透明化",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 122,
+      "style": "Normal",
+      "text": "上下文构建器面板：五维构建器与 4000 Token 总预算分配一目了然",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 123,
+      "style": "Normal",
+      "text": "系统提示词模板：默认模板+ 6个可注入变量（{book_title}/ {methodology}/{bloom_level}/{user_mastery} /{chat_history}/{knowledge_card}）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 124,
+      "style": "Normal",
+      "text": "另有一套 4 Tab 管理后台（仪表盘/提示词中心/数据库浏览器/知识库）代码与测试完整保留，作为开发者工具后置，未占用普通用户的导航心智。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 125,
+      "style": "Heading 2",
+      "text": "3\t附言",
+      "first_line_indent_pt": null,
+      "font_size_pt": 16.0,
+      "bold": null,
+      "font_name": "方正小标宋_GBK",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 126,
+      "style": "Heading 2",
+      "text": "3.1  Trae的使用与经验总结",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 127,
+      "style": "Heading 3",
+      "text": "2.1.1 Trae的部分使用截图与会话ID概览",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 128,
+      "style": "Normal",
+      "text": "本项目历经多次迭代，使用TraeIDE 和Trae work集中开发；期间报名了Trae的创造力大赛，前端使用TraeDesign进行设计重构，以下是部分使用截图和部分会话ID概览",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 129,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 130,
+      "style": "Normal",
+      "text": "Trae IDE:",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 131,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_005.png"
+      ]
+    },
+    {
+      "paragraph_index": 132,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_006.png"
+      ]
+    },
+    {
+      "paragraph_index": 133,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_007.png"
+      ]
+    },
+    {
+      "paragraph_index": 134,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_008.png"
+      ]
+    },
+    {
+      "paragraph_index": 135,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_009.png"
+      ]
+    },
+    {
+      "paragraph_index": 136,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_010.png"
+      ]
+    },
+    {
+      "paragraph_index": 137,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_011.png"
+      ]
+    },
+    {
+      "paragraph_index": 138,
+      "style": "Normal",
+      "text": "Trae work:",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 139,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_012.png"
+      ]
+    },
+    {
+      "paragraph_index": 140,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_013.png"
+      ]
+    },
+    {
+      "paragraph_index": 141,
+      "style": "Normal",
+      "text": "Trea Design",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 142,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": [
+        "img_014.png"
+      ]
+    },
+    {
+      "paragraph_index": 143,
+      "style": "Normal",
+      "text": "部分TraeAgent ID（太多了举几个例子）:",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 144,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 145,
+      "style": "Normal",
+      "text": ".1241824064444384:db4b85dac6c078b3bbb8ff06727b5588_6a5df5bab5c4014893428349.6a5f6e34c58e5b0de8f3c450.6a5f6e34187e0bfef62bf89c:Trae CN.T(2026/7/21 21:03:48)",
+      "first_line_indent_pt": null,
+      "font_size_pt": 10.0,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 146,
+      "style": "Normal",
+      "text": ".1241824064444384:972f19dc2f83370d61b0d3d6ceed6e51_6a65e719becd4bd5422f789e.6a66dad9becd4bd5422fb7ed.6a66dad86da2662af3a19bb3:Trae CN.T(2026/7/27 12:13:13)",
+      "first_line_indent_pt": null,
+      "font_size_pt": 10.0,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 147,
+      "style": "Normal",
+      "text": ".1241824064444384:02b009f9bfab4b8edf402a289d212931_6a316737f57374e1d5e5ac5f.6a56349bbbecb618e8a7a558.6a56349b8802c51727a80a03:Trae CN.T(2026/7/14 21:07:39)",
+      "first_line_indent_pt": null,
+      "font_size_pt": 10.0,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 148,
+      "style": "Normal",
+      "text": ".1241824064444384:a4b57f4a846283ed00139c906f307ee4_6a65e719becd4bd5422f789e.6a65f036becd4bd5422f7c4c.6a65f0368f661f34bae3da6b:Trae CN.T(2026/7/26 19:32:06)",
+      "first_line_indent_pt": null,
+      "font_size_pt": 10.0,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 149,
+      "style": "Normal",
+      "text": ".1241824064444384:5d7083e9ad6723290b258f0c16776fba_6a65e719becd4bd5422f789e.6a65e757becd4bd5422f78b8.6a65e7568f661f34bae3da5a:Tr.1241824064444384:268ea0f7a77c8895f9c40aa9f7109813_6a316737f57374e1d5e5ac5f.6a55a3cd66d3967c78ee8308.6a55a3cdd46f0f7744948ec7:Trae CN.T(2026/7/14 10:49:49) ae CN.T(2026/7/26 18:54:15)",
+      "first_line_indent_pt": null,
+      "font_size_pt": 10.0,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 150,
+      "style": "Normal",
+      "text": ".1241824064444384:de76f06807c6f79361366bd1e1c7a4b1_6a1a7c036f4b24eb983b5266.6a2e5cb30b80ea5a1714cbba.6a2e5cb287e9716997c46d04:Trae CN.T(2026/6/14 15:50:32)",
+      "first_line_indent_pt": null,
+      "font_size_pt": 10.0,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 151,
+      "style": "Normal",
+      "text": ".1241824064444384:d7e0fd8e08e05280f47a010dfd6f0cee_6a1d8b342cf0c31995f1e6d3.6a2e33a90b80ea5a1714c077.6a2e33a93bfe9c0d5c4c61c2:Trae CN.T(2026/6/14 12:53:01)",
+      "first_line_indent_pt": null,
+      "font_size_pt": 10.0,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 152,
+      "style": "Heading 3",
+      "text": "3.1.2 Trae的使用经验总结",
+      "first_line_indent_pt": null,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 153,
+      "style": "Normal",
+      "text": "我开发项目时，采用“循环工程子 Agent 开发模式”——每个任务由独立的 AI subagent 实施，经 spec 合规审查 + 7 维代码质量审查双门禁通过才进入下一任务，全程沉淀可追溯。这套 AI 协作工程化流程，本身就是对\"AI 时代软件工程\"的一次完整探索。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 154,
+      "style": "Normal",
+      "text": "这不是一个\"能跑就行\"的参赛 Demo，而是按工业标准交付的开源产品：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 155,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 156,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 157,
+      "style": "Normal",
+      "text": "工程质量汇报表",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 158,
+      "style": "Heading 2",
+      "text": "3.2  个人想法",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 159,
+      "style": "Normal",
+      "text": "我自己到底得到了什么？以下是我作为第一个用户的真实自述，也是我最想对评委说的一段话——它回答\"这个产品到底能干什么\"。",
+      "first_line_indent_pt": 22.1,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 160,
+      "style": "Normal",
+      "text": "我最大的感受，是第一次真正与一个\"懂我笔记\"的 AI 对话。它知道我在哪本书的哪一页划了线，知道我反复关注的是什么主题。问它问题时，它不是给我一段百科全书式的泛泛而谈，而是引用我自己划过的那句话、接着我自己的思考往下追问。这种体验和 ChatGPT 完全不同——通用 AI 面前我是陌生人，知行读书里的 AI 是陆续读完了我所有笔记的老朋友。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 161,
+      "style": "Normal",
+      "text": "一个具体的例子：《被讨厌的勇气》怎么改变了我处理人际关系的方式。",
+      "first_line_indent_pt": 22.1,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 162,
+      "style": "Normal",
+      "text": "我的知识卡片和方法论库里，沉淀最多的是个人心理方向的内容。读《被讨厌的勇气》时，知行读书从我的划线里自动提炼出了几条方法论：课题分离（分清\"这是谁的课题\"，别人如何评价你是别人的课题）、目的论（不是\"因为过去所以现在\"，而是\"为了某个目的选择了现在\"）、横向关系（不评价、不比较，把人当伙伴而非对手）——每条都带着触发场景标签，比如\"在意别人看法时\"、\"人际冲突时\"。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 163,
+      "style": "Normal",
+      "text": "真正的变化发生在读完之后。以前我接了别人的请求不好意思拒绝，事后又内耗很久；现在遇到这种时刻，我会想起方法论库里那张\"课题分离\"卡——拒绝之后对方怎么想，是对方的课题，不是我的。更重要的是，这不是\"读过就忘\"的一时感动：FSRS 会在我即将遗忘的时候把这张卡推回来；和 AI 讨论人际困扰时，它会用苏格拉底式追问验收我是不是真懂了（\"你觉得朋友生气，是谁的课题？\"）；系统还会把我的掌握度从\"知道\"一级级带到\"会用\"。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 164,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 165,
+      "style": "Normal",
+      "text": "所以通过知行读书，我得到的是三层收获：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 166,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 167,
+      "style": "Normal",
+      "text": "这就是\"知行合一\"四个字的实感：不是多读了几本书，而是书真的改变了我处理具体事情的方式。如果它对我——一个普通的年轻读者——有效，它就能对微信读书里数以万计同样\"读了很多却留不住\"的人有效。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 168,
+      "style": "Heading 2",
+      "text": "3.3  与竞品的差异化",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 169,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 170,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 171,
+      "style": "Normal",
+      "text": "护城河：微信读书生态 × Anki 同源算法 × 教学策略 Agent 的三重组合，目前没有第二个产品同时做到。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 172,
+      "style": "Heading 2",
+      "text": "3.4  评审标准对标",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 173,
+      "style": "Normal",
+      "text": "创新性与创意度（20%）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 174,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 175,
+      "style": "Normal",
+      "text": "技术实现与复杂度（30%）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 176,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 177,
+      "style": "Normal",
+      "text": "实用价值与落地性（30%）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 178,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 179,
+      "style": "Normal",
+      "text": "用户体验与交互设计（20%）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 180,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 181,
+      "style": "Heading 2",
+      "text": "3.5  应用价值",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 182,
+      "style": "Normal",
+      "text": "用户价值：把每本书的阅读投入转化为长期认知资产——划线自动变卡片、卡片科学调度复习、AI 私教检验理解、方法论指导实践，形成完整的\"知行合一\"闭环。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 183,
+      "style": "Normal",
+      "text": "教育价值：苏格拉底追问 + 费曼复述 + Bloom 分级这些原本只存在于优质课堂的教学法，被产品化为每个人随时可用的 AI 私教——高质量教学辅导的平民化。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 184,
+      "style": "Normal",
+      "text": "商业前景（我的宗旨还是开源）：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 185,
+      "style": "Normal",
+      "text": "知识服务：方法论库、学习路径规划",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 186,
+      "style": "Normal",
+      "text": "生态位：微信读书海量注册用户中的深度学习者是天然种子盘",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 187,
+      "style": "Normal",
+      "text": "社会价值：",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 188,
+      "style": "Normal",
+      "text": "把\"读过\"变成\"学会\"，提升全民深度阅读的实际回报",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 189,
+      "style": "Normal",
+      "text": "用本地优先架构示范\"数据主权归用户\"的产品伦理",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 190,
+      "style": "Normal",
+      "text": "为 Skill 开放生态提供最佳实践样本，示范平台与开发者共赢",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 191,
+      "style": "Heading 2",
+      "text": "3.6  未来规划",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 192,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 193,
+      "style": "Heading 2",
+      "text": "4\t数据来源与合规说明",
+      "first_line_indent_pt": null,
+      "font_size_pt": 16.0,
+      "bold": null,
+      "font_name": "方正小标宋_GBK",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 194,
+      "style": "Heading 2",
+      "text": "4.1  数据来源",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 195,
+      "style": "Normal",
+      "text": "四类核心数据矩阵",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 196,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 197,
+      "style": "Heading 2",
+      "text": "4.2  合规性声明",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 198,
+      "style": "Normal",
+      "text": "微信读书 API 使用合规",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 199,
+      "style": "Normal",
+      "text": "遵循微信读书开放平台服务条款",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 200,
+      "style": "Normal",
+      "text": "仅用于个人学习和非商业用途",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 201,
+      "style": "Normal",
+      "text": "不爬取、不存储用户隐私信息",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 202,
+      "style": "Normal",
+      "text": "尊重用户知识产权",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 203,
+      "style": "Normal",
+      "text": "用户自主申请 API Key 并授权",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 204,
+      "style": "Normal",
+      "text": "AI 服务使用合规",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 205,
+      "style": "Normal",
+      "text": "遵循各 AI 服务商的使用条款（火山引擎 / DeepSeek / OpenAI / Anthropic）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 206,
+      "style": "Normal",
+      "text": "不生成违法、有害内容",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 207,
+      "style": "Normal",
+      "text": "用户对 AI 生成内容负责",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 208,
+      "style": "Normal",
+      "text": "请求直连服务商，不经过任何中转服务器",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 209,
+      "style": "Normal",
+      "text": "数据安全合规",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 210,
+      "style": "Normal",
+      "text": "符合《个人信息保护法》要求",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 211,
+      "style": "Normal",
+      "text": "明确告知用户数据用途",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 212,
+      "style": "Normal",
+      "text": "提供数据导出和删除功能",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 213,
+      "style": "Normal",
+      "text": "不向第三方共享用户数据",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 214,
+      "style": "Normal",
+      "text": "开源协议遵循（MIT License）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 215,
+      "style": "Normal",
+      "text": "开源声明",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 216,
+      "style": "Normal",
+      "text": "本项目以 MIT License 开源，源代码托管于 GitHub（harryopo/zhixing-reader）。所有第三方组件的版权与商标归其原作者所有。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 217,
+      "style": "Heading 2",
+      "text": "5\t使用教程与常见问题解答",
+      "first_line_indent_pt": null,
+      "font_size_pt": 16.0,
+      "bold": null,
+      "font_name": "方正小标宋_GBK",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 218,
+      "style": "Heading 2",
+      "text": "5.1  使用教程",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 219,
+      "style": "Normal",
+      "text": "系统要求",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 220,
+      "style": "Normal",
+      "text": "操作系统：Windows 10 / 11（64 位）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 221,
+      "style": "Normal",
+      "text": "内存：≥ 4GB RAM（推荐 8GB）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 222,
+      "style": "Normal",
+      "text": "硬盘：≥ 500MB 可用空间（应用 125MB + 数据增长空间）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 223,
+      "style": "Normal",
+      "text": "网络：仅微信读书同步 + AI 对话需要联网（其他功能可离线）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 224,
+      "style": "Normal",
+      "text": "下载与安装",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 225,
+      "style": "List Paragraph",
+      "text": "访问 GitHub Releases 页面：github.com/harryopo/zhixing-reader/releases",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 226,
+      "style": "List Paragraph",
+      "text": "下载最新的 ZhixingReader-Setup-1.0.0.exe（约 125MB）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 227,
+      "style": "List Paragraph",
+      "text": "双击安装包，按向导完成安装（约 30 秒）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 228,
+      "style": "List Paragraph",
+      "text": "启动应用，进入主界面",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 229,
+      "style": "Normal",
+      "text": "首次启动",
+      "first_line_indent_pt": 21.0,
+      "font_size_pt": 12.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 230,
+      "style": "List Paragraph",
+      "text": "首次启动会创建本地数据目录：C:\\Users\\<你的用户名>\\AppData\\Roaming\\zhixing-reader",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 231,
+      "style": "List Paragraph",
+      "text": "建议在「设置 → AI 配置」中填入你的 AI 服务商 API Key（火山引擎 / DeepSeek / OpenAI / Anthropic / Moonshot）",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 232,
+      "style": "List Paragraph",
+      "text": "在「设置 → 微信读书」中填入 API Key，连接你的微信读书账号",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 233,
+      "style": "Normal",
+      "text": "提示：API Key 通过 Electron safeStorage 系统级加密存储，仅主进程可解密，安全有保障。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "黑体",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 234,
+      "style": "Heading 2",
+      "text": "5.2  常见问题 FAQ",
+      "first_line_indent_pt": null,
+      "font_size_pt": 14.0,
+      "bold": true,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 235,
+      "style": "Normal",
+      "text": "Q1：在哪里下载安装包？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 236,
+      "style": "Normal",
+      "text": "答：从 GitHub Releases 页面下载最新的 ZhixingReader-Setup-x.y.z.exe（约 125MB），双击安装即可。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 237,
+      "style": "Normal",
+      "text": "Q2：为什么安装包这么大？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 238,
+      "style": "Normal",
+      "text": "答：主要来自 Electron 运行时 + sql.js WASM 引擎 + ECharts 图表库，这是 Electron 桌面应用的正常体积。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 239,
+      "style": "Normal",
+      "text": "Q3：支持 macOS / Linux 吗？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 240,
+      "style": "Normal",
+      "text": "答：当前仅提供 Windows 安装包。macOS / Linux 需要克隆仓库后自行构建（npm install && npm run package），欢迎贡献跨平台打包配置。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 241,
+      "style": "Normal",
+      "text": "Q4：如何更新到新版本？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 242,
+      "style": "Normal",
+      "text": "答：应用会通过 GitHub Releases API 自动检查更新并提示；也可以手动到 Releases 页面下载新版安装包覆盖安装，本地数据不会丢失。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 243,
+      "style": "Normal",
+      "text": "Q5：我的数据存在哪里？会上传吗？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 244,
+      "style": "Normal",
+      "text": "答：所有数据（书架、划线、笔记、卡片、对话记录）都存储在本地 SQLite 数据库（sql.js），不上传任何服务器。应用不包含分析、追踪或广告 SDK。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 245,
+      "style": "Normal",
+      "text": "Q6：如何备份数据？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 246,
+      "style": "Normal",
+      "text": "答：直接复制本地数据库文件 zhixing.db 即可完整备份；也可以在应用内使用导出功能（笔记导出 Markdown、生词本导出 CSV/Anki）。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 247,
+      "style": "Normal",
+      "text": "Q7：支持离线使用吗？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 248,
+      "style": "Normal",
+      "text": "答：支持。除微信读书同步和 AI 对话需要联网外，复习、笔记、知识卡片、统计等功能均可离线使用。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 249,
+      "style": "Normal",
+      "text": "Q8：如何连接微信读书？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 250,
+      "style": "Normal",
+      "text": "答：进入「设置 → 微信读书」，填入微信读书开放平台的 API Key，点击「测试连接」，成功后点击「同步书架」。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 251,
+      "style": "Normal",
+      "text": "Q9：同步失败怎么办？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 252,
+      "style": "Normal",
+      "text": "答：按顺序排查：1) 检查 API Key 是否有效、是否过期；2) 检查网络连接；3) 是否触发了微信读书 API 频率限制（稍后重试）；4) 在设置页点击「立即同步」手动触发。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 253,
+      "style": "Normal",
+      "text": "Q10：多久自动同步一次？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 254,
+      "style": "Normal",
+      "text": "答：默认每 15 分钟自动同步一次，可在设置中调整为 15 / 30 / 60 分钟，也可随时手动同步。同步为增量模式，不会重复拉取全量数据。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 255,
+      "style": "Normal",
+      "text": "Q11：AI 对话需要自己的 API Key 吗？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 256,
+      "style": "Normal",
+      "text": "答：需要。进入「设置 → AI 配置」填入你的 AI 服务商 API Key，支持火山引擎、DeepSeek、OpenAI、Anthropic、Moonshot 等。Key 加密保存在本地，请求直连 AI 服务商，不经过任何中转服务器。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 257,
+      "style": "Normal",
+      "text": "Q12：什么是「深度思考」模式？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 258,
+      "style": "Normal",
+      "text": "答：开启后会展示 AI 的推理过程（支持 DeepSeek R1 reasoning_content、OpenAI reasoning、Claude thinking 三种格式），适合需要看推理链的深度学习场景。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 259,
+      "style": "Normal",
+      "text": "Q13：AI 对话和普通聊天机器人有什么区别？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 260,
+      "style": "Normal",
+      "text": "答：知行读书的智能体会根据你的意图自动切换教学策略：直接回答（知识查询）、苏格拉底追问（深度讨论）、费曼复述（教学实践）。同时自动注入 5 维上下文（书籍内容 / 知识卡片 / 记忆 / 方法论 / 用户画像），回答基于你真实读过的内容。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 261,
+      "style": "Normal",
+      "text": "Q14：一次对话消耗多少 Token？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 262,
+      "style": "Normal",
+      "text": "答：约 500–2000 tokens（取决于上下文和回复长度）。可在「Token 监控」页面查看各服务商、各功能的详细用量统计。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 263,
+      "style": "Normal",
+      "text": "Q15：复习算法是什么？和 Anki 一样吗？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 264,
+      "style": "Normal",
+      "text": "答：采用 FSRS v5 算法（基于 ts-fsrs 5.4.1，open-spaced-repetition 官方实现），与 Anki 23.10+ 同源，19 组标准权重的 DSR 模型。卡片数据结构与 Anki 兼容，可导出到 Anki。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 265,
+      "style": "Normal",
+      "text": "Q16：复习评分怎么选？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 266,
+      "style": "Normal",
+      "text": "答：1 忘记（完全想不起来）/ 2 困难（吃力）/ 3 良好（正常想起，大多数情况）/ 4 简单（毫不费力）。算法会根据评分自动调整下次复习时间。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 267,
+      "style": "Normal",
+      "text": "Q17：生词本怎么用？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 268,
+      "style": "Normal",
+      "text": "答：阅读英文内容时选中单词点击「添加到生词本」，系统自动查询释义（内置约 8 万词的本地 ECDICT 词典，离线可查）。生词按独立的记忆算法调度复习，支持导出 CSV / Anki 格式。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 269,
+      "style": "Normal",
+      "text": "Q18：应用启动后白屏 / 打不开怎么办？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 270,
+      "style": "Normal",
+      "text": "答：1) 完全退出后重新启动；2) 检查杀毒软件是否拦截了应用；3) 重新安装最新版本；4) 仍有问题请到 GitHub Issues 反馈，附上系统版本和复现步骤。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 271,
+      "style": "Normal",
+      "text": "Q19：如何反馈 Bug 或提功能建议？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 272,
+      "style": "Normal",
+      "text": "答：到 GitHub Issues 提交，描述清楚：使用版本、操作步骤、预期行为、实际行为（最好附截图）。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 273,
+      "style": "Normal",
+      "text": "Q20：如何参与贡献？",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 274,
+      "style": "Normal",
+      "text": "答：阅读 CONTRIBUTING.md 了解开发环境搭建和 PR 流程，提交前确保 npm run verify 全绿（lint / typecheck / test / build）。",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 275,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 276,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 277,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 278,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 279,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 280,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 281,
+      "style": "Heading 2",
+      "text": "6\t致谢",
+      "first_line_indent_pt": null,
+      "font_size_pt": 16.0,
+      "bold": null,
+      "font_name": "方正小标宋_GBK",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 282,
+      "style": "Normal",
+      "text": "行文至此，可以说感慨良多，我为这个火山杯兜兜转转地准备了好久，我也依稀记得期末考试期间准备开发前的场景，以及暑期天天坐在电脑前审查文件、编译代码的样子，对AI的飞速发展深受震撼，我也在与AI对话的时候，不断在思考以后计算机专业的出路，我焦虑过，兴奋过，沮丧过，也成长过。AI时代，我们要接纳它、拥抱它，更要学会使用并驾驭（Harness）它，AI时代给我们每个人的日常生活和学习带来了巨大的冲击，一键代码生成、一键文章生成、任何想法都有实现的可能——当我们感受到它的快捷的时候，也在思考它对我们的影响：惰性的放大，让我们变得不加思考，变得更加麻木。我觉得在这个时代，面对冷冰冰的AI机械式的输出，最珍贵的还是人本身，我们仍要保持人性的光辉，以更加真挚的心灵和开放的心态去做人、处事，一定要保持好奇心和创造力，一定要终身学习，虽然我不清楚未来的时代会变得怎样，但我充满了希望。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 283,
+      "style": "Normal",
+      "text": "为此，我还是要特别感谢这个时代。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 284,
+      "style": "Normal",
+      "text": "第一、感谢学校和学院，紧跟时代潮流，通过赛事提供平台，让我们能被看见，让广大师生了解到了AI的发展，试着去使用AI，由此打开AI的大门，方便了我们的日常生活、学习工作，也为我们的灵感迸发注入了无穷的力量。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 285,
+      "style": "Normal",
+      "text": "第二、感谢火山引擎和Trae以及国内的AI平台，为我们提供编译环境和token支持以及技术辅导，虽然我很早之前就使用过Trae，参加过它的skill大赛和创造力大赛，但它的更新让我愈发地震撼和感激，我意识到我正在一步步地见证国产AI编程软件的崛起与完善，从Cursor的一家独秀到TraeIDE，从Solo到wrok，再到Design，再到各个厂商如今百花齐放的编程软件，我深刻感受到中国AI的魅力与实力，也感受到了老一辈的独立自主、接续奋斗的精神。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 286,
+      "style": "Normal",
+      "text": "第三、感谢微信读书开放平台。正是 微信读书Skill API 的开放，让开发者能够合规、优雅地把用户的阅读资产——书架、划线、笔记、书评、阅读数据交还到用户自己手中。没有微信读书skill，就没有知行读书的\"第二大脑\"。这对一名职业院校的计算机学子而言，这份开放更意味着一次珍贵的机会：让课堂里的软件工程知识与亿级用户的真实阅读生态相连接。知行读书愿意成为 Skill 开放生态的最佳实践样本，与平台一起把\"让阅读真正改变人生\"这件事做深。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 287,
+      "style": "Normal",
+      "text": "第四、感谢 open-spaced-repetition（ts-fsrs）、ECDICT、Electron、React、sql.js、Vercel AI SDK 等开源社区——本项目站在巨人的肩膀上，当然本项目也全部开源。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 288,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": 22.1,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 289,
+      "style": "Normal",
+      "text": "知行读书不仅仅是为比赛而生的概念作品，更是开发者基于自身真实阅读痛点、经过多轮迭代打磨而成的生产级工具。它将微信读书的开放数据、AI 大模型的理解能力、认知科学的复习方法与软件工程的本地优先理念整合为一个完整闭环，让\"读完一本书\"真正转化为\"掌握一套方法、改变一些行为\"，进而塑造我们的人生。",
+      "first_line_indent_pt": 22.0,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 290,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 291,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 292,
+      "style": "Normal",
+      "text": "",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": null,
+      "nearby_images": []
+    },
+    {
+      "paragraph_index": 293,
+      "style": "Normal",
+      "text": "——知之真切笃实处即是行，行之明觉精察处即是知。\n王阳明《传习录》",
+      "first_line_indent_pt": null,
+      "font_size_pt": null,
+      "bold": null,
+      "font_name": "Times New Roman",
+      "nearby_images": []
+    }
+  ]
+}
