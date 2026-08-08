@@ -1,0 +1,209 @@
+\begin{theindex}
+
+  \item \LaTeX, \hyperpage{iii}
+
+  \indexspace
+
+  \item CJK 排版, \hyperpage{iii}
+
+  \indexspace
+
+  \item \Class{kaobook}, \hyperpage{iii, iv}
+  \item kaobook 特性, \hyperpage{1}
+
+  \indexspace
+
+  \item multicolumn, \hyperpage{13}
+  \item multirow, \hyperpage{13}
+
+  \indexspace
+
+  \item \texttt{\textbackslash setchapterimage}, \hyperpage{23}
+  \item sidenote vs marginnote, \hyperpage{6}
+
+  \indexspace
+
+  \item todo 注释, \hyperpage{7}
+  \item Tufte, Edward, \hyperpage{iii}
+  \item \Class{Tufte-LaTeX}, \hyperpage{iii}
+
+  \indexspace
+
+  \item 三线表, \hyperpage{13}
+  \item 中文本地化, \hyperpage{iii}
+  \item 代数恒等式, \hyperpage{9}
+  \item 代码清单, \hyperpage{3}
+  \item 信息分层, \hyperpage{7}
+
+  \indexspace
+
+  \item 内容组织
+    \subitem \texttt{\textbackslash appendix}, \hyperpage{33}
+    \subitem \texttt{\textbackslash backmatter}, \hyperpage{34}
+    \subitem \texttt{\textbackslash frontmatter}, \hyperpage{31}
+    \subitem \texttt{\textbackslash mainmatter}, \hyperpage{32}
+    \subitem 主文件结构, \hyperpage{30}
+    \subitem 前言, \hyperpage{31}
+    \subitem 后记, \hyperpage{34}
+    \subitem 排版建议, \hyperpage{33}
+    \subitem 文件结构, \hyperpage{30}
+    \subitem 标题页, \hyperpage{32}
+    \subitem 正文, \hyperpage{32}
+    \subitem 章节组织, \hyperpage{32}
+    \subitem 编译工作流, \hyperpage{34}
+    \subitem 附录, \hyperpage{33}
+    \subitem 项目组织, \hyperpage{30}
+  \item 分析学, \hyperpage{8}
+  \item 分段函数, \hyperpage{10}
+  \item 图像, \hyperpage{12}
+  \item 图像与表格, \hyperpage{12}
+  \item 增广矩阵, \hyperpage{10}
+  \item 子图, \hyperpage{14}
+  \item 字体
+    \subitem Cascadia Code, \hyperpage{41}
+    \subitem Consolas, \hyperpage{41}
+    \subitem Courier New, \hyperpage{41}
+    \subitem 体系总览, \hyperpage{41}
+    \subitem 命令, \hyperpage{41}
+    \subitem 方正书宋, \hyperpage{39}
+      \subsubitem 样张, \hyperpage{42}
+    \subitem 方正仿宋, \hyperpage{39}
+      \subsubitem 样张, \hyperpage{42}
+    \subitem 方正字库, \hyperpage{41}
+    \subitem 方正小标宋, \hyperpage{39, 40}
+      \subsubitem 样张, \hyperpage{42}
+    \subitem 方正楷体, \hyperpage{39}
+      \subsubitem 样张, \hyperpage{42}
+    \subitem 方正隶书, \hyperpage{39, 40}
+      \subsubitem 样张, \hyperpage{42}
+    \subitem 方正黑体, \hyperpage{39}
+      \subsubitem 样张, \hyperpage{42}
+    \subitem 等宽字体, \hyperpage{41}
+      \subsubitem 样张, \hyperpage{43}
+    \subitem 自定义路径, \hyperpage{45}
+    \subitem 西文字体, \hyperpage{41}
+    \subitem 速查表, \hyperpage{40}
+  \item 字体要求, \hyperpage{v}
+  \item 字母表
+    \subitem 希腊字母, \hyperpage{37}
+  \item 定理环境, \hyperpage{8}
+  \item 定理环境速查, \hyperpage{11}
+  \item 宽段落, \hyperpage{6}
+  \item 宽版图像, \hyperpage{13}
+  \item 宽版表格, \hyperpage{14}
+  \item 希腊字母, \hyperpage{37}
+    \subitem 变体, \hyperpage{37}
+  \item 度量空间, \hyperpage{8}
+  \item 开集, \hyperpage{8}
+  \item 引用
+    \subitem \texttt{.bib} 文件, \hyperpage{19}
+    \subitem \texttt{\textbackslash cite}, \hyperpage{16}
+    \subitem \texttt{\textbackslash citeauthor}, \hyperpage{16}
+    \subitem \texttt{\textbackslash citeyear}, \hyperpage{16}
+    \subitem \texttt{cleveref}, \hyperpage{18}
+    \subitem \texttt{\textbackslash Cref}, \hyperpage{18}
+    \subitem \texttt{\textbackslash cref}, \hyperpage{18}
+    \subitem kaorefs 与 cleveref, \hyperpage{18}
+    \subitem \texttt{\textbackslash labch}, \hyperpage{17}
+    \subitem \texttt{\textbackslash label}, \hyperpage{17}
+    \subitem \texttt{\textbackslash parencite}, \hyperpage{16}
+    \subitem \texttt{\textbackslash ref}, \hyperpage{17}
+    \subitem \texttt{\textbackslash sidecite}, \hyperpage{16}
+    \subitem \texttt{\textbackslash textcite}, \hyperpage{16}
+    \subitem 中文本地化, \hyperpage{18}
+    \subitem 交叉引用, \hyperpage{17}
+    \subitem 图引用, \hyperpage{17}
+    \subitem 文献引用, \hyperpage{16}
+    \subitem 样式, \hyperpage{16}
+    \subitem 索引, \hyperpage{19}
+    \subitem 编译, \hyperpage{18}
+
+  \indexspace
+
+  \item 排版
+    \subitem \texttt{\textbackslash addpart}, \hyperpage{26}
+    \subitem fullwidth 布局, \hyperpage{25}
+    \subitem \texttt{lstlisting}, \hyperpage{27}
+    \subitem margin 布局, \hyperpage{25}
+    \subitem \texttt{\textbackslash pagelayout}, \hyperpage{25}
+    \subitem Part 标题, \hyperpage{26}
+    \subitem \texttt{\textbackslash setpartimage}, \hyperpage{26}
+    \subitem \texttt{sidebox}, \hyperpage{26}
+    \subitem \texttt{sidebox*}, \hyperpage{27}
+    \subitem \texttt{solutions}, \hyperpage{27}
+    \subitem wide 布局, \hyperpage{25}
+    \subitem \texttt{widepar}, \hyperpage{28}
+    \subitem 代码块, \hyperpage{27}
+    \subitem 内部机制, \hyperpage{26}
+    \subitem 页面布局, \hyperpage{25}
+  \item 数学排版, \hyperpage{8}
+  \item 数学符号, \hyperpage{38}
+  \item 方正字体, \hyperpage{iii}, \hyperpage{v}
+  \item 最佳实践, \hyperpage{15}
+  \item 最小工作示例, \hyperpage{3}
+  \item 有界性, \hyperpage{9}
+  \item 柯西序列, \hyperpage{9}
+  \item 欧几里得距离, \hyperpage{11}
+  \item 欧拉公式, \hyperpage{9}
+
+  \indexspace
+
+  \item 矩阵, \hyperpage{10}
+  \item 离散度量空间, \hyperpage{9}
+  \item 章节标题, \hyperpage{1}
+  \item 章节样式, \hyperpage{22}
+    \subitem bar, \hyperpage{23}
+    \subitem kao, \hyperpage{23}
+    \subitem lines, \hyperpage{23}
+    \subitem Part 图片, \hyperpage{24}
+    \subitem plain, \hyperpage{23}
+    \subitem \texttt{\textbackslash setchapterstyle}, \hyperpage{22}
+    \subitem 章节图片, \hyperpage{23}
+  \item 章首页图片, \hyperpage{2}
+  \item 算法排版, \hyperpage{15}
+  \item 索引, \hyperpage{19}
+  \item 编译
+    \subitem biber, \hyperpage{18}
+    \subitem XeLaTeX, \hyperpage{43}
+    \subitem 命令, \hyperpage{43}
+    \subitem 工作流, \hyperpage{34}
+    \subitem 常见问题, \hyperpage{44}
+    \subitem 环境要求, \hyperpage{43}
+    \subitem 辅助文件, \hyperpage{44}
+  \item 编译环境, \hyperpage{v}
+
+  \indexspace
+
+  \item 脚注, \hyperpage{6}
+  \item 表格, \hyperpage{13}
+  \item 读者群体, \hyperpage{iv}
+  \item 边栏代码, \hyperpage{7}
+  \item 边栏图, \hyperpage{6}
+  \item 边栏图像, \hyperpage{12}
+  \item 边栏注释, \hyperpage{5}
+  \item 边栏目录, \hyperpage{2}
+  \item 边栏表, \hyperpage{6}
+  \item 边栏表格, \hyperpage{14}
+  \item 边注, \hyperindexformat{\see {sidenote}}{5}
+    \subitem 垂直偏移, \hyperpage{5}
+    \subitem 自定义标记, \hyperpage{5}
+
+  \indexspace
+
+  \item 选项
+    \subitem \texttt{a4paper}, \hyperpage{21}
+    \subitem \texttt{backgroundcolor}, \hyperpage{22}
+    \subitem \texttt{fontsize}, \hyperpage{21}
+    \subitem \texttt{numbers}, \hyperpage{22}
+    \subitem \texttt{secnumdepth}, \hyperpage{21, 22}
+    \subitem \texttt{twoside}, \hyperpage{21, 22}
+    \subitem \texttt{twoside=false}, \hyperpage{22}
+    \subitem 专属选项, \hyperpage{22}
+    \subitem 最佳实践, \hyperpage{24}
+    \subitem 纸张尺寸, \hyperpage{21}
+    \subitem 超链接, \hyperpage{24}
+    \subitem 颜色, \hyperpage{24}
+  \item 页码编排, \hyperpage{2}
+  \item 页面布局, \hyperpage{1}
+
+\end{theindex}
