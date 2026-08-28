@@ -491,3 +491,34 @@ TexLite 原生支持 `.md` 主文档（调研报告方案 B 落地，阶段 2 �
 ### 下一步
 - ⬜ 模板注册表内置模板 → TexLite 模板 gallery（借鉴 Oleafly template.json 契约）
 - ⬜ docling 接入、harryopo-build-mcp、Web 可视化编辑器（阶段 3）
+
+## harryopo 模板 gallery → TexLite 入库（2026-08-28 完成，3/3 编译通过）
+
+借鉴 Oleafly 模板契约（template.json + 自包含目录 + main.tex），模板注册表与 TexLite 打通。
+
+### 契约（template.json，Oleafly 风格）
+```json
+{ "id": "harryopo-report", "name": "harryopo 报告模板", "category": "报告",
+  "description": "...", "main_doc": "main.tex", "engine": "xelatex",
+  "layout": "single-column", "pages": "multi", "default_color": "#0c8599",
+  "license": {...}, "requires": {"packages": [...], "fonts": [...]}, "order": 10 }
+```
+
+### 入库流程（texlite_seed_templates.py）
+1. 打包自包含项目目录（修正副本 cls/sty `Path=../fonts/`→`fonts/` + fonts/ + main.tex 精简示例 + template.json）→ output/texlite-gallery/<id>/
+2. **ZIP import 原子导入**（POST /api/projects/import）→ 自动检测 mainFile
+3. PATCH engine=xelatex → 编译验证
+
+### 模板（全部编译 succeeded）
+- harryopo-paper（精简示例 33KB）· harryopo-report（showcase 235KB/15 页）· harryopo-notes（精简示例 47KB）
+
+### 关键踩坑
+- **逐文件 upload/PUT 覆盖默认 main.tex 有竞态**（项目创建后 Yjs room 初始化与连续上传冲突，覆盖不生效）→ 用 ZIP import 原子替换最可靠
+- **GET /api/projects 返回顺序非创建顺序**：取"最新"项目需按 createdAt/created_at 排序，不能依赖数组顺序
+- **TexLite latexmk 带 `-halt-on-error`**：非致命错误（如 example-note.tex 的 Undefined control sequence）会导致编译判失败（本地直接 xelatex 可继续）→ 模板示例必须零错误
+- **showcase-paper.tex 在 TinyTeX 有 `\mathbf` 兼容问题**（完整 TeX Live 未暴露）→ gallery 用精简示例
+- **mathnotes 依赖 extsizes/colortbl/zref**（TinyTeX 需 tlmgr 补装）
+
+### 下一步
+- ⬜ docling 接入、harryopo-build-mcp、Web 可视化编辑器（阶段 3）
+- ⬜ preview.png 自动生成（PDF 首页截图，模板 gallery 预览图）
