@@ -150,8 +150,8 @@ build.ps1（3 遍 XeLaTeX + TEXINPUTS + 页数统计）
 - [x] harryopo LaTeX 模板体系（base.sty + paper/report.cls，46 个 .tex 全通过）
 - [x] docxtpl 模板填充子 skill（11 项端到端验证通过）
 - [x] Word ↔ Markdown ↔ LaTeX 转换（Pandoc 中枢 + MinerU 两阶段审查）
-- [ ] 模板注册表 v1（manifest.json）
-- [ ] 解析端三级路由落地（markitdown P0）
+- [x] 模板注册表 v1（manifest.json）✅（2026-08-28，24 项端到端验证；M2 LaTeX 反解待后续）
+- [x] 解析端三级路由落地（markitdown P0）
 
 ### 阶段 2：输出链路打通（v2 重点，1 个月内）
 - [ ] **Word → PDF 直接导出**（`doc.ExportAsFixedFormat`，COM 复用）

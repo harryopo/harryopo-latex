@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "template": "docxtpl-example",
+  "generated_at": "",
+  "fields": {
+    "date": {
+      "type": "string",
+      "required": true,
+      "description": ""
+    },
+    "logo": {
+      "type": "string",
+      "required": true,
+      "description": ""
+    },
+    "need_abstract": {
+      "type": "string",
+      "required": false,
+      "description": ""
+    },
+    "owner": {
+      "type": "object",
+      "required": true,
+      "description": "",
+      "fields": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        "phone": {
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      }
+    },
+    "project_name": {
+      "type": "string",
+      "required": true,
+      "description": ""
+    },
+    "summary": {
+      "type": "string",
+      "required": true,
+      "description": ""
+    },
+    "tasks": {
+      "type": "array",
+      "required": true,
+      "description": "",
+      "item": {
+        "type": "object",
+        "fields": {
+          "name": {
+            "type": "string",
+            "required": true,
+            "description": ""
+          },
+          "owner": {
+            "type": "string",
+            "required": true,
+            "description": ""
+          },
+          "status": {
+            "type": "string",
+            "required": true,
+            "description": ""
+          }
+        }
+      }
+    },
+    "version": {
+      "type": "string",
+      "required": true,
+      "description": ""
+    }
+  }
+}
