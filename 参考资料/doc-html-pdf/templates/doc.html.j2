@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>{{ meta.title }} · {{ theme.name }}</title>
+{% set brand = meta.brand if meta.brand is defined and meta.brand else (meta.title or "Document") %}
+<link rel="stylesheet" href="{{ katex_css }}" />
+<style>
+/* ============== 基础重置 ============== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  font-family: "Source Han Sans CN", "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11pt; line-height: 1.6; color: #1f2937; background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}
+code, pre, .mono { font-family: "JetBrains Mono", "Consolas", "Source Code Pro", monospace; }
+
+:root {
+  /* 主题色变量（动态注入） */
+  --c-50:  {{ theme.scale['50'] }};
+  --c-100: {{ theme.scale['100'] }};
+  --c-200: {{ theme.scale['200'] }};
+  --c-300: {{ theme.scale['300'] }};
+  --c-400: {{ theme.scale['400'] }};
+  --c-500: {{ theme.scale['500'] }};
+  --c-600: {{ theme.scale['600'] }};
+  --c-700: {{ theme.scale['700'] }};
+  --c-800: {{ theme.scale['800'] }};
+  --c-900: {{ theme.scale['900'] }};
+  --c-primary: {{ theme.primary }};
+  --c-primary-dark: {{ theme.primary_dark }};
+  --c-accent: {{ theme.accent_text }};
+  --c-muted: {{ theme.muted }};
+  --cover-gradient: {{ theme.cover_gradient }};
+  --data-card-gradient: {{ theme.data_card_gradient }};
+  --data-card-dark-gradient: {{ theme.data_card_dark_gradient }};
+
+  /* 中性色（跨主题一致） */
+  --gray-50:  #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+}
+
+/* ============== 打印分页 ============== */
+/* 打印：页面边距由 @page 统一提供（保证连续流动分页时每页边距一致）；
+   封面使用 named page 全出血（margin 0，渐变铺满整页） */
+@page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+@page cover-page { size: A4; margin: 0; }
+.page.cover { page: cover-page; }
+
+/* 屏幕预览：用 .page 容器模拟 A4 整页 */
+.page {
+  width: 210mm; min-height: 297mm;
+  padding: 18mm 16mm 16mm 16mm;
+  page-break-after: always;
+  position: relative;
+  overflow: visible;   /* 内容超高不被裁剪，打印时由分页规则接管 */
+  background: #ffffff;
+}
+.page:last-child { page-break-after: auto; }
+
+/* 封面：flex 容器，高297mm铺满A4，渐变背景区flex:1撑满 */
+.page.cover {
+  display: flex;
+  flex-direction: column;
+  height: 297mm;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+/* 封面渐变背景区：flex:1撑满页面，内部居中内容 */
+.page.cover > .cover {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+.page.cover > .cover > .content {
+  width: 100%;
+  max-width: 170mm;
+  padding: 0 10mm;
+}
+/* 封面页脚：绝对定位在页面底部，不干扰 flex 布局 */
+.page.cover .page-footer {
+  position: absolute;
+  bottom: 10mm;
+  left: 16mm;
+  right: 16mm;
+  display: flex;
+  justify-content: flex-start;
+  font-size: 9pt;
+  color: rgba(255, 255, 255, 0.7);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  padding-top: 6px;
+}
+
+/* 打印分页策略：
+   flow 模式（默认）——封面/目录整页，正文连续流动（学术论文惯例，杜绝页尾大片空白）
+   --no-flow 模式——每章强制换页（报告/手册风格） */
+@media print {
+  .page { width: auto; min-height: auto; padding: 0; page-break-after: auto; }
+  /* 封面：named page margin 0，flex 高297mm，渐变区flex:1撑满 */
+  .page.cover {
+    height: 297mm;
+    page-break-after: always;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .page.cover > .cover { flex: 1; }
+  /* 封面页脚：白色半透明，绝对定位底部 */
+  .page.cover .page-footer {
+    color: rgba(255, 255, 255, 0.6);
+    border-top-color: rgba(255, 255, 255, 0.3);
+  }
+  /* 目录：单独成页但不设 min-height（@page margin 下可用高仅 259mm，
+     297mm 会溢出拆出空白页）；目录不满页属正常现象 */
+  .page.page-toc { page-break-after: always; }
+  {% if not flow %}
+  .page.page-preamble, .page.page-section { page-break-before: always; }
+  {% endif %}
+  .page:first-child { page-break-before: avoid; }
+}
+
+/* ============== 页脚页眉 ============== */
+.page-footer {
+  position: absolute; bottom: 10mm; left: 16mm; right: 16mm;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 9pt; color: var(--gray-500); border-top: 1px solid var(--gray-200); padding-top: 6px;
+}
+.page-footer .brand { color: var(--c-primary); font-weight: 600; }
+.page-num { font-family: "JetBrains Mono", monospace; color: var(--c-primary); font-weight: 500; }
+
+/* 打印页脚：position:fixed 使 Chromium 在打印时每页重复显示（屏幕隐藏） */
+.print-footer { display: none; }
+@media print {
+  .page-footer { display: none; }
+  .print-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    position: fixed; bottom: 10mm; left: 16mm; right: 16mm;
+    font-size: 9pt; color: var(--gray-500);
+    border-top: 1px solid var(--gray-200); padding-top: 6px;
+  }
+  .print-footer .brand { color: var(--c-primary); font-weight: 600; }
+}
+
+/* ============== 章节大标题 ============== */
+.kicker {
+  font-size: 10pt; font-weight: 600; color: var(--c-primary); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.h1 { font-size: 28pt; font-weight: 700; color: var(--c-primary-dark); line-height: 1.2; margin-bottom: 12px; }
+.h2 { font-size: 18pt; font-weight: 700; color: var(--c-800); line-height: 1.3; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid var(--c-100); }
+.h3 { font-size: 13pt; font-weight: 600; color: var(--c-700); line-height: 1.4; margin: 14px 0 6px; }
+.subtitle { font-size: 12pt; color: var(--gray-600); line-height: 1.5; margin-bottom: 16px; }
+
+/* ============== 章节编号 ============== */
+.section-num {
+  display: inline-block; padding: 4px 14px; background: var(--c-100); color: var(--c-primary-dark);
+  border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 11pt; font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* ============== 文本块 ============== */
+p { margin: 8px 0; line-height: 1.9; }
+.math-block + p { margin-top: 12px; }
+/* KaTeX 行内公式：适当缩小字号，不干预内部布局 */
+p .katex { font-size: 0.92em; }
+strong { color: var(--c-primary-dark); }
+.muted { color: var(--gray-500); font-size: 0.92em; }
+em.tip { font-style: normal; background: var(--c-50); color: var(--c-700); padding: 1px 6px; border-radius: 3px; font-size: 0.92em; }
+code.inline { background: var(--gray-100); color: var(--c-700); padding: 1px 6px; border-radius: 3px; font-size: 0.9em; font-family: "JetBrains Mono", monospace; }
+
+/* ============== 表格 ============== */
+table { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 10px 0; }
+th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--gray-200); }
+th { background: var(--c-50); color: var(--c-800); font-weight: 600; font-size: 10pt; }
+tr:last-child td { border-bottom: none; }
+
+/* ============== 列表 ============== */
+ul.check, ul.bullet, ul.numbered { list-style: none; padding: 0; margin: 6px 0; }
+ul.check li, ul.bullet li, ul.numbered li { padding: 4px 0 4px 22px; position: relative; font-size: 10.5pt; }
+ul.check li::before { content: "✓"; position: absolute; left: 0; color: var(--c-500); font-weight: 700; }
+ul.bullet li::before { content: "•"; position: absolute; left: 4px; color: var(--c-500); font-weight: 700; }
+ul.numbered { counter-reset: nlist; }
+ul.numbered li { counter-increment: nlist; }
+ul.numbered li::before { content: counter(nlist); position: absolute; left: 0; color: var(--c-primary); font-weight: 700; min-width: 18px; }
+ul.cross li::before { content: "✗"; position: absolute; left: 0; color: #dc2626; font-weight: 700; }
+.list-title { font-weight: 700; color: var(--c-800); font-size: 10.5pt; margin: 8px 0 4px; }
+
+/* ============== Callout ============== */
+.callout {
+  border-left: 4px solid var(--c-500); background: var(--c-50); padding: 10px 14px;
+  border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 10.5pt;
+}
+.callout .callout-title { font-weight: 700; color: var(--c-primary-dark); margin-bottom: 4px; font-size: 11pt; }
+.callout.warn { border-left-color: #f59e0b; background: #fffbeb; }
+.callout.warn .callout-title { color: #92400e; }
+.callout.tip { border-left-color: var(--c-500); }
+.callout.info { border-left-color: #3b82f6; background: #eff6ff; }
+.callout.info .callout-title { color: #1e40af; }
+
+/* ============== KV 键值对 ============== */
+.kv { margin: 8px 0; }
+.kv-row { display: flex; padding: 6px 0; border-bottom: 1px dashed var(--gray-200); font-size: 10.5pt; }
+.kv-row:last-child { border-bottom: none; }
+.kv-key { flex: 0 0 90px; color: var(--c-700); font-weight: 600; }
+.kv-value { flex: 1; color: var(--gray-700); }
+
+/* ============== 数据卡 ============== */
+.data-grid { display: grid; gap: 10px; margin: 12px 0; }
+.data-card {
+  background: var(--data-card-gradient);
+  border: 1px solid var(--c-200); border-radius: 8px; padding: 12px 14px;
+}
+.data-card .icon { font-size: 20pt; margin-bottom: 6px; }
+.data-card .title { font-size: 12pt; font-weight: 700; color: var(--c-primary-dark); margin-bottom: 6px; }
+.data-card ul { list-style: none; padding: 0; }
+.data-card ul li { padding: 2px 0 2px 16px; position: relative; font-size: 10pt; color: var(--gray-700); }
+.data-card ul li::before { content: "•"; position: absolute; left: 4px; color: var(--c-primary); font-weight: 700; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+/* ============== 步骤条 ============== */
+.steps { display: flex; gap: 0; margin: 10px 0; align-items: stretch; flex-wrap: wrap; }
+.step {
+  flex: 1; min-width: 80px; background: #ffffff; border: 1px solid var(--c-200);
+  border-right: none; padding: 8px 10px; text-align: center; position: relative; font-size: 9.5pt;
+}
+.step:last-child { border-right: 1px solid var(--c-200); }
+.step::after { content: "→"; position: absolute; right: -8px; top: 50%; transform: translateY(-50%); color: var(--c-400); font-weight: 700; z-index: 2; background: #fff; padding: 0 2px; }
+.step:last-child::after { content: ""; }
+.step .step-label { color: var(--c-800); font-weight: 600; }
+
+/* ============== 代码块 ============== */
+.code-block { margin: 8px 0; border: 1px solid var(--c-200); border-radius: 6px; overflow: hidden; }
+.code-block .code-title { background: var(--c-50); color: var(--c-800); padding: 5px 12px; font-size: 9.5pt; font-weight: 600; border-bottom: 1px solid var(--c-200); }
+.code-block pre { background: var(--gray-900); color: var(--c-100); padding: 10px 14px; font-size: 9pt; line-height: 1.5; overflow-x: auto; white-space: pre; }
+
+/* ============== FAQ ============== */
+.faq-item { margin: 10px 0; padding: 10px 14px; background: var(--c-50); border-left: 4px solid var(--c-primary); border-radius: 0 6px 6px 0; }
+.faq-q { font-weight: 700; color: var(--c-primary-dark); margin-bottom: 6px; font-size: 11pt; }
+.faq-a { color: var(--gray-700); font-size: 10.5pt; line-height: 1.6; }
+
+/* ============== 目录 ============== */
+.toc-list { list-style: none; padding: 0; counter-reset: toc; }
+.toc-item { display: flex; align-items: baseline; padding: 8px 0; border-bottom: 1px dashed var(--gray-200); font-size: 12pt; }
+.toc-item::before { content: counter(toc, cjk-ideographic) "、"; counter-increment: toc; color: var(--c-primary); font-weight: 700; min-width: 36px; font-family: "JetBrains Mono", monospace; }
+.toc-item .toc-title { flex: 1; color: var(--gray-800); font-weight: 500; }
+.toc-item .toc-page { color: var(--c-primary); font-family: "JetBrains Mono", monospace; font-weight: 500; }
+
+/* ============== 封面 ============== */
+.cover { background: var(--cover-gradient); color: #ffffff; }
+.cover .content { display: flex; flex-direction: column; justify-content: center; height: 100%; padding-top: 20mm; }
+.cover .logo {
+  width: 80px; height: 80px; background: rgba(255,255,255,0.18); border: 2px solid var(--c-200);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center; font-size: 36pt; font-weight: 700; color: #ffffff;
+  margin-bottom: 24px;
+}
+.cover .cover-kicker { font-size: 10pt; font-weight: 600; letter-spacing: 0.18em; opacity: 0.85; margin-bottom: 12px; }
+.cover .cover-title { font-size: 36pt; font-weight: 800; line-height: 1.15; margin-bottom: 12px; }
+.cover .cover-subtitle { font-size: 14pt; opacity: 0.9; font-weight: 300; margin-bottom: 32px; }
+.cover .cover-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 24px 0; }
+.cover-stat { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 14px 16px; }
+.cover-stat .num { font-size: 28pt; font-weight: 800; line-height: 1; font-family: "JetBrains Mono", monospace; }
+.cover-stat .label { font-size: 10pt; opacity: 0.92; margin-top: 6px; }
+.cover-stat .sub { font-size: 8.5pt; opacity: 0.7; margin-top: 2px; font-family: "JetBrains Mono", monospace; }
+.cover .cover-meta { margin-top: 32px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.25); font-size: 10pt; opacity: 0.9; }
+.cover .cover-meta .row { display: flex; padding: 3px 0; }
+.cover .cover-meta .key { flex: 0 0 80px; opacity: 0.7; }
+.cover .cover-meta .val { flex: 1; font-weight: 500; }
+.cover .cover-theme-tag { position: absolute; top: 12mm; right: 16mm; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 12px; font-size: 9pt; font-family: "JetBrains Mono", monospace; }
+
+/* 章节块间距 */
+.block { margin: 10px 0; }
+
+/* ============== 数学公式 ============== */
+.math-block {
+  margin: 16px 0;
+  text-align: center;
+  font-size: 10.5pt;
+  page-break-inside: avoid;   /* 公式块打印不拆页 */
+}
+.math-block .katex-display { margin: 8px 0; }
+p .katex-display { margin: 8px 0; }
+
+/* ============== 架构图（论文风格：外框 + 图题 + 分层条带 + 竖排层标签 + 层间箭头） ============== */
+.arch-block {
+  margin: 12px 0; padding: 14px 16px;
+  border: 1px solid var(--c-300); border-radius: 10px;
+  background: var(--c-50);
+  page-break-inside: avoid;   /* 架构图打印不拆页 */
+}
+.arch-title {
+  font-size: 12pt; font-weight: 700; text-align: center;
+  color: var(--c-primary-dark); margin-bottom: 6px; letter-spacing: 0.05em;
+}
+.arch-title::after {
+  content: ""; display: block; width: 56px; height: 2px;
+  background: var(--c-400); margin: 6px auto 0; border-radius: 1px;
+}
+.arch-layer {
+  display: flex; align-items: stretch; gap: 10px;
+  background: #ffffff; border: 1px solid var(--c-200); border-radius: 8px;
+  padding: 8px 10px;
+}
+.arch-layer-name {
+  flex: 0 0 34px; display: flex; align-items: center; justify-content: center;
+  writing-mode: vertical-rl; text-orientation: mixed;
+  font-size: 10pt; font-weight: 700;
+  color: #ffffff; background: var(--c-600); border-radius: 6px; padding: 8px 0;
+  letter-spacing: 0.35em;   /* 竖排文字的上下字距 */
+}
+.arch-layer-items {
+  flex: 1; display: flex; gap: 8px; justify-content: center; align-items: center;
+  flex-wrap: wrap; min-height: 34px;
+  padding-right: 44px;   /* 右侧对称补偿层标签(34px)+gap(10px)，使模块组整条带居中 */
+}
+.arch-node {
+  border: 1px solid var(--c-300); background: #ffffff; border-radius: 6px;
+  padding: 5px 14px; font-size: 9.5pt; font-weight: 500; text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.arch-arrow {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--c-500); font-size: 10pt; line-height: 1; margin: 4px 0;
+  font-weight: 700;
+}
+.arch-arrow::before { content: "▼"; }
+
+/* ============== 块组件打印保护（避免拆页留白） ============== */
+@media print {
+  .callout, .arch-block, .math-block, .code-block, .data-grid, .steps { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+{# ============== 块渲染宏（章节页 / 前言页复用） ============== #}
+{% macro render_blocks(blocks) %}
+  {% for block in blocks %}
+  <div class="block">
+    {% if block.type == 'heading' %}
+      <div class="h3">{{ block.num }} {{ block.text }}</div>
+    {% elif block.type == 'paragraph' %}
+      <p>{{ block.text }}</p>
+    {% elif block.type == 'table' %}
+      <table>
+        <thead><tr>{% for h in block.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for row in block.rows %}
+          <tr>{% for c in row %}<td>{{ c }}</td>{% endfor %}</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% elif block.type == 'list' %}
+      {% if block['title'] %}<div class="list-title">{{ block['title'] }}</div>{% endif %}
+      <ul class="{{ block['variant'] or 'bullet' }}">
+        {% for item in block['items'] %}<li>{{ item }}</li>{% endfor %}
+      </ul>
+    {% elif block.type == 'callout' %}
+      <div class="callout {{ block['variant'] or 'tip' }}">
+        <div class="callout-title">{{ block['title'] }}</div>
+        <div>{{ block['text'] }}</div>
+      </div>
+    {% elif block.type == 'kv' %}
+      <div class="kv">
+        {% for r in block['items'] %}
+        <div class="kv-row"><div class="kv-key">{{ r['key'] }}</div><div class="kv-value">{{ r['value'] }}</div></div>
+        {% endfor %}
+      </div>
+    {% elif block.type == 'data-card-grid' %}
+      <div class="data-grid cols-{{ block['items']|length if block['items']|length <= 4 else 2 }}">
+        {% for card in block['items'] %}
+        <div class="data-card">
+          {% if card['icon'] %}<div class="icon">{{ card['icon'] }}</div>{% endif %}
+          <div class="title">{{ card['title'] }}</div>
+          <ul>{% for it in card['items'] %}<li>{{ it }}</li>{% endfor %}</ul>
+        </div>
+        {% endfor %}
+      </div>
+    {% elif block.type == 'steps' %}
+      <div class="steps">
+        {% for s in block['items'] %}
+        <div class="step"><div class="step-label">{{ loop.index }}. {{ s }}</div></div>
+        {% endfor %}
+      </div>
+    {% elif block.type == 'code-block' %}
+      <div class="code-block">
+        {% if block['title'] %}<div class="code-title">{{ block['title'] }}</div>{% endif %}
+        <pre><code>{{ block['code'] }}</code></pre>
+      </div>
+    {% elif block.type == 'math' %}
+      <div class="math-block">$${{ block.tex }}$$</div>
+    {% elif block.type == 'architecture' %}
+      <div class="arch-block">
+        {% if block['title'] %}<div class="arch-title">{{ block['title'] }}</div>{% endif %}
+        {% for layer in block['layers'] %}
+        <div class="arch-layer">
+          <div class="arch-layer-name">{{ layer['name'] }}</div>
+          <div class="arch-layer-items">
+            {% for item in layer['items'] %}<div class="arch-node">{{ item }}</div>{% endfor %}
+          </div>
+        </div>
+        {% if not loop.last %}<div class="arch-arrow"></div>{% endif %}
+        {% endfor %}
+      </div>
+    {% elif block.type == 'faq' %}
+      {% for item in block['items'] %}
+      <div class="faq-item">
+        <div class="faq-q">{{ item['q'] }}</div>
+        <div class="faq-a">{{ item['a'] }}</div>
+      </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% endfor %}
+{% endmacro %}
+
+{# ============== 封面页 ============== #}
+<div class="page cover">
+  <div class="cover-theme-tag">THEME · {{ theme.name }} · {{ theme.id|upper }}</div>
+  <div class="cover">
+    <div class="content">
+      <div class="logo">{{ meta.logo if meta.logo is defined and meta.logo else meta.title[:1] }}</div>
+      <div class="cover-kicker">{{ cover.kicker }}</div>
+      <div class="cover-title">{{ cover.title }}</div>
+      <div class="cover-subtitle">{{ cover.subtitle }}</div>
+
+      {% if cover.stats %}
+      <div class="cover-stats">
+        {% for s in cover.stats %}
+        <div class="cover-stat">
+          <div class="num">{{ s.num }}</div>
+          <div class="label">{{ s.label }}</div>
+          {% if s.sub %}<div class="sub">{{ s.sub }}</div>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="cover-meta">
+        {% if meta.author %}<div class="row"><div class="key">作者</div><div class="val">{{ meta.author }}</div></div>{% endif %}
+        {% if meta.class %}<div class="row"><div class="key">班级</div><div class="val">{{ meta.class }}</div></div>{% endif %}
+        {% if meta.school %}<div class="row"><div class="key">学校</div><div class="val">{{ meta.school }}</div></div>{% endif %}
+        <div class="row"><div class="key">版本</div><div class="val">{{ meta.version if meta.version else "—" }}{% if meta.date %} · {{ meta.date }}{% endif %}</div></div>
+        <div class="row"><div class="key">主题</div><div class="val">{{ theme.name }} ({{ theme.name_en }})</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span class="brand">{{ brand }} · {{ theme.name }}主题</span>
+  </div>
+</div>
+
+{# ============== 目录页 ============== #}
+<div class="page page-toc">
+  <div class="kicker">CONTENTS</div>
+  <div class="h1">目录</div>
+  <div class="subtitle">Table of Contents · {{ toc|length }} 个章节</div>
+
+  <ol class="toc-list">
+    {% for item in toc %}
+    <li class="toc-item">
+      <span class="toc-title">{{ item.title }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+
+  <div class="page-footer">
+    <span class="brand">{{ brand }} · {{ theme.name }}主题</span>
+  </div>
+</div>
+
+{# ============== 前言页（第一个章节前的引言，可选） ============== #}
+{% if preamble %}
+<div class="page page-preamble">
+  <div class="kicker">PREFACE</div>
+  <div class="h1">前言</div>
+  <div class="subtitle">Introduction · {{ meta.title }}</div>
+
+  {{ render_blocks(preamble) }}
+
+  <div class="page-footer">
+    <span class="brand">{{ brand }} · {{ theme.name }}主题</span>
+  </div>
+</div>
+{% endif %}
+
+{# ============== 章节页 ============== #}
+{% for section in sections %}
+<div class="page page-section">
+  <div class="kicker">{{ section.num }} · SECTION</div>
+  <div class="h1">{{ section.title }}</div>
+  <div class="subtitle">第 {{ section.num }} 章 · 共 {{ sections|length }} 章</div>
+
+  {{ render_blocks(section.blocks) }}
+
+  <div class="page-footer">
+    <span class="brand">{{ brand }} · {{ theme.name }}主题</span>
+  </div>
+</div>
+{% endfor %}
+
+<script src="{{ katex_js }}"></script>
+<script src="{{ katex_autorender }}"></script>
+
+{# ============== 打印页脚（position:fixed，打印时每页重复显示） ============== #}
+<div class="page-footer print-footer">
+  <span class="brand">{{ brand }} · {{ theme.name }}主题</span>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.renderMathInElement) {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+      // 裸 < > 是 KaTeX 非法语法（如 a_{<t}），转为 \lt / \gt
+      preProcess: function (math) {
+        return math
+          .replace(/<(?![a-zA-Z/\\])/g, "\\lt")
+          .replace(/(?<![a-zA-Z\\])>/g, "\\gt");
+      },
+      throwOnError: false
+    });
+  }
+});
+</script>
+</body>
+</html>

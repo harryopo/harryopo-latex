@@ -1,0 +1,26 @@
+{
+  "id": "slate",
+  "name": "石墨冷峻",
+  "name_en": "Slate Dark",
+  "description": "石墨冷色，审计专业",
+  "css_var": "slate",
+  "scale": {
+    "50":  "#f8fafc",
+    "100": "#f1f5f9",
+    "200": "#e2e8f0",
+    "300": "#cbd5e1",
+    "400": "#94a3b8",
+    "500": "#64748b",
+    "600": "#475569",
+    "700": "#334155",
+    "800": "#1e293b",
+    "900": "#0f172a"
+  },
+  "primary": "#475569",
+  "primary_dark": "#0f172a",
+  "cover_gradient": "linear-gradient(135deg, #0f172a 0%, #1e293b 70%, #475569 100%)",
+  "data_card_gradient": "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)",
+  "data_card_dark_gradient": "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+  "accent_text": "#334155",
+  "muted": "#6b7280"
+}

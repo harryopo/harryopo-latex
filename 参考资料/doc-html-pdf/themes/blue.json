@@ -1,0 +1,26 @@
+{
+  "id": "blue",
+  "name": "海蓝深邃",
+  "name_en": "Ocean Blue",
+  "description": "经典学术蓝，沉稳大气",
+  "css_var": "blue",
+  "scale": {
+    "50":  "#eff6ff",
+    "100": "#dbeafe",
+    "200": "#bfdbfe",
+    "300": "#93c5fd",
+    "400": "#60a5fa",
+    "500": "#3b82f6",
+    "600": "#2563eb",
+    "700": "#1d4ed8",
+    "800": "#1e40af",
+    "900": "#1e3a8a"
+  },
+  "primary": "#2563eb",
+  "primary_dark": "#1e3a8a",
+  "cover_gradient": "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 70%, #3b82f6 100%)",
+  "data_card_gradient": "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+  "data_card_dark_gradient": "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)",
+  "accent_text": "#1d4ed8",
+  "muted": "#6b7280"
+}
