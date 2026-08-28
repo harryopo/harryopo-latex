@@ -342,3 +342,32 @@ mineru_cli.py 重构为两阶段：
 **踩坑**:
 - YAML 内联映射必须用 `{key: val}` 格式，空格分隔会导致 ScannerError
 - style14 要求 intents 字段非空，不足时补充默认项
+
+---
+
+## 办公超级 Skill v2 落地：markitdown 路由 + Word→PDF（2026-08-28 完成）
+
+### 方案书与调研
+- 方案书 v2: `docs/plans/2026-08-28-office-super-skill-v2.md`
+- 调研报告: `docs/research/2026-08-28-开源方案深度调研-tex64-mcp-markitdown-docling.md`
+- tex64 澄清: 商业 LaTeX 编辑器非开源，不采纳；方向转为自封装 harryopo-build-mcp
+
+### 已实施（commit 4fd23c0）
+1. **markitdown 三级/四级解析路由**（office.py）:
+   - 新增 `convert_via_markitdown(path)`（微软官方 0.1.7）与 `convert_via_mineru(path, out_dir)`（调 mineru_cli.py --stage auto 读 result.md）
+   - 输入扩展: `.md` / `.docx,.doc` / `.pdf,.png,.jpg,.jpeg`（MinerU 优先→markitdown 兜底）/ `.pptx,.xlsx,.epub,.html,.csv,.json,.xml,.zip,.msg,.ipynb,.txt`（markitdown 直转）
+   - DOCX 四级解析: anydoc → pandoc → markitdown → python-docx（markitdown 自带 GFM 表格，tables=[] 不回填）
+2. **Word→PDF 直接导出**（word_template_engine.py）:
+   - `save(export_pdf=True)` → `_update_toc_com` 同会话 SaveAs2 后 `ExportAsFixedFormat(OutputFileName, ExportFormat=17, OptimizeFor=0, CreateBookmarks=1)`
+   - `--no-toc` 时走独立 `_export_pdf_com`（Close(False) 只读导出）
+   - CLI: md_to_word.py `--pdf`、office.py render `--pdf`
+3. **验证**（低成本确定性检查）: py_compile 3 文件 ✅；MD→Word→PDF 294KB ✅；pptx→markitdown→MD→Word→PDF 128KB 全链路 ✅；DOCX 主路径回归（anydoc/pandoc 缺失时 markitdown 兜底实际生效）✅
+
+### 环境备注
+- 当前默认 Python 3.14（pythoncore-3.14-64）为新环境: 已装 markitdown[docx,pptx,xlsx] + python-docx 1.2.0 + pywin32 312；pandoc/xelatex 不在该环境 PATH（验证时 markitdown 兜底接管了 pandoc 缺失场景，恰好证明路由价值）
+- 产物验证目录: `output/v2-verify/`（已 gitignore）
+
+### 下一步（按方案书 v2 路线图）
+- ⬜ 模板注册表 v1（manifest.json）
+- ⬜ LaTeX → Word MD 中间态链路（.tex → MD 清洗 → md_to_word）
+- ⬜ docling 接入（MinerU 互为兜底）、harryopo-build-mcp、本地预览服务器

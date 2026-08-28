@@ -142,11 +142,15 @@
 - ✅ 办公超级 Skill 方案调研完成
 - ✅ **harryopo-office 超级 skill（原 harryopo-latex 更名升级，2026-08-09）**：Word 模板引擎（Markdown 中间态 → .docx）并入，方正/开源字体 JSON 配置驱动，原生自动目录 + OMML 公式 + 表格/图片/注释/参考文献，端到端验证通过（表格/公式/目录全对）
 - ✅ **docxtpl 模板填充子 skill（2026-08-09）**：用户 Word 模板 → extract schema（占位符扫描 + jinja2 类型推断）→ AI 产 data.json → validate/render 保真填充。支持表格行循环（{%tr %}）、条件块、图片（InlineImage）、对象/数组字段。端到端验证 11 项全通过（占位符零残留、循环表格 4 行、图片插入）
+- ✅ **方案书 v2 + 开源方案深度调研（2026-08-28）**：`docs/plans/2026-08-28-office-super-skill-v2.md` + 调研报告（tex64 实为商业编辑器不采纳；markitdown/docling 为解析端增量；LaTeX MCP 生态转自封装 harryopo-build-mcp）
+- ✅ **markitdown 解析路由 + Word→PDF 直出（2026-08-28）**：office.py 输入扩展至 MD/DOCX/PDF/图片/pptx/xlsx/epub/html/csv 等（DOCX 四级解析 anydoc→pandoc→markitdown→python-docx，PDF/图片 MinerU 优先→markitdown 兜底）；word_template_engine.py `save(export_pdf=True)` 同会话 `ExportAsFixedFormat` 导出 PDF；CLI `--pdf` 透传（md_to_word.py / office.py render）。验证：MD→Word→PDF 294KB、pptx 全链路 128KB、DOCX 兜底回归通过
 
 **待开发**：
 
 - ⬜ harryopo-book.cls + harryopo-notes.cls
 - ⬜ 模板注册表 v1（manifest.json）
+- ⬜ LaTeX → Word MD 中间态链路（.tex → MD 清洗 → md_to_word）
+- ⬜ docling 接入（MinerU 互为兜底）+ harryopo-build-mcp（编译诊断闭环）
 - ⬜ 本地预览服务器（阶段 2）
 - ⬜ Web 可视化编辑器（阶段 3）
 
