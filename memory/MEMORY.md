@@ -367,7 +367,29 @@ mineru_cli.py 重构为两阶段：
 - 当前默认 Python 3.14（pythoncore-3.14-64）为新环境: 已装 markitdown[docx,pptx,xlsx] + python-docx 1.2.0 + pywin32 312；pandoc/xelatex 不在该环境 PATH（验证时 markitdown 兜底接管了 pandoc 缺失场景，恰好证明路由价值）
 - 产物验证目录: `output/v2-verify/`（已 gitignore）
 
+## 办公超级 Skill v2 落地：LaTeX→Word 反向链路（2026-08-28 完成，commit 427727e）
+
+方案书 v2 §4 落地：`.tex → MD 清洗 → Word 引擎渲染`（不直转，统一走 MD 中间态核心范式）。
+
+### 新增/修改
+1. **tex2md.py**（新建）— LaTeX→MD 清洗，处理 harryopo 全结构:
+   - `{\fzht }`/`\textbf` → `**`（黑体闭环）；`\section/subsection/subsubsection` → `#/##/###`
+   - `tabularx/tabular` → GFM 表格（列定义行/`\toprule\midrule\bottomrule` 跳过；表格单元格黑体**不转 `**`**——Word 表格字体由模板样式控制，星号会原样显示）
+   - `equation/align` → `$$ ... $$` 单行；`figure` → `![caption](绝对路径)`；`quote` → `> 注释`
+   - table 浮动体: 消费到 `\end{table}`，空 `\caption{}` 占位丢弃、非空提取为 `> **表N：**`
+2. **md_to_word.py** — 公式解析兼容单行 `$$ ... $$`（此前只支持多行，导致单行公式收集循环吞掉从 `式(3)` 到文件尾全部内容 → 表2/四/五章/参考文献静默丢失、OMML 错乱）
+3. **office.py** — `.tex` 输入分支（`from tex2md import tex_to_md`）+ Word 同会话 PDF 产物提示
+
+### 验证（端到端断言全绿）
+- 中间态: 无 `\begin/\end/toprule/caption` 残留；表格 14 行（两表 8+6）；图片 2；公式 3 对
+- docx: 主标题 ✓ 两表（表头无 `**`）✓ 3 个 OMML 公式 ✓ 2 张图片 ✓
+- 完整入口 `office.py render input-paper.tex --format word --pdf` → docx 44KB + PDF 314KB（%PDF 头有效）
+- e2e 样本缺图修复: PIL 生成 `蒸馏区/e2e-test/figures/arch.png` + `pipeline.png`（真实图片，非占位）
+
+### 关键踩坑（tex2md/LaTeX→Word）
+- 表格标题在**独立 quote 块**（`\begin{quote}{\fzht 表1：...}\end{quote}`），表格 caption 常为**空 `\caption{}`** 占位 → 必须丢弃，否则裸文本残留中间态
+- 单行公式 `$$ ... $$` 与 md_to_word 多行公式收集逻辑不兼容 → 必须两端对齐（md_to_word 兼容单行）
+
 ### 下一步（按方案书 v2 路线图）
 - ⬜ 模板注册表 v1（manifest.json）
-- ⬜ LaTeX → Word MD 中间态链路（.tex → MD 清洗 → md_to_word）
 - ⬜ docling 接入（MinerU 互为兜底）、harryopo-build-mcp、本地预览服务器
