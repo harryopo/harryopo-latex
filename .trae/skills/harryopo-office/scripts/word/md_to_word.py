@@ -342,12 +342,13 @@ def _next_content_idx(lines, idx, n):
 
 
 def build_document(md_text, config_path=None, output_path='output.docx',
-                   update_toc=True, base_dir=None):
+                   update_toc=True, base_dir=None, export_pdf=False):
     """解析 Markdown 中间态 → 生成 Word 文档
 
     base_dir: MD 文件所在目录，用于解析图片相对路径
               （office.py 等从别的 cwd 调用时，图片 `figures/xx.png`
                必须相对 MD 文件而非进程 cwd）
+    export_pdf: 同时导出同名 PDF（Word COM 同会话完成）
     """
     engine = WordTemplateEngine(config_path)
 
@@ -567,7 +568,7 @@ def build_document(md_text, config_path=None, output_path='output.docx',
     if refs:
         engine.add_references(refs)
 
-    engine.save(output_path, update_toc=update_toc)
+    engine.save(output_path, update_toc=update_toc, export_pdf=export_pdf)
     return output_path
 
 
@@ -580,6 +581,8 @@ def main():
                     help='字体配置 JSON（默认 configs/fangzheng.json）')
     ap.add_argument('--no-toc', action='store_true',
                     help='不自动更新目录域（保留手动更新）')
+    ap.add_argument('--pdf', action='store_true',
+                    help='同时导出同名 PDF（Word COM ExportAsFixedFormat）')
     args = ap.parse_args()
 
     md_path = Path(args.input)
@@ -596,7 +599,7 @@ def main():
     md_text = md_path.read_text(encoding='utf-8')
     build_document(md_text, config_path=config_path,
                    output_path=output, update_toc=not args.no_toc,
-                   base_dir=md_path.parent)
+                   base_dir=md_path.parent, export_pdf=args.pdf)
 
 
 if __name__ == '__main__':

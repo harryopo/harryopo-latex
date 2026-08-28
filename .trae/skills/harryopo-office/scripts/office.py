@@ -13,6 +13,13 @@ office.py — 办公超级 Skill 统一入口
     python office.py render input.md --format word,paper      # 组合输出
     python office.py render input.md --format all --open      # 产出后自动打开
     python office.py render input.md --config opensource      # 用开源字体
+    python office.py render input.md --format word --pdf      # Word + 同名 PDF
+
+输入格式:
+    .md                        直接渲染
+    .docx/.doc                 anydoc → pandoc → markitdown → python-docx 四级解析
+    .pdf/.png/.jpg/.jpeg       MinerU 深解析（版面感知）→ markitdown 兜底
+    .pptx/.xlsx/.epub/.html/.csv/.json/.xml/.zip/.msg 等   markitdown 转换
 """
 
 import argparse
@@ -51,6 +58,7 @@ PANDOC_TEMPLATE = SCRIPT_DIR / 'pandoc' / 'mathnotes-template.latex'
 PANDOC_LUA = SCRIPT_DIR / 'pandoc' / 'mathnotes-table.lua'
 WORD_CONFIG_FZ = SCRIPT_DIR / 'word' / 'configs' / 'fangzheng.json'
 WORD_CONFIG_OS = SCRIPT_DIR / 'word' / 'configs' / 'opensource.json'
+MINERU_SCRIPT = SCRIPT_DIR / 'mineru_cli.py'
 
 
 # ============================================================
@@ -113,20 +121,70 @@ def collect_output(src, dst):
 
 
 # ============================================================
+# 通用解析路由（v2：anydoc 快检 → MinerU 深解析 → markitdown 兜底）
+# ============================================================
+
+# markitdown 直接支持的输入格式（微软官方 20+ 格式 → MD，解析兜底）
+MARKITDOWN_EXTS = {'.pptx', '.xlsx', '.epub', '.html', '.htm', '.csv',
+                   '.json', '.xml', '.zip', '.msg', '.ipynb', '.txt'}
+# MinerU 深解析优先的格式（版面感知：PDF/扫描件/图片 OCR）
+MINERU_EXTS = {'.pdf', '.png', '.jpg', '.jpeg'}
+
+
+def convert_via_markitdown(path):
+    """markitdown 兜底转换：任意格式 → MD（微软官方，mammoth/pptx 内核）
+
+    返回 MD 文本或 None（未安装/转换失败/输出为空）。
+    """
+    try:
+        from markitdown import MarkItDown
+        result = MarkItDown().convert(str(path))
+        text = (result.text_content or '').strip()
+        return text or None
+    except ImportError:
+        print('[WARN] markitdown 未安装: pip install "markitdown[docx,pptx,xlsx]"',
+              file=sys.stderr)
+        return None
+    except Exception as e:
+        print(f'[WARN] markitdown 转换失败: {e}', file=sys.stderr)
+        return None
+
+
+def convert_via_mineru(path, output_dir):
+    """MinerU 深解析：PDF/扫描件/图片 → MD（版面感知，0.2s/页）
+
+    调用 mineru_cli.py --stage auto（内置两阶段清洗），读取其 result.md。
+    返回 MD 文本或 None。
+    """
+    out_dir = output_dir / f'{Path(path).stem}_mineru'
+    ok, out, err = run(
+        [sys.executable, str(MINERU_SCRIPT), str(path),
+         '-o', str(out_dir), '--stage', 'auto'],
+        check=False, label='mineru'
+    )
+    result_md = out_dir / 'result.md'
+    if ok and result_md.exists():
+        return result_md.read_text(encoding='utf-8')
+    print(f'[WARN] MinerU 解析失败: {err[:200] if err else "result.md 未生成"}',
+          file=sys.stderr)
+    return None
+
+
+# ============================================================
 # 三条链路
 # ============================================================
 
-def render_word(md_file, output_dir, config_name='fangzheng'):
-    """链路1: MD → Word"""
+def render_word(md_file, output_dir, config_name='fangzheng', export_pdf=False):
+    """链路1: MD → Word（可选同时导出 PDF）"""
     print('\n=== 链路1: MD → Word ===')
     config = WORD_CONFIG_OS if config_name == 'opensource' else WORD_CONFIG_FZ
     output = output_dir / f'{md_file.stem}-word.docx'
 
-    ok, out, err = run(
-        [sys.executable, str(WORD_SCRIPT), str(md_file),
-         '-o', str(output), '-c', str(config)],
-        label='md_to_word'
-    )
+    cmd = [sys.executable, str(WORD_SCRIPT), str(md_file),
+           '-o', str(output), '-c', str(config)]
+    if export_pdf:
+        cmd.append('--pdf')
+    ok, out, err = run(cmd, label='md_to_word')
     if not ok:
         print(f'  [失败] {err}')
         return None
@@ -298,21 +356,53 @@ def cmd_render(args):
                 print('[WARN] pandoc 未安装，改用 python-docx 提取', file=sys.stderr)
 
         if md_text is None:
+            # markitdown 兜底（微软官方，Office 原生格式保真，mammoth 内核）
+            md_text = convert_via_markitdown(input_file)
+            if md_text:
+                converter = 'markitdown'
+
+        if md_text is None:
             from convert import convert_docx_via_python
             md_text = convert_docx_via_python(str(input_file))
             converter = 'python-docx'
             if not md_text:
-                print('[ERROR] DOCX 转换失败，请安装 anydoc / pandoc / python-docx 之一', file=sys.stderr)
+                print('[ERROR] DOCX 转换失败，请安装 anydoc / pandoc / markitdown / python-docx 之一',
+                      file=sys.stderr)
                 sys.exit(1)
 
         # 清洗转换输出：删 TOC / 大标题 / 反转义 / 图片占位 / 表格回填 / Unicode 数学。
-        # anydoc 自带 GFM 表格（tables=[] 不重复插表）；pandoc 输出 simple table
-        # 需 python-docx 回填（extract_docx_tables）。
+        # anydoc/markitdown 自带 GFM 表格（tables=[] 不重复插表）；pandoc 输出 simple
+        # table 需 python-docx 回填（extract_docx_tables）。
         from docx_clean import clean_pandoc_md, extract_docx_tables
-        tables = [] if converter == 'anydoc' else extract_docx_tables(str(input_file))
+        tables = [] if converter in ('anydoc', 'markitdown') else extract_docx_tables(str(input_file))
         cleaned = clean_pandoc_md(md_text, tables)
         tmp_md.write_text(cleaned, encoding='utf-8')
         print(f'  [OK] {tmp_md.name}（转换器 {converter}，清洗完成，表格 {len(tables)} 个）')
+    elif input_file.suffix.lower() in MINERU_EXTS:
+        # PDF / 扫描件 / 图片：MinerU 深解析（版面感知）→ markitdown 兜底（纯文本）
+        print(f'\n=== {input_file.suffix.upper()} → Markdown（MinerU 优先）===')
+        tmp_md = output_dir / f'{input_file.stem}_convert.tmp.md'
+        md_text = convert_via_mineru(input_file, output_dir)
+        if md_text is None:
+            print('  [INFO] MinerU 失败，降级 markitdown 兜底（无版面分析）', file=sys.stderr)
+            md_text = convert_via_markitdown(input_file)
+        if md_text is None:
+            print('[ERROR] 解析失败：MinerU 与 markitdown 均不可用', file=sys.stderr)
+            sys.exit(1)
+        tmp_md.write_text(md_text, encoding='utf-8')
+        md_file = tmp_md
+        print(f'  [OK] {tmp_md.name}')
+    elif input_file.suffix.lower() in MARKITDOWN_EXTS:
+        # 其它 markitdown 支持的格式（pptx/xlsx/epub/html/csv/...）直接转 MD
+        print(f'\n=== {input_file.suffix.upper()} → Markdown（markitdown）===')
+        tmp_md = output_dir / f'{input_file.stem}_convert.tmp.md'
+        md_text = convert_via_markitdown(input_file)
+        if md_text is None:
+            print('[ERROR] markitdown 转换失败，无法解析该格式', file=sys.stderr)
+            sys.exit(1)
+        tmp_md.write_text(md_text, encoding='utf-8')
+        md_file = tmp_md
+        print(f'  [OK] {tmp_md.name}')
     else:
         md_file = input_file  # 直接是 MD
 
@@ -342,7 +432,7 @@ def cmd_render(args):
     results = {}
 
     if 'word' in formats:
-        results['word'] = render_word(md_file, output_dir, args.config)
+        results['word'] = render_word(md_file, output_dir, args.config, args.pdf)
     if 'paper' in formats:
         results['paper'] = render_paper(md_file, output_dir)
     if 'notes' in formats:
@@ -419,6 +509,8 @@ def main():
     p_render.add_argument('--output-dir', '-o', help='输出目录 (默认 MD 同级)')
     p_render.add_argument('--open', action='store_true',
                           help='完成后自动打开产物')
+    p_render.add_argument('--pdf', action='store_true',
+                          help='Word 链路同时导出同名 PDF（COM ExportAsFixedFormat）')
     p_render.set_defaults(func=cmd_render)
 
     # info 子命令
