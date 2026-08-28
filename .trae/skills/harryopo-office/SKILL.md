@@ -16,6 +16,7 @@ harryopo-office/
 ├── SKILL.md                              # 本文件
 ├── scripts/
 │   ├── convert.py                        # MD/DOCX → paper/report .tex（纯 Python）
+│   ├── tex2md.py                         # .tex → MD 中间态（反向链路：LaTeX→Word/PDF）
 │   ├── diagram_render.py                 # 图表统一渲染器（super-diagram 架构图/时序图 + mermaid）
 │   ├── md2latex.py                       # MD → math-notes .tex（Pandoc 优先 + Python 回退）
 │   ├── mineru_cli.py                     # DOCX/PDF → MD（MinerU 解析 + 清洗 + HTML表格转LaTeX）
@@ -317,6 +318,16 @@ python docx_template.py render 模板.docx -d data.json -o 输出.docx --check
 ### 先总结后转换流程（关键）
 
 **核心原则：内容确认优先于格式转换。**
+
+#### 场景C：用户有 LaTeX 源文件（.tex）→ Word
+
+1. **反向转换**：调用 `tex2md.py` 将 .tex 清洗为标准 Markdown（MD 中间态）
+   - 处理 `{\fzht }`/`\textbf` 黑体、`\section/subsection/subsubsection` 标题层级、`tabularx/tabular` 表格、`equation/align` 公式、`figure` 图片、`thebibliography` 参考文献
+2. **内容确认**：将 .md 呈现给用户确认
+3. **Word 渲染**：`md_to_word.py` 渲染 .docx（可选 `--pdf` 同会话导出 PDF）
+   - 完整入口：`office.py render input.tex --format word --pdf`
+
+**注意**：表格单元格内的 `{\fzht }` 不转 `**`（Word 表格字体由模板样式控制，星号会原样显示）；表格标题独立 `quote` 块（`> **表N：**`）与表格相邻；空 `\caption{}` 占位自动丢弃。
 
 #### 场景A：用户有现有源材料（Word/MD/文本）
 

@@ -488,13 +488,20 @@ def build_document(md_text, config_path=None, output_path='output.docx',
 
         # ---- 行间公式 ----
         if stripped.startswith('$$'):
-            j = i + 1
-            formula = []
-            while j < n and not lines[j].strip().startswith('$$'):
-                if lines[j].strip():
-                    formula.append(lines[j].strip())
-                j += 1
-            latex = ' '.join(formula)
+            # 兼容两种写法：
+            #   单行：$$ ... $$（同一行，convert.py / tex2md 默认输出）
+            #   多行：$$ 单独一行 ... $$ 单独一行
+            if stripped.endswith('$$') and len(stripped) > 4:
+                latex = stripped[2:-2].strip()
+                j = i
+            else:
+                j = i + 1
+                formula = []
+                while j < n and not lines[j].strip().startswith('$$'):
+                    if lines[j].strip():
+                        formula.append(lines[j].strip())
+                    j += 1
+                latex = ' '.join(formula)
             omath = latex_to_omath(latex)
             # 公式编号：向前（跳过空行）找 > 式(N)：
             caption = None

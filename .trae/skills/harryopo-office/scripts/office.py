@@ -18,6 +18,7 @@ office.py — 办公超级 Skill 统一入口
 输入格式:
     .md                        直接渲染
     .docx/.doc                 anydoc → pandoc → markitdown → python-docx 四级解析
+    .tex                       LaTeX → MD 中间态（tex2md 清洗 → md_to_word 渲染）
     .pdf/.png/.jpg/.jpeg       MinerU 深解析（版面感知）→ markitdown 兜底
     .pptx/.xlsx/.epub/.html/.csv/.json/.xml/.zip/.msg 等   markitdown 转换
 """
@@ -189,6 +190,12 @@ def render_word(md_file, output_dir, config_name='fangzheng', export_pdf=False):
         print(f'  [失败] {err}')
         return None
     print(f'  [成功] {output.name}')
+    if export_pdf:
+        pdf_path = output.with_suffix('.pdf')
+        if pdf_path.exists() and pdf_path.stat().st_size > 100:
+            print(f'  [成功] {pdf_path.name}（Word 同会话导出）')
+        else:
+            print(f'  [WARN] PDF 未生成：{pdf_path.name}')
     return output
 
 
@@ -389,6 +396,15 @@ def cmd_render(args):
         if md_text is None:
             print('[ERROR] 解析失败：MinerU 与 markitdown 均不可用', file=sys.stderr)
             sys.exit(1)
+        tmp_md.write_text(md_text, encoding='utf-8')
+        md_file = tmp_md
+        print(f'  [OK] {tmp_md.name}')
+    elif input_file.suffix.lower() == '.tex':
+        # LaTeX → MD 中间态（方案书 v2 §4：.tex → MD 清洗 → md_to_word 渲染）
+        print('\n=== .TEX → Markdown（MD 中间态）===')
+        from tex2md import tex_to_md
+        tmp_md = output_dir / f'{input_file.stem}_tex.tmp.md'
+        md_text = tex_to_md(str(input_file))
         tmp_md.write_text(md_text, encoding='utf-8')
         md_file = tmp_md
         print(f'  [OK] {tmp_md.name}')
