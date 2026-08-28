@@ -489,13 +489,14 @@ class WordTemplateEngine:
     # 保存
     # ============================================================
 
-    def save(self, output_path, update_toc=True):
+    def save(self, output_path, update_toc=True, export_pdf=False):
         """
         保存文档。
 
         Args:
             output_path: 输出路径
             update_toc: 是否用 Word COM 自动更新 TOC 目录（默认 True）
+            export_pdf: 是否同时导出同名 PDF（COM 同会话完成，默认 False）
         """
         self.doc.save(output_path)
         print(f"[OK] {output_path}")
@@ -503,9 +504,12 @@ class WordTemplateEngine:
         print(f"  配置方案：{name}")
 
         if update_toc:
-            self._update_toc_com(output_path)
+            self._update_toc_com(output_path, export_pdf)
+        elif export_pdf:
+            # 无需更新 TOC 时，单独用 COM 导出 PDF
+            self._export_pdf_com(output_path)
 
-    def _update_toc_com(self, output_path):
+    def _update_toc_com(self, output_path, export_pdf=False):
         """用 Word COM 自动更新 TOC 并保存"""
         try:
             import win32com.client
@@ -519,6 +523,8 @@ class WordTemplateEngine:
                 toc.Update()
             # 用 SaveAs2 强制保存为 docx 格式，避免 OMML 冲突
             doc.SaveAs2(abs_path, FileFormat=12)  # 12 = wdFormatXMLDocument
+            if export_pdf:
+                self._export_pdf(doc, abs_path)
             doc.Close()
             word.Quit()
             print(f"  [OK] TOC 已自动更新")
@@ -530,3 +536,40 @@ class WordTemplateEngine:
                 taskkill = os.system('taskkill /f /im WINWORD.EXE >nul 2>&1')
             except:
                 pass
+
+    def _export_pdf_com(self, output_path):
+        """单独用 Word COM 导出 PDF（不更新 TOC 时使用）"""
+        try:
+            import win32com.client
+            import os
+            abs_path = os.path.abspath(output_path)
+            word = win32com.client.Dispatch('Word.Application')
+            word.Visible = False
+            word.DisplayAlerts = False
+            doc = word.Documents.Open(abs_path)
+            self._export_pdf(doc, abs_path)
+            doc.Close(False)  # 只读导出，不回存 docx
+            word.Quit()
+        except Exception as e:
+            print(f"  [WARN] PDF 导出失败: {e}")
+            try:
+                taskkill = os.system('taskkill /f /im WINWORD.EXE >nul 2>&1')
+            except:
+                pass
+
+    @staticmethod
+    def _export_pdf(doc, abs_docx_path):
+        """在已打开的 Word 文档上执行 PDF 导出（ExportFormat 17 = wdExportFormatPDF）"""
+        import os
+        pdf_path = os.path.splitext(abs_docx_path)[0] + '.pdf'
+        doc.ExportAsFixedFormat(
+            OutputFileName=pdf_path,
+            ExportFormat=17,        # 17 = wdExportFormatPDF
+            OpenAfterExport=False,  # 不自动打开，避免阻塞
+            OptimizeFor=0,          # 0 = wdExportOptimizeForPrint（打印质量）
+            CreateBookmarks=1,      # 1 = wdExportCreateHeadingBookmarks（标题书签）
+        )
+        if os.path.exists(pdf_path):
+            print(f"  [OK] PDF 已导出: {pdf_path} ({os.path.getsize(pdf_path) // 1024}KB)")
+        else:
+            print(f"  [WARN] PDF 导出后未找到文件: {pdf_path}")
