@@ -72,8 +72,12 @@ def run(cmd, cwd=None, env_extra=None, check=True, label=''):
     if env_extra:
         env.update(env_extra)
     print(f'  [{label}] {" ".join(str(c) for c in cmd[:4])}...')
-    result = subprocess.run(cmd, cwd=str(cwd) if cwd else None,
-                            capture_output=True, text=True, env=env)
+    try:
+        result = subprocess.run(cmd, cwd=str(cwd) if cwd else None,
+                                capture_output=True, text=True, env=env)
+    except FileNotFoundError as e:
+        # 命令不在 PATH（如 xelatex 未安装）→ 优雅失败而非崩溃
+        return False, '', f'命令不存在: {e.filename}（请检查环境，如安装 TeX Live/MiKTeX）'
     if check and result.returncode != 0:
         stderr_tail = result.stderr.strip().split('\n')[-3:] if result.stderr else []
         return False, result.stdout, '\n'.join(stderr_tail)
@@ -309,6 +313,19 @@ def render_notes(md_file, output_dir):
 
 def cmd_render(args):
     """render 子命令：渲染 MD 到多种格式"""
+    # ---- 模板路由校验（优先）：按注册表模板决定渲染链路（v1 模板注册表）----
+    if args.template:
+        sys.path.insert(0, str(SCRIPT_DIR / 'word' / 'template'))
+        from template_registry import load_manifest, find_template
+        manifest = load_manifest()
+        tpl = find_template(manifest, args.template)
+        if not tpl:
+            print(f'错误：注册表中无此模板: {args.template}（用 template list 查看）',
+                  file=sys.stderr)
+            sys.exit(1)
+        print(f'按模板渲染: {tpl["name"]}（engine={tpl["engine"]}, '
+              f'format={tpl["format"]}）')
+
     input_file = Path(args.input).resolve()
     if not input_file.exists():
         print(f'错误：找不到 {input_file}')
@@ -321,6 +338,21 @@ def cmd_render(args):
     formats = args.format.lower().split(',')
     if 'all' in formats:
         formats = ['word', 'paper', 'notes']
+
+    # ---- 模板路由：决定渲染链路 ----
+    if args.template:
+        if tpl['format'] == 'latex':
+            # harryopo-notes 走数理笔记链路（pandoc+mathnotes），其余 LaTeX 走论文链路
+            if tpl['id'] == 'harryopo-notes':
+                if 'notes' not in formats:
+                    formats.append('notes')
+            elif 'paper' not in formats:
+                formats.append('paper')
+        elif tpl['format'] == 'docx':
+            # docx 模板是"按 schema 填数据"场景（AI 产 data.json），
+            # 渲染请用 docx_template.py render；office.py 渲染的是 MD 内容
+            print('[INFO] docx 模板请用 docx_template.py render（按 schema 填 data.json）',
+                  file=sys.stderr)
 
     print(f'输入文件: {input_file}')
     print(f'输出目录: {output_dir}')
@@ -477,6 +509,20 @@ def cmd_render(args):
         sys.exit(1)
 
 
+def cmd_template(args):
+    """template 子命令：委托 template_registry.py（参数透传，零重复实现）"""
+    script = SCRIPT_DIR / 'word' / 'template' / 'template_registry.py'
+    result = subprocess.run(
+        [sys.executable, str(script)] + args.tpl_args,
+        capture_output=True, text=True)
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
 def cmd_info(args):
     """info 子命令：打印路径和环境信息"""
     print('=== 办公超级 Skill 环境信息 ===\n')
@@ -527,7 +573,16 @@ def main():
                           help='完成后自动打开产物')
     p_render.add_argument('--pdf', action='store_true',
                           help='Word 链路同时导出同名 PDF（COM ExportAsFixedFormat）')
+    p_render.add_argument('--template', default=None,
+                          help='按注册表模板渲染（如 harryopo-paper / harryopo-notes）')
     p_render.set_defaults(func=cmd_render)
+
+    # template 子命令（委托 template_registry.py，注册表：入库/发现/schema）
+    # REMAINDER：吞掉剩余全部参数（含 -o 等选项），原样透传给注册表
+    p_tpl = sub.add_parser('template', help='模板注册表（list/describe/schema/search/add/remove）')
+    p_tpl.add_argument('tpl_args', nargs=argparse.REMAINDER,
+                       help='透传给 template_registry.py 的参数，如: list / describe <id>')
+    p_tpl.set_defaults(func=cmd_template)
 
     # info 子命令
     p_info = sub.add_parser('info', help='打印环境信息')

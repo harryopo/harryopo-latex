@@ -227,6 +227,45 @@ python docx_template.py render 模板.docx -d data.json -o 输出.docx --check
 
 **依赖**：`docxtpl`（自动带 python-docx + jinja2）。示例见 `template/examples/`（`make_example_template.py` 生成模板 → extract → data.json → output.docx 全链路）。
 
+### 场景D：模板注册表（模板库管理 → 按模板出文档）
+
+**核心：注册表是模板的"中央元数据单点"。模板入库 → 自动提取 schema → AI 按 schema 受约束产出 → 引擎渲染保真。LLM 不直接动模板文件（对齐 arXiv 双轨框架）。**
+
+目录：`templates/registry/`（manifest.json 索引 + word/latex/markdown 模板库 + schemas/ + previews/）。内置模板：harryopo-paper / harryopo-report / harryopo-notes（LaTeX）+ docxtpl-example（Word）。
+
+```powershell
+cd .trae/skills/harryopo-office/scripts/word/template
+
+# 模板入库（docx 自动提取 schema；可指定分类/名称/id/标签）
+python template_registry.py add 公文模板.docx -c 用户自定义 -n 公文模板 --tags 公文 红头
+
+# 发现与查询
+python template_registry.py list                      # 全部
+python template_registry.py list -f docx             # 按格式
+python template_registry.py search 报告              # 名称/id/标签模糊
+python template_registry.py describe harryopo-report # 详情 + schema 摘要
+
+# schema（AI structured output 依据）
+python template_registry.py schema harryopo-report -o schema.json
+
+# 移除（内置模板需 --force）
+python template_registry.py remove user-xxx --force -d   # -d 同时删文件
+
+# office.py 统一入口（template 子命令透传注册表 CLI）
+python office.py template list
+python office.py render input.md --template harryopo-report   # 按模板路由渲染链路
+```
+
+**AI 按模板出文档工作流**：
+```
+1. template list / search → 找到模板 id
+2. template describe <id> → 了解模板字段与引擎
+3. docx 模板：schema <id> → 按 schema 向用户确认字段 → 产出 data.json → docx_template.py render
+4. latex 模板：AI 产 MD 内容 → office.py render input.md --template <id>（自动路由 paper/notes 链路）
+```
+
+**manifest 严格校验**：未知字段拒绝加载（对齐 M365 Copilot），内置模板受删除保护。
+
 ### 图表融合流程（super-diagram 框架图 + mermaid 流程图）
 
 **核心：文档涉及架构/流程/时序时，AI 先提问用户是否生成框架图；确认后产出结构化图表数据嵌入 MD，渲染器自动转 PNG 并插入三条链路（Word/paper/notes）。**

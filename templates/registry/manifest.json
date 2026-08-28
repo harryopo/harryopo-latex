@@ -1,0 +1,89 @@
+{
+  "manifest_version": "1.0",
+  "templates": [
+    {
+      "manifest_version": "1.0",
+      "id": "harryopo-paper",
+      "name": "harryopo 论文模板",
+      "version": "4.0",
+      "format": "latex",
+      "category": "全局",
+      "engine": "harryopo-xelatex",
+      "source": "builtin",
+      "template_path": "latex/harryopo-paper.tex",
+      "schema_ref": "",
+      "preview": "",
+      "placeholder_syntax": "tex-placeholder-v1",
+      "tags": [
+        "学术",
+        "论文"
+      ],
+      "usage_count": 0,
+      "created_at": "2026-08-28",
+      "updated_at": "2026-08-28"
+    },
+    {
+      "manifest_version": "1.0",
+      "id": "harryopo-report",
+      "name": "harryopo 报告模板",
+      "version": "4.0",
+      "format": "latex",
+      "category": "全局",
+      "engine": "harryopo-xelatex",
+      "source": "builtin",
+      "template_path": "latex/harryopo-report.tex",
+      "schema_ref": "",
+      "preview": "",
+      "placeholder_syntax": "tex-placeholder-v1",
+      "tags": [
+        "学术",
+        "报告"
+      ],
+      "usage_count": 0,
+      "created_at": "2026-08-28",
+      "updated_at": "2026-08-28"
+    },
+    {
+      "manifest_version": "1.0",
+      "id": "harryopo-notes",
+      "name": "harryopo 数理笔记模板",
+      "version": "1.0",
+      "format": "latex",
+      "category": "全局",
+      "engine": "harryopo-xelatex",
+      "source": "builtin",
+      "template_path": "latex/harryopo-notes.tex",
+      "schema_ref": "",
+      "preview": "",
+      "placeholder_syntax": "tex-placeholder-v1",
+      "tags": [
+        "笔记",
+        "数学"
+      ],
+      "usage_count": 0,
+      "created_at": "2026-08-28",
+      "updated_at": "2026-08-28"
+    },
+    {
+      "manifest_version": "1.0",
+      "id": "docxtpl-example",
+      "name": "docxtpl 模板填充示例",
+      "version": "1.0",
+      "format": "docx",
+      "category": "全局",
+      "engine": "docxtpl",
+      "source": "builtin",
+      "template_path": "docx/docxtpl-example.docx",
+      "schema_ref": "schemas/docxtpl-example.schema.json",
+      "preview": "",
+      "placeholder_syntax": "jinja2",
+      "tags": [
+        "示例",
+        "docx"
+      ],
+      "usage_count": 0,
+      "created_at": "2026-08-28",
+      "updated_at": "2026-08-28"
+    }
+  ]
+}
