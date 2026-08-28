@@ -1,0 +1,102 @@
+{
+  "kind": "example",
+  "meta": {
+    "title": "示例文档：排版组件总览",
+    "subtitle": "A Showcase of All Components",
+    "brand": "doc-html-pdf",
+    "logo": "排",
+    "version": "v2.0.0",
+    "date": "2026-08-04",
+    "author": "",
+    "school": "",
+    "class": ""
+  },
+  "cover": {
+    "kicker": "EXAMPLE · SHOWCASE",
+    "title": "示例文档：排版组件总览",
+    "subtitle": "A Showcase of All Components",
+    "stats": [
+      { "num": "3", "label": "章节", "sub": "Sections" },
+      { "num": "14", "label": "组件类型", "sub": "Components" },
+      { "num": "6", "label": "内置主题", "sub": "Themes" }
+    ]
+  },
+  "toc": [
+    { "num": "一", "title": "基础组件" },
+    { "num": "二", "title": "增强组件" },
+    { "num": "三", "title": "问答与键值" }
+  ],
+  "sections": [
+    {
+      "num": "一",
+      "title": "基础组件",
+      "level": 1,
+      "blocks": [
+        { "type": "paragraph", "text": "本示例演示 doc-html-pdf 支持的全部排版组件。段落、表格、引用提示、列表为最常用的基础组件，覆盖绝大多数说明类文档的排版需求。" },
+        { "type": "heading", "level": 2, "num": "1.1", "text": "表格" },
+        { "type": "table", "headers": ["组件", "用途", "JSON type"], "rows": [
+          ["段落", "普通正文", "paragraph"],
+          ["表格", "结构化数据", "table"],
+          ["引用提示", "重点说明", "callout"],
+          ["列表", "条目罗列", "list"]
+        ] },
+        { "type": "callout", "variant": "info", "title": "使用提示", "text": "引用块（> 开头）在蒸馏时自动转换为 callout；首行带 **加粗标题** 时自动作为提示标题。", "icon": "💡" },
+        { "type": "callout", "variant": "warn", "title": "注意", "text": "warn 变体使用琥珀色，适合强调风险与注意事项。" },
+        { "type": "list", "variant": "check", "title": "支持能力", "items": [
+          "Markdown → JSON 蒸馏（含 frontmatter）",
+          "HTML + PDF 双格式输出",
+          "打印样式与 A4 分页"
+        ] },
+        { "type": "list", "variant": "numbered", "items": [
+          "编写 Markdown 源文件",
+          "运行 distill.py 蒸馏为 JSON",
+          "运行 build.py 生成 HTML 与 PDF"
+        ] },
+        { "type": "math", "tex": "\\text{sim}(\\mathbf{q}, \\mathbf{d}) = \\frac{\\mathbf{q} \\cdot \\mathbf{d}}{\\|\\mathbf{q}\\| \\cdot \\|\\mathbf{d}\\|}", "display": true },
+        { "type": "paragraph", "text": "行内公式示例：欧拉恒等式 $e^{i\\pi} + 1 = 0$，下标与裸比较符 $a_{<t}$ 自动转换为 $\\lt$ 渲染。" },
+        { "type": "architecture", "title": "三层架构示例", "layers": [
+          { "name": "应用层", "items": ["Web 前端", "移动端", "API 网关"] },
+          { "name": "服务层", "items": ["业务引擎", "检索服务", "调度中心"] },
+          { "name": "数据层", "items": ["文档库", "向量数据库", "缓存存储"] }
+        ] }
+      ]
+    },
+    {
+      "num": "二",
+      "title": "增强组件",
+      "level": 1,
+      "blocks": [
+        { "type": "data-card-grid", "items": [
+          { "title": "本地优先", "items": ["所有资源本地化", "离线可用", "不依赖外部 CDN"], "icon": "🛡️" },
+          { "title": "多主题", "items": ["6 套内置配色", "同一内容换色即换风格", "色阶 9 档统一"], "icon": "🎨" },
+          { "title": "打印友好", "items": ["A4 纸面设计", "封面目录独立页", "章节自动分页"], "icon": "🖨️" }
+        ] },
+        { "type": "steps", "items": [
+          "准备内容",
+          "选择主题",
+          "生成 HTML",
+          "编译 PDF",
+          "交付分享"
+        ] },
+        { "type": "code-block", "title": "命令行示例", "lang": "bash", "code": "# 蒸馏\npython scripts/distill.py --md doc.md --out content/doc.json\n\n# 渲染 HTML + PDF（emerald 主题）\npython scripts/build.py --content content/doc.json --theme emerald --format all" }
+      ]
+    },
+    {
+      "num": "三",
+      "title": "问答与键值",
+      "level": 1,
+      "blocks": [
+        { "type": "kv", "items": [
+          { "key": "输出格式", "value": "HTML + PDF（A4）" },
+          { "key": "运行环境", "value": "Python 3.10+，依赖 jinja2 / playwright" },
+          { "key": "主题扩展", "value": "在 themes/ 下新增 JSON 即可，无需改代码" }
+        ] },
+        { "type": "faq", "items": [
+          { "q": "Q1：如何更换主题？", "a": "build.py 使用 --theme 指定主题 ID，例如 --theme slate；批量生成时自动遍历全部主题。" },
+          { "q": "Q2：作者信息如何填写？", "a": "在 Markdown 顶部写 YAML frontmatter（author/version/date 等），蒸馏时会自动读取；缺省字段在封面自动隐藏。" },
+          { "q": "Q3：支持哪些 Markdown 语法？", "a": "标题、段落、表格、列表、代码块、引用块、frontmatter；连续段落自动合并为一段。" }
+        ] }
+      ]
+    }
+  ]
+}

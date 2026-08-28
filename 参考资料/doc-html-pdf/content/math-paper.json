@@ -1,0 +1,485 @@
+{
+  "kind": "paper",
+  "meta": {
+    "title": "基于检索增强生成的多模态智能问答系统设计与实现",
+    "subtitle": "Design and Implementation of a Multimodal Intelligent QA System Based on Retrieval-Augmented Generation",
+    "version": "v1.0.0",
+    "date": "2026-08-04",
+    "author": "张小明",
+    "school": "示例大学",
+    "class": "计算机科学与技术 2201 班"
+  },
+  "cover": {
+    "kicker": "PAPER",
+    "title": "基于检索增强生成的多模态智能问答系统设计与实现",
+    "subtitle": "Design and Implementation of a Multimodal Intelligent QA System Based on Retrieval-Augmented Generation",
+    "stats": [
+      {
+        "num": "8",
+        "label": "章节数",
+        "sub": "Sections"
+      },
+      {
+        "num": "48",
+        "label": "内容块",
+        "sub": "Blocks"
+      }
+    ]
+  },
+  "preamble": [],
+  "toc": [
+    {
+      "num": "一",
+      "title": "摘要"
+    },
+    {
+      "num": "一",
+      "title": "引言"
+    },
+    {
+      "num": "二",
+      "title": "相关工作"
+    },
+    {
+      "num": "三",
+      "title": "系统架构"
+    },
+    {
+      "num": "四",
+      "title": "核心方法"
+    },
+    {
+      "num": "五",
+      "title": "实验与结果"
+    },
+    {
+      "num": "六",
+      "title": "结论"
+    },
+    {
+      "num": "八",
+      "title": "参考文献"
+    }
+  ],
+  "sections": [
+    {
+      "num": "一",
+      "title": "摘要",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "随着大语言模型（Large Language Model, LLM）的快速发展，检索增强生成（Retrieval-Augmented Generation, RAG）已成为缓解模型幻觉、引入外部知识的关键范式。本文设计并实现了一个多模态智能问答系统，系统采用\"向量检索 + 重排序 + 生成\"的三级流水线，对文本、表格与图片进行统一嵌入与检索。核心创新包括：基于动态温度系数 $\\tau$ 的检索概率校准，以及融合跨模态注意力权重的答案生成策略。在领域问答数据集上的实验表明，所提方法将答案准确率从基线 RAG 的 $78.3\\%$ 提升至 $91.6\\%$，并将平均检索延迟控制在 $320$ ms 以内，验证了系统的有效性与实用性。"
+        }
+      ]
+    },
+    {
+      "num": "一",
+      "title": "引言",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "检索增强生成通过先从外部知识库检索相关文档片段，再将其与用户问题拼接后交由生成模型作答，从而在不重新训练的前提下注入领域知识。设用户问题为 $q$，检索器返回 $N$ 个候选文档片段 $\\mathcal{D} = \\{d_1, d_2, \\ldots, d_N\\}$，生成模型的目标是最大化条件概率"
+        },
+        {
+          "type": "math",
+          "tex": "P(a \\mid q, \\mathcal{D}) = \\prod_{t=1}^{T} P_\\theta(a_t \\mid a_{<t}, q, \\mathcal{D})",
+          "display": true
+        },
+        {
+          "type": "paragraph",
+          "text": "其中 $a = (a_1, \\ldots, a_T)$ 为生成的答案序列。然而，传统 RAG 存在三个关键问题："
+        },
+        {
+          "type": "list",
+          "variant": "bullet",
+          "items": [
+            "检索质量不足：单一向量相似度难以度量复杂语义",
+            "知识时效性弱：静态索引无法应对增量数据",
+            "多模态支持缺失：现有方案难以统一处理图文混合内容"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "本文针对上述问题，提出一种多模态智能问答系统，主要贡献如下："
+        },
+        {
+          "type": "list",
+          "variant": "numbered",
+          "items": [
+            "设计\"向量检索 + 重排序 + 生成\"三级流水线架构",
+            "提出动态温度系数的检索概率校准方法",
+            "构建统一多模态嵌入空间，支持文本、表格与图片的联合检索"
+          ]
+        }
+      ]
+    },
+    {
+      "num": "二",
+      "title": "相关工作",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 2,
+          "num": "2.1",
+          "text": "向量检索"
+        },
+        {
+          "type": "paragraph",
+          "text": "稠密检索模型将文本映射到高维向量空间，并通过相似度函数度量相关性。最常用的相似度度量是余弦相似度（Cosine Similarity）："
+        },
+        {
+          "type": "math",
+          "tex": "\\text{sim}(\\mathbf{q}, \\mathbf{d}) = \\frac{\\mathbf{q} \\cdot \\mathbf{d}}{\\|\\mathbf{q}\\| \\cdot \\|\\mathbf{d}\\|} = \\frac{\\sum_{i=1}^{m} q_i d_i}{\\sqrt{\\sum_{i=1}^{m} q_i^2} \\cdot \\sqrt{\\sum_{i=1}^{m} d_i^2}}",
+          "display": true
+        },
+        {
+          "type": "paragraph",
+          "text": "其中 $\\mathbf{q} \\in \\mathbb{R}^{m}$ 为查询向量，$\\mathbf{d} \\in \\mathbb{R}^{m}$ 为文档向量。该度量对向量模长不敏感，适合高维稀疏场景。"
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "num": "2.2",
+          "text": "检索增强生成"
+        },
+        {
+          "type": "paragraph",
+          "text": "Lewis 等人（2020）首次系统提出 RAG 框架，将预训练的参数化记忆（Parametric Memory）与非参数化记忆（Non-parametric Memory）相结合。给定查询 $q$，检索器依据概率分布 $p_\\eta(d \\mid q)$ 采样文档，生成器 $p_\\theta(a \\mid q, d)$ 基于采样文档生成答案，最终目标函数为"
+        },
+        {
+          "type": "math",
+          "tex": "\\mathcal{L}_{\\text{RAG}} = \\sum_{(q, a)} \\log \\sum_{d \\in \\mathcal{D}} p_\\eta(d \\mid q) \\cdot p_\\theta(a \\mid q, d)",
+          "display": true
+        }
+      ]
+    },
+    {
+      "num": "三",
+      "title": "系统架构",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "系统采用分层架构设计，共分为三层，各层职责明确、通过标准化接口解耦："
+        },
+        {
+          "type": "architecture",
+          "title": "系统总体架构",
+          "layers": [
+            {
+              "name": "应用层",
+              "items": [
+                "Web 前端",
+                "移动端",
+                "API 网关"
+              ]
+            },
+            {
+              "name": "服务层",
+              "items": [
+                "意图识别",
+                "RAG 引擎",
+                "LLM 调度",
+                "多轮记忆"
+              ]
+            },
+            {
+              "name": "数据层",
+              "items": [
+                "文档解析",
+                "向量数据库",
+                "元数据存储",
+                "会话存储"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "其中服务层的 RAG 引擎内部又划分为四个子模块，其处理流水线如图 2 所示："
+        },
+        {
+          "type": "architecture",
+          "title": "RAG 引擎内部流水线",
+          "layers": [
+            {
+              "name": "检索模块",
+              "items": [
+                "查询改写",
+                "混合检索",
+                "候选召回"
+              ]
+            },
+            {
+              "name": "重排模块",
+              "items": [
+                "语义重排",
+                "阈值过滤",
+                "Top-K 截断"
+              ]
+            },
+            {
+              "name": "生成模块",
+              "items": [
+                "Prompt 组装",
+                "多模态生成",
+                "答案校验"
+              ]
+            },
+            {
+              "name": "优化模块",
+              "items": [
+                "反馈采集",
+                "增量索引",
+                "效果评估"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "num": "3.1",
+          "text": "查询处理"
+        },
+        {
+          "type": "paragraph",
+          "text": "用户查询首先经过预处理管道，包括分词、停用词过滤与查询改写。改写阶段采用轻量级生成模型对原始查询 $q$ 进行扩展，生成查询变体集合 $\\{q, q_1, q_2, \\ldots, q_K\\}$，其中每个变体捕获不同的查询意图，最终检索得分取变体得分的加权融合"
+        },
+        {
+          "type": "math",
+          "tex": "\\text{Score}(d) = \\sum_{k=1}^{K} w_k \\cdot \\text{sim}(\\mathbf{q}_k, \\mathbf{d}), \\quad \\sum_{k=1}^{K} w_k = 1",
+          "display": true
+        }
+      ]
+    },
+    {
+      "num": "四",
+      "title": "核心方法",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 2,
+          "num": "4.1",
+          "text": "检索概率校准"
+        },
+        {
+          "type": "paragraph",
+          "text": "传统 RAG 直接使用向量相似度排序，分数尺度在不同查询间差异巨大。本文引入温度系数 $\\tau$ 对检索分数进行软最大化（Softmax）校准，将相似度转化为检索概率："
+        },
+        {
+          "type": "math",
+          "tex": "P(d_k \\mid q) = \\frac{\\exp\\left(\\text{sim}(\\mathbf{q}, \\mathbf{d}_k) / \\tau\\right)}{\\sum_{j=1}^{N} \\exp\\left(\\text{sim}(\\mathbf{q}, \\mathbf{d}_j) / \\tau\\right)}",
+          "display": true
+        },
+        {
+          "type": "paragraph",
+          "text": "温度系数 $\\tau$ 控制概率分布的锐度：$\\tau \\to 0$ 时退化为硬选择，$\\tau \\to \\infty$ 时趋于均匀分布。本文提出动态温度策略，根据查询置信度 $c(q)$ 自适应调节："
+        },
+        {
+          "type": "math",
+          "tex": "\\tau(q) = \\tau_{\\min} + (\\tau_{\\max} - \\tau_{\\min}) \\cdot \\frac{1}{1 + e^{\\alpha (c(q) - c_0)}}",
+          "display": true
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "num": "4.2",
+          "text": "多模态嵌入融合"
+        },
+        {
+          "type": "paragraph",
+          "text": "对于图文混合内容，本文采用跨模态注意力机制融合文本与视觉特征。设文本特征矩阵 $\\mathbf{T} \\in \\mathbb{R}^{m \\times d_t}$，视觉特征矩阵 $\\mathbf{V} \\in \\mathbb{R}^{n \\times d_v}$，先通过线性投影对齐到同一维度 $d$，再计算注意力："
+        },
+        {
+          "type": "math",
+          "tex": "\\text{Attn}(\\mathbf{T}, \\mathbf{V}) = \\text{softmax}\\left(\\frac{\\mathbf{T} \\mathbf{W}_Q (\\mathbf{V} \\mathbf{W}_K)^{\\top}}{\\sqrt{d}}\\right) \\mathbf{V} \\mathbf{W}_V",
+          "display": true
+        },
+        {
+          "type": "paragraph",
+          "text": "融合后的表示 $\\mathbf{h} = \\text{Attn}(\\mathbf{T}, \\mathbf{V})$ 与文本语义向量拼接，构成最终检索向量。"
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "num": "4.3",
+          "text": "答案生成与评估"
+        },
+        {
+          "type": "paragraph",
+          "text": "生成阶段采用 Top-$k$ 截断采样，并引入长度惩罚系数 $\\beta$。解码器在每一步计算词汇分布："
+        },
+        {
+          "type": "math",
+          "tex": "P(w_t \\mid w_{<t}) = \\frac{\\exp(z_{w_t} / T_g)}{\\sum_{w \\in \\mathcal{V}} \\exp(z_w / T_g)}",
+          "display": true
+        },
+        {
+          "type": "paragraph",
+          "text": "其中 $\\mathcal{V}$ 为词表，$z_w$ 为对数几率，$T_g$ 为生成温度。系统评估采用如下指标：答案准确率（Accuracy）、F1 分数与生成困惑度（Perplexity）"
+        },
+        {
+          "type": "math",
+          "tex": "\\text{PPL} = \\exp\\left(-\\frac{1}{N} \\sum_{i=1}^{N} \\log P_\\theta(w_i \\mid w_{<i})\\right)",
+          "display": true
+        },
+        {
+          "type": "math",
+          "tex": "\\text{F1} = \\frac{2 \\cdot P \\cdot R}{P + R}",
+          "display": true
+        },
+        {
+          "type": "paragraph",
+          "text": "其中 $P$ 为精确率，$R$ 为召回率。"
+        }
+      ]
+    },
+    {
+      "num": "五",
+      "title": "实验与结果",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "heading",
+          "level": 2,
+          "num": "5.1",
+          "text": "实验设置"
+        },
+        {
+          "type": "paragraph",
+          "text": "实验基于领域问答数据集构建，共 $12{,}000$ 条问答对，按 $8:1:1$ 划分为训练集、验证集与测试集。基线系统包括：BM25 稀疏检索、传统 RAG（仅向量检索）、本文方法（校准 + 多模态融合）。"
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "num": "5.2",
+          "text": "主实验结果"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "方法",
+            "准确率 (%)",
+            "F1 (%)",
+            "平均延迟 (ms)",
+            "索引大小 (MB)"
+          ],
+          "rows": [
+            [
+              "BM25 稀疏检索",
+              "61.2",
+              "55.8",
+              "42",
+              "18"
+            ],
+            [
+              "传统 RAG（向量）",
+              "78.3",
+              "74.6",
+              "287",
+              "156"
+            ],
+            [
+              "RAG + 重排序",
+              "85.4",
+              "82.1",
+              "305",
+              "156"
+            ],
+            [
+              "本文方法（完整）",
+              "91.6",
+              "89.3",
+              "320",
+              "162"
+            ]
+          ]
+        },
+        {
+          "type": "callout",
+          "variant": "info",
+          "title": "实验结论",
+          "text": "在引入动态温度校准与多模态融合后，系统准确率相对传统 RAG 提升 $13.3$ 个百分点，同时平均延迟仅增加 $33$ ms，处于可接受范围。"
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "num": "5.3",
+          "text": "消融实验"
+        },
+        {
+          "type": "paragraph",
+          "text": "为验证各模块贡献，本文进行了消融实验："
+        },
+        {
+          "type": "table",
+          "headers": [
+            "配置",
+            "准确率 (%)",
+            "F1 (%)"
+          ],
+          "rows": [
+            [
+              "完整系统",
+              "91.6",
+              "89.3"
+            ],
+            [
+              "- 动态温度校准",
+              "88.9",
+              "86.4"
+            ],
+            [
+              "- 多模态融合",
+              "86.2",
+              "83.8"
+            ],
+            [
+              "- 重排序模块",
+              "82.7",
+              "80.1"
+            ]
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "结果显示动态温度校准贡献约 $2.7$ 个百分点，多模态融合贡献约 $2.7$ 个百分点，重排序贡献约 $3.5$ 个百分点，各模块均发挥显著作用。"
+        }
+      ]
+    },
+    {
+      "num": "六",
+      "title": "结论",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "本文设计并实现了一个基于检索增强生成的多模态智能问答系统。系统通过三级流水线架构、动态温度概率校准与跨模态注意力融合，显著提升了领域问答的准确率与鲁棒性。实验表明，所提方法在准确率与 F1 指标上均优于基线系统。未来工作将聚焦于流式增量索引更新与个性化知识偏好建模。"
+        }
+      ]
+    },
+    {
+      "num": "八",
+      "title": "参考文献",
+      "level": 1,
+      "blocks": [
+        {
+          "type": "list",
+          "variant": "numbered",
+          "items": [
+            "Lewis P, Perez E, Piktus A, et al. Retrieval-augmented generation for knowledge-intensive NLP tasks[C]. NeurIPS, 2020.",
+            "Reimers N, Gurevych I. Sentence-BERT: Sentence embeddings using siamese BERT-networks[C]. EMNLP, 2019.",
+            "Karpukhin V, Oğuz B, Min S, et al. Dense passage retrieval for open-domain question answering[C]. EMNLP, 2020.",
+            "Robertson S, Zaragoza H. The probabilistic relevance framework: BM25 and beyond[J]. Foundations and Trends in Information Retrieval, 2009.",
+            "Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need[C]. NeurIPS, 2017."
+          ]
+        }
+      ]
+    }
+  ]
+}
