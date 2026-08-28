@@ -35,3 +35,18 @@ Desktop.ini
 
 # 备份
 *.bak
+
+# 第三方开源参考源码（自带 git 管理，不入主仓库）
+opensource-reference/
+
+# 生成产物（编译/渲染输出）
+output/
+
+# 工具缓存
+.mimosa/
+
+# Word 临时锁文件
+~$*
+
+# 蒸馏区临时产物
+蒸馏区/*.tmp*
