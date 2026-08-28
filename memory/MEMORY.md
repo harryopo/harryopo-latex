@@ -1,6 +1,6 @@
 # 项目记忆 — d:\ai\latex
 
-> 最后更新: 2026-08-08 | 版本: flowchart-generator 6样式完整体系（移除 style19 流程图）
+> 最后更新: 2026-08-28 | 版本: 办公超级 Skill 方案 v2（解析端四级路由 + Word→PDF 直出 + LaTeX→Word MD 中间态）
 
 ---
 
