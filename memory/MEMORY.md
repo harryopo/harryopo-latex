@@ -391,5 +391,78 @@ mineru_cli.py 重构为两阶段：
 - 单行公式 `$$ ... $$` 与 md_to_word 多行公式收集逻辑不兼容 → 必须两端对齐（md_to_word 兼容单行）
 
 ### 下一步（按方案书 v2 路线图）
-- ⬜ 模板注册表 v1（manifest.json）
 - ⬜ docling 接入（MinerU 互为兜底）、harryopo-build-mcp、本地预览服务器
+
+## 办公超级 Skill v2 落地：模板注册表 v1（2026-08-28 完成）
+
+方案书 v2 §7 + 调研报告 `docs/research/2026-08-28-模板注册表v1可行性调研.md` 落地。阶段 1 收尾项清零。
+
+### 新增/修改
+1. **template_registry.py**（新建，纯 stdlib）— 注册表骨架 + CLI:
+   - `add`（docx 自动调 schema_extractor 提取 schema；latex/md/html 登记）、`list`（格式/分类/关键字过滤）、`describe`（详情 + schema 摘要）、`schema`（导出）、`search`、`remove`（builtin 需 --force）、`update-usage`
+   - manifest 白名单严格校验：未知字段拒绝加载并报错定位（对齐 M365 Copilot 严格模式）；枚举校验（format/source/engine）+ id 唯一
+   - `seed_builtins.py` 幂等初始化内置 4 条：harryopo-paper/report/notes（latex）+ docxtpl-example（docx，自动 schema）
+2. **office.py** — `render --template <id>` 路由（latex→paper/notes 链路、docx→提示走 docx_template.py）+ `template` 委托子命令（argparse.REMAINDER 透传）；`run()` 捕获 FileNotFoundError 优雅失败（xelatex 缺失不再崩溃 traceback）
+3. **SKILL.md** — 新增"场景D：模板注册表"章节
+
+### 验证（端到端断言 24 项全绿）
+- 内置 4 条 id 集合/来源/分类 ✓；add→schema 自动生成（8 字段、tasks=array、owner=object、need_abstract 可选，与原始提取一致）✓；重复 add 报错 ✓；未知字段拒绝加载 ✓；builtin remove 保护 ✓
+- docx 全链路：注册表模板 + schema + data.json → docxtpl render → 占位符零残留、项目名/循环表格数据落盘 ✓
+- office.py 路由：template list/schema 委托 ✓、不存在模板报错 ✓、--template harryopo-paper 正确追加 paper 链路 ✓
+
+### 关键踩坑
+- **office.py template 子命令 `-o` 被 argparse 拦截**：nargs='+' 不吞选项参数 → 改用 `argparse.REMAINDER` 原样透传
+- **cmd_remove 错误 print 到 stdout**：check 端取 stderr 拿不到 → 统一报错写 stderr
+- **docxtpl render 图片相对路径以 cwd 为基准**：验证脚本 cwd 需设为 template 目录（data.json 里 `examples/demo.png` 才能解析）
+- **当前默认 Python 3.14 缺 docxtpl**：pip 补装（0.20.2，schema_extractor 已适配该版本无 get_defined_variables）；**xelatex/pandoc 不在该环境 PATH**（LaTeX 编译链路待环境补齐，注册表核心验证不依赖）
+
+### 下一步（按方案书 v2 路线图）
+- ⬜ **M2 LaTeX 模板反解**（harryopo 占位符约定 `% [harryopo:placeholder]` 规则引擎 + LLM 补语义描述）
+- ⬜ docling 接入（MinerU 互为兜底）、harryopo-build-mcp、本地预览服务器
+- ⬜ xelatex/pandoc 环境补齐（当前默认 Python PATH 缺失）
+
+## 调研：TexLite / Oleafly 轻量本地实时编辑方案（2026-08-28）
+
+用户指示调研"轻量、本地、可预览、实时编辑"开源方案（调 deep-research-ultra），指定 TexLite（SWUFE-DB-Group）与 Oleafly。已 clone 至 `opensource-reference/` 并全量源码分析，报告：`docs/research/2026-08-28-TexLite-Oleafly-轻量实时编辑调研.md`。
+
+### 核心结论
+- **TexLite v0.8.1（AGPL-3.0，Node24+Fastify+SQLite+React+CodeMirror6+Yjs+pdfjs）**：轻量 Web 工作区，**默认引擎 xelatex**；编译队列+快照隔离+增量缓存+SyncTeX+Yjs 协同+37 测试——**就是阶段 2/3 现成蓝本**，推荐为主改造对象
+  - 方正字体接入：项目 latexmkrc 注入 TEXINPUTS（零改核心）
+  - MD 中间态：改 compiler.ts 加转换步骤 + 多产物发布（PDF+DOCX）
+  - 编译诊断 `compileDiagnostics.ts` → 包装 harryopo-build-mcp
+- **Oleafly v0.3.12（AGPL-3.0-or-later，Tauri+Rust+React+TipTap3）**：本地优先研究工具链桌面应用，无多人实时编辑；EngineDescriptor 能力矩阵/模板 gallery 契约/MCP server（127.0.0.1:5323）/自研 synctex 解析器可借鉴
+- **决策**：不采用"自研 ~500 行核心"（重复造轮子），改为基于 TexLite 改造（阶段 2 MVP）；Oleafly 作设计蓝本
+
+### 前置条件
+- 需 Node ≥24；**xelatex/latexmk 当前环境缺失**（与模板注册表 M1 遗留的环境问题同源，需一并补齐）
+- AGPL 合规：内部自用无碍，商业化分发需评估
+
+## 环境补齐 + TexLite 部署（2026-08-28）
+
+用户选择开源方案（TinyTeX，Oleafly 同款）替代完整 TeX Live，落地 TexLite 本地预览（阶段 2 MVP）。
+
+### TinyTeX（D:\Tools\TinyTeX\TinyTeX，TeX Live 2026）
+- 下载：GitHub releases `TinyTeX-1-windows-v2026.08.exe`（73MB，实为 7-Zip SFX，用 `-y -o<dir>` 解压，非 `--auto-install`）
+- tlmgr：先 `update --self` 再 install（否则报"please update tlmgr"）；清华镜像 `tlmgr option repository https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/tlnet`
+- 宏包：ctex fandol zhnumber xecjk unicode-math fontspec dblfloatfix flushend algorithm2e booktabs tabularx multirow longtable array caption subcaption float titlesec tocloft appendix fancyhdr hyperref cleveref tikz pgf listings enumitem marginfix mdframed framed adjustbox changepage marginnote 等
+- bin 加入用户 PATH（永久）
+
+### harryopo-base.sty 修复
+- 补 `\usetikzlibrary{positioning}`：`\node[below=0.6cm of B]` 相对定位语法在 TinyTeX/TeX Live 2026 下报 `PGF Math Error: Unknown operator 'of'`
+
+### TexLite v0.8.1（opensource-reference/TexLite）
+- npm ci 踩坑：better-sqlite3 原生模块需 `better_sqlite3_binary_host_mirror=https://registry.npmmirror.com/-/binary/better-sqlite3` + `disturl` 写入 `~/.npmrc`（npm 11 拒绝 config set 未知项）；`npm install-scripts approve better-sqlite3 esbuild` + `npm rebuild`（npm 11 install-scripts 保护）
+- 配置：`texlite.config.json`（dataDir=output/texlite-data，latexmk 指 TinyTeX 绝对路径）；PowerShell ConvertTo-Json 写文件带 BOM → Node JSON.parse 失败，改用 Python `json.dump`
+- init 需 PATH 含 pdflatex/xelatex/lualatex；`TEXLITE_INIT_*` 环境变量非交互建管理员
+- 启动：`npm start` → http://127.0.0.1:3000（health: `/api/health`）
+- API：登录/创建项目/upload(multipart, directory 参数)/PATCH(settings)/compile/compile/latest(latestRun.status)/pdf
+
+### 方正字体接入（项目自包含，8/8 验证全绿）
+- **关键坑**：harryopo 全部字体 `Path=../fonts/` 相对编译 cwd；build.ps1 cwd=templates/report 命中，TexLite 快照 cwd=项目根不命中；OPENTYPEFONTS 对显式 Path 无效
+- 解法：`prepare_harryopo_project.py` 生成自包含项目（修正副本 cls/sty `Path=../fonts/`→`Path=fonts/` + fonts/ 19 字体 + 示例 tex），上传快照即完整
+- 端到端：上传 22 文件 → 编译 succeeded → PDF 235KB（与 build.ps1 240KB 一致）
+- 验证脚本：`output/registry-verify/prepare_harryopo_project.py` + `texlite_e2e.py`
+
+### 下一步
+- ⬜ TexLite × harryopo MD 中间态改造（compiler.ts 编译前置 MD→LaTeX + 多产物发布）
+- ⬜ 模板注册表内置模板 → TexLite 模板 gallery（借鉴 Oleafly template.json 契约）

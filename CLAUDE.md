@@ -145,14 +145,15 @@
 - ✅ **方案书 v2 + 开源方案深度调研（2026-08-28）**：`docs/plans/2026-08-28-office-super-skill-v2.md` + 调研报告（tex64 实为商业编辑器不采纳；markitdown/docling 为解析端增量；LaTeX MCP 生态转自封装 harryopo-build-mcp）
 - ✅ **markitdown 解析路由 + Word→PDF 直出（2026-08-28）**：office.py 输入扩展至 MD/DOCX/PDF/图片/pptx/xlsx/epub/html/csv 等（DOCX 四级解析 anydoc→pandoc→markitdown→python-docx，PDF/图片 MinerU 优先→markitdown 兜底）；word_template_engine.py `save(export_pdf=True)` 同会话 `ExportAsFixedFormat` 导出 PDF；CLI `--pdf` 透传（md_to_word.py / office.py render）。验证：MD→Word→PDF 294KB、pptx 全链路 128KB、DOCX 兜底回归通过
 - ✅ **LaTeX→Word 反向链路（2026-08-28）**：tex2md.py 清洗 .tex 全结构（{\fzht}黑体/章节/tabular/公式/figure/参考文献）→ MD 中间态 → md_to_word 渲染 Word/PDF；office.py 新增 .tex 输入分支；md_to_word 公式解析兼容单行 `$$...$$`（修复单行公式收集吞掉后续全文的致命 bug）。端到端断言全绿：标题/两表/3 OMML 公式/2 图片，PDF 314KB
+- ✅ **模板注册表 v1（manifest.json，2026-08-28）**：`template_registry.py`（纯 stdlib）实现模板入库/发现/schema 管理（add/list/describe/schema/search/remove/update-usage），manifest 白名单严格校验（未知字段拒绝，对齐 M365 Copilot）；docx 入库自动复用 schema_extractor 提取 JSON Schema；内置 4 条模板（harryopo-paper/report/notes + docxtpl-example）；office.py 接入 `--template` 路由（latex→paper/notes 链路）+ `template` 委托子命令；`seed_builtins.py` 幂等初始化。端到端验证 24 项全绿（含 docx 全链路渲染占位符零残留）
+- ✅ **环境补齐 + TexLite 部署（2026-08-28）**：TinyTeX 安装（D:\Tools\TinyTeX\TinyTeX，texlive 2026，xelatex/latexmk/latexmk 4.88 + ctex 全系宏包，清华镜像）；`harryopo-base.sty` 补 `\usetikzlibrary{positioning}`（修复 `below=0.6cm of B` 报 PGF Math Error）；TexLite v0.8.1 部署于 `opensource-reference/TexLite`（npm ci + init + build，127.0.0.1:3000，dataDir=output/texlite-data，admin/harryopo2026）；**方正字体接入走"项目自包含"**：修正副本 `Path=../fonts/`→`Path=fonts/` + 项目内 fonts/ 目录（TexLite 快照 cwd 无法命中宿主相对路径）。端到端 8/8 全绿（上传 22 文件 → 编译 succeeded → PDF 235KB 与 build.ps1 产物一致）
 
 **待开发**：
 
 - ⬜ harryopo-book.cls + harryopo-notes.cls
-- ⬜ 模板注册表 v1（manifest.json）
 - ⬜ docling 接入（MinerU 互为兜底）+ harryopo-build-mcp（编译诊断闭环）
-- ⬜ 本地预览服务器（阶段 2）
-- ⬜ Web 可视化编辑器（阶段 3）
+- ⬜ **TexLite × harryopo MD 中间态改造**（compiler.ts 编译前置 MD→LaTeX 转换 + 多产物 PDF/DOCX 发布）
+- ⬜ 本地预览服务器（阶段 2 收尾）、Web 可视化编辑器（阶段 3）
 
 ---
 

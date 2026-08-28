@@ -78,6 +78,9 @@
 
 % --- 绘图 ---
 \RequirePackage{tikz}
+% positioning：支持 \node[below=0.6cm of B] 相对定位语法
+% （TinyTeX/TeX Live 2026 下无 positioning 会报 PGF Math Error: Unknown operator `of'）
+\usetikzlibrary{positioning}
 
 % --- 工具 ---
 \RequirePackage{ifthen}
