@@ -176,17 +176,12 @@
 \newCJKfontfamily\hrypxb{FZXBSJW}[Extension=.TTF, Path=../fonts/]
 \newCJKfontfamily\hrypht{FZHTJW}[Extension=.TTF, Path=../fonts/]
 
-% 快捷命令（双模式：带花括号参数 \fzht{文字} 或声明式 {\fzht 文字}）
-\newcommand{\fzht}{\@ifnextchar\bgroup{\@fzhtht}{\hrypht}}
-\newcommand{\@fzhtht}[1]{{\hrypht #1}}
-\newcommand{\fzkt}{\@ifnextchar\bgroup{\@fzktht}{\hrypkai}}
-\newcommand{\@fzktht}[1]{{\hrypkai #1}}
-\newcommand{\fzfs}{\@ifnextchar\bgroup{\@fzfsht}{\hrypfs}}
-\newcommand{\@fzfsht}[1]{{\hrypfs #1}}
-\newcommand{\fzdbs}{\@ifnextchar\bgroup{\@fzdbsht}{\hrypdbs}}
-\newcommand{\@fzdbsht}[1]{{\hrypdbs #1}}
-\newcommand{\fzxb}{\@ifnextchar\bgroup{\@fzxbht}{\hrypxb}}
-\newcommand{\@fzxbht}[1]{{\hrypxb #1}}
+% 快捷命令（声明式，需用 {\fzht 文字} 分组调用来限定范围）
+\newcommand{\fzkt}{\hrypkai}       % 楷体
+\newcommand{\fzfs}{\hrypfs}         % 仿宋
+\newcommand{\fzdbs}{\hrypdbs}       % 大标宋
+\newcommand{\fzxb}{\hrypxb}         % 小标宋
+\newcommand{\fzht}{\hrypht}         % 黑体
 
 % ============================================================
 % 第五部分：数学与定理环境

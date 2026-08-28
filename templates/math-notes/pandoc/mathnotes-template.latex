@@ -5,6 +5,9 @@
 % ============================================================
 \documentclass{harryopo-mathnotes}
 
+% Pandoc 图片绑定命令兼容层
+\providecommand{\pandocbounded}[1]{#1}
+
 $if(title)$
 \renewcommand{\mathtitle}{$title$}
 $endif$

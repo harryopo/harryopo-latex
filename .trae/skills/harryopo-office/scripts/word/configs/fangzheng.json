@@ -1,0 +1,36 @@
+{
+    "name": "方正字体版（本地，GBK）",
+    "description": "方正全套字体，适合本地使用，商用需授权",
+    "fonts": {
+        "title": "方正大标宋_GBK",
+        "heading1": "方正小标宋_GBK",
+        "heading2": "方正黑体_GBK",
+        "heading3": "方正楷体_GBK",
+        "heading4": "方正楷体_GBK",
+        "body": "方正书宋_GBK",
+        "annotation": "方正仿宋_GBK",
+        "english": "Times New Roman"
+    },
+    "colors": {
+        "dark": [26, 32, 44],
+        "main": [26, 54, 93],
+        "sub": [43, 108, 176],
+        "gray": [102, 102, 102]
+    },
+    "page": {
+        "width": 21.0,
+        "height": 29.7,
+        "margin_top": 2.54,
+        "margin_bottom": 2.54,
+        "margin_left": 3.17,
+        "margin_right": 3.17
+    },
+    "styles": {
+        "title": { "size": 22, "color": [26, 32, 44], "space_before": 36, "space_after": 8 },
+        "heading1": { "size": 16, "color": [26, 54, 93], "space_before": 20, "space_after": 10 },
+        "heading2": { "size": 14, "color": [26, 54, 93], "space_before": 14, "space_after": 8 },
+        "heading3": { "size": 12, "color": [43, 108, 176], "space_before": 10, "space_after": 6 },
+        "heading4": { "size": 12, "color": [43, 108, 176], "space_before": 8, "space_after": 4 },
+        "body": { "size": 12, "space_before": 0, "space_after": 0 }
+    }
+}

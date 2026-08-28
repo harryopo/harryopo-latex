@@ -1,0 +1,18 @@
+{
+  "project_name": "知行读书·多智能体知识服务平台",
+  "version": "v2.0",
+  "date": "2026年8月9日",
+  "owner": {
+    "name": "张三",
+    "phone": "138-0000-0000"
+  },
+  "need_abstract": true,
+  "tasks": [
+    {"name": "需求分析与架构设计", "owner": "张三", "status": "已完成"},
+    {"name": "多智能体编排引擎开发", "owner": "李四", "status": "进行中"},
+    {"name": "RAG 知识库接入", "owner": "王五", "status": "进行中"},
+    {"name": "前端可视化界面", "owner": "赵六", "status": "待开始"}
+  ],
+  "summary": "本项目通过多智能体协作架构，实现知识检索、内容生成与学习路径规划的自动化闭环。",
+  "logo": {"image": "examples/demo.png", "width_mm": 30}
+}

@@ -136,3 +136,24 @@
 - **教训**: 过度设计（多色箭头+曲线数据流+图标）反而丑，不如简洁的方框+直线
 - **保留的3个高质量examples**: example-flowchart(v3)、example-org-tree(v2)、example-architecture-full
 - **org-tree优化**: 去掉Times New Roman和drop shadow，统一Arial+无衬线+浅灰填充，间距加大(node distance=1.0cm/0.8cm)
+
+---
+
+## 2026-08-09: arch-prompter skill 端到端验证
+
+### learning: YAML 内联映射必须用花括号
+- **问题**: 生成 YAML 时用 `  - key1: val1 key2: val2`（空格分隔）格式
+- **报错**: `yaml.scanner.ScannerError: mapping values are not allowed here`
+- **根因**: flowchart-generator 的 gen.py 使用 `yaml.safe_load()`，内联映射必须 `{key: val, key2: val2}`
+- **修复**: 所有 style14/15/16 生成函数统一使用 `{key: val}` 格式
+- **教训**: 生成 YAML 时优先用多行块格式，避免内联映射格式错误
+
+### learning: jieba 分词需要注册自定义词典
+- **问题**: jieba 默认把"微服务"拆成"微"+"服务"，"网关"拆成"网"+"关"
+- **修复**: 在 `extract_tokens()` 中调用 `jieba.add_word(term, freq=10000, tag="n")` 注册技术复合词
+- **影响**: 技术节点提取准确性大幅提升，30+ 复合词全部正确识别
+
+### learning: flowchart-generator style14 要求 intents 非空
+- **问题**: extras 不足 2 个时，intents 列表为空，gen.py 的 `data["intents"]` 触发 KeyError
+- **修复**: 当 extras < 2 时，补充默认意图项 `{"en": "Default Intent", "zh": "默认意图"}`
+- **教训**: 生成 YAML 时需确保所有必填字段都有值，不能省略

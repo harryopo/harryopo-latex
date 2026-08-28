@@ -63,34 +63,62 @@
 % 第四部分：页眉页脚（无横线）
 % ============================================================
 
-% 使用基础包中的统一页眉配置
-\harryopo@setup@header{sectionmark}
+% 正文页眉：左=日期 · 节标题（楷体），右=页码
+\fancypagestyle{fancy}{
+    \fancyhf{}
+    \fancyhead[L]{\small\fzkt\@date\quad\ifx\leftmark\@empty\else\textperiodcentered\quad\leftmark\fi}
+    \fancyhead[R]{\small\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+% 首页页眉：左=日期，右=页码
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyhead[L]{\small\fzkt\@date}
+    \fancyhead[R]{\small\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+\renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+\pagestyle{fancy}
 
 % ============================================================
 % 第五部分：正文标题层级
 % ============================================================
 
-% 一级标题 section：方正大标宋 + 蓝色
+% 隐藏 section/subsection/subsubsection 自动编号（不显示 0.1/0.2 等）
+% convert.py 已用 \section* 系列；此处保险起见也覆盖手动写 \section 的情况
+\renewcommand{\thesection}{}
+\renewcommand{\thesubsection}{}
+\renewcommand{\thesubsubsection}{}
+
+% 一级标题 section：方正大标宋 + 黑色
 \titleformat{\section}
-    {\Large\fzdbs\color{MainColor}}
-    {\rmfamily\bfseries\thesection}{1em}{}
+    {\Large\fzdbs\bfseries}
+    {}{0pt}{}
 \titlespacing{\section}{0pt}{16pt}{10pt}
 
-% 二级标题 subsection：黑体 + 辅色
+% 二级标题 subsection：方正黑体 + 黑色
 \titleformat{\subsection}
-    {\large\bfseries\color{SubColor}}
-    {\rmfamily\bfseries\thesubsection}{1em}{}
+    {\large\bfseries\fzht}
+    {}{0pt}{}
 \titlespacing{\subsection}{1em}{12pt}{6pt}
 
-% 三级标题 subsubsection：方正楷体 + 略深辅色
+% 三级标题 subsubsection：方正楷体 + 黑色
 \titleformat{\subsubsection}
-    {\normalsize\fzkt\color{MainColor!80!black}}
-    {\rmfamily\bfseries\thesubsubsection}{1em}{}
+    {\normalsize\fzkt\bfseries}
+    {}{0pt}{}
 \titlespacing{\subsubsection}{2em}{8pt}{4pt}
 
+% 四级标题 paragraph：方正黑体 + 黑色（公文 ① 层级）
+\renewcommand{\theparagraph}{}
+\titleformat{\paragraph}
+    {\normalsize\bfseries\fzht}
+    {}{0pt}{}
+\titlespacing{\paragraph}{2em}{6pt}{2pt}
+
 % 括号式小标题：\subhead{标题名} → （标题名）黑体后接正文
+% 注意：不再使用 \noindent，保证后续段落正常段首缩进 2 字符
 \newcommand{\subhead}[1]{%
-    \par\vspace{6pt}\noindent
+    \par\vspace{6pt}%
     {\bfseries\fzht\color{SubColor}（#1）}\hspace{0.5em}%
 }
 
@@ -109,10 +137,10 @@
 
 \renewcommand{\maketitle}{%
     \begin{center}
-        {\huge\fzxb\color{DarkColor}\@title\par}
-        \vspace{0.8cm}
-        {\large\fzkt\@author\par}
-        \vspace{0.6cm}
+        {\huge\fzdbs\color{DarkColor}\@title\par}
+        \vspace{0.7cm}
+        {\Large\fzkt\@author\par}
+        \vspace{0.5cm}
     \end{center}
 }
 
@@ -122,16 +150,22 @@
 
 \renewenvironment{abstract}{%
     \list{}{\leftmargin=2em \rightmargin=0em \topsep=0.5cm \parsep=0pt \itemsep=0pt}\item\relax
-    {\fzht\color{MainColor} 摘\quad 要：}%
+    {\bfseries\fzht 摘\quad 要：}%
     \fzkt
 }{%
     \endlist
 }
 
+% 关键：必须用 \begingroup...\endgroup 包裹 \list...\endlist
+% 因为 \list 是底层命令，会把 \parindent 改为 \listparindent(0pt)
+% 而 \endlist 不恢复 \parindent，导致后续所有段落失去首行缩进
 \newcommand{\keywords}[1]{%
+    \begingroup
     \list{}{\leftmargin=2em \rightmargin=0em \topsep=0pt \parsep=0pt \itemsep=0pt}\item\relax
-    {\fzht\color{MainColor} 关键词：}\fzkt #1%
+    {\bfseries\fzht 关键词：}\fzkt #1%
     \endlist
+    \endgroup
+    \setlength{\parindent}{2em}% 双保险：确保 \parindent 恢复
     \par\vspace{0.3cm}
 }
 
@@ -189,8 +223,12 @@
 \newcommand{\printfunding}{%
     \ifdefined\@fundproject\relax
         \ifx\@fundproject\@empty\else
-            \vspace{0.5cm}
-            \noindent{\small\color{gray}\@fundproject\par}
+            \vspace{0.5cm}\par
+            \begingroup
+                \small
+                \parindent=2em\relax
+                \indent{\color{gray}\@fundproject}\par
+            \endgroup
         \fi
     \fi
 }
@@ -202,9 +240,17 @@
 \newcommand{\printauthorbio}{%
     \ifdefined\@authorbio\relax
         \ifx\@authorbio\@empty\else
-            \vspace{0.5cm}
-            \noindent{\bfseries\color{MainColor} 作者简介：}\par
-            \noindent{\small\@authorbio\par}
+            \vspace{0.5cm}\par
+            \begingroup
+                \bfseries
+                \parindent=2em\relax
+                \indent{\color{MainColor}作者简介：}\par
+            \endgroup
+            \begingroup
+                \small
+                \parindent=2em\relax
+                \indent\@authorbio\par
+            \endgroup
         \fi
     \fi
 }
