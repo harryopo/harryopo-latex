@@ -466,3 +466,28 @@ mineru_cli.py 重构为两阶段：
 ### 下一步
 - ⬜ TexLite × harryopo MD 中间态改造（compiler.ts 编译前置 MD→LaTeX + 多产物发布）
 - ⬜ 模板注册表内置模板 → TexLite 模板 gallery（借鉴 Oleafly template.json 契约）
+
+## TexLite × harryopo MD 中间态改造（2026-08-28 完成，8/8 全绿）
+
+TexLite 原生支持 `.md` 主文档（调研报告方案 B 落地，阶段 2 收尾）。
+
+### 改动（TexLite 源码，opensource-reference/TexLite）
+1. **config.ts**：新增 `md` 配置段（`md.convertScript` 指向 harryopo convert.py、`md.pythonBinary`、`md.convertType`，默认关闭），校验脚本存在
+2. **compiler.ts compileProject**：mainFile 校验放宽 .tex/.md；**反向检测**同名 `.md` 存在于快照（compileMainFile 已把 .md 规范化 .tex）→ 在**缓存源目录**内调 convert.py 转 .tex → latexmk 编译
+3. **compileArtifacts.ts compileMainFile**：`.md` 返回同名 `.tex`（不校验存在性/documentclass）
+4. **projects.ts PATCH**：mainFile 允许 .md/.markdown，md 跳过 documentclass 候选校验（需 mdConvertScript 配置）
+5. **projectFiles.ts**：重命名保护放宽 .tex/.md/.markdown
+
+### 关键踩坑
+- **转换产物必须写缓存源目录（cache.sourceDir）而非快照**：prepareCompileCache 只同步 snapshot.files 清单，快照内新增的 .tex 不会被同步 → latexmk 找不到。转换时机在 prepareCompileCache 之后、spawn 之前
+- **compileMainFile 提前规范化**：routes 层把 .md→.tex 后 compileProject 拿不到原始 .md，需反向检测（快照里同名 .md 存在即视为 MD 项目）
+- **harryopo-paper.cls 也需修正副本**：prepare_harryopo_project.py 只做了 report，MD 默认 convertType=paper 需要 paper.cls
+- **上传后缀大小写**：方正字体 `.TTF` 大写，e2e 上传过滤需 `suffix.lower()`
+- **algorithm2e 依赖 ifoddpage**：TinyTeX 需 tlmgr install ifoddpage relsize
+
+### 验证
+- `texlite_md_e2e.py`：PATCH mainFile=note.md → 编译内部 MD→LaTeX 转换 → xelatex → PDF 30KB，8/8 全绿
+
+### 下一步
+- ⬜ 模板注册表内置模板 → TexLite 模板 gallery（借鉴 Oleafly template.json 契约）
+- ⬜ docling 接入、harryopo-build-mcp、Web 可视化编辑器（阶段 3）
