@@ -1,0 +1,36 @@
+{
+    "name": "开源字体版（Windows 系统字体，免授权）",
+    "description": "使用 Windows 自带字体替换方正，适合开源项目",
+    "fonts": {
+        "title": "宋体",
+        "heading1": "宋体",
+        "heading2": "黑体",
+        "heading3": "楷体",
+        "heading4": "楷体",
+        "body": "宋体",
+        "annotation": "仿宋",
+        "english": "Times New Roman"
+    },
+    "colors": {
+        "dark": [26, 32, 44],
+        "main": [26, 54, 93],
+        "sub": [43, 108, 176],
+        "gray": [102, 102, 102]
+    },
+    "page": {
+        "width": 21.0,
+        "height": 29.7,
+        "margin_top": 2.54,
+        "margin_bottom": 2.54,
+        "margin_left": 3.17,
+        "margin_right": 3.17
+    },
+    "styles": {
+        "title": { "size": 22, "color": [26, 32, 44], "space_before": 36, "space_after": 8 },
+        "heading1": { "size": 16, "color": [26, 54, 93], "space_before": 20, "space_after": 10 },
+        "heading2": { "size": 14, "color": [26, 54, 93], "space_before": 14, "space_after": 8 },
+        "heading3": { "size": 12, "color": [43, 108, 176], "space_before": 10, "space_after": 6 },
+        "heading4": { "size": 12, "color": [43, 108, 176], "space_before": 8, "space_after": 4 },
+        "body": { "size": 12, "space_before": 0, "space_after": 0 }
+    }
+}

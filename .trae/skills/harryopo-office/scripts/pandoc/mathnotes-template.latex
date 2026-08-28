@@ -7,6 +7,9 @@
 
 % Pandoc 图片绑定命令兼容层
 \providecommand{\pandocbounded}[1]{#1}
+% 图片宽度约束：防止大图撑满页面
+\usepackage{graphicx}
+\setkeys{Gin}{width=0.85\textwidth,max width=\textwidth}
 
 $if(title)$
 \renewcommand{\mathtitle}{$title$}

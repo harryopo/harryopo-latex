@@ -35,6 +35,9 @@
 \RequirePackage{indentfirst}
 \RequirePackage{enumitem}
 
+% 全局段首缩进 2 字符（中文排版规范）
+\setlength{\parindent}{2em}
+
 % --- 页面布局 ---
 \RequirePackage[a4paper]{geometry}
 
@@ -43,7 +46,9 @@
 
 % --- 数学 ---
 % 注意：不在此处加载 ctex！cls 已通过 ctexart/ctexrep 加载
-\ifx\harryopo@nomath0%
+% 关键修复：\ifx 不展开宏，\harryopo@nomath 是控制序列而 0 是字符，永远不等。
+% 必须用 \expandafter 先展开 \harryopo@nomath 得到其内容（"0" 或 "1"），再 \ifx 比较。
+\expandafter\ifx\harryopo@nomath0%
     \RequirePackage{unicode-math}
 \else
     \RequirePackage{amsmath}
@@ -78,6 +83,7 @@
 
 % --- 绘图 ---
 \RequirePackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,shapes.geometric}
 
 % --- 工具 ---
 \RequirePackage{ifthen}
@@ -112,6 +118,12 @@
 % 第四部分：字体配置
 % ============================================================
 
+% --- 字体路径 ---
+% 默认 ../fonts/ 相对于 cls/sty 文件位置
+% 若从其他目录编译，可在 \documentclass 之前重新定义：
+%   \def\harryopofontpath{你的字体路径}
+\providecommand{\harryopofontpath}{../fonts/}
+
 % --- 英文主字体 — XITS（Times 风格） ---
 \setmainfont{XITS}[
     Extension = .otf,
@@ -119,16 +131,17 @@
     BoldFont = *-Bold,
     ItalicFont = *-Italic,
     BoldItalicFont = *-BoldItalic,
-    Path = ../fonts/
+    Path = \harryopofontpath
 ]
 
 % --- 数学字体（可选） ---
-\ifx\harryopo@nomath0%
+% 同上的 \ifx 展开修复
+\expandafter\ifx\harryopo@nomath0%
     \setmathfont{XITSMath}[
         Extension = .otf,
         UprightFont = *-Regular,
         BoldFont = *-Bold,
-        Path = ../fonts/
+        Path = \harryopofontpath
     ]
 \fi
 
@@ -139,44 +152,50 @@
     BoldFont = *-bold,
     ItalicFont = *-italic,
     BoldItalicFont = *-bolditalic,
-    Path = ../fonts/
+    Path = \harryopofontpath
 ]
 \setmonofont{lmmono10-regular}[
     Extension = .otf,
-    Path = ../fonts/
+    Path = \harryopofontpath
 ]
 
 % --- 中文字体 — 方正系列 ---
 % 关键：使用 hrp- 前缀避免与 ctex 默认 fandol 字体族冲突
 %       ctex 默认定义了 zhkai/zhfs/zhhei/zhyahei 等，此处覆盖为方正系列
+% 关键：fontspec 语法必须是 \setCJKmainfont{字体名}[options]（name 在前），
+%       之前写成 [options]{name} 导致 fontspec 把整个 options 串当作字体名
+%       → 触发 "Extension=, Path=../fonts/ cannot be found" → 回退到 ctex 默认
 \xeCJKsetup{AutoFallBack=true}
-\setCJKmainfont[
+\setCJKmainfont{FZSSJW}[
     Extension = .TTF,
     BoldFont = FZHTJW,
     ItalicFont = FZKTJW,
-    Path = ../fonts/
-]{FZSSJW}
-\setCJKsansfont[
+    Path = \harryopofontpath
+]
+\setCJKsansfont{FZHTJW}[
     Extension = .TTF,
-    Path = ../fonts/
-]{FZHTJW}
+    Path = \harryopofontpath
+]
 
 % 用 ctex 提供的接口覆盖默认 CJK 字体族（而非直接 \setCJKfamilyfont 重复定义）
 % 这样避免 "already defined" 冲突
-\newfontfamily\harryopo@fzkt{FZKTJW}[Extension=.TTF, Path=../fonts/]
-\newfontfamily\harryopo@fzfs{FZFSJW}[Extension=.TTF, Path=../fonts/]
-\newfontfamily\harryopo@fzdbs{FZDBSJW}[Extension=.TTF, Path=../fonts/]
-\newfontfamily\harryopo@fzxb{FZXBSJW}[Extension=.TTF, Path=../fonts/]
-\newfontfamily\harryopo@fzht{FZHTJW}[Extension=.TTF, Path=../fonts/]
+% 同样：字体名放到 [] 前面
+% BoldFont/ItalicFont 指向自身避免 "Font shape ... undefined" 警告
+\newfontfamily\harryopo@fzkt{FZKTJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZKTJW, ItalicFont=FZKTJW]
+\newfontfamily\harryopo@fzfs{FZFSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZFSJW, ItalicFont=FZFSJW]
+\newfontfamily\harryopo@fzdbs{FZDBSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZDBSJW, ItalicFont=FZDBSJW]
+\newfontfamily\harryopo@fzxb{FZXBSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZXBSJW, ItalicFont=FZXBSJW]
+\newfontfamily\harryopo@fzht{FZHTJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZHTJW, ItalicFont=FZHTJW]
 
 % 用 \newCJKfontfamily 创建独立族（hrp- 前缀，不与 ctex 默认冲突）
-\newCJKfontfamily\hrypkai{FZKTJW}[Extension=.TTF, Path=../fonts/]
-\newCJKfontfamily\hrypfs{FZFSJW}[Extension=.TTF, Path=../fonts/]
-\newCJKfontfamily\hrypdbs{FZDBSJW}[Extension=.TTF, Path=../fonts/]
-\newCJKfontfamily\hrypxb{FZXBSJW}[Extension=.TTF, Path=../fonts/]
-\newCJKfontfamily\hrypht{FZHTJW}[Extension=.TTF, Path=../fonts/]
+% 同样：字体名放到 [] 前面
+\newCJKfontfamily\hrypkai{FZKTJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZKTJW, ItalicFont=FZKTJW]
+\newCJKfontfamily\hrypfs{FZFSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZFSJW, ItalicFont=FZFSJW]
+\newCJKfontfamily\hrypdbs{FZDBSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZDBSJW, ItalicFont=FZDBSJW]
+\newCJKfontfamily\hrypxb{FZXBSJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZXBSJW, ItalicFont=FZXBSJW]
+\newCJKfontfamily\hrypht{FZHTJW}[Extension=.TTF, Path=\harryopofontpath, BoldFont=FZHTJW, ItalicFont=FZHTJW]
 
-% 快捷命令（声明式，需用 {\fzht 文字} 分组调用来限定范围）
+% 快捷命令
 \newcommand{\fzkt}{\hrypkai}       % 楷体
 \newcommand{\fzfs}{\hrypfs}         % 仿宋
 \newcommand{\fzdbs}{\hrypdbs}       % 大标宋
@@ -283,7 +302,6 @@
 % 第八部分：杂项
 % ============================================================
 
-\setlength{\parindent}{2em}
 \setstretch{1.25}
 \tolerance=1000
 \emergencystretch=3em
