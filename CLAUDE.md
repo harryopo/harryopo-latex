@@ -154,7 +154,7 @@
 
 - ⬜ harryopo-book.cls + harryopo-notes.cls
 - ⬜ docling 接入（MinerU 互为兜底）+ harryopo-build-mcp（编译诊断闭环）
-- ⬜ Web 可视化编辑器（阶段 3）
+- ⬜ Web 可视化编辑器（阶段 3，方案已定：**`docs/plans/2026-08-28-stage3-web-editor.md`**，TipTap 3 + @tiptap/markdown + RawBlock 兜底，M1 MVP 待实施）
 
 ---
 

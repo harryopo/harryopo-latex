@@ -528,3 +528,31 @@ TexLite 原生支持 `.md` 主文档（调研报告方案 B 落地，阶段 2 �
 
 ### 下一步
 - ⬜ docling 接入、harryopo-build-mcp、Web 可视化编辑器（阶段 3）
+
+## 阶段 3 Web 可视化编辑器方案（2026-08-28 调研完成）
+
+方案书：`docs/plans/2026-08-28-stage3-web-editor.md`。调研（Oleafly wysiwyg 源码深析 + tiptap-markdown-react clone 分析 + 2026 竞品对比）。
+
+### 技术选型（已定）
+- **TipTap 3**（ProseMirror）+ `@tiptap/markdown`（开源双向）+ `@tiptap/extension-mathematics`（官方公式）+ KaTeX + 自研 RawBlock/RawInline 兜底
+- **不采用**：@tiptap-pro（商业 Start plan）；Milkdown（备选，插件门槛高）
+- 定位：办公文档（MD 中间态）可视化编辑面，与 TexLite（LaTeX 源码）并存
+
+### 关键机制（借鉴 Oleafly，源码实证）
+- **RawBlock/RawInline**：atom 节点 + attrs.source，未识别结构原样保真（呼应"AI 只产结构化数据"铁律）
+- **math token 占位保护**（protectInlineSources/restore）：防解析器破坏 $ 定界符
+- **preamble/body 分离**（splitLatexDocument）：preamble 收进 textarea
+- **round-trip 幂等测试**：serialize(parse(serialize(parse(x)))) === serialize(parse(x))
+- **AI 写并发模型**：generation 计数 + 二次校验；isolateHistory 不进 undo
+- **diff 全套 @codemirror/merge**（unified/MergeView/审批卡）
+
+### tiptap-markdown-react 参考
+- `@tiptap/markdown` MarkdownManager 双向；extension-mathematics + KaTeX；CitationRef.ts 展示自定义节点 renderMarkdown/markdownTokenizer 范式（harryopo 扩展公式/表格/注释的方法）
+
+### 路线图
+- M1 MVP：Vite+React+TipTap 脚手架、MD 双向、公式/表格/图片、预览、导出 office.py、round-trip 测试
+- M2：模板注册表 schema 表单、文件树、图表渲染
+- M3：Yjs 协同 + @codemirror/merge inline diff + AI 流式插入
+
+### 下一步
+- ⬜ M1 脚手架实施（用户确认后）
