@@ -521,4 +521,10 @@ TexLite 原生支持 `.md` 主文档（调研报告方案 B 落地，阶段 2 �
 
 ### 下一步
 - ⬜ docling 接入、harryopo-build-mcp、Web 可视化编辑器（阶段 3）
-- ⬜ preview.png 自动生成（PDF 首页截图，模板 gallery 预览图）
+
+## preview.png 自动生成（2026-08-28 完成，15/15）
+
+`texlite_preview_gen.py`：PyMuPDF（`import pymupdf`，fitz API 已 deprecated）渲染 PDF 首页（dpi=100）→ preview.png（paper 45KB / report 32KB / notes 20KB）；更新 template.json `preview` 字段并上传 TexLite 最新项目。模板 gallery 契约与 Oleafly 完整对齐（id/name/category/description/main_doc/engine/preview）。
+
+### 下一步
+- ⬜ docling 接入、harryopo-build-mcp、Web 可视化编辑器（阶段 3）
