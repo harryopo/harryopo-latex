@@ -23,6 +23,7 @@
     "express": "^5.2.1",
     "katex": "^0.18.4",
     "markdown-it": "^15.0.1",
+    "mermaid": "^11.17.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

@@ -1,10 +1,19 @@
-// App.tsx — harryopo-web 主界面（文档管理 + 编辑 + 预览 + 导出）
+// App.tsx — harryopo-web 主界面（文件树 + 编辑 + 预览 + 导出 + 模板新建）
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Editor } from './components/Editor'
 import { Preview } from './components/Preview'
+import { FileTree } from './components/FileTree'
+import { TemplateModal } from './components/TemplateModal'
 
 const API = ''
+
+interface TreeNode {
+  name: string
+  path: string
+  type: 'dir' | 'md'
+  children?: TreeNode[]
+}
 
 interface ExportFile {
   name: string
@@ -12,52 +21,47 @@ interface ExportFile {
 }
 
 export default function App() {
-  const [docs, setDocs] = useState<string[]>([])
+  const [tree, setTree] = useState<TreeNode[]>([])
   const [current, setCurrent] = useState<string>('')
   const [md, setMd] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [savedAt, setSavedAt] = useState<string>('')
+  const [savedAt, setSavedAt] = useState('')
   const [exports, setExports] = useState<ExportFile[]>([])
   const [exporting, setExporting] = useState(false)
+  const [tplOpen, setTplOpen] = useState(false)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // 文档列表
-  const refreshDocs = useCallback(async () => {
+  const refreshTree = useCallback(async () => {
     try {
-      const r = await fetch(`${API}/api/docs`)
-      const data = await r.json()
-      setDocs(data.docs || [])
-      if (!current && data.docs?.length) {
-        const first = data.docs[0].replace(/\.md$/, '')
-        setCurrent(first)
-        loadDoc(first)
-      }
+      const r = await fetch(`${API}/api/tree`)
+      const d = await r.json()
+      setTree(d.tree || [])
     } catch {
-      /* server 未启动时静默 */
+      /* server 未启动 */
     }
-  }, [current])
+  }, [])
 
-  // 加载文档
-  const loadDoc = useCallback(async (name: string) => {
+  // 加载文档（path）
+  const loadDoc = useCallback(async (path: string) => {
     try {
-      const r = await fetch(`${API}/api/doc?name=${encodeURIComponent(name)}`)
-      const data = await r.json()
-      setMd(data.content ?? '')
-      setCurrent(name)
+      const r = await fetch(`${API}/api/doc?path=${encodeURIComponent(path)}`)
+      const d = await r.json()
+      setMd(d.content ?? '')
+      setCurrent(path)
       setExports([])
     } catch {
       /* ignore */
     }
   }, [])
 
-  // 保存（debounce 600ms）
-  const saveDoc = useCallback(async (name: string, content: string) => {
+  // 保存（debounce）
+  const saveDoc = useCallback(async (path: string, content: string) => {
     setSaving(true)
     try {
       await fetch(`${API}/api/doc`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, content }),
+        body: JSON.stringify({ path, content }),
       })
       setSavedAt(new Date().toLocaleTimeString())
     } finally {
@@ -65,7 +69,6 @@ export default function App() {
     }
   }, [])
 
-  // 编辑器变化 → debounce 保存
   const handleChange = useCallback(
     (content: string) => {
       setMd(content)
@@ -78,13 +81,33 @@ export default function App() {
   )
 
   // 新建文档
-  const newDoc = useCallback(() => {
-    const name = window.prompt('新文档名（不含 .md）')
+  const newDoc = useCallback(async () => {
+    const name = window.prompt('新文档名（含 .md，支持子目录如 报告/周报.md）')
     if (!name) return
-    setCurrent(name)
-    setMd('# 新文档\n\n## 一、\n\n正文。')
-    setExports([])
-  }, [])
+    const r = await fetch(`${API}/api/file`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: name }),
+    })
+    if (r.ok) {
+      await refreshTree()
+      loadDoc(name)
+    } else {
+      alert((await r.json()).error || '创建失败')
+    }
+  }, [refreshTree, loadDoc])
+
+  // 删除文档
+  const deleteDoc = useCallback(async (path: string) => {
+    const r = await fetch(`${API}/api/file?path=${encodeURIComponent(path)}`, { method: 'DELETE' })
+    if (r.ok) {
+      await refreshTree()
+      if (current === path) {
+        setCurrent('')
+        setMd(null)
+      }
+    }
+  }, [refreshTree, current])
 
   // 导出
   const doExport = useCallback(async (format: string) => {
@@ -97,9 +120,9 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: current, format }),
       })
-      const data = await r.json()
-      if (data.ok) setExports(data.files)
-      else alert(`导出失败：${data.log || ''}`)
+      const d = await r.json()
+      if (d.ok) setExports(d.files)
+      else alert(`导出失败：${d.log || ''}`)
     } catch (e) {
       alert(`导出请求失败：${e}`)
     } finally {
@@ -108,28 +131,21 @@ export default function App() {
   }, [current])
 
   useEffect(() => {
-    refreshDocs()
-  }, [refreshDocs])
+    refreshTree()
+  }, [refreshTree])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', fontFamily: 'system-ui, sans-serif' }}>
       {/* 顶栏 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderBottom: '1px solid #d0d7de', background: '#f6f8fa' }}>
         <strong>harryopo-web</strong>
-        <select
-          value={current}
-          onChange={(e) => loadDoc(e.target.value)}
-          style={{ padding: '4px 8px' }}
-        >
-          {docs.map((d) => (
-            <option key={d} value={d.replace(/\.md$/, '')}>{d}</option>
-          ))}
-        </select>
-        <button onClick={newDoc} style={btnStyle}>新建</button>
+        <span style={{ flex: 1, color: '#57606a', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {current || '（未打开文档）'}
+        </span>
         <span style={{ color: saving ? '#0969da' : '#57606a', fontSize: 12 }}>
           {saving ? '保存中…' : savedAt ? `已保存 ${savedAt}` : ''}
         </span>
-        <span style={{ flex: 1 }} />
+        <button onClick={() => setTplOpen(true)} style={btnStyle}>从模板新建</button>
         <button onClick={() => doExport('word')} disabled={exporting} style={btnStyle}>
           {exporting ? '导出中…' : '导出 Word'}
         </button>
@@ -141,8 +157,17 @@ export default function App() {
         </button>
       </div>
 
-      {/* 主区：编辑 + 预览 */}
+      {/* 主区：文件树 | 编辑 | 预览 */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <div style={{ width: 200, borderRight: '1px solid #d0d7de', overflow: 'auto', background: '#f6f8fa' }}>
+          <FileTree
+            tree={tree}
+            current={current}
+            onOpen={loadDoc}
+            onNew={newDoc}
+            onDelete={deleteDoc}
+          />
+        </div>
         <div style={{ flex: 1, borderRight: '1px solid #d0d7de' }}>
           <Editor value={md} onChange={handleChange} />
         </div>
@@ -156,17 +181,15 @@ export default function App() {
         <div style={{ padding: '8px 16px', borderTop: '1px solid #d0d7de', background: '#f6f8fa' }}>
           导出完成：
           {exports.map((f) => (
-            <a
-              key={f.name}
-              href={`${API}${f.url}`}
-              download={f.name}
-              style={{ marginRight: 12, color: '#0969da' }}
-            >
+            <a key={f.name} href={`${API}${f.url}`} download={f.name} style={{ marginRight: 12, color: '#0969da' }}>
               {f.name}
             </a>
           ))}
         </div>
       )}
+
+      {/* 从模板新建 */}
+      {tplOpen && <TemplateModal onClose={() => setTplOpen(false)} />}
     </div>
   )
 }

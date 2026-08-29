@@ -584,3 +584,22 @@ TexLite 原生支持 `.md` 主文档（调研报告方案 B 落地，阶段 2 �
 - ⬜ 阶段 3 M2：模板注册表 schema 表单 + 文件树 + 图表渲染
 - ⬜ 阶段 3 M3：Yjs 协同 + @codemirror/merge inline diff + AI 流式插入
 - ⬜ office.py paper 链路环境问题排查
+
+## 阶段 3 M2：文件树 + 模板表单 + 图表（2026-08-28 完成，13/13）
+
+web-editor 升级。
+
+### 交付
+- **文件树**：`/api/tree`（递归目录）+ 新建/删除 + `safeRel` 安全路径（防 `..` 穿越）；前端 FileTree 组件（子目录展开/选中高亮/删除）
+- **模板注册表对接**：`/api/templates`（读 manifest.json）+ `/api/templates/:id/schema` + `/api/templates/:id/render`（调 docx_template.py render → docx 下载）；前端 TemplateModal（模板列表 → schema 动态表单 string/object/array → 渲染下载）
+- **图表**：Preview 集成 mermaid（前端渲染 ```mermaid 代码块）+ `/api/diagram` 后端 super-diagram 接口
+- 生产模式：后端 express.static(dist) → http://127.0.0.1:8080 直接访问 M2 版前端
+
+### 关键踩坑
+- **重复路由拦截**：追加的 GET/PUT /api/doc 被 M1 旧版（只认 name）先命中 → path 参数被忽略 → 404。修复：删重复路由、扩展 M1 版支持 path
+- **Express 路由按注册顺序匹配**，同名路由只有第一个生效
+- **docx_template 校验把空字符串当缺失**：表单必填字段必须给非空值
+
+### 下一步
+- ⬜ 阶段 3 M3：Yjs 协同 + @codemirror/merge inline diff + AI 流式插入
+- ⬜ office.py paper 链路环境问题排查

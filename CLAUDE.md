@@ -150,12 +150,13 @@
 - ✅ **TexLite × harryopo MD 中间态改造（2026-08-28）**：TexLite 原生支持 `.md` 主文档（`config.md` 段配置 convertScript 指向 harryopo convert.py + pythonBinary + convertType）；改动：compileProject 反向检测同名 .md 快照→缓存目录内 convert.py 转 .tex→latexmk 编译；compileMainFile/.md→.tex 规范化；projects.ts PATCH 与 projectFiles 重命名校验放宽 .md/.markdown。端到端 8/8 全绿（PATCH mainFile=note.md → 编译 succeeded → PDF 30KB）
 - ✅ **harryopo 模板 gallery → TexLite 入库（2026-08-28）**：借鉴 Oleafly 模板契约（template.json + 自包含目录 + main.tex）；`texlite_seed_templates.py` 打包 3 个模板（harryopo-paper/report/notes 修正副本 + fonts/ + 精简示例）通过 **ZIP import 原子导入** TexLite，全部编译 succeeded（paper 33KB / report 235KB / notes 47KB）；`texlite_preview_gen.py` 用 PyMuPDF 渲染 PDF 首页生成 preview.png（Oleafly 契约 preview 字段），模板 gallery 契约完整对齐
 - ✅ **阶段 3 M1：harryopo-web 可视化编辑器 MVP（2026-08-28）**：`web-editor/`（Vite + React 19 + TipTap 3.30 + @tiptap/markdown + extension-mathematics + KaTeX + RawBlock/RawInline 兜底 + Express 后端）。核心：MD 中间态双向（round-trip 幂等测试 8/8）、harryopo 单行 `$$...$$`=块级公式定制、工具栏、实时预览、导出复用 office.py。验证：构建通过 + API 端到端 8/8（Word 导出 35KB docx 可下载）。运行：后端 :8080 + 前端 :5173
+- ✅ **阶段 3 M2：文件树 + 模板注册表表单 + 图表（2026-08-28）**：web-editor 升级——文件树（多文档/子目录 + 安全路径防穿越）、模板注册表对接（docx 模板 schema 动态表单 → data.json → docxtpl 渲染下载）、mermaid 前端渲染。验证：API 端到端 13/13（含模板渲染 35KB docx）。生产模式 http://127.0.0.1:8080 直接访问
 
 **待开发**：
 
 - ⬜ harryopo-book.cls + harryopo-notes.cls
 - ⬜ docling 接入（MinerU 互为兜底）+ harryopo-build-mcp（编译诊断闭环）
-- ⬜ 阶段 3 M2（模板注册表 schema 表单 + 文件树 + 图表渲染）· M3（Yjs 协同 + inline diff）
+- ⬜ 阶段 3 M3（Yjs 协同 + inline diff + AI 流式插入）· office.py paper 链路排查
 
 ---
 
