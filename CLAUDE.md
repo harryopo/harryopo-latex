@@ -149,12 +149,13 @@
 - ✅ **环境补齐 + TexLite 部署（2026-08-28）**：TinyTeX 安装（D:\Tools\TinyTeX\TinyTeX，texlive 2026，xelatex/latexmk/latexmk 4.88 + ctex 全系宏包，清华镜像）；`harryopo-base.sty` 补 `\usetikzlibrary{positioning}`（修复 `below=0.6cm of B` 报 PGF Math Error）；TexLite v0.8.1 部署于 `opensource-reference/TexLite`（npm ci + init + build，127.0.0.1:3000，dataDir=output/texlite-data，admin/harryopo2026）；**方正字体接入走"项目自包含"**：修正副本 `Path=../fonts/`→`Path=fonts/` + 项目内 fonts/ 目录（TexLite 快照 cwd 无法命中宿主相对路径）。端到端 8/8 全绿（上传 22 文件 → 编译 succeeded → PDF 235KB 与 build.ps1 产物一致）
 - ✅ **TexLite × harryopo MD 中间态改造（2026-08-28）**：TexLite 原生支持 `.md` 主文档（`config.md` 段配置 convertScript 指向 harryopo convert.py + pythonBinary + convertType）；改动：compileProject 反向检测同名 .md 快照→缓存目录内 convert.py 转 .tex→latexmk 编译；compileMainFile/.md→.tex 规范化；projects.ts PATCH 与 projectFiles 重命名校验放宽 .md/.markdown。端到端 8/8 全绿（PATCH mainFile=note.md → 编译 succeeded → PDF 30KB）
 - ✅ **harryopo 模板 gallery → TexLite 入库（2026-08-28）**：借鉴 Oleafly 模板契约（template.json + 自包含目录 + main.tex）；`texlite_seed_templates.py` 打包 3 个模板（harryopo-paper/report/notes 修正副本 + fonts/ + 精简示例）通过 **ZIP import 原子导入** TexLite，全部编译 succeeded（paper 33KB / report 235KB / notes 47KB）；`texlite_preview_gen.py` 用 PyMuPDF 渲染 PDF 首页生成 preview.png（Oleafly 契约 preview 字段），模板 gallery 契约完整对齐
+- ✅ **阶段 3 M1：harryopo-web 可视化编辑器 MVP（2026-08-28）**：`web-editor/`（Vite + React 19 + TipTap 3.30 + @tiptap/markdown + extension-mathematics + KaTeX + RawBlock/RawInline 兜底 + Express 后端）。核心：MD 中间态双向（round-trip 幂等测试 8/8）、harryopo 单行 `$$...$$`=块级公式定制、工具栏、实时预览、导出复用 office.py。验证：构建通过 + API 端到端 8/8（Word 导出 35KB docx 可下载）。运行：后端 :8080 + 前端 :5173
 
 **待开发**：
 
 - ⬜ harryopo-book.cls + harryopo-notes.cls
 - ⬜ docling 接入（MinerU 互为兜底）+ harryopo-build-mcp（编译诊断闭环）
-- ⬜ Web 可视化编辑器（阶段 3，方案已定：**`docs/plans/2026-08-28-stage3-web-editor.md`**，TipTap 3 + @tiptap/markdown + RawBlock 兜底，M1 MVP 待实施）
+- ⬜ 阶段 3 M2（模板注册表 schema 表单 + 文件树 + 图表渲染）· M3（Yjs 协同 + inline diff）
 
 ---
 

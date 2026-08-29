@@ -556,3 +556,31 @@ TexLite 原生支持 `.md` 主文档（调研报告方案 B 落地，阶段 2 �
 
 ### 下一步
 - ⬜ M1 脚手架实施（用户确认后）
+
+## 阶段 3 M1：harryopo-web 可视化编辑器 MVP（2026-08-28 完成）
+
+方案书落地。`web-editor/`（Vite + React 19 + TipTap 3.30 + @tiptap/markdown + extension-mathematics + KaTeX + RawBlock/RawInline + Express 后端）。
+
+### 交付
+- `src/lib/math.ts`：harryopo 公式定制——单行 `$$...$$`=块级（官方 BlockMath 只认多行）、`$...$`=行内，markdownTokenizer/renderMarkdown 双向
+- `src/lib/raw.tsx`：RawBlock/RawInline（Oleafly 模式：atom + attrs.source 原样保真）
+- `src/lib/md.ts` + extensions.ts：MarkdownManager parse/serialize 双向 + round-trip 幂等
+- `server/index.js`：Express :8080（docs 列表/加载/保存/导出调 office.py render）
+- 前端：编辑（TipTap + 工具栏）/预览（markdown-it + KaTeX）/导出按钮
+
+### 验证
+- round-trip 幂等测试 8/8 ✓（公式单行/多行/行内、表格、标题、引用、图片）
+- 构建通过；API 端到端 8/8 ✓（Word 导出 35KB docx 可下载）
+- 运行：node server/index.js（:8080）+ npm run dev（:5173，proxy /api）
+
+### 关键踩坑
+- **oxc 对 .ts 文件含 JSX 报解析错误**：含 JSX 的源文件必须 .tsx（vite 7 默认 oxc，tsc 不报但 vite transform 报）
+- **@tiptap/extension-table 等 v3 是命名导出**（`import { Table } from ...`），默认导出 undefined
+- **renderMarkdown 签名是直接传 node**（`renderMarkdown(node)`），不是 `{ node }` 解构（官方/tiptap-markdown-react 实证）
+- **MarkdownManager 可服务端 parse/serialize**（`new MarkdownManager({ extensions })`），round-trip 测试基础
+- **office.py paper 链路在部分终端环境失败**（xelatex spawn 环境差异，Word 链路正常）——web-editor 导出以 word 为主验证；paper 链路属 office.py 既有问题待查
+
+### 下一步
+- ⬜ 阶段 3 M2：模板注册表 schema 表单 + 文件树 + 图表渲染
+- ⬜ 阶段 3 M3：Yjs 协同 + @codemirror/merge inline diff + AI 流式插入
+- ⬜ office.py paper 链路环境问题排查
