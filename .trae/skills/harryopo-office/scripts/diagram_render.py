@@ -28,8 +28,15 @@ import sys
 import tempfile
 from pathlib import Path
 
-# super-diagram 渲染脚本（全局 skill，可用环境变量覆盖）
-SUPER_DIAGRAM_SCRIPT = r'c:\Users\Lenovo\.trae-cn\skills\super-diagram\scripts\render_v2.py'
+# super-diagram 渲染脚本（全局 skill，可用环境变量 SUPER_DIAGRAM_SCRIPT 覆盖）
+# 注意：不得硬编码用户名（不同机器的用户目录不同，硬编码会导致渲染静默失败）。
+# 自动探测顺序：环境变量 → 当前用户 .trae-cn/skills → 历史用户目录。
+SUPER_DIAGRAM_CANDIDATES = (
+    os.environ.get('SUPER_DIAGRAM_SCRIPT', ''),
+    os.path.join(os.path.expanduser('~'), '.trae-cn', 'skills',
+                 'super-diagram', 'scripts', 'render_v2.py'),
+    r'c:\Users\Lenovo\.trae-cn\skills\super-diagram\scripts\render_v2.py',
+)
 
 # 图表代码块正则（语言标签 = 引擎名）
 SUPER_RE = re.compile(r'```super-diagram\s*\n(.*?)\n```', re.DOTALL)
@@ -47,9 +54,11 @@ def code_hash(code: str) -> str:
 
 def _find_super_script():
     """定位 super-diagram 渲染脚本，返回 Path 或 None"""
-    cand = os.environ.get('SUPER_DIAGRAM_SCRIPT') or SUPER_DIAGRAM_SCRIPT
-    p = Path(cand)
-    return p if p.exists() else None
+    for cand in SUPER_DIAGRAM_CANDIDATES:
+        p = Path(cand) if cand else None
+        if p and p.exists():
+            return p
+    return None
 
 
 def render_super_diagram(json_text: str, output_path) -> bool:

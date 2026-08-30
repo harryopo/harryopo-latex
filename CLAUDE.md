@@ -39,6 +39,7 @@
 - `md_to_word.py` — Markdown 中间态 → .docx 主入口（AI 产出 MD → 用户可编辑 → 渲染）
 - `word_template_engine.py` — 渲染引擎：方正/开源字体 JSON 配置驱动、Word 原生自动目录（COM 更新 TOC + SaveAs2 兼容 OMML）、OMML 数学公式、表格/图片/注释/参考文献规范排版
 - `template/` — **docxtpl 模板填充子 skill**（用户模板 → 保真填充）：`docx_template.py`（extract schema / validate / render）、`schema_extractor.py`（占位符扫描 + jinja2 作用域类型推断）、`template_render.py`（data.json → .docx，含图片 InlineImage）
+- `skills/diagram-design/` — **编辑级图表 skill（2026-08-29 内嵌）**：39 类型 × 3 变体（极简亮/暗/全编辑），白纸黑字编辑风（4px 网格 + 6 连接器规则 + 焦点色 ≤2 + 密度 4/10），自检 `self_check.py`；`scripts/diagram_design_render.py`（HTML→PNG，`--svg` 仅截 SVG / `--check` 自检）；`office.py diagram` 子命令（委托透传）。**SKILL.md 已固化"文档生成主流程"**（写文档/文章/报告推荐路径）：①AI 产出 MD 中间态 → ②用户预览确认内容 → ③AI 智能分析是否适合配图（适合则提问并给多类型选择，禁止擅自生成）→ ④diagram-design 生成 HTML→PNG→self_check→用户审核 → ⑤智能插入（图注 `![图N：xxx]` + `> 注：` 注释，图紧跟引用段落）→ ⑥office.py render → Word/LaTeX（可选 --template）
 - `configs/` — `fangzheng.json`（本地方正 GBK）+ `opensource.json`（Windows 系统字体，免授权）
 - `examples/example.md` — 完整示例
 - **Markdown 约定**：`#`主标题 / `##`一、级 / `> 注：`注释 / `> **表N：**`表标题 / `$$...$$`公式 / `![图N：](path)`图片
@@ -81,10 +82,11 @@
 
 ### 4. 流程图/Skill 图谱体系
 
-**flowchart-generator**（`c:\Users\Lenovo\.trae-cn\skills\flowchart-generator/`）
+**flowchart-generator**（`c:\Users\Administrator\.trae-cn\skills\flowchart-generator/`）
 
 - 自研流程图生成器，借鉴 lhr-fireworks-tech-graph 核心技巧（紧凑路由、token色系、粗箭头）
 - **核心改进**：连线正交不歪斜、中文排版适配（PingFang SC/Microsoft YaHei）、布局参数精确计算
+- **mono 黑白灰主题（2026-08-29）**：`meta.theme: mono`（亮色白底黑字灰边）或 `mono-dark`（纯黑底白字），全 style 生效；mono 模式**强制忽略 YAML 彩色 colors 覆盖**；色板常量 `MONO_THEME`/`MONO_DARK`（含灰度半透明 fill_front/back/db/cloud/security/bus/external + arrow_main/arrow_fb/card_bg）；渲染处硬编码彩色 rgba 全部改为 `colors.get("fill_*")`，node_box 暗色遮罩色跟随 `colors["bg"]`
 - **6 种内置样式**：
   - style13 — Compact Architecture（系统架构图，多层堆叠 + 左侧标注层：USERS/GATEWAY/SERVICES 等语义色条 + 中英双语标注 + 内容区自动避让）
   - style14 — Agent Orchestration（智能体编排，6 步垂直 + 意图/源/工具扇出 + 反馈环）
@@ -105,12 +107,12 @@
 **全局 Skill 参考**：
 
 - `diagram-skill` — draw.io XML 生成（交互式，从文字/手绘生成，三阶自审）
-- `arch-prompter`（`c:\Users\Lenovo\.trae-cn\skills\arch-prompter/`）— 自然语言 → 架构图合同 + YAML，调用 flowchart-generator 渲染
+- `arch-prompter`（`c:\Users\Administrator\.trae-cn\skills\arch-prompter/`）— 自然语言 → 架构图合同 + YAML，调用 flowchart-generator 渲染
   - 支持 style13（多层架构）、style14（智能体编排）、style15（数据管线）、style16（数据流图）
   - 集成 jieba 中文分词 + 自定义词库（30+ 技术节点），防止复合词被拆分
   - 输出纸框架风格合同 + flowchart-generator YAML，用户确认后渲染
 
-**super-diagram**（`c:\Users\Lenovo\.trae-cn\skills\super-diagram/`）— 统一图表生成入口 v2.1
+**super-diagram**（`c:\Users\Administrator\.trae-cn\skills\super-diagram/`）— 统一图表生成入口 v2.1
 
 - 自然语言描述 → LLM 计算坐标 → render_v2.py 渲染（架构图 nodes+edges / 时序图 participants+messages）
 - 两大类型自动路由：`architecture`（节点+边，正交路由+避障）与 `sequence`（时序图，防字体遮盖布局）
@@ -220,7 +222,7 @@
 27. **踩坑**: **新版 docxtpl（0.20+）已移除 `get_defined_variables()`**——schema 提取需自己扫描 docx XML 的 `<w:t>` 节点用正则提取占位符，并模拟 jinja2 作用域栈推断类型；`{%tr`/`{%p`/`{%tc` 前缀标签在正则中需用 `(?:(?:tr|tc|p|r)\s+)?` 处理
 28. **踩坑**: **docxtpl 图片字段在 data.json 中写 `{"image": "path", "width_mm": 30}`**——渲染器识别含 `image` 键的 dict 自动转 InlineImage，校验器 string 分支也需放行此类 dict
 29. **踩坑**: **flowchart-generator style13 箭头坐标必须写"内容坐标"（不含 sx 左侧标注层偏移）**——渲染时自动 +sx；曾误把 sx=120 估算值写进 YAML，实际 sx=116（"API GATEWAY" 含空格宽度小），导致箭头偏离组中心 ~120px。对齐方法：箭头 x = 目标组/卡的内容中心（组 `x:30 w:395` → 中心 `227.5`）。**改 items 行数后需同步检查下方层 y**：组高内容驱动后（L4 3行=184 vs 旧固定 120），下方层需留足间隙；**卡片尺寸必须内容驱动**——显式 `h: 240` 等固定约束会导致"卡片大文字空"，组高按 items/sub_items 行数自动算（`20+行数×52+8`），组宽按最长文本自动算（CJK≈1.0×字号，ASCII≈0.58×字号）
-30. **踩坑**: **skill 生成产物不能落 C 盘**——Trae 全局 skill 目录在 `c:\Users\Lenovo\.trae-cn\skills\`（C 盘），若生成器把 output/generated/archive 默认写到 skill 目录旁会持续吃 C 盘空间。flowchart-generator 通过 `_OUT_ROOT`（默认 `d:\ai\latex\output\flowchart-generator`，可用环境变量 `FLOWCHART_OUT_DIR` 覆盖）重定向所有产物到 D 盘项目目录；测试脚本同样需指向 D 盘，否则 `shutil.rmtree`/`--out-dir` 会重新在 C 盘建目录
+30. **踩坑**: **skill 生成产物不能落 C 盘**——Trae 全局 skill 目录在 `c:\Users\Administrator\.trae-cn\skills\`（C 盘），若生成器把 output/generated/archive 默认写到 skill 目录旁会持续吃 C 盘空间。flowchart-generator 通过 `_OUT_ROOT`（默认 `d:\ai\latex\output\flowchart-generator`，可用环境变量 `FLOWCHART_OUT_DIR` 覆盖）重定向所有产物到 D 盘项目目录；测试脚本同样需指向 D 盘，否则 `shutil.rmtree`/`--out-dir` 会重新在 C 盘建目录
 
 ---
 
@@ -231,13 +233,13 @@
 - **核心模板**: `templates/cls/` — harryopo-base.sty + paper.cls + report.cls
 - **字体目录**: `templates/fonts/` — 18 个内嵌字体（方正+XITS+TeX Gyre Heros）
 - **编译脚本**: `templates/build.ps1`
-- **转换 Skill**: `.trae/skills/harryopo-latex/`
+- **转换 Skill**: `.trae/skills/harryopo-office/`
 - **记忆系统**: `memory/MEMORY.md`
 - **学习日志**: `.learnings/`
 - **方案设计**: `docs/plans/` 和 `docs/research/`
 - **流程图参考**: `opensource-reference/fireworks-tech-graph/`（原始12风格）
 - **架构图参考**: `opensource-reference/archdiagramgen/`（暗色主题 + 箭头遮罩 + HTML 导出工具栏）
-- **流程图生成器**: `c:\Users\Lenovo\.trae-cn\skills\flowchart-generator/`（6 样式，擅长架构图/时序图；产物输出到 `d:\ai\latex\output\flowchart-generator/`，默认 D 盘避免占用 C 盘）
+- **流程图生成器**: `c:\Users\Administrator\.trae-cn\skills\flowchart-generator/`（6 样式，擅长架构图/时序图；产物输出到 `d:\ai\latex\output\flowchart-generator/`，默认 D 盘避免占用 C 盘）
 - **TikZ 图表**: `skills/harryopo-tikz-diagram/`
 - **数理笔记**: `templates/math-notes/`（独立体系）
 - **kaobook**: `参考资料/中文book/`（独立体系）

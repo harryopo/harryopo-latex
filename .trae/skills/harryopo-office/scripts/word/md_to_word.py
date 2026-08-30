@@ -42,6 +42,8 @@ import re
 import sys
 from pathlib import Path
 
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+
 from word_template_engine import WordTemplateEngine
 
 # ============================================================
@@ -277,7 +279,19 @@ def ast_to_elem(node):
 
 
 def latex_to_omath(latex):
-    """LaTeX 数学字符串 → OMML oMath 元素"""
+    """LaTeX 数学字符串 → OMML oMath 元素。
+
+    优先 latex2mathml → MML2OMML.XSL（业界主流，覆盖完整 LaTeX 语法，
+    解决 \mathbf / \arg / \sum 等命令乱码）；失败时回退自研轻量解析器。
+    """
+    try:
+        from word_template_engine import latex_to_omml
+        omath = latex_to_omml(latex)
+        if omath is not None:
+            return omath
+    except ImportError:
+        pass
+    # 兜底：自研轻量解析器（仅支持 frac/sqrt/上下标/希腊字母/常用运算符）
     latex = latex.strip().strip('$').strip()
     tokens = tokenize(latex)
     nodes, _ = parse_group(tokens, 0)
@@ -385,8 +399,10 @@ def build_document(md_text, config_path=None, output_path='output.docx',
                 first_title = stripped[2:].strip()
                 subtitle = None
                 author = None
-                # 向后收集副标题/作者（跳过空行）：
-                #   1. blockquote 形式：> 副标题：xxx / > 作者：xxx
+                unit = None
+                date_meta = None
+                # 向后收集副标题/作者/单位/日期（跳过空行）：
+                #   1. blockquote 形式：> 副标题：xxx / > 作者：xxx / > 单位：xxx / > 日期：xxx
                 #   2. 裸文本形式：标题后第一段（与 convert.py 回退逻辑一致）
                 #      —— 非 # / 非 ![ / 非 ** 开头、非 摘要/关键词/作者 前缀、长度 < 60
                 j = i + 1
@@ -405,16 +421,31 @@ def build_document(md_text, config_path=None, output_path='output.docx',
                             author = content.split('：', 1)[-1].split(':', 1)[-1].strip()
                             j += 1
                             continue
+                        if content.startswith('单位') or content.startswith('学校'):
+                            unit = content.split('：', 1)[-1].split(':', 1)[-1].strip()
+                            j += 1
+                            continue
+                        if content.startswith('日期'):
+                            date_meta = content.split('：', 1)[-1].split(':', 1)[-1].strip()
+                            j += 1
+                            continue
                     elif (not s.startswith('#')
                           and not s.startswith('![')
                           and not s.startswith('**')
-                          and not re.match(r'^(摘要|关键词|作者)[：:]', s)
+                          and not re.match(r'^(摘要|关键词|作者|单位|学校|日期)[：:]', s)
                           and len(s) < 60):
                         author = s
                         j += 1
                         continue
                     break
                 engine.add_title(first_title, subtitle=subtitle, author=author)
+                # 单位（居中楷体小字）与日期（居中仿宋）紧随作者
+                for meta_text, meta_font in ((unit, 'heading3'), (date_meta, 'body')):
+                    if meta_text:
+                        mp = engine.doc.add_paragraph()
+                        mp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        engine._set_spacing(mp, before=2, after=2)
+                        engine._make_run(mp, meta_text, engine._get_font(meta_font), size=12)
                 i = j
             else:
                 h = stripped[2:].strip()
@@ -481,9 +512,21 @@ def build_document(md_text, config_path=None, output_path='output.docx',
                 c = lines[k].strip()[2:].strip()
                 m = re.match(r'\*?\*?(表\d+[：:].*?)\*?\*?$', c)
                 if m:
-                    caption = m.group(1).strip()
+                    # 去掉加粗标记（`**表1：**` 的 `**`），仅留标题文本
+                    caption = re.sub(r'\*+', '', m.group(1)).strip()
                     lines[k] = ''  # 消费该行
-            engine.add_table(headers, data_rows, caption_text=caption)
+            # 表注：表格后（跳过空行）找 > 注：xxx → 放表格下方
+            note = None
+            k = i
+            while k < n and not lines[k].strip():
+                k += 1
+            if k < n and lines[k].strip().startswith('> '):
+                c = lines[k].strip()[2:].strip()
+                if c.startswith('注'):
+                    note = c
+                    lines[k] = ''
+                    i = k + 1
+            engine.add_table(headers, data_rows, caption_text=caption, note=note)
             continue
 
         # ---- 行间公式 ----

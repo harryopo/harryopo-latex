@@ -112,8 +112,8 @@ def split_blocks(text: str) -> List[Tuple[str, str]]:
             pos += m.end()
             continue
 
-        # --- 参考文献区域（必须在 H2 之前检测） ---
-        m = re.match(r'(##\s+参考文献|##\s+References|##\s+参考)\s*\n((?:\[.+?\].+\n?)+)', text[pos:])
+        # --- 参考文献区域（必须在 H2 之前检测；兼容 `# 参考文献` 与 `## 参考文献`，条目间允许空行） ---
+        m = re.match(r'(#{1,2}\s+参考文献|#{1,2}\s+References|#{1,2}\s+参考)\s*\n((?:\[[^\]]+\][^\n]*(?:\n+|$))+)', text[pos:], re.MULTILINE)
         if m:
             blocks.append((BLOCK_BIB, m.group(2).strip()))
             pos += m.end()
@@ -242,6 +242,11 @@ def parse_inline(text: str) -> str:
     text = re.sub(r'\$([^$]+?)\$', _save_math, text)
     text = re.sub(r'\\\((.*?)\\\)', _save_math, text)
 
+    # 转义 LaTeX 特殊字符（& % $ # _ { } ~ ^）
+    # 必须在链接/代码/粗斜体转换之前执行：_escape_latex 会转义 { }，
+    # 若在 \href{} 等命令生成后再执行会破坏命令结构；公式已保护为占位符不受影响
+    text = _escape_latex(text)
+
     # 链接 [text](url)
     text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)',
                   lambda m: f'\\href{{{m.group(2)}}}{{{m.group(1)}}}', text)
@@ -281,9 +286,19 @@ def _clean_title(title: str) -> str:
     return title.strip()
 
 
+def _strip_caption_num(text: str) -> str:
+    """去掉图注/表注开头的编号前缀（图1：/表2：/式1：等）。
+
+    编号交给渲染器自动生成（LaTeX caption 自动编号），避免出现
+    "图1 图1：xxx" 的重复编号。
+    """
+    return re.sub(r'^(图|表|式)\s*\d+\s*[：:．.、\s]*', '', text.strip()).strip()
+
+
 def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
                    date: str, abstract: str, keywords: str,
-                   dark: bool, twocolumn: bool, nomath: bool = False) -> str:
+                   dark: bool, twocolumn: bool, nomath: bool = False,
+                   subtitle: str = "", institute: str = "") -> str:
     """组装 harryopo-paper .tex"""
     docopts = []
     if twocolumn:
@@ -297,13 +312,20 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
     lines = []
     lines.append(r"\documentclass[" + optstr + r"]{harryopo-paper}" if optstr else r"\documentclass{harryopo-paper}")
     lines.append("")
-    lines.append(r"\title{" + _clean_title(title) + "}")
-    lines.append(r"\author{" + format_author(author) + "}")
+    # 副标题并入 \title（与主标题同字体同字号，仅换行区分），单位并入 \author（作者行下方仿宋小字）
+    title_tex = _clean_title(title)
+    if subtitle:
+        title_tex += r"\\[0.4em]" + _clean_title(subtitle)
+    lines.append(r"\title{" + title_tex + "}")
+    author_tex = format_author(author)
+    if institute:
+        author_tex += r"\\ \fzfs\small " + institute
+    lines.append(r"\author{" + author_tex + "}")
     lines.append(r"\date{" + date + "}")
     lines.append("")
     if twocolumn:
-        lines.append(r"\abstractcontent{" + abstract + "}")
-        lines.append(r"\keywordscontent{" + keywords + "}")
+        lines.append(r"\abstractcontent{" + parse_inline(abstract) + "}")
+        lines.append(r"\keywordscontent{" + parse_inline(keywords) + "}")
     lines.append("")
     lines.append(r"\begin{document}")
     lines.append("")
@@ -314,10 +336,10 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
         lines.append(r"\maketitle")
         if abstract:
             lines.append(r"\begin{abstract}")
-            lines.append(abstract)
+            lines.append(parse_inline(abstract))
             lines.append(r"\end{abstract}")
         if keywords:
-            lines.append(r"\keywords{" + keywords + "}")
+            lines.append(r"\keywords{" + parse_inline(keywords) + "}")
         lines.append("")
 
     bib_lines: List[str] = []
@@ -389,6 +411,19 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
             lines.append(r"\end{enumerate}")
             lines.append("")
         elif btype == BLOCK_QUOTE:
+            qc = content.strip()
+            # 元信息块（`> 作者：`/`> 单位：`/`> 日期：`/`> 副标题：`）已并入 \title/\author 元数据，此处跳过不渲染
+            if re.match(r'^(副标题|作者|单位|学校|日期)\s*[：:]', qc):
+                continue
+            # 已被表格/图片块消费的注释块（前一块为 TABLE/FIGURE 且以"注"开头）跳过，
+            # 避免 for 循环中 i+=1 无效导致注释渲染两次
+            if i > 0 and blocks[i - 1][0] in (BLOCK_TABLE, BLOCK_FIGURE) and qc.startswith('注'):
+                continue
+            # 引用形式表格标题（`> **表1：**xxx`，兼容 `**` 开头）且下一块是表格 → 暂存为 caption
+            if re.match(r'^\*{0,2}表\s*\d+\s*[：:].+$', qc, re.DOTALL) and \
+                    i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_TABLE:
+                pending_caption = re.sub(r'\*+', '', qc).strip()
+                continue
             lines.append(r"\begin{quote}")
             lines.append(parse_inline(content))
             lines.append(r"\end{quote}")
@@ -421,7 +456,14 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
             lines.append(r"\end{equation}")
             lines.append("")
         elif btype == BLOCK_TABLE:
-            lines.extend(_parse_table_to_latex(content, pending_caption))
+            # 表注：表格后的引用块 `> 注：xxx` → 渲染到表格下方
+            note = None
+            if i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_QUOTE:
+                qc = blocks[i + 1][1].strip()
+                if qc.startswith('注'):
+                    note = qc
+                    i += 1  # 消费表注块
+            lines.extend(_parse_table_to_latex(content, pending_caption, note))
             pending_caption = None
         elif btype == BLOCK_RAW_LATEX:
             # MinerU 清洗后的 LaTeX 代码（longtable/tabular 等）直接透传
@@ -431,12 +473,21 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
             parts = content.split('\n', 1)
             alt = parts[0].strip()
             src = parts[1].strip() if len(parts) > 1 else ""
-            # caption 放在 \includegraphics 之后（图下方）
+            # 图片后的 `> 注：xxx` → 图片注释（消费引用块，楷体渲染在下方）
+            note = None
+            if i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_QUOTE:
+                qc = blocks[i + 1][1].strip()
+                if qc.startswith('注'):
+                    note = qc
+                    i += 1
+            # caption 放在 \includegraphics 之后（图下方）；编号去重（自动编号）
             lines.append(r"\begin{figure}[htbp]")
             lines.append(r"  \centering")
             lines.append(r"  \includegraphics[width=0.85\textwidth]{" + src + "}")
             if alt:
-                lines.append(r"  \caption{" + alt + "}")
+                lines.append(r"  \caption{" + _strip_caption_num(alt) + "}")
+            if note:
+                lines.append(r"  {\fzkt\footnotesize " + parse_inline(note) + "}")
             lines.append(r"\end{figure}")
             lines.append("")
         elif btype == BLOCK_HR:
@@ -447,7 +498,9 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
     if bib_lines:
         lines.append(r"\begin{thebibliography}{99}")
         for i, bib in enumerate(bib_lines, 1):
-            lines.append(r"\bibitem{ref" + str(i) + "} " + bib)
+            # 去掉条目开头的 `[1] ` 前缀（thebibliography 自动编号，避免 [1][1]）
+            bib_clean = re.sub(r'^\[\d+\]\s*', '', bib.strip())
+            lines.append(r"\bibitem{ref" + str(i) + "} " + bib_clean)
         lines.append(r"\end{thebibliography}")
         lines.append("")
 
@@ -455,8 +508,14 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
     return "\n".join(lines)
 
 
-def _parse_table_to_latex(raw: str, caption: str = "") -> List[str]:
-    """将 Markdown 表格转为 booktabs 三线表（tabularx 自适应宽度 + 标题在表格下方）"""
+def _parse_table_to_latex(raw: str, caption: str = "", note: str = "") -> List[str]:
+    """将 Markdown 表格转为 booktabs 三线表（tabularx 自适应宽度 + 标题在表格下方）
+
+    Args:
+        raw: Markdown 表格原文
+        caption: 表格标题（渲染在表格下方）
+        note: 表注（渲染在标题下方，如 `注：xxx`）
+    """
     rows = raw.strip().split('\n')
     if len(rows) < 2:
         return [r"% empty table"]
@@ -532,7 +591,10 @@ def _parse_table_to_latex(raw: str, caption: str = "") -> List[str]:
     lines.append(r"    \bottomrule")
     lines.append(r"  \end{tabularx}")
     if caption:
-        lines.append(r"  \caption{" + caption + "}")
+        # 表注编号去重（自动编号），标题楷体渲染（caption 包已设楷体居中）
+        lines.append(r"  \caption{" + _strip_caption_num(caption) + "}")
+    if note:
+        lines.append(r"  {\fzkt\footnotesize " + parse_inline(note) + "}")
     lines.append(r"\end{table}")
     lines.append("")
     return lines
@@ -638,6 +700,19 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
             lines.append(r"\end{enumerate}")
             lines.append("")
         elif btype == BLOCK_QUOTE:
+            qc = content.strip()
+            # 元信息块（`> 作者：`/`> 单位：`/`> 日期：`/`> 副标题：`）已并入 \title/\author 元数据，此处跳过不渲染
+            if re.match(r'^(副标题|作者|单位|学校|日期)\s*[：:]', qc):
+                continue
+            # 已被表格/图片块消费的注释块（前一块为 TABLE/FIGURE 且以"注"开头）跳过，
+            # 避免 for 循环中 i+=1 无效导致注释渲染两次
+            if i > 0 and blocks[i - 1][0] in (BLOCK_TABLE, BLOCK_FIGURE) and qc.startswith('注'):
+                continue
+            # 引用形式表格标题（`> **表1：**xxx`，兼容 `**` 开头）且下一块是表格 → 暂存为 caption
+            if re.match(r'^\*{0,2}表\s*\d+\s*[：:].+$', qc, re.DOTALL) and \
+                    i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_TABLE:
+                pending_caption = re.sub(r'\*+', '', qc).strip()
+                continue
             lines.append(r"\begin{quote}")
             lines.append(parse_inline(content))
             lines.append(r"\end{quote}")
@@ -669,7 +744,14 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
             lines.append(r"\end{equation}")
             lines.append("")
         elif btype == BLOCK_TABLE:
-            lines.extend(_parse_table_to_latex(content, pending_caption))
+            # 表注：表格后的引用块 `> 注：xxx` → 渲染到表格下方
+            note = None
+            if i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_QUOTE:
+                qc = blocks[i + 1][1].strip()
+                if qc.startswith('注'):
+                    note = qc
+                    i += 1  # 消费表注块
+            lines.extend(_parse_table_to_latex(content, pending_caption, note))
             pending_caption = None
         elif btype == BLOCK_RAW_LATEX:
             lines.append(content)
@@ -678,12 +760,21 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
             parts = content.split('\n', 1)
             alt = parts[0].strip()
             src = parts[1].strip() if len(parts) > 1 else ""
-            # caption 放在 \includegraphics 之后（图下方）
+            # 图片后的 `> 注：xxx` → 图片注释（消费引用块，楷体渲染在下方）
+            note = None
+            if i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_QUOTE:
+                qc = blocks[i + 1][1].strip()
+                if qc.startswith('注'):
+                    note = qc
+                    i += 1
+            # caption 放在 \includegraphics 之后（图下方）；编号去重（自动编号）
             lines.append(r"\begin{figure}[htbp]")
             lines.append(r"  \centering")
             lines.append(r"  \includegraphics[width=0.85\textwidth]{" + src + "}")
             if alt:
-                lines.append(r"  \caption{" + alt + "}")
+                lines.append(r"  \caption{" + _strip_caption_num(alt) + "}")
+            if note:
+                lines.append(r"  {\fzkt\footnotesize " + parse_inline(note) + "}")
             lines.append(r"\end{figure}")
             lines.append("")
         elif btype == BLOCK_HR:
@@ -693,7 +784,9 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
     if bib_lines:
         lines.append(r"\begin{thebibliography}{99}")
         for i, bib in enumerate(bib_lines, 1):
-            lines.append(r"\bibitem{ref" + str(i) + "} " + bib)
+            # 去掉条目开头的 `[1] ` 前缀（thebibliography 自动编号，避免 [1][1]）
+            bib_clean = re.sub(r'^\[\d+\]\s*', '', bib.strip())
+            lines.append(r"\bibitem{ref" + str(i) + "} " + bib_clean)
         lines.append(r"\end{thebibliography}")
         lines.append("")
 
@@ -780,6 +873,9 @@ def convert_md_to_tex(
     with open(md_path, "r", encoding="utf-8") as f:
         text = f.read()
 
+    # 剥离 HTML 注释（`<!-- ... -->`，可跨行），防止残留注释渲染进 LaTeX
+    text = re.sub(r'<!--[\s\S]*?-->', '', text)
+
     # 尝试从源文件提取元数据（标题/摘要/关键词）
     if not title:
         m = re.search(r'^#\s+(.+)$', text, re.MULTILINE)
@@ -787,17 +883,23 @@ def convert_md_to_tex(
             title = m.group(1).strip()
     author_src = None  # 记录"标题后第一段式"作者原文，用于从正文中剔除
     if not author:
-        m = re.search(r'(?i)^作者[：:]\s*(.+)$', text, re.MULTILINE)
+        # 优先 blockquote 形式 `> 作者：xxx`（与 md_to_word 约定一致）
+        m = re.search(r'(?im)^>\s*作者\s*[：:]\s*(.+?)\s*$', text)
         if m:
             author = m.group(1).strip()
         else:
+            m = re.search(r'(?i)^作者[：:]\s*(.+)$', text, re.MULTILINE)
+            if m:
+                author = m.group(1).strip()
+        if not author:
             # 回退：标题(# 标题)后的第一段作为作者（如 `张三 计算机学院 2025000101`）
             m2 = re.search(r'^#\s+.+?\n+(.+?)$', text, re.MULTILINE)
             if m2:
                 candidate = m2.group(1).strip()
-                # 排除标题后直接是摘要/加粗内容/过长段落的情况
+                # 排除标题后直接是摘要/加粗内容/引用块/过长段落的情况
                 if (candidate and not candidate.startswith('**')
-                        and not re.match(r'^(摘要|关键词|作者)', candidate)
+                        and not candidate.startswith('>')   # blockquote（如 > 副标题：/ > 作者：）不是"标题后第一段式"作者
+                        and not re.match(r'^(摘要|关键词|作者|副标题)', candidate)
                         and len(candidate) < 60):
                     author = candidate
                     author_src = candidate
@@ -815,6 +917,19 @@ def convert_md_to_tex(
         m = re.search(r'(?im)^\*{0,2}关键词[：:]\*{0,2}\s*(.+)$', text, re.MULTILINE)
         if m:
             keywords = m.group(1).strip()
+    # 副标题/单位/日期支持 `> 副标题：` / `> 单位：` / `> 日期：` blockquote 元信息
+    if not subtitle:
+        m = re.search(r'(?im)^>\s*副标题\s*[：:]\s*(.+?)\s*$', text)
+        if m:
+            subtitle = m.group(1).strip()
+    if not institute:
+        m = re.search(r'(?im)^>\s*(?:单位|学校)\s*[：:]\s*(.+?)\s*$', text)
+        if m:
+            institute = m.group(1).strip()
+    if not date:
+        m = re.search(r'(?im)^>\s*日期\s*[：:]\s*(.+?)\s*$', text)
+        if m:
+            date = m.group(1).strip()
 
     blocks = split_blocks(text)
 
@@ -823,7 +938,8 @@ def convert_md_to_tex(
                              subtitle, institute, abstract, dark, nomath)
     else:
         tex = assemble_paper(blocks, title, author, date,
-                            abstract, keywords, dark, twocolumn, nomath)
+                            abstract, keywords, dark, twocolumn, nomath,
+                            subtitle, institute)
 
     out_dir = os.path.dirname(tex_path)
     if out_dir:

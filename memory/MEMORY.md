@@ -1,6 +1,6 @@
 # 项目记忆 — d:\ai\latex
 
-> 最后更新: 2026-08-28 | 版本: 办公超级 Skill 方案 v2（解析端四级路由 + Word→PDF 直出 + LaTeX→Word MD 中间态）
+> 最后更新: 2026-08-30 | 版本: 办公超级 Skill v3（阶段 3 重定义：IDE 生态+修订审阅）+ 第三轮增量调研
 
 ---
 
@@ -603,3 +603,104 @@ web-editor 升级。
 ### 下一步
 - ⬜ 阶段 3 M3：Yjs 协同 + @codemirror/merge inline diff + AI 流式插入
 - ⬜ office.py paper 链路环境问题排查
+
+## 2026-08-29：diagram-design 内嵌 + 文档生成主流程固化 + 图表四问题修复
+
+### 1. diagram-design 编辑级图表 skill 内嵌 harryopo-office
+- 来源：cathrynlavery/diagram-design（39 类型 × 3 变体：极简亮/暗/全编辑），clone 于 `opensource-reference/diagram-design/`；源码分析报告 `docs/research/2026-08-29-diagram-design-analysis.md`
+- 安装：`.trae/skills/harryopo-office/skills/diagram-design/`（209 文件）；新增 `scripts/diagram_design_render.py`（HTML→PNG：`--svg` playwright 仅截 SVG 区域、`--check` 自检）+ `office.py diagram` 子命令（REMAINDER 透传）
+- 范式：规范驱动（AI 按规范手写 HTML/SVG，脚本只负责渲染）；4px 网格 + 6 连接器规则 + 焦点色≤2 + 密度 4/10；生成 HTML 必须补中文字体 fallback（Microsoft YaHei）；渲染 PNG 依赖 playwright chromium
+
+### 2. SKILL.md 固化"文档生成主流程"
+①AI 产出 MD 中间态 → ②用户预览确认内容 → ③AI 智能分析适合配图则提问（多类型给选择，禁止擅自生成）→ ④diagram-design 生成→PNG→self_check→用户审核 → ⑤智能插入（图注 `![图N：xxx]` + `> 注：` 注释，图紧跟引用段落）→ ⑥office.py render → Word/LaTeX（可选 --template）。验证：flow-doc.md → docx 181KB / paper PDF 223KB。
+
+### 3. 图表/参考文献四问题修复（convert.py / word_template_engine.py / harryopo-base.sty）
+| 问题 | 根因 | 修复 |
+|------|------|------|
+| 图注重复"图1图1" | convert.py caption 保留 alt 的"图1："前缀 + LaTeX 自动编号 | `_strip_caption_num()` 去 `^(图\|表\|式)\s*\d+[：:...]` 前缀 |
+| caption 黑体不居中 | base.sty `\captionsetup{labelfont=bf,format=hang}` | `{\fzkt}` 楷体 + `justification=centering` + 全角冒号分隔符 |
+| 注释位置/字体/序号 | convert.py figure 分支不消费注、Word 注释无字体控制 | figure 后 `> 注：` → `{\fzkt\footnotesize}`；add_annotation 加 font_key='heading3' |
+| 参考文献 [1] 重复 | `\bibitem{refN} [1] xxx` 保留字面 [1] | 去 `^\[\d+\]\s*` 前缀 |
+
+顺带修复：表标题正则 `^表` 不匹配 `**` 开头（改 `^\*{0,2}表`）；BLOCK_QUOTE 前块为 TABLE/FIGURE 且以注开头则跳过（for 循环 enumerate 固化的 i+=1 无效导致注释渲染两次）。验证 fix-test.md：PDF 文本"图1: 系统架构示意""表1: 组件职责说明""[1] 智能体系统设计实践"各一次，嵌入 FZKTJW 楷体。
+
+### 4. 其他今日落地（详见记忆系统 project_memory.md #40-58）
+- office.py `_find_project_root()` 漏跳 `.trae` 复发修复（修通用问题必须 grep 全部模块）
+- paper 链路 xelatex 失败根因 = PATH 快照过期 → `_ensure_tex_on_path()` 探测 prepend（幂等）
+- 公式乱码标准解法：latex2mathml + Office MML2OMML.XSL（坑：XSLT 根元素可能就是 m:oMath）
+- 行内公式 `$...$` 补全（_add_inline_runs，表格单元格同走）
+- 表格注释统一"下方" + Word 三线表
+- 网页方案废弃（TexLite/web-editor 清理）→ IDE LaTeX Workshop 10.13.1 实时编译预览（settings.json latexmk xelatex + TEXINPUTS）
+- 流程图"改良坏"根因分析（形状语言/装饰元素/语义色三要素）+ 方案 A yaml2ir 转原版 IR
+- flowchart-generator mono 黑白灰主题（强制忽略 YAML 彩色覆盖）
+
+## 2026-08-29：示例文档整理 + 双链路修复 + templates 清理
+
+用户要求：整理 `harryopo-office/templates`，用最新 skill 生成示例文档，"有问题的修复，不要的删去"。
+
+### 1. 环境卡点解决：flushend.sty（双栏末页栏平衡）
+- **现象**：双栏示例 `! LaTeX Error: File 'flushend.sty' not found.`；tlmgr install sttools 后报 `Missing \begin{document}`
+- **根因**：清华 tlnet 镜像的 sttools 下载返回 404 HTML 页面被 tlmgr 当包内容写入 `texmf-dist/tex/latex/flushend/flushend.sty`（内容为 `<html><head><title>404...`），LaTeX 加载"sty"时把 `<html>` 当 LaTeX 命令 → Runaway/Missing begin
+- **正确来源**：`https://mirrors.tuna.tsinghua.edu.cn/CTAN/systems/texlive/tlnet/archive/sttools.tar.xz`（12916B，含 tex/latex/sttools/flushend.sty v4.3）
+- **修复**：TinyTeX 目录受 shell 权限保护无法直接覆盖 → **项目自包含**：flushend.sty 放入 `templates/cls/`（TEXINPUTS 前缀目录优先于 texmf-dist 命中），skill 内嵌 templates/cls 同步一份
+
+### 2. 静默数据丢失 bug：parse_inline 不转义特殊字符（严重）
+- **现象**：双栏 `Runaway argument ... \abstractcontent{随着...32%...`；showcase 摘要"92.3% 的分割准确率"**被静默截断**（`%` 注释到行尾吞掉内容），PDF 看着"编译成功"实为缺字
+- **根因**：`_escape_latex()` 定义了但**从未被调用**；`parse_inline()` 只做 markdown 语法转换不转义 `&%$#_~{}^`。正文/摘要/关键词里的 `%` 直接进 LaTeX → 注释符吞行
+- **修复**：parse_inline 在公式保护后、链接/代码/粗斜体转换**之前**调用 `_escape_latex()`（顺序关键：`_escape_latex` 会转义 `{}`，必须在生成 `\href{}` 等命令前执行，否则破坏命令结构；公式已保护为占位符不受影响）
+
+### 3. 双链路同步修复
+- **convert.py**：`\abstractcontent{}`/`\keywordscontent{}`/`\begin{abstract}`/`\keywords{}` 全部经 `parse_inline()` 转义；BLOCK_QUOTE meta 跳过正则 `^副标题` → `^(副标题|作者|单位|学校|日期)`（作者/单位/日期 blockquote 不再渲染进正文）；入口剥离 HTML 注释 `<!--[\s\S]*?-->`
+- **office.py**：render_notes pandoc 缺失时回退 `md2latex.py --engine python`（纯 Python 引擎，无外部依赖）
+- **report-showcase.md**：旧 `> **摘 要**` blockquote → `**摘要：**` 段落；`<h1 class="chapter">` → `# 第X章`（共 5 处）；删手工目录（report 类型自动 `\tableofcontents`）；伪 mermaid（ASCII 箭头）→ 合法 flowchart TD
+
+### 4. templates 清理（skill 内嵌 + 项目根）
+- **skill 内嵌**：paper/ 删除 demo-e2e/final-test/fzht-test/公文模板tmp/mermaid-test/showcase/example-paper 全部 pdf/tex/aux/log/out；report/ 清空删除；math-notes 删除 e2e 残留 + mermaid 示例图；补全 math-notes（md2latex.py/ps1、build.ps1、README.md、example-note.md、fonts/ 10 字体）；cls/ 补 flushend.sty
+- **项目根**：templates/paper 删 demo-paper + 6 个 e2e；report/ 删 demo-report；math-notes 删 main.pdf/tex（保留官方 example-note.pdf）
+
+### 5. 示例产物（output/examples/，5+1 全绿）
+| 示例 | Word | PDF | 说明 |
+|------|------|-----|------|
+| paper-single-column | 36KB | 148KB | 论文单栏 |
+| paper-twocolumn | 36KB | 164KB | 论文双栏（flushend 修复后） |
+| paper-showcase | 41KB | 196KB | 论文全特性（摘要不再截断） |
+| report | 42KB | 213KB | 报告章节式（--type report） |
+| report-showcase | 85KB | 363KB | 报告全特性 + mermaid（--type report） |
+| example-note | — | 105KB | math-notes（python 回退引擎） |
+
+- 产物命名：`{stem}-word.docx` / `{stem}-paper.pdf`（report 类型 PDF 名固定 `-paper.pdf`，tex 为 `-report.tex`）
+- 两个 README：`templates/previews/README.md`（示例清单 + 生成命令 + 元信息约定 + 修复点）、`output/examples/README.md`（产物说明）
+- SKILL.md 架构树同步更新（previews/ + flushend.sty + math-notes 补全）
+
+### 6. 经验沉淀
+- **tlmgr 装出的坏文件排查**：LaTeX 加载 .sty 报奇怪错误（Runaway/Missing \begin{document}）时，先 `Get-Content <sty> -TotalCount 2` 看是否 404 HTML 污染
+- **`%` 静默截断是隐形杀手**：`%` 注释到行尾，编译"成功"但内容缺失；凡含百分比的文档必须验证摘要/正文完整
+- **parse_inline 转义顺序铁律**：公式保护 → 特殊字符转义 → markdown 语法转换 → 恢复公式（`_escape_latex` 转义 `{}`，不能在 `\href{}` 生成后执行）
+- **并行 Edit 同一文件有竞态**：一次消息内多个 Edit 修改同一文件可能丢失其中一处（本次第三章标题 Edit 丢失），关键修改应串行执行
+- **Edit 工具与 shell 权限**：D:\Tools（TinyTeX）不在 shell 写入白名单 → 项目自包含（flushend.sty 放 TEXINPUTS 前缀目录）是最优雅解法
+
+---
+
+## 2026-08-30：第三轮增量调研 + 方案书 v3（阶段 3 重定义）
+
+### 1. 增量调研（40+ 新项目核验，报告 `docs/research/2026-08-30-开源方案增量调研-文档MCP与生成转换生态.md`）
+- **生态信号 1**：2026 夏季 Word 工具主战场从"创建"转向"修订/审阅"（word-mcp-live 198★/docx-mcp/docx npm 9.7 图片级修订/Python-Redlines 全部主打 tracked changes）
+- **生态信号 2**：微软官方 Word MCP 只做云侧（OneDrive/Graph），本机 COM 空档由社区填补——验证我们 Windows+COM 路线差异化正确
+- **生态信号 3**：解析端走"0.9-1B 专用小模型 + Rust 快速核"（PaddleOCR-VL-1.5 94.5%、kreuzberg/office_oxide），我们的四级路由架构不变、候补按需插入
+- 关键发现：Python-Redlines（MIT，docx→原生修订红线稿，免 Word）；markitdown v0.1.7 修复 omml 公式 bug；docx-preview（2.1k★，浏览器核对 docx）；kreuzberg v4（唯一覆盖 .doc/.xls/.ppt 老格式）；中文公文生成开源界仍是空白（仅可校准 GB/T 9704 参数：三号仿宋 16pt/28 磅/37-35-28-26mm 页边距）
+
+### 2. 方案书 v3（`docs/plans/2026-08-30-office-super-skill-v3.md`，v2 已加取代指针）
+- **阶段 3 重定义**（web-editor 废弃后）：MD 确认=VS Code 预览+方正 CSS；LaTeX=LaTeX Workshop；docx 核对=docx-preview 静态 HTML；权威=Word COM 出 PDF；改稿对比=Python-Redlines 红线稿
+- **修订审阅升级 P0**：Python-Redlines（MVP：生成版 vs 用户修改版 diff 出红线稿）→ 二稿带修订记录（蓝本 docx npm 9.7 w:ins/w:del）→ 进阶 word-mcp-live COM 实时修订会话（适配器封装）
+- **PPT/Excel 正式立项**：COM 路线参考 dosev-ai/mcp-office（Output Contract 机器可验证输出规格范式优先移植）、ykuwai/ppt-mcp
+- **P0 三项**：①markitdown≥0.1.7+MinerU 3.4.5 升级 ②Python-Redlines 接入 ③docx-preview 核对页
+
+### 3. Hold 清单（许可）
+- AGPL 传染：SuperDoc/pullmd/O2OA；许可缺失或不透明：kimi-skills/ComPDFKit/OfficeDoc；非商业仅可参考规则：docformat-gui（PolyForm）
+
+### 4. 2026-08-30 补充：示例按主流程重生成 + 图表静默降级修复
+- 示例问题根因：8/29 深夜重生成时未走主流程图表环节（paper/report-showcase 架构图是 ASCII 字符画、全文零图注）；super-diagram 渲染失败因 playwright 装在别的解释器（本机默认 python=D:\Miniconda3，缺 python-docx/latex2mathml/pywin32/playwright，已补齐；chromium 走 npmmirror 镜像）
+- **静默降级 bug 修复（office.py 图表预处理）**：图表块渲染失败原先打印"[OK] 渲染了 N 个图表"继续编译 → JSON 源码进 PDF；已改为统计失败数，>0 即 sys.exit(1) 硬失败。教训：**管线失败宁可中断不可静默降级**
+- paper-showcase：ASCII 架构图 → super-diagram 契约（三层 B/S）；report-showcase：ASCII 四层图 → super-diagram（10 边，中间两"调度"标签有轻微堆叠可接受）+ 用户画像表加表注；两示例双链路重渲染全绿（paper PDF 291KB / report PDF 475KB / Word 141KB/195KB）
+- 图表微调经验：横条→多个子节点的边若出口拥挤，**加宽画布 + 拉开节点间距**让端口扇出分散（中间节点边仍可能标签堆叠，属 render_v2 已知限制）
+- .gitignore 调整：output/* + !output/examples/（官方示例产物入库展示）

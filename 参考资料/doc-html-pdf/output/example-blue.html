@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>示例文档：排版组件总览 · 海蓝深邃</title>
+
+<link rel="stylesheet" href="../assets/katex/katex.min.css" />
+<style>
+/* ============== 基础重置 ============== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  font-family: "Source Han Sans CN", "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11pt; line-height: 1.6; color: #1f2937; background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}
+code, pre, .mono { font-family: "JetBrains Mono", "Consolas", "Source Code Pro", monospace; }
+
+:root {
+  /* 主题色变量（动态注入） */
+  --c-50:  #eff6ff;
+  --c-100: #dbeafe;
+  --c-200: #bfdbfe;
+  --c-300: #93c5fd;
+  --c-400: #60a5fa;
+  --c-500: #3b82f6;
+  --c-600: #2563eb;
+  --c-700: #1d4ed8;
+  --c-800: #1e40af;
+  --c-900: #1e3a8a;
+  --c-primary: #2563eb;
+  --c-primary-dark: #1e3a8a;
+  --c-accent: #1d4ed8;
+  --c-muted: #6b7280;
+  --cover-gradient: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 70%, #3b82f6 100%);
+  --data-card-gradient: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  --data-card-dark-gradient: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+
+  /* 中性色（跨主题一致） */
+  --gray-50:  #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+}
+
+/* ============== 打印分页 ============== */
+/* 打印：页面边距由 @page 统一提供（保证连续流动分页时每页边距一致）；
+   封面使用 named page 全出血（margin 0，渐变铺满整页） */
+@page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+@page cover-page { size: A4; margin: 0; }
+.page.cover { page: cover-page; }
+
+/* 屏幕预览：用 .page 容器模拟 A4 整页 */
+.page {
+  width: 210mm; min-height: 297mm;
+  padding: 18mm 16mm 16mm 16mm;
+  page-break-after: always;
+  position: relative;
+  overflow: visible;   /* 内容超高不被裁剪，打印时由分页规则接管 */
+  background: #ffffff;
+}
+.page:last-child { page-break-after: auto; }
+
+/* 封面：flex 容器，高297mm铺满A4，渐变背景区flex:1撑满 */
+.page.cover {
+  display: flex;
+  flex-direction: column;
+  height: 297mm;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+/* 封面渐变背景区：flex:1撑满页面，内部居中内容 */
+.page.cover > .cover {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+.page.cover > .cover > .content {
+  width: 100%;
+  max-width: 170mm;
+  padding: 0 10mm;
+}
+/* 封面页脚：绝对定位在页面底部，不干扰 flex 布局 */
+.page.cover .page-footer {
+  position: absolute;
+  bottom: 10mm;
+  left: 16mm;
+  right: 16mm;
+  display: flex;
+  justify-content: flex-start;
+  font-size: 9pt;
+  color: rgba(255, 255, 255, 0.7);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  padding-top: 6px;
+}
+
+/* 打印分页策略：
+   flow 模式（默认）——封面/目录整页，正文连续流动（学术论文惯例，杜绝页尾大片空白）
+   --no-flow 模式——每章强制换页（报告/手册风格） */
+@media print {
+  .page { width: auto; min-height: auto; padding: 0; page-break-after: auto; }
+  /* 封面：named page margin 0，flex 高297mm，渐变区flex:1撑满 */
+  .page.cover {
+    height: 297mm;
+    page-break-after: always;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .page.cover > .cover { flex: 1; }
+  /* 封面页脚：白色半透明，绝对定位底部 */
+  .page.cover .page-footer {
+    color: rgba(255, 255, 255, 0.6);
+    border-top-color: rgba(255, 255, 255, 0.3);
+  }
+  /* 目录：单独成页但不设 min-height（@page margin 下可用高仅 259mm，
+     297mm 会溢出拆出空白页）；目录不满页属正常现象 */
+  .page.page-toc { page-break-after: always; }
+  
+  .page:first-child { page-break-before: avoid; }
+}
+
+/* ============== 页脚页眉 ============== */
+.page-footer {
+  position: absolute; bottom: 10mm; left: 16mm; right: 16mm;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 9pt; color: var(--gray-500); border-top: 1px solid var(--gray-200); padding-top: 6px;
+}
+.page-footer .brand { color: var(--c-primary); font-weight: 600; }
+.page-num { font-family: "JetBrains Mono", monospace; color: var(--c-primary); font-weight: 500; }
+
+/* 打印页脚：position:fixed 使 Chromium 在打印时每页重复显示（屏幕隐藏） */
+.print-footer { display: none; }
+@media print {
+  .page-footer { display: none; }
+  .print-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    position: fixed; bottom: 10mm; left: 16mm; right: 16mm;
+    font-size: 9pt; color: var(--gray-500);
+    border-top: 1px solid var(--gray-200); padding-top: 6px;
+  }
+  .print-footer .brand { color: var(--c-primary); font-weight: 600; }
+}
+
+/* ============== 章节大标题 ============== */
+.kicker {
+  font-size: 10pt; font-weight: 600; color: var(--c-primary); letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.h1 { font-size: 28pt; font-weight: 700; color: var(--c-primary-dark); line-height: 1.2; margin-bottom: 12px; }
+.h2 { font-size: 18pt; font-weight: 700; color: var(--c-800); line-height: 1.3; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid var(--c-100); }
+.h3 { font-size: 13pt; font-weight: 600; color: var(--c-700); line-height: 1.4; margin: 14px 0 6px; }
+.subtitle { font-size: 12pt; color: var(--gray-600); line-height: 1.5; margin-bottom: 16px; }
+
+/* ============== 章节编号 ============== */
+.section-num {
+  display: inline-block; padding: 4px 14px; background: var(--c-100); color: var(--c-primary-dark);
+  border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 11pt; font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* ============== 文本块 ============== */
+p { margin: 8px 0; line-height: 1.9; }
+.math-block + p { margin-top: 12px; }
+/* KaTeX 行内公式：适当缩小字号，不干预内部布局 */
+p .katex { font-size: 0.92em; }
+strong { color: var(--c-primary-dark); }
+.muted { color: var(--gray-500); font-size: 0.92em; }
+em.tip { font-style: normal; background: var(--c-50); color: var(--c-700); padding: 1px 6px; border-radius: 3px; font-size: 0.92em; }
+code.inline { background: var(--gray-100); color: var(--c-700); padding: 1px 6px; border-radius: 3px; font-size: 0.9em; font-family: "JetBrains Mono", monospace; }
+
+/* ============== 表格 ============== */
+table { width: 100%; border-collapse: collapse; font-size: 10pt; margin: 10px 0; }
+th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--gray-200); }
+th { background: var(--c-50); color: var(--c-800); font-weight: 600; font-size: 10pt; }
+tr:last-child td { border-bottom: none; }
+
+/* ============== 列表 ============== */
+ul.check, ul.bullet, ul.numbered { list-style: none; padding: 0; margin: 6px 0; }
+ul.check li, ul.bullet li, ul.numbered li { padding: 4px 0 4px 22px; position: relative; font-size: 10.5pt; }
+ul.check li::before { content: "✓"; position: absolute; left: 0; color: var(--c-500); font-weight: 700; }
+ul.bullet li::before { content: "•"; position: absolute; left: 4px; color: var(--c-500); font-weight: 700; }
+ul.numbered { counter-reset: nlist; }
+ul.numbered li { counter-increment: nlist; }
+ul.numbered li::before { content: counter(nlist); position: absolute; left: 0; color: var(--c-primary); font-weight: 700; min-width: 18px; }
+ul.cross li::before { content: "✗"; position: absolute; left: 0; color: #dc2626; font-weight: 700; }
+.list-title { font-weight: 700; color: var(--c-800); font-size: 10.5pt; margin: 8px 0 4px; }
+
+/* ============== Callout ============== */
+.callout {
+  border-left: 4px solid var(--c-500); background: var(--c-50); padding: 10px 14px;
+  border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 10.5pt;
+}
+.callout .callout-title { font-weight: 700; color: var(--c-primary-dark); margin-bottom: 4px; font-size: 11pt; }
+.callout.warn { border-left-color: #f59e0b; background: #fffbeb; }
+.callout.warn .callout-title { color: #92400e; }
+.callout.tip { border-left-color: var(--c-500); }
+.callout.info { border-left-color: #3b82f6; background: #eff6ff; }
+.callout.info .callout-title { color: #1e40af; }
+
+/* ============== KV 键值对 ============== */
+.kv { margin: 8px 0; }
+.kv-row { display: flex; padding: 6px 0; border-bottom: 1px dashed var(--gray-200); font-size: 10.5pt; }
+.kv-row:last-child { border-bottom: none; }
+.kv-key { flex: 0 0 90px; color: var(--c-700); font-weight: 600; }
+.kv-value { flex: 1; color: var(--gray-700); }
+
+/* ============== 数据卡 ============== */
+.data-grid { display: grid; gap: 10px; margin: 12px 0; }
+.data-card {
+  background: var(--data-card-gradient);
+  border: 1px solid var(--c-200); border-radius: 8px; padding: 12px 14px;
+}
+.data-card .icon { font-size: 20pt; margin-bottom: 6px; }
+.data-card .title { font-size: 12pt; font-weight: 700; color: var(--c-primary-dark); margin-bottom: 6px; }
+.data-card ul { list-style: none; padding: 0; }
+.data-card ul li { padding: 2px 0 2px 16px; position: relative; font-size: 10pt; color: var(--gray-700); }
+.data-card ul li::before { content: "•"; position: absolute; left: 4px; color: var(--c-primary); font-weight: 700; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+/* ============== 步骤条 ============== */
+.steps { display: flex; gap: 0; margin: 10px 0; align-items: stretch; flex-wrap: wrap; }
+.step {
+  flex: 1; min-width: 80px; background: #ffffff; border: 1px solid var(--c-200);
+  border-right: none; padding: 8px 10px; text-align: center; position: relative; font-size: 9.5pt;
+}
+.step:last-child { border-right: 1px solid var(--c-200); }
+.step::after { content: "→"; position: absolute; right: -8px; top: 50%; transform: translateY(-50%); color: var(--c-400); font-weight: 700; z-index: 2; background: #fff; padding: 0 2px; }
+.step:last-child::after { content: ""; }
+.step .step-label { color: var(--c-800); font-weight: 600; }
+
+/* ============== 代码块 ============== */
+.code-block { margin: 8px 0; border: 1px solid var(--c-200); border-radius: 6px; overflow: hidden; }
+.code-block .code-title { background: var(--c-50); color: var(--c-800); padding: 5px 12px; font-size: 9.5pt; font-weight: 600; border-bottom: 1px solid var(--c-200); }
+.code-block pre { background: var(--gray-900); color: var(--c-100); padding: 10px 14px; font-size: 9pt; line-height: 1.5; overflow-x: auto; white-space: pre; }
+
+/* ============== FAQ ============== */
+.faq-item { margin: 10px 0; padding: 10px 14px; background: var(--c-50); border-left: 4px solid var(--c-primary); border-radius: 0 6px 6px 0; }
+.faq-q { font-weight: 700; color: var(--c-primary-dark); margin-bottom: 6px; font-size: 11pt; }
+.faq-a { color: var(--gray-700); font-size: 10.5pt; line-height: 1.6; }
+
+/* ============== 目录 ============== */
+.toc-list { list-style: none; padding: 0; counter-reset: toc; }
+.toc-item { display: flex; align-items: baseline; padding: 8px 0; border-bottom: 1px dashed var(--gray-200); font-size: 12pt; }
+.toc-item::before { content: counter(toc, cjk-ideographic) "、"; counter-increment: toc; color: var(--c-primary); font-weight: 700; min-width: 36px; font-family: "JetBrains Mono", monospace; }
+.toc-item .toc-title { flex: 1; color: var(--gray-800); font-weight: 500; }
+.toc-item .toc-page { color: var(--c-primary); font-family: "JetBrains Mono", monospace; font-weight: 500; }
+
+/* ============== 封面 ============== */
+.cover { background: var(--cover-gradient); color: #ffffff; }
+.cover .content { display: flex; flex-direction: column; justify-content: center; height: 100%; padding-top: 20mm; }
+.cover .logo {
+  width: 80px; height: 80px; background: rgba(255,255,255,0.18); border: 2px solid var(--c-200);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center; font-size: 36pt; font-weight: 700; color: #ffffff;
+  margin-bottom: 24px;
+}
+.cover .cover-kicker { font-size: 10pt; font-weight: 600; letter-spacing: 0.18em; opacity: 0.85; margin-bottom: 12px; }
+.cover .cover-title { font-size: 36pt; font-weight: 800; line-height: 1.15; margin-bottom: 12px; }
+.cover .cover-subtitle { font-size: 14pt; opacity: 0.9; font-weight: 300; margin-bottom: 32px; }
+.cover .cover-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 24px 0; }
+.cover-stat { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; padding: 14px 16px; }
+.cover-stat .num { font-size: 28pt; font-weight: 800; line-height: 1; font-family: "JetBrains Mono", monospace; }
+.cover-stat .label { font-size: 10pt; opacity: 0.92; margin-top: 6px; }
+.cover-stat .sub { font-size: 8.5pt; opacity: 0.7; margin-top: 2px; font-family: "JetBrains Mono", monospace; }
+.cover .cover-meta { margin-top: 32px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.25); font-size: 10pt; opacity: 0.9; }
+.cover .cover-meta .row { display: flex; padding: 3px 0; }
+.cover .cover-meta .key { flex: 0 0 80px; opacity: 0.7; }
+.cover .cover-meta .val { flex: 1; font-weight: 500; }
+.cover .cover-theme-tag { position: absolute; top: 12mm; right: 16mm; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); padding: 4px 12px; border-radius: 12px; font-size: 9pt; font-family: "JetBrains Mono", monospace; }
+
+/* 章节块间距 */
+.block { margin: 10px 0; }
+
+/* ============== 数学公式 ============== */
+.math-block {
+  margin: 16px 0;
+  text-align: center;
+  font-size: 10.5pt;
+  page-break-inside: avoid;   /* 公式块打印不拆页 */
+}
+.math-block .katex-display { margin: 8px 0; }
+p .katex-display { margin: 8px 0; }
+
+/* ============== 架构图（论文风格：外框 + 图题 + 分层条带 + 竖排层标签 + 层间箭头） ============== */
+.arch-block {
+  margin: 12px 0; padding: 14px 16px;
+  border: 1px solid var(--c-300); border-radius: 10px;
+  background: var(--c-50);
+  page-break-inside: avoid;   /* 架构图打印不拆页 */
+}
+.arch-title {
+  font-size: 12pt; font-weight: 700; text-align: center;
+  color: var(--c-primary-dark); margin-bottom: 6px; letter-spacing: 0.05em;
+}
+.arch-title::after {
+  content: ""; display: block; width: 56px; height: 2px;
+  background: var(--c-400); margin: 6px auto 0; border-radius: 1px;
+}
+.arch-layer {
+  display: flex; align-items: stretch; gap: 10px;
+  background: #ffffff; border: 1px solid var(--c-200); border-radius: 8px;
+  padding: 8px 10px;
+}
+.arch-layer-name {
+  flex: 0 0 34px; display: flex; align-items: center; justify-content: center;
+  writing-mode: vertical-rl; text-orientation: mixed;
+  font-size: 10pt; font-weight: 700;
+  color: #ffffff; background: var(--c-600); border-radius: 6px; padding: 8px 0;
+  letter-spacing: 0.35em;   /* 竖排文字的上下字距 */
+}
+.arch-layer-items {
+  flex: 1; display: flex; gap: 8px; justify-content: center; align-items: center;
+  flex-wrap: wrap; min-height: 34px;
+  padding-right: 44px;   /* 右侧对称补偿层标签(34px)+gap(10px)，使模块组整条带居中 */
+}
+.arch-node {
+  border: 1px solid var(--c-300); background: #ffffff; border-radius: 6px;
+  padding: 5px 14px; font-size: 9.5pt; font-weight: 500; text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.arch-arrow {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--c-500); font-size: 10pt; line-height: 1; margin: 4px 0;
+  font-weight: 700;
+}
+.arch-arrow::before { content: "▼"; }
+
+/* ============== 块组件打印保护（避免拆页留白） ============== */
+@media print {
+  .callout, .arch-block, .math-block, .code-block, .data-grid, .steps { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+
+
+
+
+<div class="page cover">
+  <div class="cover-theme-tag">THEME · 海蓝深邃 · BLUE</div>
+  <div class="cover">
+    <div class="content">
+      <div class="logo">排</div>
+      <div class="cover-kicker">EXAMPLE · SHOWCASE</div>
+      <div class="cover-title">示例文档：排版组件总览</div>
+      <div class="cover-subtitle">A Showcase of All Components</div>
+
+      
+      <div class="cover-stats">
+        
+        <div class="cover-stat">
+          <div class="num">3</div>
+          <div class="label">章节</div>
+          <div class="sub">Sections</div>
+        </div>
+        
+        <div class="cover-stat">
+          <div class="num">14</div>
+          <div class="label">组件类型</div>
+          <div class="sub">Components</div>
+        </div>
+        
+        <div class="cover-stat">
+          <div class="num">6</div>
+          <div class="label">内置主题</div>
+          <div class="sub">Themes</div>
+        </div>
+        
+      </div>
+      
+
+      <div class="cover-meta">
+        
+        
+        
+        <div class="row"><div class="key">版本</div><div class="val">v2.0.0 · 2026-08-04</div></div>
+        <div class="row"><div class="key">主题</div><div class="val">海蓝深邃 (Ocean Blue)</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span class="brand">doc-html-pdf · 海蓝深邃主题</span>
+  </div>
+</div>
+
+
+<div class="page page-toc">
+  <div class="kicker">CONTENTS</div>
+  <div class="h1">目录</div>
+  <div class="subtitle">Table of Contents · 3 个章节</div>
+
+  <ol class="toc-list">
+    
+    <li class="toc-item">
+      <span class="toc-title">基础组件</span>
+    </li>
+    
+    <li class="toc-item">
+      <span class="toc-title">增强组件</span>
+    </li>
+    
+    <li class="toc-item">
+      <span class="toc-title">问答与键值</span>
+    </li>
+    
+  </ol>
+
+  <div class="page-footer">
+    <span class="brand">doc-html-pdf · 海蓝深邃主题</span>
+  </div>
+</div>
+
+
+
+
+
+
+<div class="page page-section">
+  <div class="kicker">一 · SECTION</div>
+  <div class="h1">基础组件</div>
+  <div class="subtitle">第 一 章 · 共 3 章</div>
+
+  
+  
+  <div class="block">
+    
+      <p>本示例演示 doc-html-pdf 支持的全部排版组件。段落、表格、引用提示、列表为最常用的基础组件，覆盖绝大多数说明类文档的排版需求。</p>
+    
+  </div>
+  
+  <div class="block">
+    
+      <div class="h3">1.1 表格</div>
+    
+  </div>
+  
+  <div class="block">
+    
+      <table>
+        <thead><tr><th>组件</th><th>用途</th><th>JSON type</th></tr></thead>
+        <tbody>
+          
+          <tr><td>段落</td><td>普通正文</td><td>paragraph</td></tr>
+          
+          <tr><td>表格</td><td>结构化数据</td><td>table</td></tr>
+          
+          <tr><td>引用提示</td><td>重点说明</td><td>callout</td></tr>
+          
+          <tr><td>列表</td><td>条目罗列</td><td>list</td></tr>
+          
+        </tbody>
+      </table>
+    
+  </div>
+  
+  <div class="block">
+    
+      <div class="callout info">
+        <div class="callout-title">使用提示</div>
+        <div>引用块（&gt; 开头）在蒸馏时自动转换为 callout；首行带 **加粗标题** 时自动作为提示标题。</div>
+      </div>
+    
+  </div>
+  
+  <div class="block">
+    
+      <div class="callout warn">
+        <div class="callout-title">注意</div>
+        <div>warn 变体使用琥珀色，适合强调风险与注意事项。</div>
+      </div>
+    
+  </div>
+  
+  <div class="block">
+    
+      <div class="list-title">支持能力</div>
+      <ul class="check">
+        <li>Markdown → JSON 蒸馏（含 frontmatter）</li><li>HTML + PDF 双格式输出</li><li>打印样式与 A4 分页</li>
+      </ul>
+    
+  </div>
+  
+  <div class="block">
+    
+      
+      <ul class="numbered">
+        <li>编写 Markdown 源文件</li><li>运行 distill.py 蒸馏为 JSON</li><li>运行 build.py 生成 HTML 与 PDF</li>
+      </ul>
+    
+  </div>
+  
+  <div class="block">
+    
+      <div class="math-block">$$\text{sim}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\| \cdot \|\mathbf{d}\|}$$</div>
+    
+  </div>
+  
+  <div class="block">
+    
+      <p>行内公式示例：欧拉恒等式 $e^{i\pi} + 1 = 0$，下标与裸比较符 $a_{&lt;t}$ 自动转换为 $\lt$ 渲染。</p>
+    
+  </div>
+  
+  <div class="block">
+    
+      <div class="arch-block">
+        <div class="arch-title">三层架构示例</div>
+        
+        <div class="arch-layer">
+          <div class="arch-layer-name">应用层</div>
+          <div class="arch-layer-items">
+            <div class="arch-node">Web 前端</div><div class="arch-node">移动端</div><div class="arch-node">API 网关</div>
+          </div>
+        </div>
+        <div class="arch-arrow"></div>
+        
+        <div class="arch-layer">
+          <div class="arch-layer-name">服务层</div>
+          <div class="arch-layer-items">
+            <div class="arch-node">业务引擎</div><div class="arch-node">检索服务</div><div class="arch-node">调度中心</div>
+          </div>
+        </div>
+        <div class="arch-arrow"></div>
+        
+        <div class="arch-layer">
+          <div class="arch-layer-name">数据层</div>
+          <div class="arch-layer-items">
+            <div class="arch-node">文档库</div><div class="arch-node">向量数据库</div><div class="arch-node">缓存存储</div>
+          </div>
+        </div>
+        
+        
+      </div>
+    
+  </div>
+  
+
+
+  <div class="page-footer">
+    <span class="brand">doc-html-pdf · 海蓝深邃主题</span>
+  </div>
+</div>
+
+<div class="page page-section">
+  <div class="kicker">二 · SECTION</div>
+  <div class="h1">增强组件</div>
+  <div class="subtitle">第 二 章 · 共 3 章</div>
+
+  
+  
+  <div class="block">
+    
+      <div class="data-grid cols-3">
+        
+        <div class="data-card">
+          <div class="icon">🛡️</div>
+          <div class="title">本地优先</div>
+          <ul><li>所有资源本地化</li><li>离线可用</li><li>不依赖外部 CDN</li></ul>
+        </div>
+        
+        <div class="data-card">
+          <div class="icon">🎨</div>
+          <div class="title">多主题</div>
+          <ul><li>6 套内置配色</li><li>同一内容换色即换风格</li><li>色阶 9 档统一</li></ul>
+        </div>
+        
+        <div class="data-card">
+          <div class="icon">🖨️</div>
+          <div class="title">打印友好</div>
+          <ul><li>A4 纸面设计</li><li>封面目录独立页</li><li>章节自动分页</li></ul>
+        </div>
+        
+      </div>
+    
+  </div>
+  
+  <div class="block">
+    
+      <div class="steps">
+        
+        <div class="step"><div class="step-label">1. 准备内容</div></div>
+        
+        <div class="step"><div class="step-label">2. 选择主题</div></div>
+        
+        <div class="step"><div class="step-label">3. 生成 HTML</div></div>
+        
+        <div class="step"><div class="step-label">4. 编译 PDF</div></div>
+        
+        <div class="step"><div class="step-label">5. 交付分享</div></div>
+        
+      </div>
+    
+  </div>
+  
+  <div class="block">
+    
+      <div class="code-block">
+        <div class="code-title">命令行示例</div>
+        <pre><code># 蒸馏
+python scripts/distill.py --md doc.md --out content/doc.json
+
+# 渲染 HTML + PDF（emerald 主题）
+python scripts/build.py --content content/doc.json --theme emerald --format all</code></pre>
+      </div>
+    
+  </div>
+  
+
+
+  <div class="page-footer">
+    <span class="brand">doc-html-pdf · 海蓝深邃主题</span>
+  </div>
+</div>
+
+<div class="page page-section">
+  <div class="kicker">三 · SECTION</div>
+  <div class="h1">问答与键值</div>
+  <div class="subtitle">第 三 章 · 共 3 章</div>
+
+  
+  
+  <div class="block">
+    
+      <div class="kv">
+        
+        <div class="kv-row"><div class="kv-key">输出格式</div><div class="kv-value">HTML + PDF（A4）</div></div>
+        
+        <div class="kv-row"><div class="kv-key">运行环境</div><div class="kv-value">Python 3.10+，依赖 jinja2 / playwright</div></div>
+        
+        <div class="kv-row"><div class="kv-key">主题扩展</div><div class="kv-value">在 themes/ 下新增 JSON 即可，无需改代码</div></div>
+        
+      </div>
+    
+  </div>
+  
+  <div class="block">
+    
+      
+      <div class="faq-item">
+        <div class="faq-q">Q1：如何更换主题？</div>
+        <div class="faq-a">build.py 使用 --theme 指定主题 ID，例如 --theme slate；批量生成时自动遍历全部主题。</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-q">Q2：作者信息如何填写？</div>
+        <div class="faq-a">在 Markdown 顶部写 YAML frontmatter（author/version/date 等），蒸馏时会自动读取；缺省字段在封面自动隐藏。</div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-q">Q3：支持哪些 Markdown 语法？</div>
+        <div class="faq-a">标题、段落、表格、列表、代码块、引用块、frontmatter；连续段落自动合并为一段。</div>
+      </div>
+      
+    
+  </div>
+  
+
+
+  <div class="page-footer">
+    <span class="brand">doc-html-pdf · 海蓝深邃主题</span>
+  </div>
+</div>
+
+
+<script src="../assets/katex/katex.min.js"></script>
+<script src="../assets/katex/auto-render.min.js"></script>
+
+
+<div class="page-footer print-footer">
+  <span class="brand">doc-html-pdf · 海蓝深邃主题</span>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.renderMathInElement) {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true }
+      ],
+      // 裸 < > 是 KaTeX 非法语法（如 a_{<t}），转为 \lt / \gt
+      preProcess: function (math) {
+        return math
+          .replace(/<(?![a-zA-Z/\\])/g, "\\lt")
+          .replace(/(?<![a-zA-Z\\])>/g, "\\gt");
+      },
+      throwOnError: false
+    });
+  }
+});
+</script>
+</body>
+</html>
