@@ -52,3 +52,8 @@ output/*
 
 # 蒸馏区临时产物
 蒸馏区/*.tmp*
+
+# 隐私脱敏（2026-08-30）：测试残留与蒸馏中间产物不入库
+蒸馏区/e2e-test/
+蒸馏区/distill-output/distill-images/
+蒸馏区/*.tmp*.pdf
