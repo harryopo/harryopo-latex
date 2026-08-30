@@ -78,7 +78,8 @@ def run(cmd, cwd=None, env_extra=None, check=True, label=''):
     print(f'  [{label}] {" ".join(str(c) for c in cmd[:4])}...')
     try:
         result = subprocess.run(cmd, cwd=str(cwd) if cwd else None,
-                                capture_output=True, text=True, env=env)
+                                capture_output=True, text=True, env=env,
+                                encoding='utf-8', errors='replace')
     except FileNotFoundError as e:
         # 命令不在 PATH（如 xelatex 未安装）→ 优雅失败而非崩溃
         return False, '', f'命令不存在: {e.filename}（请检查环境，如安装 TeX Live/MiKTeX）'
@@ -111,6 +112,28 @@ def _ensure_tex_on_path():
                 print(f'  [INFO] 已把 TeX 目录加入 PATH: {d}')
                 return
     print('  [WARN] 未找到 xelatex（TinyTeX/MiKTeX/TeX Live 均未探测到）')
+
+
+def _ensure_pandoc_on_path():
+    """pandoc 不在 PATH 时，探测常见安装目录并加入 PATH（与 _ensure_tex_on_path 同源）"""
+    import glob
+    if shutil.which('pandoc'):
+        return
+    local_appdata = os.environ.get('LOCALAPPDATA', '')
+    patterns = [
+        os.path.join(local_appdata, 'Pandoc') if local_appdata else '',
+        r'C:\Program Files\Pandoc',
+        r'C:\Program Files (x86)\Pandoc',
+    ]
+    for pat in patterns:
+        if not pat:
+            continue
+        for d in glob.glob(pat):
+            if os.path.exists(os.path.join(d, 'pandoc.exe')):
+                os.environ['PATH'] = d + os.pathsep + os.environ['PATH']
+                print(f'  [INFO] 已把 Pandoc 目录加入 PATH: {d}')
+                return
+    print('  [WARN] 未找到 pandoc（notes 链路将回退纯 Python 引擎）')
 
 
 def ensure_placeholder_figures(target_dir, md_file):
@@ -208,11 +231,13 @@ def convert_via_mineru(path, output_dir):
 # 三条链路
 # ============================================================
 
-def render_word(md_file, output_dir, config_name='fangzheng', export_pdf=False):
+def render_word(md_file, output_dir, config_name='fangzheng', export_pdf=False,
+                out_stem=None):
     """链路1: MD → Word（可选同时导出 PDF）"""
     print('\n=== 链路1: MD → Word ===')
     config = WORD_CONFIG_OS if config_name == 'opensource' else WORD_CONFIG_FZ
-    output = output_dir / f'{md_file.stem}-word.docx'
+    stem = out_stem or md_file.stem
+    output = output_dir / f'{stem}-word.docx'
 
     cmd = [sys.executable, str(WORD_SCRIPT), str(md_file),
            '-o', str(output), '-c', str(config)]
@@ -232,11 +257,12 @@ def render_word(md_file, output_dir, config_name='fangzheng', export_pdf=False):
     return output
 
 
-def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False):
+def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False,
+                 out_stem=None):
     """链路2: MD → LaTeX PDF (paper/report，可双栏)"""
     print(f'\n=== 链路2: MD → PDF ({doc_type}) ===')
     _ensure_tex_on_path()
-    stem = md_file.stem
+    stem = out_stem or md_file.stem
     tex_file = output_dir / f'{stem}-{doc_type}.tex'
 
     # Step 1: MD → TEX
@@ -266,7 +292,7 @@ def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False):
 
     # Step 4: 编译
     texinputs = f'{CLS_DIR}//;{FONTS_DIR}//;'
-    for i in range(2):
+    for i in range(3):
         ok, out, err = run(
             ['xelatex', '-interaction=nonstopmode', compile_tex.name],
             cwd=PAPER_DIR, env_extra={'TEXINPUTS': texinputs},
@@ -282,11 +308,12 @@ def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False):
     return None
 
 
-def render_notes(md_file, output_dir):
+def render_notes(md_file, output_dir, out_stem=None):
     """链路3: MD → LaTeX PDF (math-notes)"""
     print('\n=== 链路3: MD → PDF (math-notes) ===')
     _ensure_tex_on_path()
-    stem = md_file.stem
+    _ensure_pandoc_on_path()
+    stem = out_stem or md_file.stem
     tex_file = output_dir / f'{stem}-notes.tex'
 
     # Step 1: MD → TEX（Pandoc 优先，纯 Python md2latex 回退）
@@ -330,7 +357,7 @@ def render_notes(md_file, output_dir):
     ensure_placeholder_figures(NOTES_DIR, md_file)
 
     # Step 4: 编译
-    for i in range(2):
+    for i in range(3):
         ok, out, err = run(
             ['xelatex', '-interaction=nonstopmode', compile_tex.name],
             cwd=NOTES_DIR,
@@ -424,7 +451,8 @@ def cmd_render(args):
                 # pandoc 转换：禁用 smart（避免弯引号）、禁用自动换行（避免表格/段落断行）
                 cmd = ['pandoc', str(input_file), '-f', 'docx',
                        '-t', 'markdown-smart', '--wrap=none', '-o', str(tmp_md)]
-                result = subprocess.run(cmd, capture_output=True, text=True)
+                result = subprocess.run(cmd, capture_output=True, text=True,
+                                        encoding='utf-8', errors='replace')
                 if result.returncode == 0:
                     md_text = tmp_md.read_text(encoding='utf-8')
                     converter = 'pandoc'
@@ -452,7 +480,14 @@ def cmd_render(args):
         # anydoc/markitdown 自带 GFM 表格（tables=[] 不重复插表）；pandoc 输出 simple
         # table 需 python-docx 回填（extract_docx_tables）。
         from docx_clean import clean_pandoc_md, extract_docx_tables
-        tables = [] if converter in ('anydoc', 'markitdown') else extract_docx_tables(str(input_file))
+        try:
+            tables = [] if converter in ('anydoc', 'markitdown') \
+                else extract_docx_tables(str(input_file))
+        except ImportError:
+            print('[ERROR] pandoc 链路需要 python-docx 回填表格，请安装: '
+                  'pip install python-docx（缺失时表格会丢失，拒绝继续）',
+                  file=sys.stderr)
+            sys.exit(1)
         cleaned = clean_pandoc_md(md_text, tables)
         tmp_md.write_text(cleaned, encoding='utf-8')
         print(f'  [OK] {tmp_md.name}（转换器 {converter}，清洗完成，表格 {len(tables)} 个）')
@@ -496,6 +531,7 @@ def cmd_render(args):
 
     # ---- 图表统一预处理（super-diagram + mermaid）----
     # 将 MD 中的图表数据代码块渲染为 PNG，替换为 ![](figures/xxx.png)
+    base_stem = md_file.stem  # 产物命名基准：原始输入文件（不泄漏中间态后缀）
     md_text = md_file.read_text(encoding='utf-8')
     if '```mermaid' in md_text or '```super-diagram' in md_text:
         print('\n=== 图表统一预处理 ===')
@@ -526,12 +562,14 @@ def cmd_render(args):
     results = {}
 
     if 'word' in formats:
-        results['word'] = render_word(md_file, output_dir, args.config, args.pdf)
+        results['word'] = render_word(md_file, output_dir, args.config, args.pdf,
+                                      out_stem=base_stem)
     if 'paper' in formats:
         results['paper'] = render_paper(md_file, output_dir,
-                                        doc_type=args.type, twocolumn=args.twocolumn)
+                                        doc_type=args.type, twocolumn=args.twocolumn,
+                                        out_stem=base_stem)
     if 'notes' in formats:
-        results['notes'] = render_notes(md_file, output_dir)
+        results['notes'] = render_notes(md_file, output_dir, out_stem=base_stem)
 
     # 汇总
     print('\n' + '=' * 50)
@@ -561,21 +599,7 @@ def cmd_template(args):
     script = SCRIPT_DIR / 'word' / 'template' / 'template_registry.py'
     result = subprocess.run(
         [sys.executable, str(script)] + args.tpl_args,
-        capture_output=True, text=True)
-    if result.stdout:
-        print(result.stdout, end='')
-    if result.stderr:
-        print(result.stderr, end='', file=sys.stderr)
-    if result.returncode != 0:
-        sys.exit(result.returncode)
-
-
-def cmd_texlite(args):
-    """texlite-open 子命令：把 .tex 导入 TexLite 网页编辑器（参数透传）"""
-    script = SCRIPT_DIR / 'texlite_open.py'
-    result = subprocess.run(
-        [sys.executable, str(script)] + args.tlx_args,
-        capture_output=True, text=True)
+        capture_output=True, text=True, encoding='utf-8', errors='replace')
     if result.stdout:
         print(result.stdout, end='')
     if result.stderr:
@@ -589,7 +613,7 @@ def cmd_diagram(args):
     script = SCRIPT_DIR / 'diagram_design_render.py'
     result = subprocess.run(
         [sys.executable, str(script)] + args.dgm_args,
-        capture_output=True, text=True)
+        capture_output=True, text=True, encoding='utf-8', errors='replace')
     if result.stdout:
         print(result.stdout, end='')
     if result.stderr:

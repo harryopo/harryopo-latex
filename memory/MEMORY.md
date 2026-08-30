@@ -704,3 +704,75 @@ web-editor 升级。
 - paper-showcase：ASCII 架构图 → super-diagram 契约（三层 B/S）；report-showcase：ASCII 四层图 → super-diagram（10 边，中间两"调度"标签有轻微堆叠可接受）+ 用户画像表加表注；两示例双链路重渲染全绿（paper PDF 291KB / report PDF 475KB / Word 141KB/195KB）
 - 图表微调经验：横条→多个子节点的边若出口拥挤，**加宽画布 + 拉开节点间距**让端口扇出分散（中间节点边仍可能标签堆叠，属 render_v2 已知限制）
 - .gitignore 调整：output/* + !output/examples/（官方示例产物入库展示）
+
+---
+
+## 2026-08-30：全库隐私脱敏 + git 历史重写 + 完整安全扫描
+
+### 隐私清除（用户要求，两层三处全清）
+- 污染面：28 个文本文件 + 2 个 docx（公文模板/知行读书，zip 内 XML 脱敏）+ 8 个 PDF 产物 + 简历目录 + math-notes main.pdf + 4 个 tmp-e2e PDF
+- 替换映射：张子涵→张三、陈子航→李四、2503010345→2025000101、2503020108→2025000102、25计算机应用技术3-3班→计算机应用技术专业、深圳信息职业技术大学→示例大学
+- 产物重生成：examples 三示例重渲染、蒸馏区参赛模板 PDF 用 pwsh（非 powershell 5.1，UTF-8 编码问题）跑 build.ps1 重编译（27 页）
+- **git filter-repo 两轮**：①--replace-text（6 字符串映射全文本 blob）+ --invert-paths（蒸馏区 e2e-test/distill-images/两个 docx/参赛 PDF/output/examples 整目录）；②补漏（简历、templates/math-notes/main.pdf、glob *tmp-e2e.pdf）。验证：pickaxe -S 六个字符串全 0；force push 两次覆盖远程
+- **filter-repo 大坑**：--invert-paths 会把文件从工作区一并删除（包括刚脱敏的版本）→ 需从 origin 旧历史恢复再重新脱敏提交；每次运行都会删除 origin remote 配置需重新 add
+- **pickaxe 验证注意**：fetch origin 后 --all 包含 origin/main 旧引用会误报，须先 force push 再验 origin/main
+- bash 双引号内 `~$xxx` 的 $r 会被变量展开导致 rm 删不掉 Word 锁文件，用单引号
+- build.ps1 必须用 pwsh 7 跑（UTF-8），powershell 5.1 按 GBK 解析中文注释报语法错误
+
+### Mimosa deep 扫描（scan-2026-08-30T05-58-12.774Z，seal sha256:c4a78b0c...）
+- 69 findings，**自研代码（harryopo-office skill / shared / templates）零发现**
+- 分布：opensource-reference 参考仓库（anydoc/fireworks-tech-graph/Oleafly/diagram-design）与 output 生成产物——均不入库（.gitignore 已排除），风险不随仓库传播
+- 蒸馏区 convert.py/distill-docx.py 的"路径穿越"为本地 CLI 接受 ../ 路径的常规模式，无网络暴露，低风险
+- 依赖：1120 包扫描，3 包命中 6 条离线 advisory；run status inconclusive（静态分析覆盖声明）
+
+---
+
+## 2026-08-30：全面代码审查 + 全量修复（17 项）
+
+用户要求对 harryopo-office skill 做流程/代码/稳定性/输出真实性全面审查。实测驱动（output/review-test/ 样例），发现 3 严重 + 6 中等 + 8 轻微问题，全部修复并回归全绿。
+
+### 严重问题（已修复）
+1. **未闭合 `$$` 静默吞全文**（md_to_word.py）：多行公式收集到 EOF 未闭合 → 后续章节/参考文献全丢无报错。修复：抛 ValueError 带行号，CLI 层转 [ERROR] exit 1。与 `%` 截断同类的隐形杀手，实测验证
+2. **COM 异常 taskkill 杀全部 Word**（word_template_engine.py 两处）：失败分支 `taskkill /f /im WINWORD.EXE` 会杀用户未保存文档 → 删除，只留警告
+3. **subprocess 无 encoding 中文崩溃**（office.py 5 处 + diagram_render + mermaid_render）：Windows GBK 默认解码子进程输出 → UnicodeDecodeError，错误详情丢失（实测 `[WARN] 渲染失败:` 后空白）。统一 `encoding='utf-8', errors='replace'`
+
+### 中等问题（已修复）
+4. 产物命名污染：图表预处理临时文件 `*.processed.md` 的 stem 泄漏进产物名 → 三渲染函数加 `out_stem` 参数，cmd_render 预处理前记录 `base_stem`
+5. xelatex 2 遍 → 3 遍（paper/notes 均改，与 build.ps1 对齐）
+6. `_ensure_pandoc_on_path()` 新增（探测 %LOCALAPPDATA%\Pandoc 等，与 TeX 探测同源）
+7. **md2latex.py 纯 Python 回退引擎五缺陷**：①表格分隔行检测正则永假（`'|'.join` 后匹配 `^[\s:\-]+$` 含 `|` 必败）→ 逐单元格 fullmatch；②正文 `%`/`&`/`#`/`_` 未转义 → 转义顺序铁律（公式保护→URL 保护→转义→语法转换）；③图片变非法 `!\href` → 独立行图 → figure 环境 + 行内 → \includegraphics；④标题只认 YAML frontmatter → `_extract_harryopo_meta` 提取 `# ` 主标题/`> 作者：`/`> 日期：`；⑤verbatim 双重转义 → 原样写入
+8. docx_clean.extract_docx_tables python-docx 缺失静默返回空表 → 改抛 ImportError，office.py 捕获硬失败
+
+### 轻微问题（已修复）
+9. convert.py 链接 URL `%20` 被转义破坏 \href → URL 占位符保护（转义前抽出，生成 \href 时还原）；实测 `\href{...docs%20v2}` 正确
+10. convert.py `code_escaped` 死代码 ×2 删除（lstlisting verbatim 语义）
+11. **列表支持补齐**：convert.py 嵌套列表（解析器允许缩进 + `_render_nested_list` 按 2 空格层级开关 itemize/enumerate，paper/report 两处）；md_to_word.py **从零补列表**（此前 `- item` 当正文渲染出字面 "- "）：`add_list_item` 引擎 API + 解析（•/◦ 层级、有序保留编号）
+12. tex2md.py `\textbf{a{b}c}` 嵌套花括号切坏 → 平衡括号扫描器 `_strip_braced_cmd`（深度计数，迭代至不动点，未闭合保留原文）
+13. diagram_render.py 硬编码 `c:\Users\Lenovo\` 删除
+14. office.py cmd_texlite 死代码删除（引用已废弃脚本且未注册）
+15. docstring SyntaxWarning ×3 修复（raw docstring）
+
+### SKILL.md 流程升级
+- **新增 ⑤ 图描述确认环节**（用户要求）：图表类型选定后，AI 先产出**图描述 MD**（图类型/节点清单表格/连线关系/布局意图）→ 用户确认 → 才写 HTML。主流程 ④→⑧ 重编号；图表章节插入第 3 步（含示例模板）+ 硬约束"图描述未确认不得写 HTML"
+- 表标题位置澄清：实测 Word/LaTeX 两链路**都渲染在表格下方**（一致），MD 写法在表格上方——修 SKILL.md 描述（原"表格上方"误导）
+- 约定表补列表行 + MD→LaTeX 映射表列表行更新为嵌套
+
+### 环境补齐
+- Anaconda 3.13 装 markitdown 0.1.7（恰为 P0 升级目标版本）+ firecrawl-anydoc + docxtpl（`python -m pip`，注意裸 `pip` 可能指向别的环境）
+- **pandoc 3.11 winget 安装**（notes 链路主引擎；`_ensure_pandoc_on_path` 解决新装后终端 PATH 快照过期）
+
+### 回归结果（全绿）
+- 三链路：word 33KB / paper 89KB / notes 112KB（notes 从失败→成功）
+- Word 产物：3 OMML 公式、方正四字体、列表 3+2 嵌套、三线表、图注表注、链接
+- paper tex：itemize 2/2 + enumerate 1/1 平衡、\href %20 保持
+- 纯 Python 引擎 9/9 检查项通过
+- 故障路径：未闭合 $$ → [ERROR]+exit 1；坏图 → exit 1 + 中文错误详情完整（编码修复生效）
+- 产物命名：`review-diagram-word.docx`（.processed 不再泄漏）
+
+### 经验沉淀
+- **审查先实测再下结论**：表标题位置最初判断"两链路不一致"，实测 docx body 元素顺序后发现一致——段落文本序列不含表格，会误判相对位置
+- **fail-fast 检查清单**：未闭合定界符（$$/```/环境）、静默返回空集合、异常分支里的破坏性操作（杀进程/删文件）、子进程编码——这四类是本项目反复出现的隐形杀手
+- **heredoc 传 Python 检查脚本不可靠**：反斜杠/引号会被 shell 层失真，断言脚本写成 .py 文件跑
+- **re 替换串陷阱**：`r'...\linewidth...'` 中 `\l` 是非法转义，替换串的字面反斜杠要 `\\`
+- **pip vs python -m pip**：多 Python 环境（Miniconda/系统/3.14）并存时裸 pip 不可信，一律 `python -m pip`
+

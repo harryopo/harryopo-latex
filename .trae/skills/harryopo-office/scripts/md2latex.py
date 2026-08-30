@@ -46,6 +46,10 @@ class MD2LaTeX:
         # 1. Extract YAML frontmatter
         text = self._parse_frontmatter(text)
 
+        # 1.5 harryopo 约定元信息（无 frontmatter 时兜底）：
+        #     第一个 `# ` 主标题 / `> 作者：` / `> 日期：`
+        text = self._extract_harryopo_meta(text)
+
         # 2. Split into blocks (paragraphs separated by blank lines)
         blocks = text.split('\n\n')
 
@@ -74,6 +78,37 @@ class MD2LaTeX:
                     self.frontmatter[key.strip()] = value.strip().strip('"').strip("'")
             text = text[fm_match.end():]
         return text
+
+    def _extract_harryopo_meta(self, text):
+        """从正文提取 harryopo 约定元信息（仅 frontmatter 缺失项兜底）。
+
+        - 第一个 `# ` 行 → title（从正文移除，主标题不作章节）
+        - `> 作者：` / `> 学校：` / `> 单位：` → author（合并，空格连接）
+        - `> 日期：` → date
+        """
+        lines = text.split('\n')
+        kept = []
+        author_parts = []
+        for line in lines:
+            s = line.strip()
+            if ('title' not in self.frontmatter
+                    and s.startswith('# ') and not self.frontmatter.get('_title_done')):
+                self.frontmatter['title'] = s[2:].strip()
+                self.frontmatter['_title_done'] = True
+                continue
+            m = re.match(r'^>\s*(作者|学校|单位)\s*[：:]\s*(.+)$', s)
+            if m:
+                author_parts.append(m.group(2).strip())
+                continue
+            m = re.match(r'^>\s*日期\s*[：:]\s*(.+)$', s)
+            if m and 'date' not in self.frontmatter:
+                self.frontmatter['date'] = m.group(1).strip()
+                continue
+            kept.append(line)
+        if author_parts and 'author' not in self.frontmatter:
+            self.frontmatter['author'] = ' '.join(author_parts)
+        self.frontmatter.pop('_title_done', None)
+        return '\n'.join(kept)
 
     def _convert_block(self, block):
         """Convert a single block of Markdown to LaTeX."""
@@ -111,6 +146,18 @@ class MD2LaTeX:
         if re.match(r'^[-*_]{3,}$', first_line.strip()):
             return '\\medskip\\hrule\\medskip'
 
+        # Standalone image ![alt](path) → figure 环境（图注在下方）
+        m = re.fullmatch(r'!\[([^\]]*)\]\(([^)]+)\)', first_line.strip())
+        if m and len(lines) == 1:
+            alt, src = m.group(1), m.group(2)
+            alt = re.sub(r'^(图|表|式)\s*\d+\s*[：:]\s*', '', alt)  # 编号去重
+            parts = ['\\begin{figure}[htbp]', '\\centering',
+                     f'\\includegraphics[width=0.8\\linewidth]{{{src}}}']
+            if alt:
+                parts.append(f'\\caption{{{alt}}}')
+            parts.append('\\end{figure}')
+            return '\n'.join(parts)
+
         # Regular paragraph
         return self._convert_inline(block)
 
@@ -147,17 +194,7 @@ class MD2LaTeX:
                 self.in_code_block = False
                 self.code_lines = []
 
-                # Escape special LaTeX chars in code
-                code_text = code_text.replace('\\', '\\textbackslash{}')
-                code_text = code_text.replace('{', '\\{')
-                code_text = code_text.replace('}', '\\}')
-                code_text = code_text.replace('$', '\\$')
-                code_text = code_text.replace('&', '\\&')
-                code_text = code_text.replace('#', '\\#')
-                code_text = code_text.replace('%', '\\%')
-                code_text = code_text.replace('_', '\\_')
-                code_text = code_text.replace('^', '\\^{}')
-
+                # verbatim 环境逐字渲染，不做任何转义（转义符会原样显示）
                 return (
                     '\\begin{verbatim}\n' +
                     code_text + '\n' +
@@ -218,7 +255,8 @@ class MD2LaTeX:
             # Check if separator row (also protect math first)
             cleaned = re.sub(r'\$[^$]+\$', 'MATH', raw_line)
             cleaned_cells = [c.strip() for c in cleaned.strip().strip('|').split('|')]
-            if re.match(r'^[\s:\-]+$', '|'.join(cleaned_cells)):
+            if cleaned_cells and all(
+                    re.fullmatch(r'[\s:\-]+', c) for c in cleaned_cells if c):
                 separator_idx = i
                 continue
             rows.append(cells)
@@ -328,11 +366,13 @@ class MD2LaTeX:
     # ==================== Inline Formatting ====================
 
     def _convert_inline(self, text):
-        """Convert inline Markdown formatting to LaTeX."""
-        # Math must be preserved (don't touch $...$)
-        # Use placeholder technique
+        r"""Convert inline Markdown formatting to LaTeX.
 
-        # Protect math
+        顺序铁律（与 convert.py 一致）：公式保护 → 链接 URL 保护 →
+        特殊字符转义 → 语法转换 → 恢复。转义必须在 \href{} 生成前，
+        否则破坏命令结构；但 URL 须在转义前保护，避免 %20 等被转义。
+        """
+        # 1. Protect math
         math_placeholders = {}
         math_count = [0]
 
@@ -351,6 +391,27 @@ class MD2LaTeX:
         text = re.sub(r'\$\$(.+?)\$\$', protect_display_math, text, flags=re.DOTALL)
         text = re.sub(r'\$(.+?)\$', protect_inline_math, text)
 
+        # 2. Protect link URLs（URL 不转义，锚文本正常走转义与语法转换）
+        url_map = {}
+        url_count = [0]
+
+        def protect_url(m):
+            url_count[0] += 1
+            key = f'<<<URL{url_count[0]}>>>'
+            url_map[key] = m.group(2)
+            return f'[{m.group(1)}]({key})'
+
+        text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', protect_url, text)
+
+        # 3. 行内图片 → \includegraphics（避免落入链接正则产生 !\href）
+        text = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)',
+                      r'\\includegraphics[width=0.6\\linewidth]{\2}', text)
+
+        # 4. Escape LaTeX special chars（% 未转义会注释到行尾静默吞内容）
+        for ch, repl in {'&': r'\&', '%': r'\%', '#': r'\#',
+                         '_': r'\_', '~': r'\textasciitilde{}'}.items():
+            text = text.replace(ch, repl)
+
         # Inline code `code`
         text = re.sub(r'`([^`]+)`', r'\\texttt{\1}', text)
 
@@ -363,8 +424,10 @@ class MD2LaTeX:
         # Italic *text* (but not **)
         text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'\\emph{\1}', text)
 
-        # Links [text](url)
-        text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\\href{\2}{\1}', text)
+        # Links [text](url) — URL 从占位符还原（原始未转义）
+        text = re.sub(
+            r'\[([^\]]+)\]\((<<<URL\d+>>>)\)',
+            lambda m: f'\\href{{{url_map[m.group(2)]}}}{{{m.group(1)}}}', text)
 
         # Restore math
         for key, value in math_placeholders.items():
@@ -379,6 +442,9 @@ class MD2LaTeX:
         title = self.frontmatter.get('title', 'Untitled')
         author = self.frontmatter.get('author', '')
         date = self.frontmatter.get('date', '\\today')
+        # 标题/作者写入导言区前转义特殊字符（防 % 等破坏 \renewcommand）
+        title = self._convert_inline(title)
+        author = self._convert_inline(author) if author else ''
         has_toc = self.frontmatter.get('toc', '').lower() in ('true', 'yes', '1')
 
         parts = []

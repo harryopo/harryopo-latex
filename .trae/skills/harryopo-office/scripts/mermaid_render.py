@@ -98,7 +98,8 @@ def render_one(code, output_path, fmt='png'):
             '-b', 'transparent',   # 透明背景
             '-w', '1200',          # 宽度
         ]
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30,
+                                encoding='utf-8', errors='replace')
         if result.returncode != 0:
             print(f'[WARN] mmdc 渲染失败: {result.stderr.strip()[:200]}',
                   file=sys.stderr)
@@ -174,7 +175,7 @@ def extract_and_render(md_file, output_dir='figures', formats=None):
 
 
 def replace_mermaid_in_md(md_text, replacements, img_format='png', rel_prefix=''):
-    """
+    r"""
     将 MD 中的 mermaid 代码块替换为图片引用。
 
     Args:

@@ -156,21 +156,17 @@ def split_blocks(text: str) -> List[Tuple[str, str]]:
             pos += m.end()
             continue
 
-        # --- 有序列表 ---
-        m = re.match(r'((?:\d+\.\s+.*\n?)+)', text[pos:])
+        # --- 有序列表（支持缩进嵌套）---
+        m = re.match(r'((?:\s*\d+[.)]\s+.*\n?)+)', text[pos:])
         if m:
-            raw = m.group(1).strip()
-            items = re.findall(r'^\d+\.\s+(.*)$', raw, re.MULTILINE)
-            blocks.append((BLOCK_OL, "\n".join(items)))
+            blocks.append((BLOCK_OL, m.group(1).rstrip()))
             pos += m.end()
             continue
 
-        # --- 无序列表 ---
-        m = re.match(r'((?:[\-\*\+]\s+.*\n?)+)', text[pos:])
+        # --- 无序列表（支持缩进嵌套）---
+        m = re.match(r'((?:\s*[\-\*\+]\s+.*\n?)+)', text[pos:])
         if m:
-            raw = m.group(1).strip()
-            items = re.findall(r'^[\-\*\+]\s+(.*)$', raw, re.MULTILINE)
-            blocks.append((BLOCK_UL, "\n".join(items)))
+            blocks.append((BLOCK_UL, m.group(1).rstrip()))
             pos += m.end()
             continue
 
@@ -242,14 +238,25 @@ def parse_inline(text: str) -> str:
     text = re.sub(r'\$([^$]+?)\$', _save_math, text)
     text = re.sub(r'\\\((.*?)\\\)', _save_math, text)
 
+    # 保护链接 URL（占位）：URL 含 %20 等特殊字符，不能走转义；
+    # 锚文本留在原位，正常参与转义与加粗/斜体转换
+    url_placeholders: List[str] = []
+
+    def _save_url(m: re.Match) -> str:
+        url_placeholders.append(m.group(2))
+        return f"[{m.group(1)}](\x00URL{len(url_placeholders)-1}\x00)"
+
+    text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', _save_url, text)
+
     # 转义 LaTeX 特殊字符（& % $ # _ { } ~ ^）
     # 必须在链接/代码/粗斜体转换之前执行：_escape_latex 会转义 { }，
     # 若在 \href{} 等命令生成后再执行会破坏命令结构；公式已保护为占位符不受影响
     text = _escape_latex(text)
 
-    # 链接 [text](url)
-    text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)',
-                  lambda m: f'\\href{{{m.group(2)}}}{{{m.group(1)}}}', text)
+    # 链接 [text](url)（URL 从占位符还原，未经转义）
+    text = re.sub(r'\[([^\]]+)\]\(\x00URL(\d+)\x00\)',
+                  lambda m: f'\\href{{{url_placeholders[int(m.group(2))]}}}{{{m.group(1)}}}',
+                  text)
 
     # 行内代码
     text = re.sub(r'`([^`]+)`', r'\\inlinecode{\1}', text)
@@ -266,6 +273,35 @@ def parse_inline(text: str) -> str:
         text = text.replace(f"\x00MATH{i}\x00", f"${math}$")
 
     return text
+
+
+def _render_nested_list(content: str, env: str) -> List[str]:
+    """按缩进渲染嵌套列表（2 空格一级，最多 4 层）。
+
+    例：顶层 \\begin{itemize} → 子项前插入嵌套 \\begin{itemize}，
+    回到上层时先闭合，最终全部闭合。
+    """
+    out: List[str] = []
+    depth = 0
+    for raw_line in content.split('\n'):
+        if not raw_line.strip():
+            continue
+        m = re.match(r'^(\s*)([\-\*\+]|\d+[.)])\s+(.*)$', raw_line)
+        if not m:
+            continue
+        level = min(len(m.group(1).expandtabs(4)) // 2, 3)
+        item_text = m.group(3).strip()
+        while depth <= level:
+            out.append(f'\\begin{{{env}}}')
+            depth += 1
+        while depth > level + 1:
+            out.append(f'\\end{{{env}}}')
+            depth -= 1
+        out.append('  \\item ' + parse_inline(item_text))
+    while depth > 0:
+        out.append(f'\\end{{{env}}}')
+        depth -= 1
+    return out
 
 
 def format_author(author_str: str) -> str:
@@ -397,18 +433,10 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
             lines.append(parse_inline(content))
             lines.append("")
         elif btype == BLOCK_UL:
-            lines.append(r"\begin{itemize}")
-            for item in content.strip().split('\n'):
-                if item.strip():
-                    lines.append(r"  \item " + parse_inline(item.strip()))
-            lines.append(r"\end{itemize}")
+            lines.extend(_render_nested_list(content, 'itemize'))
             lines.append("")
         elif btype == BLOCK_OL:
-            lines.append(r"\begin{enumerate}")
-            for item in content.strip().split('\n'):
-                if item.strip():
-                    lines.append(r"  \item " + parse_inline(item.strip()))
-            lines.append(r"\end{enumerate}")
+            lines.extend(_render_nested_list(content, 'enumerate'))
             lines.append("")
         elif btype == BLOCK_QUOTE:
             qc = content.strip()
@@ -433,16 +461,7 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
             lang = parts[0].strip()
             code = parts[1] if len(parts) > 1 else ""
             style = LANG_MAP.get(lang, "plainstyle")
-            # 转义 LaTeX 特殊字符
-            code_escaped = code.replace("\\", r"\textbackslash{}")
-            code_escaped = code_escaped.replace("{", r"\{").replace("}", r"\}")
-            code_escaped = code_escaped.replace("_", r"\_")
-            code_escaped = code_escaped.replace("&", r"\&")
-            code_escaped = code_escaped.replace("%", r"\%")
-            code_escaped = code_escaped.replace("$", r"\$")
-            code_escaped = code_escaped.replace("#", r"\#")
-            code_escaped = code_escaped.replace("^", r"\^{}")
-            code_escaped = code_escaped.replace("~", r"\textasciitilde{}")
+            # lstlisting 为 verbatim 语义，代码原样写入，无需预转义
             if style == "pystyle":
                 lines.append(f"\\begin{{lstlisting}}[style=pystyle,caption={{}}]")
             else:
@@ -686,18 +705,10 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
             lines.append(parse_inline(content))
             lines.append("")
         elif btype == BLOCK_UL:
-            lines.append(r"\begin{itemize}")
-            for item in content.strip().split('\n'):
-                if item.strip():
-                    lines.append(r"  \item " + parse_inline(item.strip()))
-            lines.append(r"\end{itemize}")
+            lines.extend(_render_nested_list(content, 'itemize'))
             lines.append("")
         elif btype == BLOCK_OL:
-            lines.append(r"\begin{enumerate}")
-            for item in content.strip().split('\n'):
-                if item.strip():
-                    lines.append(r"  \item " + parse_inline(item.strip()))
-            lines.append(r"\end{enumerate}")
+            lines.extend(_render_nested_list(content, 'enumerate'))
             lines.append("")
         elif btype == BLOCK_QUOTE:
             qc = content.strip()
@@ -722,15 +733,7 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
             lang = parts[0].strip()
             code = parts[1] if len(parts) > 1 else ""
             style = LANG_MAP.get(lang, "plainstyle")
-            code_escaped = code.replace("\\", r"\textbackslash{}")
-            code_escaped = code_escaped.replace("{", r"\{").replace("}", r"\}")
-            code_escaped = code_escaped.replace("_", r"\_")
-            code_escaped = code_escaped.replace("&", r"\&")
-            code_escaped = code_escaped.replace("%", r"\%")
-            code_escaped = code_escaped.replace("$", r"\$")
-            code_escaped = code_escaped.replace("#", r"\#")
-            code_escaped = code_escaped.replace("^", r"\^{}")
-            code_escaped = code_escaped.replace("~", r"\textasciitilde{}")
+            # lstlisting 为 verbatim 语义，代码原样写入，无需预转义
             if style == "pystyle":
                 lines.append(f"\\begin{{lstlisting}}[style=pystyle,caption={{}}]")
             else:

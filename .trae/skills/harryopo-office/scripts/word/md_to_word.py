@@ -279,7 +279,7 @@ def ast_to_elem(node):
 
 
 def latex_to_omath(latex):
-    """LaTeX 数学字符串 → OMML oMath 元素。
+    r"""LaTeX 数学字符串 → OMML oMath 元素。
 
     优先 latex2mathml → MML2OMML.XSL（业界主流，覆盖完整 LaTeX 语法，
     解决 \mathbf / \arg / \sum 等命令乱码）；失败时回退自研轻量解析器。
@@ -544,6 +544,11 @@ def build_document(md_text, config_path=None, output_path='output.docx',
                     if lines[j].strip():
                         formula.append(lines[j].strip())
                     j += 1
+                if j >= n:
+                    # 未闭合的 $$ 绝不能静默吞掉后续全文（与 % 截断同类的隐形数据丢失）
+                    raise ValueError(
+                        f'公式未闭合：第 {i + 1} 行的 $$ 起始后未找到配对的 $$ 结束符，'
+                        f'请检查 Markdown 中的公式块')
                 latex = ' '.join(formula)
             omath = latex_to_omath(latex)
             # 公式编号：向前（跳过空行）找 > 式(N)：
@@ -610,6 +615,32 @@ def build_document(md_text, config_path=None, output_path='output.docx',
             i += 1
             continue
 
+        # ---- 列表（无序 -/*/ +，有序 1.，缩进 2 空格一级嵌套）----
+        m = re.match(r'^(\s*)([-*+]|\d+[.)])\s+(.+)$', raw)
+        if m:
+            j = i
+            while j < n:
+                l = lines[j]
+                mm = re.match(r'^(\s*)([-*+]|\d+[.)])\s+(.+)$', l.rstrip())
+                if not mm:
+                    # 允许列表内单个空行（其后仍是列表项则继续）
+                    if not l.strip() and j + 1 < n and re.match(
+                            r'^(\s*)([-*+]|\d+[.)])\s+', lines[j + 1].rstrip()):
+                        j += 1
+                        continue
+                    break
+                indent = len(mm.group(1).expandtabs(4))
+                level = min(indent // 2, 3)
+                marker_raw, content = mm.group(2), mm.group(3).strip()
+                if marker_raw[0].isdigit():
+                    marker = marker_raw  # 有序保留原编号（如 "1."）
+                else:
+                    marker = '•' if level == 0 else '◦'
+                engine.add_list_item(content, level=level, marker=marker)
+                j += 1
+            i = j
+            continue
+
         # ---- 正文 ----
         engine.add_body(stripped)
         i += 1
@@ -647,9 +678,13 @@ def main():
     output = args.output or str(md_path.with_suffix('.docx'))
 
     md_text = md_path.read_text(encoding='utf-8')
-    build_document(md_text, config_path=config_path,
-                   output_path=output, update_toc=not args.no_toc,
-                   base_dir=md_path.parent, export_pdf=args.pdf)
+    try:
+        build_document(md_text, config_path=config_path,
+                       output_path=output, update_toc=not args.no_toc,
+                       base_dir=md_path.parent, export_pdf=args.pdf)
+    except ValueError as e:
+        print(f'[ERROR] {e}', file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

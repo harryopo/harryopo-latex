@@ -41,28 +41,69 @@ _INLINE_ESCAPES = [
 ]
 
 
+def _strip_braced_cmd(text: str, opener: str, wrap=None) -> str:
+    """按平衡花括号替换单个 LaTeX 格式命令（支持任意嵌套）。
+
+    Args:
+        opener: 命令起始串，如 '\\textbf{' 或 '{\\fzht'
+        wrap: 替换包裹符 ('**','**')；None 表示仅提取纯文本（表格模式）
+    """
+    result = []
+    i = 0
+    is_group = opener.startswith('{')  # {\fzht ...} 分组形式
+    while i < len(text):
+        idx = text.find(opener, i)
+        if idx == -1:
+            result.append(text[i:])
+            break
+        result.append(text[i:idx])
+        j = idx + len(opener)
+        depth, k = 1, j
+        while k < len(text) and depth > 0:
+            if text[k] == '{':
+                depth += 1
+            elif text[k] == '}':
+                depth -= 1
+            k += 1
+        if depth == 0:
+            inner = text[j:k - 1]
+            if is_group:
+                inner = inner.strip()
+            if wrap:
+                result.append(wrap[0] + inner + wrap[1])
+            else:
+                result.append(inner)
+            i = k
+        else:
+            # 花括号未闭合：保留原文继续扫描，不破坏结构
+            result.append(text[idx])
+            i = idx + 1
+    return ''.join(result)
+
+
+def _replace_format_cmds(text: str, table_mode: bool) -> str:
+    """黑体/加粗/斜体命令 → MD 标记（迭代至不动点，嵌套内容逐层展开）"""
+    while True:
+        new = _strip_braced_cmd(text, '{\\fzht',
+                                None if table_mode else ('**', '**'))
+        new = _strip_braced_cmd(new, '\\textbf{',
+                                None if table_mode else ('**', '**'))
+        new = _strip_braced_cmd(new, '\\textit{',
+                                None if table_mode else ('*', '*'))
+        new = _strip_braced_cmd(new, '\\emph{',
+                                None if table_mode else ('*', '*'))
+        if new == text:
+            return new
+        text = new
+
+
 def clean_inline(text: str, table_mode: bool = False) -> str:
     """行内 LaTeX → MD：去自定义宏、转义、保留数学
 
     table_mode: 表格单元格模式。Word 表格字体由模板样式控制，
                 黑体分组 {\fzht X} 只提取纯文本，不转 **（否则星号原样显示）。
     """
-    if table_mode:
-        # 表格单元格：黑体/加粗/斜体 → 纯文本（去格式标记）
-        text = re.sub(r'\{\\fzht\s+([^{}]*)\}', r'\1', text)
-        text = re.sub(r'\\textbf\{([^{}]*)\}', r'\1', text)
-        text = re.sub(r'\\textit\{([^{}]*)\}', r'\1', text)
-        text = re.sub(r'\\emph\{([^{}]*)\}', r'\1', text)
-    else:
-        # 1. 黑体分组语法 {\fzht 文字} → **文字**（多个相邻的合并防交错）
-        #    （同一分组内可能嵌套 \textbf，先处理简单情形）
-        text = re.sub(r'\{\\fzht\s+([^{}]*)\}', r'**\1**', text)
-        # 2. \textbf{...} → **...**（不支持嵌套）
-        text = re.sub(r'\\textbf\{([^{}]*)\}', r'**\1**', text)
-        # 3. \textit{...} → *...*
-        text = re.sub(r'\\textit\{([^{}]*)\}', r'*\1*', text)
-        # 4. \emph{...} → *...*
-        text = re.sub(r'\\emph\{([^{}]*)\}', r'*\1*', text)
+    text = _replace_format_cmds(text, table_mode)
     # 5. 转义字符
     for pat, rep in _INLINE_ESCAPES:
         text = text.replace(pat, rep)

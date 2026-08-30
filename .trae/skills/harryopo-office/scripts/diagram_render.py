@@ -30,12 +30,11 @@ from pathlib import Path
 
 # super-diagram 渲染脚本（全局 skill，可用环境变量 SUPER_DIAGRAM_SCRIPT 覆盖）
 # 注意：不得硬编码用户名（不同机器的用户目录不同，硬编码会导致渲染静默失败）。
-# 自动探测顺序：环境变量 → 当前用户 .trae-cn/skills → 历史用户目录。
+# 自动探测顺序：环境变量 → 当前用户 .trae-cn/skills。
 SUPER_DIAGRAM_CANDIDATES = (
     os.environ.get('SUPER_DIAGRAM_SCRIPT', ''),
     os.path.join(os.path.expanduser('~'), '.trae-cn', 'skills',
                  'super-diagram', 'scripts', 'render_v2.py'),
-    r'c:\Users\Lenovo\.trae-cn\skills\super-diagram\scripts\render_v2.py',
 )
 
 # 图表代码块正则（语言标签 = 引擎名）
@@ -94,7 +93,8 @@ def render_super_diagram(json_text: str, output_path) -> bool:
     try:
         cmd = [sys.executable, str(script), tmp_json,
                '-o', str(output_path), '--scale', '2']
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120,
+                                encoding='utf-8', errors='replace')
         if result.returncode != 0:
             err = (result.stderr or result.stdout).strip()
             print(f'[WARN] super-diagram 渲染失败: {err[-200:]}', file=sys.stderr)
