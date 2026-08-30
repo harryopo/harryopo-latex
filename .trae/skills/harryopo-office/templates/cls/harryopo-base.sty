@@ -291,11 +291,15 @@
 % 第七部分：图表配置
 % ============================================================
 
+% 图/表标题：方正楷体 + 居中 + 全角冒号编号（如“图1：xxx”）
+\DeclareCaptionLabelSeparator{harryopo}{：}
 \captionsetup{
     font=small,
-    labelfont=bf,
+    labelsep=harryopo,
+    labelfont={\fzkt},
+    textfont={\fzkt},
     margin=10pt,
-    format=hang
+    justification=centering
 }
 
 % ============================================================

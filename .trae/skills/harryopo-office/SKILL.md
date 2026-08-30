@@ -1,6 +1,6 @@
 ---
 name: "harryopo-office"
-description: "harryopo 办公文档超级 skill：Word / LaTeX 全格式。Word：Markdown 中间态 → 公文/学术 .docx（方正/开源字体一键切换，原生自动目录、OMML 数学公式、表格/图片/注释/参考文献规范排版）。LaTeX：论文/报告/笔记 PDF，支持从 Markdown/Word 自动转换，或手写 .tex。单双栏、蓝/黑主题、方正字体、XITS 数学、三线表。内置图表融合：super-diagram 架构图/时序图 + Mermaid 流程图自动渲染插入三条链路。触发词：写word、生成word、word文档、docx、公文模板、学术论文word、word转换、latex、论文、报告、PDF、tex、md转latex、word转latex、docx转pdf、markdown转tex、文档转换、架构图、流程图、时序图、框架图、画个图。"
+description: "harryopo 办公文档超级 skill：Word / LaTeX 全格式。Word：Markdown 中间态 → 公文/学术 .docx（方正/开源字体一键切换，原生自动目录、OMML 数学公式、表格/图片/注释/参考文献规范排版）。LaTeX：论文/报告/笔记 PDF，支持从 Markdown/Word 自动转换，或手写 .tex。单双栏、蓝/黑主题、方正字体、XITS 数学、三线表。内置图表融合：diagram-design 编辑级图表（39 类型：架构/流程/时序/泳道/ER/桑基等）+ super-diagram 架构图/时序图 + Mermaid 流程图自动渲染插入三条链路。触发词：写word、生成word、word文档、docx、公文模板、学术论文word、word转换、latex、论文、报告、PDF、tex、md转latex、word转latex、docx转pdf、markdown转tex、文档转换、架构图、流程图、时序图、框架图、画个图、配图、diagram-design。"
 ---
 # harryopo-office
 
@@ -15,10 +15,12 @@ harryopo 办公文档超级 skill —— 覆盖 **Word (.docx)** 与 **LaTeX (PD
 harryopo-office/
 ├── SKILL.md                              # 本文件
 ├── scripts/
+│   ├── office.py                        # ★ 统一主入口（render / diagram / template 三子命令）
 │   ├── convert.py                        # MD/DOCX → paper/report .tex（纯 Python）
 │   ├── tex2md.py                         # .tex → MD 中间态（反向链路：LaTeX→Word/PDF）
-│   ├── diagram_render.py                 # 图表统一渲染器（super-diagram 架构图/时序图 + mermaid）
-│   ├── md2latex.py                       # MD → math-notes .tex（Pandoc 优先 + Python 回退）
+│   ├── diagram_render.py                 # 图表统一渲染器（super-diagram 架构图/时序图 + mermaid，被 office.py 调用）
+│   ├── diagram_design_render.py          # diagram-design HTML → PNG（--svg 仅截 SVG / --check 自检）
+│   ├── md2latex.py                       # math-notes MD → .tex（纯 Python 版；Pandoc 优先版在 templates/math-notes/md2latex.py）
 │   ├── mineru_cli.py                     # DOCX/PDF → MD（MinerU 解析 + 清洗 + HTML表格转LaTeX）
 │   ├── html_table_to_latex.py            # HTML 表格 → LaTeX（colspan/rowspan → multicolumn/multirow）
 │   ├── test-sample.md                    # 测试用 Markdown
@@ -29,6 +31,8 @@ harryopo-office/
 │       │   ├── docx_template.py          #     主入口 CLI（extract/validate/render）
 │       │   ├── schema_extractor.py       #     模板占位符 → JSON Schema（类型推断）
 │       │   ├── template_render.py        #     data.json → 保真 .docx（含图片 InlineImage）
+│       │   ├── template_registry.py      #     模板注册表（入库/发现/schema，manifest 白名单校验）
+│       │   ├── seed_builtins.py          #     内置模板幂等初始化
 │       │   └── examples/
 │       │       ├── make_example_template.py  # 生成示例模板（占位符/循环表格/图片）
 │       │       ├── template.docx / schema.json / data.json / output.docx
@@ -37,26 +41,40 @@ harryopo-office/
 │       │   └── opensource.json           #   开源字体方案（Windows 系统字体）
 │       └── examples/
 │           └── example.md                #   完整示例（标题/摘要/表格/公式/图片/注释/参考文献）
-└── templates/                            # 完整 LaTeX 模板包（自包含）
+└── skills/
+    └── diagram-design/                   # 编辑级图表 skill（39 类型 × 3 变体）
+        ├── SKILL.md                      #   设计规范（4px网格/6连接器规则/焦点色/密度预算）
+        ├── assets/                       #   模板 + 117+ 成品示例 HTML
+        ├── references/                   #   53 个类型/规范参考文档
+        └── scripts/                      #   self_check.py / mermaid_extract.py / drawio_extract.py
+├── templates/                            # 完整 LaTeX 模板包（自包含）
     ├── build.ps1                         # 编译脚本（环境检查 + TEXINPUTS + xelatex×3）
     ├── cls/                              # 文档类/样式
-    │   ├── harryopo-base.sty             #   共享基础包 v4.3
-    │   ├── harryopo-paper.cls            #   论文文档类（单/双栏 + nomath）v4.1
-    │   └── harryopo-report.cls           #   报告文档类（封面 + 目录）v4.1
+    │   ├── harryopo-base.sty             #   共享基础包 v4.2
+    │   ├── harryopo-paper.cls            #   论文文档类（单/双栏 + nomath）v4.0
+    │   ├── harryopo-report.cls           #   报告文档类（封面 + 目录）v4.0
+    │   └── flushend.sty                  #   双栏末页栏平衡（TinyTeX 缺包时的项目自包含副本）
     ├── fonts/                            # 内嵌字体（18个文件，无需系统安装）
-    ├── paper/                            # 论文目录
-    │   ├── showcase-paper.tex/pdf        #   全功能展示
-    │   └── example-paper-twocolumn.tex/pdf  # 双栏示例
-    ├── report/                           # 报告目录
-    │   ├── showcase-report.tex/pdf       #   全功能展示
-    │   └── example-report.tex/pdf        #   简单示例
+    ├── previews/                         # 示例文档 + 预览方案（5 个最新示例 md）
+    │   ├── README.md                     #   示例清单 + office.py 生成命令 + 元信息约定
+    │   ├── harryopo-preview.css          #   MD 预览样式（模拟蓝主题）
+    │   ├── paper-single-column.md        #   论文单栏示例
+    │   ├── paper-twocolumn.md            #   论文双栏示例
+    │   ├── paper-showcase.md             #   论文全特性示例（算法/公式/多表/引用）
+    │   ├── report.md                     #   报告示例（章节式 + 自动目录）
+    │   └── report-showcase.md            #   报告全特性示例（mermaid/RAG 多Agent）
+    ├── paper/                            # 论文编译目录（运行时生成 e2e 产物）
+    │   └── figures/                      #   占位图（office.py 自动生成真实图）
+    ├── report/                           # 报告编译目录（运行时生成 e2e 产物）
     └── math-notes/                       # 数理笔记目录（独立体系）
         ├── harryopo-mathnotes.cls        #   笔记文档类（独立，不加载base.sty）
         ├── md2latex.py                   #   MD→LaTeX 统一脚本（Pandoc 引擎 + Python 回退）
+        ├── md2latex.ps1                  #   PowerShell 便捷编译入口
         ├── example-note.md               #   示例 Markdown（高等数学笔记）
-        ├── main.tex                       #   手写示例
+        ├── README.md                     #   使用说明
         ├── build.ps1                     #   编译脚本
         ├── fonts/                        #   专用字体（XITS + TeX Gyre Heros）
+        ├── figures/                      #   占位图
         └── pandoc/                       #   Pandoc 集成
             ├── mathnotes-template.latex  #     自定义 LaTeX 模板
             └── mathnotes-table.lua       #     智能表格 Lua Filter
@@ -66,12 +84,63 @@ harryopo-office/
 
 ## 工作流程
 
+### 文档生成主流程（推荐路径 · 内容 → 预览 → 图表建议 → 插入 → Word/LaTeX）
+
+**用户写文档 / 文章 / 报告时直接调用本 skill，走以下推荐路径：**
+
+```
+用户需求（写文档 / 文章 / 报告）
+  │
+  ▼ ① 元信息提问（MD 生成前 · 必须）
+AI 先提问文档元信息（AskUserQuestion 一次问清，用户可跳过不填）：
+  - 文档类型：论文 / 报告 / 笔记
+  - 作者：姓名（可含职位/学院/学号注释，如 "张三 计算机学院 2025000101"）
+  - 学校 / 单位
+  - 日期（今天 / 自定义）
+  - 副标题（可选）、栏数（论文：单栏/双栏）、主题（蓝/深紫/黑白灰）
+  用户确认后进入 ②
+  │
+  ▼ ② 内容生成
+AI 产出结构化 Markdown 中间态（用户可直接编辑），元信息按约定写入
+  （`> 副标题：` / `> 作者：` / `> 单位：` / `> 日期：` blockquote 形式）
+  │
+  ▼ ③ 内容预览
+呈现 MD 给用户确认内容是否有误（可编辑修改）
+  │
+  ▼ ④ 图表智能分析（贯穿内容生成过程）
+AI 阅读内容 → 判断是否适合配图（diagram-design 30+ 类型）
+  ├─ 适合 → 提问用户："检测到 XX 内容，建议生成【架构图 / 流程图 / 时序图 / …】，
+  │          要生成哪个？"（内容适配多类型时给用户选择）→ 用户确认后进入 ⑤
+  └─ 不适合 / 用户拒绝 → 跳过（禁止擅自生成）
+  │
+  ▼ ⑤ 图表生成与审核
+diagram-design 生成 HTML → PNG → self_check 自检 → 展示图片地址给用户审核（满意再继续）
+  │
+  ▼ ⑥ 智能插入（写好注释）
+审核通过 → 图片引用插入文档对应位置（图注：`![图N：xxx](figures/xx.png)`）
+        → 需要补充说明时加 `> 注：xxx` 注释
+  │
+  ▼ ⑦ 最终输出
+office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
+        → 产物统一归到 output/<项目名>/（md + docx + tex + pdf + figures/）
+        → 提示用户：LaTeX 源码可直接在 IDE（VS Code + LaTeX Workshop）打开编辑实时预览
+```
+
+**各环节硬约束**：
+- **元信息提问优先于内容生成**：① 未完成（用户未回答/跳过）不得进入 ②；作者/学校/日期是论文必备元信息
+- **内容确认优先于格式转换**：② 内容预览、④ 图审核两步必须用户确认后才继续
+- **图表属于视觉产物**：不确认不进文档（禁止未确认直接插入）
+- **插入的图片必须带图注**；补充说明用 `> 注：` 注释块
+- **用户未要求图时**：AI 主动分析（见下方智能分析映射表），适合就提问，不适合不说
+- **产物目录统一**：最终交付集中到 `output/<项目名>/`（Markdown 源 / Word docx / LaTeX tex / PDF / figures 图片），便于查看编辑
+
 ### 触发词识别
 
 当用户输入包含以下关键词时，进入对应流程：
 
 | 用户意图 | 关键词示例 | 处理流程 |
 |----------|-----------|----------|
+| 写文档/文章/报告 | "写文档"、"写文章"、"写报告"、"写方案"、"帮我写"、"生成文章" | **走文档生成主流程：内容 → 预览 → 图表建议 → 插入 → Word/LaTeX** |
 | 生成 Word 文档 | "写word"、"生成word"、"word文档"、"docx"、"公文"、"学术论文word" | **先出 MD 中间态 → md_to_word.py 渲染** |
 | 按用户模板填充 | "按模板"、"模板填充"、"套用模板"、"docxtpl"、"填写模板"、"根据模板生成" | **extract schema → AI 产 data.json → render（docxtpl 保真）** |
 | 总结报告/总结文档 | "总结报告"、"总结文档"、"写总结"、"生成总结" | **先总结后转换** |
@@ -79,7 +148,7 @@ harryopo-office/
 | 输出 LaTeX | "输出 LaTeX"、"生成 LaTeX"、"转 latex"、"写 tex" | 确认源材料后转换 |
 | MD/DOCX 转 LaTeX | "md转latex"、"docx转pdf"、"markdown转tex" | 直接转换 |
 | 手写 LaTeX | "写论文"、"写报告"、"写笔记" | 提供骨架模板 |
-| 生成框架图 | "框架图"、"架构图"、"流程图"、"时序图"、"画个图"、"配图" | **先提问是否生成 → 产出 super-diagram JSON 代码块 → 自动渲染插入三条链路** |
+| 生成框架图 | "框架图"、"架构图"、"流程图"、"时序图"、"画个图"、"配图" | **先提问是否生成 → diagram-design 生成（可多类型选择）→ 渲染插入三条链路** |
 
 ### Word 生成流程（Markdown 中间态 → .docx）
 
@@ -96,8 +165,11 @@ AI 按以下约定生成 .md（**必须呈现给用户确认/编辑，用户可�
 | Markdown 写法 | Word 效果 |
 |---------------|-----------|
 | `# 主标题`（文档第一个 `# `） | 大标题（方正大标宋，居中） |
-| `> 副标题：xxx` | 副标题（紧随主标题，可空行分隔） |
-| 主标题后第一段裸文本（如 `张三 计算机学院 2025000101`）或 `> 作者：xxx` | 作者（居中楷体四号 14pt） |
+| `> 副标题：xxx` | 副标题（紧随主标题下方，居中楷体） |
+| `> 作者：xxx`（如 `张三 计算机学院 2025000101`） | 作者（居中楷体四号 14pt） |
+| `> 单位：xxx` / `> 学校：xxx` | 学校/单位（居中楷体小字；LaTeX 并入作者行下方仿宋） |
+| `> 日期：xxx` | 日期（居中仿宋；LaTeX 渲染为 `\date{}`） |
+| 主标题后第一段裸文本（无 `> 前缀`，长度<60） | 作者（兼容旧写法，居中楷体） |
 | `**摘要：** 内容` | 摘要（"摘要："黑体 + 内容楷体） |
 | `**关键词：** 词1；词2` | 关键词（"关键词："黑体 + 内容楷体） |
 | `# 一、引言`（后续 `# `） | 一级标题 Heading 1（进目录） |
@@ -136,9 +208,10 @@ python md_to_word.py input.md
 # 开源字体版（Windows 系统字体，免授权）
 python md_to_word.py input.md -c configs/opensource.json
 
-# 指定输出路径 / 不自动更新目录
+# 指定输出路径 / 不自动更新目录 / 同会话导出 PDF
 python md_to_word.py input.md -o output.docx
 python md_to_word.py input.md --no-toc
+python md_to_word.py input.md --pdf
 ```
 
 渲染自动完成：
@@ -266,93 +339,105 @@ python office.py render input.md --template harryopo-report   # 按模板路由�
 
 **manifest 严格校验**：未知字段拒绝加载（对齐 M365 Copilot），内置模板受删除保护。
 
-### 图表融合流程（super-diagram 框架图 + mermaid 流程图）
+### 图表生成与插入流程（diagram-design 编辑级图表 · 39 类型）
 
-**核心：文档涉及架构/流程/时序时，AI 先提问用户是否生成框架图；确认后产出结构化图表数据嵌入 MD，渲染器自动转 PNG 并插入三条链路（Word/paper/notes）。**
+**核心闭环**：AI 智能分析 → 用户确认 → diagram-design 生成（39 类型编辑级图表）→ 渲染 PNG → 用户审核 → 插入 Word / LaTeX。用户未要求图时，AI 主动分析内容是否适合配图并给出建议。
 
-#### 第1步：提问用户（关键）
+#### 第1步：智能分析 & 触发（关键）
 
-产出 MD 中间态时，若内容涉及以下场景，**必须主动提问**："文档涉及 XX 架构/流程，是否需要生成一张框架图？"
+**触发条件**：
 
-| 文档内容 | 建议图表 |
-|----------|----------|
-| 系统架构、模块划分、技术栈层次 | 架构图（super-diagram `architecture`） |
-| 业务/数据流程、编排流水线 | 流程图（super-diagram `architecture` 线性布局） |
-| 调用链、消息交互、时序 | 时序图（super-diagram `sequence`） |
-| 简单流程、类图式说明 | Mermaid（````mermaid`） |
+- **用户明确要求图**（"画个图"/"配图"/"架构图"/"流程图"/"时序图"等）→ 直接进入第2步
+- **用户未要求** → AI 阅读文档内容后**主动判断是否适合配图**：
 
-用户确认后 → 第2步；用户不需要 → 跳过。
+| 文档内容 | 建议？ | 建议图表（diagram-design 类型） |
+|----------|--------|-------------------------------|
+| 系统架构、模块划分、技术栈层次 | ✅ 建议 | Architecture（架构图） |
+| 业务流程、编排流水线、决策逻辑 | ✅ 建议 | Flowchart / Process / Data flow |
+| 调用链、消息交互、多角色时序 | ✅ 建议 | Sequence（时序图） |
+| 跨部门/多角色协作流程 | ✅ 建议 | Swimlane（泳道图） |
+| 实体关系、数据模型、数据库表 | ✅ 建议 | ER / Database schema |
+| 优先级/两维对比 | ✅ 建议 | Quadrant（象限图） |
+| 数据分布、趋势、占比 | ✅ 建议 | Bar / Line / Treemap |
+| 简单列表、纯文字说明 | ❌ 不建议 | （用表格/正文即可） |
 
-#### 第2步：产出图表数据代码块（AI 嵌入 MD）
+给用户一句具体建议（例如："文档涉及系统架构，建议配一张架构图，是否生成？"）→ 用户确认 → 第2步；用户拒绝 → 跳过（**禁止擅自生成**）。**内容适配多类型时给出选择**（例如："这段内容可配【架构图 / 时序图】，要生成哪个？"）。
 
-在文档对应位置插入图表代码块，渲染器（`office.py render` 自动执行）会把代码块替换为 `![图注](figures/xxx.png)`：
+#### 第2步：引擎选型
 
-**架构图**（````super-diagram` + architecture JSON，AI 按契约算坐标）：
+| 场景 | 引擎 | 说明 |
+|------|------|------|
+| **编辑级图表（首选）** | **diagram-design** | 39 类型 × 3 变体（极简亮/暗/全编辑），白纸黑字编辑风，可配品牌色；`skills/diagram-design/` |
+| 快速简单流程图 | mermaid | `` `mermaid` `` 代码块，渲染器自动转 PNG |
+| 需要程序化坐标的架构/时序 | super-diagram | `` `super-diagram` `` JSON 代码块 |
 
-````markdown
-```super-diagram
-{
-  "type": "architecture",
-  "canvas": {"width": 960, "height": 480, "theme": "light"},
-  "title": "图1：智能体编排系统总体架构",
-  "subtitle": "用户 → 网关 → 服务 → 数据库",
-  "nodes": [
-    {"id": "user", "en": "User", "zh": "用户", "x": 400, "y": 80, "w": 160, "h": 64, "type": "frontend"},
-    {"id": "gw", "en": "API Gateway", "zh": "API 网关", "x": 400, "y": 220, "w": 160, "h": 64, "type": "backend"},
-    {"id": "svc", "en": "Agent Service", "zh": "智能体服务", "x": 400, "y": 360, "w": 160, "h": 64, "type": "backend"}
-  ],
-  "edges": [
-    {"from": "user", "to": "gw", "label": "对话"},
-    {"from": "gw", "to": "svc", "label": "请求"}
-  ]
-}
-```
-````
+#### 第3步：生成（diagram-design 流程）
 
-**时序图**（````super-diagram` + sequence JSON）：
+1. **读规范**：加载 `skills/diagram-design/SKILL.md` + 对应 `references/type-*.md`（按图类型选），先确认 type/size/复杂预算
+2. **写 HTML**：复制 `skills/diagram-design/assets/template.html`（或 `-dark`/`-full`）为底，按规范手写 SVG：
+   - **语义 token**：`paper` 底 / `ink` 文字 / `muted` 次级 / `accent` 焦点色（≤2 个元素）；**中文环境字体栈必须补 `'Microsoft YaHei'`** fallback（模板原字体 Geist/Instrument Serif 无中文）
+   - **4px 网格**：所有 x/y/字号/间距必须被 4 整除
+   - **6 条连接器规则**：正交圆角 r=8、箭头标签距线 6-10px、连接器不重叠、同边 fan-out ≥12px、不穿非端点盒子、标签遮罩不压节点
+   - **密度 4/10**：≤9 节点、≤12 箭头；超过则拆图（overview + detail）
+   - **无障碍**：`<svg role="img" aria-labelledby>`，`<title>` 第一个子元素，slug 前缀 ID
+3. **保存 HTML** → `figures/图N-描述.html`
+4. **渲染 PNG + 自检**：
+   ```powershell
+   cd .trae/skills/harryopo-office/scripts
+   python office.py diagram figures/图N-描述.html -o figures/图N-描述.png --svg --check
+   ```
+   （`--svg` 只截 SVG 区域不含标题；`--check` 先跑 self_check.py 验证）
 
-````markdown
-```super-diagram
-{
-  "type": "sequence",
-  "canvas": {"width": 1100, "height": 760, "theme": "light"},
-  "title": "图2：多轮对话调用时序",
-  "participants": [
-    {"id": "user", "en": "User", "zh": "用户", "kind": "user"},
-    {"id": "llm", "en": "LLM", "zh": "大模型", "kind": "db"}
-  ],
-  "messages": [
-    {"from": "user", "to": "llm", "en": "POST /chat", "zh": "发送问题", "time": "0ms"},
-    {"from": "llm", "to": "user", "en": "LLMOutput", "zh": "生成回复", "async": true, "time": "1.2s"}
-  ]
-}
-```
-````
-
-**图注规则**：`title` 字段就是图片下方的图注（如 `图1：xxx`），AI 写完整编号与文案，渲染器原样使用。
-
-#### 第3步：坐标布局铁律（AI 计算架构图坐标时必须遵守）
-
-1. **网格对齐**：所有 `x, y` 必须是 **20 的倍数**
-2. **层间垂直间距 ≥ 120px**（如 y=100 → y=220 → y=360）
-3. **同层水平间距 ≥ 150px**（节点中心到中心）
-4. **画布留边 ≥ 40px**：所有节点必须在 `canvas.width × height` 内
-5. **体现拓扑语义**：星型分发（源居中扇开）、线性流水（左→右一字排开）、分层架构（上→下垂直）
-6. **节点尺寸**：标准 160×64，数据库 160×56
-
-#### 第4步：自动渲染（无需手动操作）
-
-`office.py render` 自动完成：识别 ````super-diagram` / ````mermaid` 代码块 → 渲染 PNG 到 `figures/` → 替换为图片引用 → Word/paper/notes 三条链路自动带图带注。渲染失败保留代码块便于排查。
-
-**依赖**：super-diagram skill 渲染脚本（`c:\Users\Lenovo\.trae-cn\skills\super-diagram\scripts\render_v2.py`，可用 `SUPER_DIAGRAM_SCRIPT` 环境变量覆盖）；PNG 导出需 `playwright`（含 chromium）。mermaid 需 `mmdc`。
-
-#### 第5步：渲染后展示确认（关键闭环）
+#### 第4步：用户审核（关键闭环）
 
 渲染出 PNG 后，**必须先把图展示给用户确认是否满意**：
-- 满意 → 继续生成 Word / paper / notes 三条链路
-- 不满意 → 按用户反馈调整 JSON 拓扑/坐标/图注，重新渲染，**直到用户满意再继续**（禁止未确认直接进入文档链路）
+- 满意 → 进入第5步
+- 不满意 → 按用户反馈修改 HTML（拓扑/坐标/配色/图注）→ 重新渲染 → **直到用户满意再继续**（禁止未确认直接插入文档）
 
 > 图表属于视觉产物，用户是否认可必须人工确认——内容确认优先于格式转换，图确认优先于文档生成。
+
+#### 第5步：智能插入（写好注释）
+
+审核通过后，在 MD 中间态对应位置写图片引用（**图注必须完整**：`图N：` 编号 + 说明文案，写在 `![]()` 的 alt 里）：
+
+```markdown
+![图3：多智能体编排平台架构](figures/图3-多智能体编排.png)
+
+> 注：本图展示接入层、编排层、智能体执行层与基础设施的关系。
+```
+
+需要补充说明时，紧跟图片后加 `> 注：xxx` 注释块（渲染为仿宋灰色注释）。**插入位置与正文逻辑衔接**：图应紧跟首次引用它的段落之后。
+
+---
+
+**备选引擎流程（super-diagram / mermaid，保留）**：AI 在 MD 中嵌入结构化代码块，`office.py render` 自动识别并渲染：
+
+- **架构图**（````super-diagram` + architecture JSON，AI 按契约算坐标）：
+  ````markdown
+  ```super-diagram
+  {
+    "type": "architecture",
+    "canvas": {"width": 960, "height": 480, "theme": "light"},
+    "title": "图1：智能体编排系统总体架构",
+    "subtitle": "用户 → 网关 → 服务 → 数据库",
+    "nodes": [
+      {"id": "user", "en": "User", "zh": "用户", "x": 400, "y": 80, "w": 160, "h": 64, "type": "frontend"},
+      {"id": "gw", "en": "API Gateway", "zh": "API 网关", "x": 400, "y": 220, "w": 160, "h": 64, "type": "backend"},
+      {"id": "svc", "en": "Agent Service", "zh": "智能体服务", "x": 400, "y": 360, "w": 160, "h": 64, "type": "backend"}
+    ],
+    "edges": [
+      {"from": "user", "to": "gw", "label": "对话"},
+      {"from": "gw", "to": "svc", "label": "请求"}
+    ]
+  }
+  ```
+  ````
+- **时序图**（````super-diagram` + sequence JSON）：`participants` + `messages`
+- **mermaid**：````mermaid` 代码块
+- **坐标布局铁律**（AI 算坐标时遵守）：网格对齐（x/y 是 20 的倍数）、层间垂直间距 ≥120px、同层水平间距 ≥150px、画布留边 ≥40px、体现拓扑语义、节点 160×64
+- **渲染**：`office.py render` 自动识别代码块 → PNG → 图片引用 → 三条链路
+
+**依赖**：diagram-design 渲染需 `playwright`（含 chromium，`office.py diagram` 委托 `diagram_design_render.py`）；super-diagram 需 `SUPER_DIAGRAM_SCRIPT` 环境变量（默认自动探测 `~/.trae-cn/skills/super-diagram/scripts/render_v2.py`，按当前用户目录解析，无需手动设置）；mermaid 需 `mmdc`。
 
 ### 先总结后转换流程（关键）
 
@@ -527,7 +612,7 @@ xelatex -interaction=nonstopmode output.tex
 xelatex -interaction=nonstopmode output.tex
 ```
 
-### 方式B：MD/DOCX → paper/report（convert.py）
+### 方式C：MD/DOCX → paper/report（convert.py）
 
 收到用户上传的 `.md` / `.docx` 后，使用纯 Python 脚本转换。
 
@@ -838,6 +923,7 @@ Pandoc 原生支持几乎所有 Markdown 扩展语法，无需手动映射：
 - **必需**：Python 3.7+、`python-docx`（`pip install python-docx`）
 - **数学公式**：`lxml`（构建 OMML）
 - **TOC 自动更新**：`pywin32`（`pip install pywin32`，Windows + 已装 Word；无 COM 时自动跳过并提示手动"更新域"）
+- **模板填充**：`docxtpl`（`pip install docxtpl`，docxtpl 模板子 skill 用）
 - **中文字体**：方正方案需系统已装方正 GBK 字体；开源方案用 Windows 自带宋体/黑体/楷体/仿宋
 
 ### LaTeX 流程
@@ -846,3 +932,8 @@ Pandoc 原生支持几乎所有 Markdown 扩展语法，无需手动映射：
 - **DOCX 转换**：office.py 首选 `anydoc`（`pip install firecrawl-anydoc`，无图文档毫秒级转换，GFM 表格原生），MinerU 3.0+（`pip install -U "mineru[all]"`）+ python-docx
 - **字体**：已内嵌于 `templates/fonts/`，无需单独安装
 - **关键**：fontspec v2.9+ 语法要求 `\setCJKmainfont{FONTNAME}[options]`（name 在前），反之为 `[options]{name}` 会导致方正字体加载失败并回退到 ctex 默认字体
+
+### 图表流程
+- **diagram-design 渲染**：`playwright`（`pip install playwright` + `PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright/ python -m playwright install chromium`），`office.py diagram` 委托 `diagram_design_render.py`
+- **super-diagram**：`SUPER_DIAGRAM_SCRIPT` 环境变量可覆盖渲染脚本路径（默认自动探测 `~/.trae-cn/skills/super-diagram/scripts/render_v2.py`）
+- **mermaid**：`mmdc`（`npm install -g @mermaid-js/mermaid-cli`，含 puppeteer chromium）

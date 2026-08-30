@@ -18,6 +18,7 @@ word_template_engine.py — 公文/学术 Word 模板引擎
 """
 
 import json
+import os
 import re
 from pathlib import Path
 from docx import Document
@@ -31,6 +32,71 @@ from lxml import etree
 
 # OMML 命名空间
 M_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/math'
+
+
+# ============================================================
+# LaTeX 数学 → OMML（Word 原生公式）
+#
+# 链路：latex2mathml(LaTeX→MathML) → Office MML2OMML.XSL(MathML→OMML)
+# 这是业界主流方案（tex2word / formulas-in-word 同款）。相比自研解析器，
+# 它覆盖完整 LaTeX 数学语法（\mathbf / \arg\max / \begin{aligned} / \sum 上下限等），
+# 彻底解决命令映射不全导致的公式乱码。
+# ============================================================
+
+def _find_mml_xsl():
+    """定位 Office 官方 MML2OMML.XSL（MathML → OMML 转换器）"""
+    cands = [
+        os.environ.get('MML2OMML_XSL', ''),
+        r'C:\Program Files\Microsoft Office\root\Office16\MML2OMML.XSL',
+        r'C:\Program Files (x86)\Microsoft Office\root\Office16\MML2OMML.XSL',
+        r'C:\Program Files\Microsoft Office\root\Office15\MML2OMML.XSL',
+    ]
+    for c in cands:
+        if c and os.path.exists(c):
+            return c
+    return None
+
+
+_XSLT_CACHE = None
+
+
+def _get_mml_xslt():
+    """加载（并缓存）MML2OMML.XSL 转换器，找不到返回 None"""
+    global _XSLT_CACHE
+    if _XSLT_CACHE is None:
+        xsl_path = _find_mml_xsl()
+        _XSLT_CACHE = etree.XSLT(etree.parse(xsl_path)) if xsl_path else None
+    return _XSLT_CACHE
+
+
+def latex_to_omml(latex):
+    """LaTeX 数学字符串 → OMML oMath 元素（含 m:oMath 命名空间）。
+
+    依赖：latex2mathml（pip install latex2mathml）+ Office MML2OMML.XSL。
+    环境不具备时返回 None，调用方自行兜底。
+    """
+    xslt = _get_mml_xslt()
+    if xslt is None:
+        return None
+    try:
+        import latex2mathml.converter
+    except ImportError:
+        return None
+    try:
+        # 预处理：latex2mathml 不识别组合运算符命令，替换为它原生支持的写法
+        latex = latex.strip().strip('$').strip()
+        latex = latex.replace(r'\arg\max', r'\argmax')
+        mathml = latex2mathml.converter.convert(latex)
+        mm_root = etree.fromstring(mathml.encode('utf-8'))
+        result = xslt(mm_root)
+        root = result.getroot()
+        # XSLT 输出可能是单个 m:oMath（此时 root 即公式），也可能包在 oMathPara 中
+        if root.tag == '{%s}oMath' % M_NS:
+            return root
+        omath = root.find('.//{%s}oMath' % M_NS)
+        return omath
+    except Exception:
+        return None
 
 
 class WordTemplateEngine:
@@ -172,13 +238,13 @@ class WordTemplateEngine:
                        size=self.config['styles']['title']['size'],
                        color=self._get_color('dark'))
 
-        # 副标题
+        # 副标题（与主标题同字体同字号，仅换行区分）
         if subtitle:
             p = self.doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             self._set_spacing(p, before=4, after=12)
-            self._make_run(p, subtitle, self._get_font('heading1'),
-                           size=self.config['styles']['heading1']['size'],
+            self._make_run(p, subtitle, self._get_font('title'),
+                           size=self.config['styles']['title']['size'],
                            color=self._get_color('sub'))
 
         # 作者（居中楷体，四号 14pt，与 LaTeX \Large 对应）
@@ -280,16 +346,30 @@ class WordTemplateEngine:
                        size=self.config['styles']['heading4']['size'],
                        color=self._get_color('sub'))
 
+    def _make_math_inline(self, para, latex):
+        """行内公式：把 LaTeX 转成 OMML 元素插入段落 run 流。
+        转换失败返回 False（由调用方按普通文本兜底）。"""
+        omath = latex_to_omml(latex)
+        if omath is None:
+            return False
+        para._p.append(omath)
+        return True
+
     def _add_inline_runs(self, para, text, cn_font, size=12, bold=False,
                          color=None):
-        """向段落添加 run，支持行内 **加粗** → 黑体片段"""
-        parts = re.split(r'(\*\*.+?\*\*)', text)
+        """向段落添加 run，支持行内 **加粗** → 黑体片段、$...$ → 原生公式"""
+        parts = re.split(r'(\*\*.+?\*\*|\$[^$\n]+\$)', text)
         for part in parts:
             if not part:
                 continue
             if part.startswith('**') and part.endswith('**') and len(part) > 4:
                 self._make_run(para, part[2:-2], self._get_font('heading2'),
                                size=size, bold=True, color=color)
+            elif part.startswith('$') and part.endswith('$') and len(part) > 2:
+                # 行内公式 → Word 原生 OMML（预览 KaTeX 与 Word 渲染一致）
+                if not self._make_math_inline(para, part[1:-1]):
+                    self._make_run(para, part, cn_font, size=size,
+                                   bold=bold, color=color)
             else:
                 self._make_run(para, part, cn_font, size=size,
                                bold=bold, color=color)
@@ -306,12 +386,12 @@ class WordTemplateEngine:
             self._set_indent(p, 2)
         self._add_inline_runs(p, text, self._get_font('body'), size=12)
 
-    def add_annotation(self, text):
-        """注释段落（仿宋，五号，灰色）"""
+    def add_annotation(self, text, font_key='annotation'):
+        """注释段落（默认仿宋，五号，灰色；表格/图片注可传 'heading3' 用楷体）"""
         p = self.doc.add_paragraph()
         self._set_spacing(p, before=4, after=4)
         self._set_indent(p, 2)
-        self._make_run(p, text, self._get_font('annotation'),
+        self._make_run(p, text, self._get_font(font_key),
                        size=10.5, color=self._get_color('gray'))
 
     def add_caption(self, text):
@@ -337,7 +417,7 @@ class WordTemplateEngine:
                        color=self._get_color('gray'))
         self.add_caption(caption_text)
         if note:
-            self.add_annotation(note)
+            self.add_annotation(note, font_key='heading3')  # 占位图注：楷体
 
     def add_picture(self, image_path, caption_text=None, note=None, width_cm=14.0):
         """
@@ -364,24 +444,56 @@ class WordTemplateEngine:
         if caption_text:
             self.add_caption(caption_text)
         if note:
-            self.add_annotation(note)
+            self.add_annotation(note, font_key='heading3')  # 图片注：楷体
+
+    def _set_table_three_line_borders(self, table):
+        """三线表边框：上下粗线（1.5pt）+ 表头下细线（0.75pt），无竖线。
+
+        与 LaTeX booktabs 三线表一致，保证 Word/PDF/预览视觉统一。
+        """
+        tblPr = table._tbl.tblPr
+        # 整表边框：仅上下粗线
+        borders = OxmlElement('w:tblBorders')
+        for tag, sz in (('top', 12), ('bottom', 12)):
+            el = OxmlElement(f'w:{tag}')
+            el.set(qn('w:val'), 'single')
+            el.set(qn('w:sz'), str(sz))
+            el.set(qn('w:space'), '0')
+            el.set(qn('w:color'), '000000')
+            borders.append(el)
+        for tag in ('left', 'right', 'insideH', 'insideV'):
+            el = OxmlElement(f'w:{tag}')
+            el.set(qn('w:val'), 'none')
+            el.set(qn('w:sz'), '0')
+            el.set(qn('w:space'), '0')
+            el.set(qn('w:color'), 'auto')
+            borders.append(el)
+        tblPr.append(borders)
+        # 表头行下边线（细线）
+        for cell in table.rows[0].cells:
+            tcPr = cell._tc.get_or_add_tcPr()
+            tcBorders = OxmlElement('w:tcBorders')
+            bottom = OxmlElement('w:bottom')
+            bottom.set(qn('w:val'), 'single')
+            bottom.set(qn('w:sz'), '6')
+            bottom.set(qn('w:space'), '0')
+            bottom.set(qn('w:color'), '000000')
+            tcBorders.append(bottom)
+            tcPr.append(tcBorders)
 
     def add_table(self, headers, rows, caption_text=None, note=None):
         """
-        创建表格（标题在上方，注释在下方，表头黑体居中，内容水平居中）
+        创建三线表（表头黑体居中，内容水平居中；标题与表注均在表格下方）
 
         Args:
             headers: 表头列表
             rows: 数据行列表（每行为列表）
-            caption_text: 表格标题（可选）
-            note: 注释文本（可选，放在表格下方）
+            caption_text: 表格标题（可选，放在表格下方）
+            note: 表注文本（可选，放在标题下方，如 `注：数据来源...`）
         """
-        if caption_text:
-            self.add_caption(caption_text)
-
         table = self.doc.add_table(rows=1 + len(rows), cols=len(headers))
-        table.style = 'Table Grid'
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        self._set_table_three_line_borders(table)
 
         # 表头：黑体加粗居中
         for i, h in enumerate(headers):
@@ -391,21 +503,24 @@ class WordTemplateEngine:
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             self._make_run(p, h, self._get_font('heading2'), size=10.5, bold=True)
 
-        # 数据行：全部水平居中
+        # 数据行：全部水平居中（单元格支持行内 **加粗** 与 $...$ 公式）
         for r, row_data in enumerate(rows):
             for c, val in enumerate(row_data):
                 cell = table.rows[r + 1].cells[c]
                 cell.text = ''
                 p = cell.paragraphs[0]
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                self._make_run(p, val, self._get_font('body'), size=10.5)
+                self._add_inline_runs(p, val, self._get_font('body'), size=10.5)
 
+        # 标题与表注放表格下方（符合"表格注释在表格下面"的要求）
+        if caption_text:
+            self.add_caption(caption_text)
         if note:
-            self.add_annotation(note)
+            self.add_annotation(note, font_key='heading3')  # 表注：楷体
 
     def add_references(self, refs):
         """
-        添加参考文献列表
+        添加参考文献列表（悬挂缩进：序号 [N] 悬挂，内容第二行对齐序号后）
 
         Args:
             refs: 参考文献文本列表（不含序号）
@@ -413,6 +528,9 @@ class WordTemplateEngine:
         for i, ref in enumerate(refs, 1):
             p = self.doc.add_paragraph()
             self._set_spacing(p, before=2, after=2)
+            # 悬挂缩进：段落整体右缩进 + 首行负缩进，保证换行内容对齐 [N] 之后
+            p.paragraph_format.left_indent = Cm(0.9)
+            p.paragraph_format.first_line_indent = Cm(-0.9)
             self._make_run(p, f'[{i}] ', self._get_font('body'), size=10.5)
             self._make_run(p, ref, self._get_font('body'), size=10.5)
 

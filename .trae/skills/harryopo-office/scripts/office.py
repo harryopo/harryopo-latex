@@ -39,8 +39,12 @@ SKILL_DIR = SCRIPT_DIR.parent                          # .../harryopo-office/
 
 # 自动查找项目根（向上遍历直到找到 templates/ 目录）
 def _find_project_root():
-    """从 skill 目录向上查找包含 templates/ 的目录"""
+    """从 skill 目录向上查找包含 templates/ 的目录。
+    必须跳过 .trae 内的目录：skill 自带的 templates/ 副本会抢先命中，
+    导致 cls/字体/编译目录错误锚定到 skill 内副本。"""
     for parent in [SKILL_DIR] + list(SKILL_DIR.parents):
+        if '.trae' in parent.parts:
+            continue
         if (parent / 'templates' / 'cls').exists():
             return parent
     # 回退：假设标准结构 .../project_root/.trae/skills/harryopo-office/
@@ -82,6 +86,31 @@ def run(cmd, cwd=None, env_extra=None, check=True, label=''):
         stderr_tail = result.stderr.strip().split('\n')[-3:] if result.stderr else []
         return False, result.stdout, '\n'.join(stderr_tail)
     return True, result.stdout, result.stderr
+
+
+def _ensure_tex_on_path():
+    """xelatex 不在 PATH 时，探测常见 TeX 发行版安装目录并加入 PATH。
+
+    背景：TinyTeX 安装后，已启动的终端/服务进程 PATH 快照过期，subprocess 继承
+    旧 PATH 导致 spawn xelatex 抛 FileNotFoundError（office.py paper 链路"部分终端
+    失败"的根因）。此处幂等补齐。"""
+    import glob
+    if shutil.which('xelatex'):
+        return
+    patterns = [
+        r'D:\Tools\TinyTeX*\TinyTeX\bin\windows',
+        r'C:\Tools\TinyTeX*\TinyTeX\bin\windows',
+        r'C:\texlive\*\bin\*',
+        r'C:\Program Files\MiKTeX\miktex\bin\x64',
+        r'C:\MiKTeX\miktex\bin\x64',
+    ]
+    for pat in patterns:
+        for d in glob.glob(pat):
+            if os.path.exists(os.path.join(d, 'xelatex.exe')):
+                os.environ['PATH'] = d + os.pathsep + os.environ['PATH']
+                print(f'  [INFO] 已把 TeX 目录加入 PATH: {d}')
+                return
+    print('  [WARN] 未找到 xelatex（TinyTeX/MiKTeX/TeX Live 均未探测到）')
 
 
 def ensure_placeholder_figures(target_dir, md_file):
@@ -203,18 +232,19 @@ def render_word(md_file, output_dir, config_name='fangzheng', export_pdf=False):
     return output
 
 
-def render_paper(md_file, output_dir):
-    """链路2: MD → LaTeX PDF (paper)"""
-    print('\n=== 链路2: MD → PDF (paper) ===')
+def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False):
+    """链路2: MD → LaTeX PDF (paper/report，可双栏)"""
+    print(f'\n=== 链路2: MD → PDF ({doc_type}) ===')
+    _ensure_tex_on_path()
     stem = md_file.stem
-    tex_file = output_dir / f'{stem}-paper.tex'
+    tex_file = output_dir / f'{stem}-{doc_type}.tex'
 
     # Step 1: MD → TEX
-    ok, out, err = run(
-        [sys.executable, str(CONVERT_SCRIPT), str(md_file),
-         '--type', 'paper', '-o', str(tex_file)],
-        label='convert.py'
-    )
+    cmd = [sys.executable, str(CONVERT_SCRIPT), str(md_file),
+           '--type', doc_type, '-o', str(tex_file)]
+    if twocolumn:
+        cmd.append('--twocolumn')
+    ok, out, err = run(cmd, label='convert.py')
     if not ok:
         print(f'  [失败] {err}')
         return None
@@ -255,22 +285,31 @@ def render_paper(md_file, output_dir):
 def render_notes(md_file, output_dir):
     """链路3: MD → LaTeX PDF (math-notes)"""
     print('\n=== 链路3: MD → PDF (math-notes) ===')
+    _ensure_tex_on_path()
     stem = md_file.stem
     tex_file = output_dir / f'{stem}-notes.tex'
 
-    # Step 1: Pandoc → TEX
+    # Step 1: MD → TEX（Pandoc 优先，纯 Python md2latex 回退）
     pandoc_exe = shutil.which('pandoc')
-    if not pandoc_exe:
-        print('  [失败] pandoc 未安装')
-        return None
-
-    ok, out, err = run(
-        [pandoc_exe, str(md_file),
-         f'--template={PANDOC_TEMPLATE}',
-         f'--lua-filter={PANDOC_LUA}',
-         '--standalone', '-o', str(tex_file)],
-        label='pandoc'
-    )
+    if pandoc_exe:
+        ok, out, err = run(
+            [pandoc_exe, str(md_file),
+             f'--template={PANDOC_TEMPLATE}',
+             f'--lua-filter={PANDOC_LUA}',
+             '--standalone', '-o', str(tex_file)],
+            label='pandoc'
+        )
+    else:
+        # 回退：math-notes/md2latex.py（纯 Python 引擎，无外部依赖）
+        md2latex = NOTES_DIR / 'md2latex.py'
+        if not md2latex.exists():
+            md2latex = SCRIPT_DIR / 'md2latex.py'
+        print('  [WARN] pandoc 未安装，回退 md2latex.py 纯 Python 引擎')
+        ok, out, err = run(
+            [sys.executable, str(md2latex), str(md_file),
+             '-o', str(tex_file), '--engine', 'python'],
+            label='md2latex(python)'
+        )
     if not ok:
         print(f'  [失败] {err}')
         return None
@@ -467,7 +506,14 @@ def cmd_render(args):
             if replacements:
                 # 替换为相对路径图片引用（正斜杠，兼容 LaTeX/Word）
                 md_text = replace_in_md(md_text, replacements)
-                print(f'  [OK] 渲染了 {len(replacements)} 个图表')
+                n_ok = sum(1 for r in replacements.values() if r.get('images'))
+                n_fail = len(replacements) - n_ok
+                if n_ok:
+                    print(f'  [OK] 渲染了 {n_ok} 个图表')
+                if n_fail:
+                    # 图表块渲染失败绝不能静默降级——否则 JSON 源码会作为代码块进入文档
+                    print(f'  [FATAL] {n_fail} 个图表块渲染失败，图表代码将原样进入文档', file=sys.stderr)
+                    sys.exit(1)
         except ImportError:
             print('  [WARN] diagram_render 模块未找到，跳过图表渲染')
 
@@ -482,7 +528,8 @@ def cmd_render(args):
     if 'word' in formats:
         results['word'] = render_word(md_file, output_dir, args.config, args.pdf)
     if 'paper' in formats:
-        results['paper'] = render_paper(md_file, output_dir)
+        results['paper'] = render_paper(md_file, output_dir,
+                                        doc_type=args.type, twocolumn=args.twocolumn)
     if 'notes' in formats:
         results['notes'] = render_notes(md_file, output_dir)
 
@@ -514,6 +561,34 @@ def cmd_template(args):
     script = SCRIPT_DIR / 'word' / 'template' / 'template_registry.py'
     result = subprocess.run(
         [sys.executable, str(script)] + args.tpl_args,
+        capture_output=True, text=True)
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
+def cmd_texlite(args):
+    """texlite-open 子命令：把 .tex 导入 TexLite 网页编辑器（参数透传）"""
+    script = SCRIPT_DIR / 'texlite_open.py'
+    result = subprocess.run(
+        [sys.executable, str(script)] + args.tlx_args,
+        capture_output=True, text=True)
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
+def cmd_diagram(args):
+    """diagram 子命令：diagram-design HTML → PNG（委托 diagram_design_render.py，参数透传）"""
+    script = SCRIPT_DIR / 'diagram_design_render.py'
+    result = subprocess.run(
+        [sys.executable, str(script)] + args.dgm_args,
         capture_output=True, text=True)
     if result.stdout:
         print(result.stdout, end='')
@@ -575,6 +650,10 @@ def main():
                           help='Word 链路同时导出同名 PDF（COM ExportAsFixedFormat）')
     p_render.add_argument('--template', default=None,
                           help='按注册表模板渲染（如 harryopo-paper / harryopo-notes）')
+    p_render.add_argument('--type', default='paper', choices=['paper', 'report'],
+                          help='文档类型（默认 paper；report 用 harryopo-report）')
+    p_render.add_argument('--twocolumn', action='store_true',
+                          help='双栏排版（仅 paper）')
     p_render.set_defaults(func=cmd_render)
 
     # template 子命令（委托 template_registry.py，注册表：入库/发现/schema）
@@ -583,6 +662,12 @@ def main():
     p_tpl.add_argument('tpl_args', nargs=argparse.REMAINDER,
                        help='透传给 template_registry.py 的参数，如: list / describe <id>')
     p_tpl.set_defaults(func=cmd_template)
+
+    # diagram 子命令（委托 diagram_design_render.py：diagram-design HTML → PNG）
+    p_dgm = sub.add_parser('diagram', help='diagram-design HTML → PNG（参数透传，如: 图.html -o figures/图1.png --svg --check）')
+    p_dgm.add_argument('dgm_args', nargs=argparse.REMAINDER,
+                       help='透传给 diagram_design_render.py 的参数')
+    p_dgm.set_defaults(func=cmd_diagram)
 
     # info 子命令
     p_info = sub.add_parser('info', help='打印环境信息')

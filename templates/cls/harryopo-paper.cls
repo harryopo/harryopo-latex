@@ -140,6 +140,10 @@
         {\huge\fzdbs\color{DarkColor}\@title\par}
         \vspace{0.7cm}
         {\Large\fzkt\@author\par}
+        \ifx\@date\@empty\else
+        \vspace{0.3cm}
+        {\normalsize\fzfs\@date\par}
+        \fi
         \vspace{0.5cm}
     \end{center}
 }
