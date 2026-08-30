@@ -157,13 +157,14 @@ def _remove_simple_tables(text: str):
 
 
 def extract_docx_tables(docx_path: str) -> list:
-    """用 python-docx 按文档流顺序提取表格（list[list[list[str]]]）"""
-    try:
-        import docx
-        from docx.table import Table
-        from docx.oxml.ns import qn
-    except ImportError:
-        return []
+    """用 python-docx 按文档流顺序提取表格（list[list[list[str]]]）
+
+    python-docx 缺失时抛 ImportError——调用方（pandoc 链路）必须硬失败，
+    静默返回空表会导致表格丢失且无提示。
+    """
+    import docx
+    from docx.table import Table
+    from docx.oxml.ns import qn
     doc = docx.Document(docx_path)
     tables = []
     for child in doc.element.body.iterchildren():

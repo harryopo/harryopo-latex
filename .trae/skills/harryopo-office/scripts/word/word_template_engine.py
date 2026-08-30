@@ -386,6 +386,21 @@ class WordTemplateEngine:
             self._set_indent(p, 2)
         self._add_inline_runs(p, text, self._get_font('body'), size=12)
 
+    def add_list_item(self, text, level=0, marker='•'):
+        """
+        列表项段落（标记符 + 内容，按层级左缩进）
+
+        Args:
+            text: 列表项文本（支持行内 **加粗** 与 $...$ 公式）
+            level: 嵌套层级（0 起，每级缩进 0.74cm）
+            marker: 标记符（无序 •/◦，有序用原数字如 "1."）
+        """
+        p = self.doc.add_paragraph()
+        self._set_spacing(p, before=2, after=2)
+        p.paragraph_format.left_indent = Cm(0.74 * (level + 1))
+        self._make_run(p, f'{marker} ', self._get_font('body'), size=12)
+        self._add_inline_runs(p, text, self._get_font('body'), size=12)
+
     def add_annotation(self, text, font_key='annotation'):
         """注释段落（默认仿宋，五号，灰色；表格/图片注可传 'heading3' 用楷体）"""
         p = self.doc.add_paragraph()
@@ -649,11 +664,6 @@ class WordTemplateEngine:
         except Exception as e:
             print(f"  [WARN] TOC 自动更新失败: {e}")
             print(f"  请在 Word 中手动右键目录区域 → '更新域'")
-            # 确保 Word 进程被清理
-            try:
-                taskkill = os.system('taskkill /f /im WINWORD.EXE >nul 2>&1')
-            except:
-                pass
 
     def _export_pdf_com(self, output_path):
         """单独用 Word COM 导出 PDF（不更新 TOC 时使用）"""
@@ -670,10 +680,6 @@ class WordTemplateEngine:
             word.Quit()
         except Exception as e:
             print(f"  [WARN] PDF 导出失败: {e}")
-            try:
-                taskkill = os.system('taskkill /f /im WINWORD.EXE >nul 2>&1')
-            except:
-                pass
 
     @staticmethod
     def _export_pdf(doc, abs_docx_path):
