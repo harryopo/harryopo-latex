@@ -39,8 +39,10 @@ Desktop.ini
 # 第三方开源参考源码（自带 git 管理，不入主仓库）
 opensource-reference/
 
-# 生成产物（编译/渲染输出）
-output/
+# 生成产物（编译/渲染输出；官方示例 output/examples 例外，需入库展示）
+output/*
+!output/examples/
+!output/examples/**
 
 # 工具缓存
 .mimosa/
