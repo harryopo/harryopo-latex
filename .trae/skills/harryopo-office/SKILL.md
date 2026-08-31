@@ -42,11 +42,15 @@ harryopo-office/
 │       └── examples/
 │           └── example.md                #   完整示例（标题/摘要/表格/公式/图片/注释/参考文献）
 └── skills/
-    └── diagram-design/                   # 编辑级图表 skill（39 类型 × 3 变体）
-        ├── SKILL.md                      #   设计规范（4px网格/6连接器规则/焦点色/密度预算）
-        ├── assets/                       #   模板 + 117+ 成品示例 HTML
-        ├── references/                   #   53 个类型/规范参考文档
-        └── scripts/                      #   self_check.py / mermaid_extract.py / drawio_extract.py
+    ├── diagram-design/                   # 编辑级图表 skill（39 类型 × 3 变体）【内嵌】
+    │   ├── SKILL.md                      #   设计规范（4px网格/6连接器规则/焦点色/密度预算）
+    │   ├── assets/                       #   模板 + 117+ 成品示例 HTML
+    │   ├── references/                   #   53 个类型/规范参考文档
+    │   └── scripts/                      #   self_check.py / mermaid_extract.py / drawio_extract.py
+    └── super-diagram/                    # 架构图/时序图引擎【内嵌，自包含】
+        ├── SKILL.md                      #   JSON 契约规范（architecture: nodes+edges / sequence）
+        ├── scripts/render_v2.py          #   渲染器（纯标准库 + playwright，含质量校验）
+        └── testdata/                     #   契约样例 JSON（可作 AI 产数据的参考）
 ├── templates/                            # 完整 LaTeX 模板包（自包含）
     ├── build.ps1                         # 编译脚本（环境检查 + TEXINPUTS + xelatex×3）
     ├── cls/                              # 文档类/样式
@@ -139,6 +143,7 @@ office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
 - **元信息提问优先于内容生成**：① 未完成（用户未回答/跳过）不得进入 ②；作者/学校/日期是论文必备元信息
 - **内容确认优先于格式转换**：② 内容预览、⑤ 图描述、⑥ 图审核三步必须用户确认后才继续
 - **图表属于视觉产物**：不确认不进文档（禁止未确认直接插入）；**图描述未确认不得写 HTML**
+- **禁止 ASCII 字符画**：任何图都必须经三引擎之一渲染为 PNG（diagram-design / super-diagram / mermaid）；**字符画、文本框线图、"示意图"占位一律不得进入文档**——画不了就走图描述环节与用户沟通，不许降级
 - **插入的图片必须带图注**；补充说明用 `> 注：` 注释块
 - **用户未要求图时**：AI 主动分析（见下方智能分析映射表），适合就提问，不适合不说
 - **产物目录统一**：最终交付集中到 `output/<项目名>/`（Markdown 源 / Word docx / LaTeX tex / PDF / figures 图片），便于查看编辑
@@ -971,5 +976,5 @@ Pandoc 原生支持几乎所有 Markdown 扩展语法，无需手动映射：
 
 ### 图表流程
 - **diagram-design 渲染**：`playwright`（`pip install playwright` + `PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright/ python -m playwright install chromium`），`office.py diagram` 委托 `diagram_design_render.py`
-- **super-diagram**：`SUPER_DIAGRAM_SCRIPT` 环境变量可覆盖渲染脚本路径（默认自动探测 `~/.trae-cn/skills/super-diagram/scripts/render_v2.py`）
+- **super-diagram**：已内嵌 `skills/super-diagram/`（自包含，任意机器可用）；探测顺序：`SUPER_DIAGRAM_SCRIPT` 环境变量 → 内嵌副本 → 全局 `~/.trae-cn/skills/super-diagram/`；渲染依赖 `playwright` chromium + 项目根 `shared/diagram_geometry.py`（质量校验，缺失时降级不阻塞）
 - **mermaid**：`mmdc`（`npm install -g @mermaid-js/mermaid-cli`，含 puppeteer chromium）

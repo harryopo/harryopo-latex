@@ -776,3 +776,34 @@ web-editor 升级。
 - **re 替换串陷阱**：`r'...\linewidth...'` 中 `\l` 是非法转义，替换串的字面反斜杠要 `\\`
 - **pip vs python -m pip**：多 Python 环境（Miniconda/系统/3.14）并存时裸 pip 不可信，一律 `python -m pip`
 
+---
+
+## 2026-08-31：图表引擎内嵌 + ASCII 字符画拦截（"其他 AI 画图不生效"根治）
+
+### 用户痛点
+其他 AI 调用本 skill 时图表能力不生效，配图以 MD 里的 ASCII 字符画形式出现（8/29 示例问题同根复发）。
+
+### 根因（三查）
+1. **super-diagram 未内嵌**：`diagram_render.py` 只探测 `~/.trae-cn/skills/super-diagram/`（Trae 全局目录）——其他 AI 平台/其他机器没有该路径，架构图引擎直接不可用
+2. **无"禁止 ASCII 字符画"约束**：SKILL.md 没有铁律，AI 画不了图就降级画字符画，管线不拦截直接进文档
+3. diagram-design 已内嵌 ✓，但 super-diagram 依赖链断裂使"三引擎"实际只有两条可用
+
+### 修复
+1. **super-diagram 内嵌**（878K）：`skills/super-diagram/`（SKILL.md 契约 + scripts/render_v2.py + testdata/ 样例；unified.py 旧脚本与 output/ 不嵌）。render_v2.py 纯标准库 + playwright，质量校验库探测打补丁：硬编码 `d:/ai/latex` 删除 → 从 `__file__` 向上找 `shared/diagram_geometry.py`（跳 `.trae`，与 office.py `_find_project_root` 同理）
+2. **探测顺序**（diagram_render.py）：环境变量 `SUPER_DIAGRAM_SCRIPT` → **内嵌副本** → 全局 `~/.trae-cn`；实测命中内嵌
+3. **ASCII 拦截双层**：
+   - SKILL.md 硬约束："禁止 ASCII 字符画——任何图必走三引擎之一渲染 PNG，画不了走图描述环节沟通，不许降级"
+   - office.py 运行时护栏：非三引擎代码块盒线字符 ≥10 或 `+---+` 框线 ≥3 → `[WARN] 疑似 ASCII 字符画图`（不硬失败——目录树等合法场景防误报）
+4. SKILL.md 同步：架构树补 super-diagram【内嵌，自包含】、依赖章节探测顺序说明
+
+### 验证（全绿）
+- 内嵌探测命中：`_find_super_script()` → `harryopo-office/skills/super-diagram/scripts/render_v2.py`
+- 内嵌独立渲染：testdata/microservice.json → PNG 73KB + 质量校验通过
+- 全链路：super-diagram 块 → `[OK] 渲染了 1 个图表` + ASCII 块 → `[WARN] 疑似字符画` 同场触发，Word 生成成功
+- 质量校验价值实证：布局过挤的 JSON（canvas 420/节点 y=340）被校验拦下，调整后通过——坏图宁可失败不进文档
+
+### 经验沉淀
+- **skill 自包含原则**：凡是管线依赖的外部脚本/引擎必须内嵌进 skill（参考 8/29 diagram-design 内嵌先例），全局目录依赖 = 其他环境必然失效
+- **AI 降级行为要用"约束+护栏"双保险**：只写约束（SKILL.md）AI 可能不遵守；只写护栏（代码）覆盖不全；约束定方向、护栏给提醒
+- **质量校验拦截是特性不是 bug**：排查时先确认是自己的测试数据布局问题还是引擎问题（单独跑渲染器二分）
+

@@ -28,11 +28,13 @@ import sys
 import tempfile
 from pathlib import Path
 
-# super-diagram 渲染脚本（全局 skill，可用环境变量 SUPER_DIAGRAM_SCRIPT 覆盖）
+# super-diagram 渲染脚本（可用环境变量 SUPER_DIAGRAM_SCRIPT 覆盖）
+# 探测顺序：环境变量 → skill 内嵌副本（自包含，任意 AI/机器可用）→ 全局目录。
 # 注意：不得硬编码用户名（不同机器的用户目录不同，硬编码会导致渲染静默失败）。
-# 自动探测顺序：环境变量 → 当前用户 .trae-cn/skills。
 SUPER_DIAGRAM_CANDIDATES = (
     os.environ.get('SUPER_DIAGRAM_SCRIPT', ''),
+    str(Path(__file__).resolve().parent.parent / 'skills' / 'super-diagram'
+        / 'scripts' / 'render_v2.py'),
     os.path.join(os.path.expanduser('~'), '.trae-cn', 'skills',
                  'super-diagram', 'scripts', 'render_v2.py'),
 )
