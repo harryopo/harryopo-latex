@@ -46,6 +46,10 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from word_template_engine import WordTemplateEngine
 
+# 中文标点/空格规范化（护栏层，与 convert.py 共享；详见 text_norm.py）
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from text_norm import normalize_markdown
+
 # ============================================================
 # LaTeX 数学 → OMML（Word 原生公式）
 # ============================================================
@@ -365,6 +369,9 @@ def build_document(md_text, config_path=None, output_path='output.docx',
     export_pdf: 同时导出同名 PDF（Word COM 同会话完成）
     """
     engine = WordTemplateEngine(config_path)
+
+    # 中文标点/空格规范化（护栏：AI 产出英文标点/中英空格在入口统一清洗）
+    md_text = normalize_markdown(md_text)
 
     # 自动目录放第一页（用户约定：目录第一页，正文从第二页开始）
     engine.add_toc()

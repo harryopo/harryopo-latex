@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-diagram_render.py — 图表统一渲染器（super-diagram + mermaid）
+diagram_render.py — 图表统一渲染器（mermaid）
 
 将 MD 中的图表数据代码块渲染为 PNG，自动替换为图片引用：
-  ```super-diagram + JSON   → super-diagram 引擎（架构图/时序图，AI 算坐标）
-  ```mermaid + 代码          → mmdc 引擎（Mermaid 流程图，保留既有能力）
+  ```mermaid + 代码          → mmdc 引擎（Mermaid 流程图）
+  ```super-diagram + JSON   → 已不支持（引擎 2026-09-02 移除）：报错提示改用 diagram-design
 
 被 office.py 的 render 流程调用。渲染出的 PNG 落到 `output_dir/figures/`，
-Word / paper / notes 三条链路通过标准 `![alt](path)` 语法自动带图。
+Word / paper / notes 双链路通过标准 `![alt](path)` 语法自动带图。
 
 用法（CLI）:
     python diagram_render.py input.md --output-dir figures/
@@ -28,97 +28,14 @@ import sys
 import tempfile
 from pathlib import Path
 
-# super-diagram 渲染脚本（可用环境变量 SUPER_DIAGRAM_SCRIPT 覆盖）
-# 探测顺序：环境变量 → skill 内嵌副本（自包含，任意 AI/机器可用）→ 全局目录。
-# 注意：不得硬编码用户名（不同机器的用户目录不同，硬编码会导致渲染静默失败）。
-SUPER_DIAGRAM_CANDIDATES = (
-    os.environ.get('SUPER_DIAGRAM_SCRIPT', ''),
-    str(Path(__file__).resolve().parent.parent / 'skills' / 'super-diagram'
-        / 'scripts' / 'render_v2.py'),
-    os.path.join(os.path.expanduser('~'), '.trae-cn', 'skills',
-                 'super-diagram', 'scripts', 'render_v2.py'),
-)
-
 # 图表代码块正则（语言标签 = 引擎名）
-SUPER_RE = re.compile(r'```super-diagram\s*\n(.*?)\n```', re.DOTALL)
+SUPER_RE = re.compile(r'```super-diagram\s*\n(.*?)\n```', re.DOTALL)  # 仅用于拦截报错
 MERMAID_RE = re.compile(r'```mermaid\s*\n(.*?)\n```', re.DOTALL)
 
 
 def code_hash(code: str) -> str:
     """对图表数据做 hash，用于缓存文件名"""
     return hashlib.md5(code.encode('utf-8')).hexdigest()[:8]
-
-
-# ============================================================
-# super-diagram 引擎
-# ============================================================
-
-def _find_super_script():
-    """定位 super-diagram 渲染脚本，返回 Path 或 None"""
-    for cand in SUPER_DIAGRAM_CANDIDATES:
-        p = Path(cand) if cand else None
-        if p and p.exists():
-            return p
-    return None
-
-
-def render_super_diagram(json_text: str, output_path) -> bool:
-    """
-    用 super-diagram 渲染单个 JSON 数据为 PNG。
-
-    Args:
-        json_text: super-diagram 契约 JSON（architecture: nodes+edges / sequence: participants+messages）
-        output_path: 输出 PNG 路径
-
-    Returns:
-        True 如果成功，False 如果失败
-    """
-    script = _find_super_script()
-    if not script:
-        print('[WARN] super-diagram 脚本不存在。请安装 super-diagram skill 或设置 '
-              'SUPER_DIAGRAM_SCRIPT 环境变量', file=sys.stderr)
-        return False
-
-    # 先校验 JSON 合法性（render_v2.py 也会校验，这里提前给出友好报错）
-    try:
-        json.loads(json_text)
-    except json.JSONDecodeError as e:
-        print(f'[WARN] super-diagram JSON 解析失败: {e}', file=sys.stderr)
-        return False
-
-    # 写临时 JSON 文件（render_v2.py 从文件读取）
-    with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False,
-                                     encoding='utf-8') as f:
-        f.write(json_text)
-        tmp_json = f.name
-
-    try:
-        cmd = [sys.executable, str(script), tmp_json,
-               '-o', str(output_path), '--scale', '2']
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120,
-                                encoding='utf-8', errors='replace')
-        if result.returncode != 0:
-            err = (result.stderr or result.stdout).strip()
-            print(f'[WARN] super-diagram 渲染失败: {err[-200:]}', file=sys.stderr)
-            return False
-        return True
-    except subprocess.TimeoutExpired:
-        print('[WARN] super-diagram 渲染超时（120s）', file=sys.stderr)
-        return False
-    except Exception as e:
-        print(f'[WARN] super-diagram 异常: {e}', file=sys.stderr)
-        return False
-    finally:
-        os.unlink(tmp_json)
-
-
-def _extract_title(json_text: str) -> str:
-    """从 JSON 中提取图注（title 优先，subtitle 兜底），用于图片 alt"""
-    try:
-        data = json.loads(json_text)
-        return (data.get('title') or data.get('subtitle') or '').strip()
-    except Exception:
-        return ''
 
 
 # ============================================================
@@ -129,12 +46,11 @@ def find_diagram_blocks(md_text: str):
     """提取 MD 中所有图表代码块，返回 [{engine, match, code, title}, ...]"""
     blocks = []
     for m in SUPER_RE.finditer(md_text):
-        code = m.group(1).strip()
         blocks.append({
             'engine': 'super-diagram',
             'match': m,
-            'code': code,
-            'title': _extract_title(code),
+            'code': m.group(1).strip(),
+            'title': '',
         })
     for m in MERMAID_RE.finditer(md_text):
         blocks.append({
@@ -149,7 +65,10 @@ def find_diagram_blocks(md_text: str):
 def render_one(engine: str, code: str, output_path) -> bool:
     """按引擎路由渲染单个图表"""
     if engine == 'super-diagram':
-        return render_super_diagram(code, output_path)
+        # 引擎已于 2026-09-02 移除（收敛为 diagram-design + mermaid 双引擎）
+        print('[WARN] super-diagram 引擎已移除，请改用 diagram-design（HTML→PNG）'
+              '或 mermaid 流程图；架构/时序图参考 skills/diagram-design/', file=sys.stderr)
+        return False
     if engine == 'mermaid':
         # 复用 mermaid_render.render_one（mmdc CLI）
         try:
@@ -232,7 +151,7 @@ def replace_in_md(md_text: str, replacements: dict, rel_prefix='figures'):
         rel_path = f'{rel_prefix}/{img.name}'
 
         if info['engine'] == 'super-diagram':
-            alt = info['title'] or f'图{idx + 1}'
+            alt = f'图{idx + 1}'  # 引擎已移除，仅保留兼容路径（实际渲染会失败）
         else:
             alt = f'流程图{idx + 1}'
 
@@ -260,7 +179,7 @@ def preprocess_md(md_file, output_dir='figures'):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description='图表统一渲染器（super-diagram + mermaid）')
+    parser = argparse.ArgumentParser(description='图表统一渲染器（mermaid）')
     parser.add_argument('input', help='输入 MD 文件')
     parser.add_argument('-o', '--output-dir', default='figures', help='图片输出目录')
     parser.add_argument('--replace', action='store_true',

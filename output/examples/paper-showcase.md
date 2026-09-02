@@ -52,27 +52,7 @@ EfficientNet [7] 通过复合缩放策略在多个分类基准上取得 SOTA 性
 
 系统采用前后端分离的 B/S 架构，整体架构如图 1 所示：浏览器端负责影像导入、可视化展示与报告生成；后端服务（FastAPI）承载影像管理、模型推理与用户认证；底层模型服务（Triton Inference Server）提供分割、分类与可解释性三类推理能力。
 
-```super-diagram
-{
-  "type": "architecture",
-  "canvas": {"width": 960, "height": 560, "theme": "light"},
-  "title": "图1：医学影像智能诊断系统整体架构",
-  "subtitle": "浏览器端 → 后端服务（FastAPI）→ 模型服务（Triton）",
-  "nodes": [
-    {"id": "web", "en": "Browser (Vue 3)", "zh": "浏览器端（Vue 3）", "x": 400, "y": 60, "w": 160, "h": 64, "type": "frontend"},
-    {"id": "api", "en": "Backend (FastAPI)", "zh": "后端服务（FastAPI）影像管理 · 模型推理 · 用户认证", "x": 120, "y": 240, "w": 720, "h": 64, "type": "backend"},
-    {"id": "seg", "en": "Segmentation", "zh": "病灶分割（U-Net++）", "x": 120, "y": 420, "w": 210, "h": 64, "type": "backend"},
-    {"id": "cls", "en": "Classification", "zh": "良恶性分类（EfficientNet-B4）", "x": 370, "y": 420, "w": 240, "h": 64, "type": "backend"},
-    {"id": "cam", "en": "Grad-CAM", "zh": "Grad-CAM 可视化解释", "x": 650, "y": 420, "w": 220, "h": 64, "type": "backend"}
-  ],
-  "edges": [
-    {"from": "web", "to": "api", "label": "HTTPS / WebSocket"},
-    {"from": "api", "to": "seg", "label": "gRPC"},
-    {"from": "api", "to": "cls", "label": "gRPC"},
-    {"from": "api", "to": "cam", "label": "gRPC"}
-  ]
-}
-```
+![图1：医学影像智能诊断系统整体架构](figures/super-diagram-00-260b50dc.png)
 
 > 注：前后端通过 HTTPS 与 WebSocket 通信，后端与模型服务之间采用 gRPC 长连接以降低推理延迟。
 
