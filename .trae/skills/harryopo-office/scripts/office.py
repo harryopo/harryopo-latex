@@ -530,7 +530,7 @@ def cmd_render(args):
 
 
     # ---- ASCII 字符画检测护栏（禁止字符画进文档的运行时提醒）----
-    # 非三引擎代码块若含大量盒线字符/ASCII 框线，基本可判定为降级画的字符画
+    # 非双引擎代码块若含大量盒线字符/ASCII 框线，基本可判定为降级画的字符画
     import re as _re
     _BOX_CHARS = '─│┌┐└┘├┤┬┴┼═║╔╗╚╝╠╣╦╩╬→←↑↓▼▲■□'
     md_text = md_file.read_text(encoding='utf-8')
@@ -542,10 +542,10 @@ def cmd_render(args):
         if _n_box >= 10 or _n_ascii_box >= 3:
             print(f'  [WARN] 疑似 ASCII 字符画图（代码块语言: {_lang.strip() or "无"}，'
                   f'盒线字符 {_n_box} 个）：字符画不得进入文档，'
-                  f'请改用 diagram-design / super-diagram / mermaid 渲染',
+                  f'请改用 diagram-design / mermaid 渲染',
                   file=sys.stderr)
 
-    # ---- 图表统一预处理（super-diagram + mermaid）----
+    # ---- 图表统一预处理（mermaid；super-diagram 块会被报错拦截）----
     # 将 MD 中的图表数据代码块渲染为 PNG，替换为 ![](figures/xxx.png)
     base_stem = md_file.stem  # 产物命名基准：原始输入文件（不泄漏中间态后缀）
     if '```mermaid' in md_text or '```super-diagram' in md_text:

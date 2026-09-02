@@ -26,6 +26,12 @@ import argparse
 from pathlib import Path
 from typing import List, Tuple, Optional, Dict, Any
 
+try:
+    from text_norm import normalize_markdown
+except ImportError:  # 从其他 cwd 直接调用时补充脚本目录
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from text_norm import normalize_markdown
+
 # ============================================================
 # 常量
 # ============================================================
@@ -878,6 +884,10 @@ def convert_md_to_tex(
 
     # 剥离 HTML 注释（`<!-- ... -->`，可跨行），防止残留注释渲染进 LaTeX
     text = re.sub(r'<!--[\s\S]*?-->', '', text)
+
+    # 中文标点/空格规范化（护栏：AI 产出英文标点/中英空格在入口统一清洗；
+    # 代码块/公式/URL 已在 normalize_markdown 内保护，元信息正则兼容全半角冒号）
+    text = normalize_markdown(text)
 
     # 尝试从源文件提取元数据（标题/摘要/关键词）
     if not title:

@@ -179,7 +179,7 @@ support_crew = Crew(
 
 ### 3.1.2 核心业务流程
 
-![流程图2](figures/mermaid-01-d2380bfd.png)
+![流程图1](figures/mermaid-00-d2380bfd.png)
 
 ## 3.2 功能性需求
 

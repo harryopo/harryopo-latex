@@ -153,6 +153,7 @@
 - ✅ **harryopo 模板 gallery → TexLite 入库（2026-08-28）**：借鉴 Oleafly 模板契约（template.json + 自包含目录 + main.tex）；`texlite_seed_templates.py` 打包 3 个模板（harryopo-paper/report/notes 修正副本 + fonts/ + 精简示例）通过 **ZIP import 原子导入** TexLite，全部编译 succeeded（paper 33KB / report 235KB / notes 47KB）；`texlite_preview_gen.py` 用 PyMuPDF 渲染 PDF 首页生成 preview.png（Oleafly 契约 preview 字段），模板 gallery 契约完整对齐
 - ✅ **阶段 3 M1：harryopo-web 可视化编辑器 MVP（2026-08-28）**：`web-editor/`（Vite + React 19 + TipTap 3.30 + @tiptap/markdown + extension-mathematics + KaTeX + RawBlock/RawInline 兜底 + Express 后端）。核心：MD 中间态双向（round-trip 幂等测试 8/8）、harryopo 单行 `$$...$$`=块级公式定制、工具栏、实时预览、导出复用 office.py。验证：构建通过 + API 端到端 8/8（Word 导出 35KB docx 可下载）。运行：后端 :8080 + 前端 :5173
 - ✅ **阶段 3 M2：文件树 + 模板注册表表单 + 图表（2026-08-28）**：web-editor 升级——文件树（多文档/子目录 + 安全路径防穿越）、模板注册表对接（docx 模板 schema 动态表单 → data.json → docxtpl 渲染下载）、mermaid 前端渲染。验证：API 端到端 13/13（含模板渲染 35KB docx）。生产模式 http://127.0.0.1:8080 直接访问
+- ✅ **Word 质量 AI 味修复 + 图表引擎收敛（2026-09-02）**：①新增 `scripts/text_norm.py`（中文标点全角化 + CJK 侧半角空格全删，代码/公式/URL/行首标记保护），md_to_word.py 与 convert.py 双引擎入口统一清洗（护栏层）+ SKILL.md 输出硬约束（约束层）；②内嵌 super-diagram 移除（收敛为 diagram-design + mermaid 双引擎），diagram_render.py 对 super-diagram 块拦截报错，示例 MD 改直接引用已渲染 PNG
 
 **待开发**：
 

@@ -57,3 +57,7 @@ output/*
 蒸馏区/e2e-test/
 蒸馏区/distill-output/distill-images/
 蒸馏区/*.tmp*.pdf
+
+# office.py 渲染副产物（e2e 转换 tex/pdf，不入库）
+templates/**/*-e2e.tex
+templates/**/*-e2e.pdf

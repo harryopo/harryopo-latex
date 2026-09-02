@@ -12,7 +12,7 @@
 
 **2026-08-30 更新（主流程规范落地）**：
 
-- **框架图**：paper-showcase / report-showcase 的架构图由 ASCII 字符画升级为 **super-diagram 契约渲染的真框架图**（` ```super-diagram ` JSON 块 → 管线自动渲染 PNG → 图注 + `> 注：` 注释，见 `figures/`）；report-showcase 另含 Mermaid 业务流程图
+- **框架图**：paper-showcase / report-showcase 的架构图由 ASCII 字符画升级为真框架图（初版由 super-diagram 契约渲染；该引擎已于 2026-09-02 移除收敛为 diagram-design，示例 MD 现直接引用已渲染 PNG，见 `figures/`）；report-showcase 另含 Mermaid 业务流程图
 - **注释规范**：表注 / 图注统一渲染在**表格 / 图片下方**（`> 注：` 语法），两个 showcase 各有示范
 - 文件名带 `.processed`：因文档含图表代码块，渲染时先预处理为 PNG 再编译；`figures/` 存放渲染出的图片
 

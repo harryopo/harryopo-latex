@@ -13,7 +13,7 @@
 | **MD → LaTeX → PDF** | 论文（单/双栏）/ 报告 / 数理笔记 / 公文风格，XeLaTeX + 方正字体 + XITS 数学 | `office.py render x.md --format paper [--type report]` |
 | **文档 → MD 解析** | 四级解析路由：anydoc（Rust 毫秒级快检）→ MinerU（扫描件/公式深解析）→ markitdown（微软官方 20+ 格式兜底）→ python-docx 回填 | `office.py render 任意文档` |
 | **反向转换** | Word → MD（清洗）；LaTeX → Word/PDF（.tex → MD 清洗 → 双渲染器）；Word → PDF 直接导出（COM） | 同上 |
-| **内置图表** | super-diagram 契约（架构图/时序图，AI 算坐标代码渲染）+ Mermaid + diagram-design（39 类型编辑级图表）+ TikZ | MD 中写 ` ```super-diagram ` / ` ```mermaid ` 块 |
+| **内置图表** | diagram-design（39 类型编辑级图表，架构/流程/时序/泳道/ER/桑基）+ Mermaid 流程图 + TikZ | MD 中写 ` ```mermaid ` 块 / diagram-design HTML → `office.py diagram` 渲染 |
 | **模板注册表** | 用户 Word 模板入库 → 自动提取 schema → AI 产 data.json → docxtpl 保真填充 | `office.py template ...` |
 
 ## 快速开始
@@ -30,10 +30,10 @@ python .trae/skills/harryopo-office/scripts/office.py render 我的文档.md --f
 # 2) 报告类型（章节式封面+目录）
 python .trae/skills/harryopo-office/scripts/office.py render 报告.md --format all --type report
 
-# 3) 在 MD 里写架构图（AI/人写 JSON 契约，渲染管线自动出图）
-#    ```super-diagram
-#    {"type":"architecture","canvas":{"width":960,"height":560,"theme":"light"},
-#     "title":"图1：系统架构","nodes":[...],"edges":[...]}
+# 3) 在 MD 里写流程图（渲染管线自动出图）
+#    ```mermaid
+#    flowchart TD
+#    A[用户] --> B[网关] --> C[服务]
 #    ```
 ```
 
@@ -43,11 +43,11 @@ python .trae/skills/harryopo-office/scripts/office.py render 报告.md --format 
 
 ## 示例产物
 
-见 **[output/examples/](output/examples/README.md)**：论文单栏/双栏/全特性、报告/报告全特性，五份示例 Word + PDF + LaTeX 三格式齐全，全特性示例含 super-diagram 架构图与 Mermaid 流程图。
+见 **[output/examples/](output/examples/README.md)**：论文单栏/双栏/全特性、报告/报告全特性，五份示例 Word + PDF + LaTeX 三格式齐全，全特性示例含架构图与 Mermaid 流程图。
 
 | 示例 | 亮点 |
 |------|------|
-| paper-showcase | 论文全特性：多列表格、算法伪代码、公式、参考文献 + **super-diagram 系统架构图** |
+| paper-showcase | 论文全特性：多列表格、算法伪代码、公式、参考文献 + **系统架构图** |
 | report-showcase | 章节式报告：封面/目录/三线表 + **四层架构图 + Mermaid 流程图** + 表注规范 |
 
 ## 目录结构
@@ -70,7 +70,7 @@ python .trae/skills/harryopo-office/scripts/office.py render 报告.md --format 
 
 ## 技术栈
 
-XeLaTeX（ctex + xeCJK + 方正字体 + XITS Math）｜python-docx + docxtpl（Word 引擎）｜anydoc / MinerU / markitdown（解析三级路由）｜super-diagram / Mermaid / diagram-design（图表）｜MS Office COM（目录刷新、PDF 导出）｜playwright（图表 PNG）
+XeLaTeX（ctex + xeCJK + 方正字体 + XITS Math）｜python-docx + docxtpl（Word 引擎）｜anydoc / MinerU / markitdown（解析三级路由）｜diagram-design / Mermaid / TikZ（图表）｜MS Office COM（目录刷新、PDF 导出）｜playwright（图表 PNG）
 
 ## 文档
 

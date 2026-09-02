@@ -224,36 +224,7 @@ flowchart TD
 
 系统采用分层架构设计，整体架构如图 1 所示：表现层提供管理后台与用户对话窗口；应用层承载对话管理、意图识别、路由调度与人工接管；智能体层由订单、物流、退换、推荐四类 Agent 组成；底层基础能力层为各 Agent 提供统一的 RAG 检索、工具调用、向量库与大模型服务。
 
-```super-diagram
-{
-  "type": "architecture",
-  "canvas": {"width": 1100, "height": 720, "theme": "light"},
-  "title": "图1：智能客服系统四层架构",
-  "subtitle": "表现层 → 应用层 → 智能体层 → 基础能力层",
-  "nodes": [
-    {"id": "admin", "en": "Admin Console", "zh": "Web 管理后台", "x": 280, "y": 60, "w": 190, "h": 60, "type": "frontend"},
-    {"id": "chat", "en": "Chat Window", "zh": "用户对话窗口", "x": 630, "y": 60, "w": 190, "h": 60, "type": "frontend"},
-    {"id": "app", "en": "App Layer (FastAPI)", "zh": "应用层：对话管理 · 意图识别 · 路由调度 · 人工接管", "x": 100, "y": 230, "w": 900, "h": 64, "type": "backend"},
-    {"id": "order", "en": "Order Agent", "zh": "订单 Agent", "x": 80, "y": 400, "w": 180, "h": 60, "type": "backend"},
-    {"id": "logistics", "en": "Logistics Agent", "zh": "物流 Agent", "x": 300, "y": 400, "w": 180, "h": 60, "type": "backend"},
-    {"id": "return", "en": "Return Agent", "zh": "退换 Agent", "x": 560, "y": 400, "w": 180, "h": 60, "type": "backend"},
-    {"id": "reco", "en": "Recommend Agent", "zh": "推荐 Agent", "x": 820, "y": 400, "w": 180, "h": 60, "type": "backend"},
-    {"id": "infra", "en": "Infrastructure", "zh": "基础能力层：RAG 检索 · 工具调用 · 向量库 · 大模型", "x": 100, "y": 580, "w": 900, "h": 64, "type": "db"}
-  ],
-  "edges": [
-    {"from": "admin", "to": "app", "label": "HTTPS"},
-    {"from": "chat", "to": "app", "label": "WebSocket"},
-    {"from": "app", "to": "order", "label": "调度"},
-    {"from": "app", "to": "logistics", "label": "调度"},
-    {"from": "app", "to": "return", "label": "调度"},
-    {"from": "app", "to": "reco", "label": "调度"},
-    {"from": "order", "to": "infra"},
-    {"from": "logistics", "to": "infra"},
-    {"from": "return", "to": "infra"},
-    {"from": "reco", "to": "infra"}
-  ]
-}
-```
+![图1：智能客服系统四层架构](figures/super-diagram-00-06876f91.png)
 
 > 注：各 Agent 之间不直接通信，全部交互经应用层路由调度；基础能力层以统一网关对外提供服务，便于模型版本升级与灰度发布。
 

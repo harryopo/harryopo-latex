@@ -804,6 +804,38 @@ web-editor 升级。
 
 ### 经验沉淀
 - **skill 自包含原则**：凡是管线依赖的外部脚本/引擎必须内嵌进 skill（参考 8/29 diagram-design 内嵌先例），全局目录依赖 = 其他环境必然失效
-- **AI 降级行为要用"约束+护栏"双保险**：只写约束（SKILL.md）AI 可能不遵守；只写护栏（代码）覆盖不全；约束定方向、护栏给提醒
+- **AI 降级行为要用“约束+护栏”双保险**：只写约束（SKILL.md）AI 可能不遵守；只写护栏（代码）覆盖不全；约束定方向、护栏给提醒
 - **质量校验拦截是特性不是 bug**：排查时先确认是自己的测试数据布局问题还是引擎问题（单独跑渲染器二分）
+
+---
+
+## 2026-09-02：Word 质量 AI 味修复（text_norm）+ super-diagram 移除
+
+用户反馈三问题：①Word 产物 AI 味浓（英文引号/标点未转中文）；②排版空格多（中英间半角空格透传）；③图表 skill 两个并存（super-diagram 与 diagram-design）。用户决策：空格全删（中英间不留，公文风格）；删内嵌 super-diagram 保留 diagram-design + mermaid 双引擎。
+
+### 1. text_norm.py 护栏层（两引擎共享）
+- 标点转换（仅 CJK 上下文）：`, : ; ? !` 前邻 CJK → `，：；？！`；`(`/`)` 按另一侧邻 CJK 转 `（）`；直双引号按开闭配对转 `“”`（段落含 CJK 时）；直单引号仅两侧邻 CJK 才转（`don't` 不动）；数字语境（`10:30`/`1,000`）不动
+- 空格删除：任一侧为 CJK 的半角空格全删（含中英/中数之间），`_strip_cjk_spaces` 迭代到不动点
+- 保护：围栏代码块/多行公式块（`$$` 单独成行状态机）/行内公式代码/URL（markdown `](...)` 含空格路径 + 裸 http）/行首 markdown 标记（`# > - * + 1.`）→ 占位符机制
+- 接入：`md_to_word.py build_document` 入口 + `convert.py convert_md_to_tex`（HTML 注释剥离后）统一 `normalize_markdown()`；SKILL.md 新增“中文标点与空格（输出硬约束）”约束层，双保险
+
+### 2. super-diagram 移除（收敛双引擎）
+- 删 `skills/super-diagram/` 内嵌目录（SKILL.md/render_v2.py/testdata 4 个 JSON）
+- `diagram_render.py`：删 SUPER_DIAGRAM_CANDIDATES/_find_super_script/render_super_diagram/_extract_title；SUPER_RE 保留仅拦截，render_one 对 super-diagram 块报错返回 False（“引擎已移除，请改用 diagram-design 或 mermaid”）
+- `office.py`：ASCII 警告文案“三引擎”→“双引擎”；第 551 行 super-diagram 块检测条件保留（触发报错 → n_fail → sys.exit(1)，与 8/30 fail-fast 修复联动）
+- SKILL.md：description/架构树/主流程/引擎表/依赖段全面改双引擎表述
+- 示例 MD 连带处理：paper-showcase / report-showcase 含 ```super-diagram 块，引擎移除后重渲染会硬失败 → 改为直接引用已渲染 PNG（figures/super-diagram-00-*.png 已存在）
+- C 盘全局 super-diagram 副本不在范围（skill 自包含后不再依赖）
+
+### 3. 验证（全绿）
+- text_norm 单测 18/18（含奇数引号兑底/纯英文段/表格/行首标记）
+- 双链路产物断言 38/38（test-norm.md：英文标点消失+全角出现+CJK 空格清除+代码/公式/URL 原样，tex 与 docx 双侧）
+- 三示例回归：paper-showcase 292KB / report-showcase 475KB（mermaid 1 块渲染 OK）/ paper-twocolumn 157KB，Word+PDF 双格式
+- super-diagram 块拦截：EXIT=1 + 明确报错文案
+
+### 踩坑
+- URL 保护正则 `\]\([^)\s]*\)` 遇含空格图片路径失效 → 改 `\]\([^)]*\)`（`[^)\s]` 会把路径内空格排除在保护外）
+- 断言脚本误报三例：tex `\author{## 一…}` 的空格是行首标记语法空格（应保留）、Word“目 录”是自动目录页固有字距、代码块在 tex 中是 verbatim 无围栏标记
+- 删引擎后示例 MD 里的引擎块要同步改写，否则 fail-fast 会拦住回归验证（先 grep 确认 PNG 存在再改引用）
+
 
