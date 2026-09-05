@@ -1,15 +1,15 @@
 \documentclass{harryopo-paper}
 
 \title{基于注意力机制的轻量化图像分类方法研究}
-\author{张三 计算机学院 2025000101\\ \fzfs\small 示例大学}
-\date{2026年08月30日}
+\author{张三计算机学院2025000101\\ \fzfs\small 示例大学}
+\date{2026年09月05日}
 
 
 \begin{document}
 
 \maketitle
 \begin{abstract}
-图像分类是计算机视觉领域的基础任务之一。本文提出了一种基于注意力机制的轻量化图像分类方法，在保持较高准确率的同时显著降低了模型复杂度。实验结果表明，所提方法在 ImageNet 数据集上的 Top-1 准确率达到 78.3\%，参数量仅为 3.2M，FLOPs 为 0.8G，优于现有的 MobileNetV3 和 ShuffleNetV2 等轻量化模型。
+图像分类是计算机视觉领域的基础任务之一。本文提出了一种基于注意力机制的轻量化图像分类方法，在保持较高准确率的同时显著降低了模型复杂度。实验结果表明，所提方法在ImageNet数据集上的Top-1准确率达到78.3\%，参数量仅为3.2M，FLOPs为0.8G，优于现有的MobileNetV3和ShuffleNetV2等轻量化模型。
 \end{abstract}
 \keywords{图像分类；注意力机制；轻量化网络；深度学习}
 
@@ -18,31 +18,31 @@
 
 图像分类是计算机视觉中最基本的任务之一，其目标是将输入图像分配到预定义的类别中。传统方法依赖手工设计的特征提取器，泛化能力有限。深度学习技术的兴起——特别是卷积神经网络（CNN）——彻底改变了这一局面。
 
-自 AlexNet 在 2012 年 ImageNet 挑战赛中取得突破以来，研究者们提出了大量 CNN 架构。ResNet 通过残差连接解决了深层网络训练困难的问题，EfficientNet 则通过复合缩放策略实现了效率与精度的平衡。
+自AlexNet在2012年ImageNet挑战赛中取得突破以来，研究者们提出了大量CNN架构。ResNet通过残差连接解决了深层网络训练困难的问题，EfficientNet则通过复合缩放策略实现了效率与精度的平衡。
 
-\subsubsection*{1.1 研究背景}
-\addcontentsline{toc}{subsubsection}{1.1 研究背景}
+\subsubsection*{1.1研究背景}
+\addcontentsline{toc}{subsubsection}{1.1研究背景}
 
 随着移动设备和边缘计算的普及，模型轻量化成为研究热点。轻量化模型需要在保持较高准确率的同时，显著减少参数量和计算量。
 
-\subsubsection*{1.2 主要贡献}
-\addcontentsline{toc}{subsubsection}{1.2 主要贡献}
+\subsubsection*{1.2主要贡献}
+\addcontentsline{toc}{subsubsection}{1.2主要贡献}
 
 本文的主要贡献包括：
 
 \begin{enumerate}
-  \item 提出了一种新的通道注意力机制，{\fzht 计算开销降低 40\%}
+  \item 提出了一种新的通道注意力机制，{\fzht 计算开销降低40\%}
   \item 设计了自适应空间池化模块，增强多尺度特征提取能力
-  \item 在 ImageNet、CIFAR-100 上均取得 SOTA 性能
+  \item 在ImageNet、CIFAR-100上均取得SOTA性能
 \end{enumerate}
 
 \subsection*{二、相关工作}
 \addcontentsline{toc}{subsection}{二、相关工作}
 
-\subsubsection*{2.1 轻量化网络}
-\addcontentsline{toc}{subsubsection}{2.1 轻量化网络}
+\subsubsection*{2.1轻量化网络}
+\addcontentsline{toc}{subsubsection}{2.1轻量化网络}
 
-MobileNetV3 通过深度可分离卷积和 SE 注意力机制实现高效推理；ShuffleNetV2 则通过通道混洗优化并行计算。
+MobileNetV3通过深度可分离卷积和SE注意力机制实现高效推理；ShuffleNetV2则通过通道混洗优化并行计算。
 
 \begin{table}[htbp]
   \centering
@@ -59,16 +59,16 @@ MobileNetV3 通过深度可分离卷积和 SE 注意力机制实现高效推理�
   \end{tabularx}
 \end{table}
 
-\subsubsection*{2.2 注意力机制}
-\addcontentsline{toc}{subsubsection}{2.2 注意力机制}
+\subsubsection*{2.2注意力机制}
+\addcontentsline{toc}{subsubsection}{2.2注意力机制}
 
-SE 注意力通过全局平均池化建模通道关系，CBAM 进一步引入空间注意力。两者均能以较小开销提升模型性能。
+SE注意力通过全局平均池化建模通道关系，CBAM进一步引入空间注意力。两者均能以较小开销提升模型性能。
 
 \subsection*{三、方法}
 \addcontentsline{toc}{subsection}{三、方法}
 
-\subsubsection*{3.1 整体架构}
-\addcontentsline{toc}{subsubsection}{3.1 整体架构}
+\subsubsection*{3.1整体架构}
+\addcontentsline{toc}{subsubsection}{3.1整体架构}
 
 本文方法的整体架构如下图所示：
 
@@ -77,17 +77,17 @@ SE 注意力通过全局平均池化建模通道关系，CBAM 进一步引入空
        → 阶段3（注意力模块 × 6）→ 阶段4（注意力模块 × 3）→ 全局池化 → 分类器
 \end{lstlisting}
 
-\subsubsection*{3.2 轻量化注意力模块}
-\addcontentsline{toc}{subsubsection}{3.2 轻量化注意力模块}
+\subsubsection*{3.2轻量化注意力模块}
+\addcontentsline{toc}{subsubsection}{3.2轻量化注意力模块}
 
 轻量化注意力模块（LAM）由两个分支组成：通道注意力分支和空间注意力分支。
 
 \begin{quote}
-{\fzht 公式 1} 通道注意力计算公式：
+{\fzht 公式1}通道注意力计算公式：
 \$$M_c(F) = \sigma(\text{MLP}(\text{AvgPool}(F)) + \text{MLP}(\text{MaxPool}(F)))$\$
 \end{quote}
 
-其中 $\sigma$ 表示 Sigmoid 激活函数，$\text{MLP}$ 为多层感知机。
+其中$\sigma$表示Sigmoid激活函数，$\text{MLP}$为多层感知机。
 
 \begin{lstlisting}[style=pystyle,caption={}]
 class LightweightAttention(nn.Module):
@@ -110,33 +110,33 @@ class LightweightAttention(nn.Module):
         return x * scale.expand_as(x)
 \end{lstlisting}
 
-\subsubsection*{3.3 损失函数}
-\addcontentsline{toc}{subsubsection}{3.3 损失函数}
+\subsubsection*{3.3损失函数}
+\addcontentsline{toc}{subsubsection}{3.3损失函数}
 
 本文使用标签平滑交叉熵损失：
 
 \begin{quote}
-{\fzht 公式 2} 标签平滑交叉熵损失：
+{\fzht 公式2}标签平滑交叉熵损失：
 \$$L = -\sum_{i=1}^{C} y_i^{\text{smooth}} \log(p_i), \quad y_i^{\text{smooth}} = (1-\epsilon) y_i + \frac{\epsilon}{C}$\$
 \end{quote}
 
-其中 $\epsilon = 0.1$ 为平滑系数，$C$ 为类别数。
+其中$\epsilon = 0.1$为平滑系数，$C$为类别数。
 
 \subsection*{四、实验与分析}
 \addcontentsline{toc}{subsection}{四、实验与分析}
 
-\subsubsection*{4.1 实验设置}
-\addcontentsline{toc}{subsubsection}{4.1 实验设置}
+\subsubsection*{4.1实验设置}
+\addcontentsline{toc}{subsubsection}{4.1实验设置}
 
 \begin{itemize}
-  \item 数据集：ImageNet-1K（1000 类，128 万张训练图像）
+  \item 数据集：ImageNet-1K（1000类，128万张训练图像）
   \item 优化器：SGD（momentum=0.9, weight\_decay=4e-5）
-  \item 初始学习率：0.1，cosine 衰减，训练 300 epoch
+  \item 初始学习率：0.1，cosine衰减，训练300 epoch
   \item 批量大小：256（4×RTX 3090）
 \end{itemize}
 
-\subsubsection*{4.2 消融实验}
-\addcontentsline{toc}{subsubsection}{4.2 消融实验}
+\subsubsection*{4.2消融实验}
+\addcontentsline{toc}{subsubsection}{4.2消融实验}
 
 \begin{table}[htbp]
   \centering
@@ -146,9 +146,9 @@ class LightweightAttention(nn.Module):
     {\fzht 模块} & {\fzht Top-1 (\%)} & {\fzht Params (M)} & {\fzht FLOPs (G)} \\
     \midrule
     基线 & 72.4 & 2.8 & 0.5 \\
-    + 通道注意力 & 76.1 & 3.0 & 0.7 \\
-    + 空间注意力 & 77.5 & 3.1 & 0.75 \\
-    + 标签平滑 & 78.3 & 3.2 & 0.8 \\
+    +通道注意力 & 76.1 & 3.0 & 0.7 \\
+    +空间注意力 & 77.5 & 3.1 & 0.75 \\
+    +标签平滑 & 78.3 & 3.2 & 0.8 \\
     \bottomrule
   \end{tabularx}
 \end{table}
@@ -157,15 +157,15 @@ class LightweightAttention(nn.Module):
 {\fzht 结论}：三个模块均带来稳定提升，组合使用时效果最佳。
 \end{quote}
 
-\subsubsection*{4.3 可视化分析}
-\addcontentsline{toc}{subsubsection}{4.3 可视化分析}
+\subsubsection*{4.3可视化分析}
+\addcontentsline{toc}{subsubsection}{4.3可视化分析}
 
-通过 Grad-CAM 可视化发现，注意力模块能有效聚焦于图像的判别性区域，抑制背景噪声的干扰。
+通过Grad-CAM可视化发现，注意力模块能有效聚焦于图像的判别性区域，抑制背景噪声的干扰。
 
 \subsection*{五、结论}
 \addcontentsline{toc}{subsection}{五、结论}
 
-本文提出了一种基于注意力机制的轻量化图像分类方法，通过通道-空间双分支注意力设计，在仅增加 14\% 参数量的前提下将 Top-1 准确率从 72.4\% 提升至 78.3\%。实验结果表明所提方法在精度和效率间取得了良好平衡，适合在边缘设备上部署。
+本文提出了一种基于注意力机制的轻量化图像分类方法，通过通道-空间双分支注意力设计，在仅增加14\%参数量的前提下将Top-1准确率从72.4\%提升至78.3\%。实验结果表明所提方法在精度和效率间取得了良好平衡，适合在边缘设备上部署。
 
 未来的研究方向包括：
 

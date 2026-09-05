@@ -340,7 +340,8 @@ def _strip_caption_num(text: str) -> str:
 def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
                    date: str, abstract: str, keywords: str,
                    dark: bool, twocolumn: bool, nomath: bool = False,
-                   subtitle: str = "", institute: str = "") -> str:
+                   subtitle: str = "", institute: str = "",
+                   gov: bool = False) -> str:
     """组装 harryopo-paper .tex"""
     docopts = []
     if twocolumn:
@@ -349,6 +350,8 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
         docopts.append("dark")
     if nomath:
         docopts.append("nomath")
+    if gov:
+        docopts.append("gov")
     optstr = ",".join(docopts)
 
     lines = []
@@ -877,6 +880,7 @@ def convert_md_to_tex(
     dark: bool = False,
     twocolumn: bool = False,
     nomath: bool = False,
+    gov: bool = False,
 ) -> str:
     """主编排：MD → LaTeX .tex"""
     with open(md_path, "r", encoding="utf-8") as f:
@@ -952,7 +956,7 @@ def convert_md_to_tex(
     else:
         tex = assemble_paper(blocks, title, author, date,
                             abstract, keywords, dark, twocolumn, nomath,
-                            subtitle, institute)
+                            subtitle, institute, gov=gov)
 
     out_dir = os.path.dirname(tex_path)
     if out_dir:
@@ -996,7 +1000,8 @@ def convert_docx_to_tex(
             f.write(md_text)
 
     return convert_md_to_tex(md_path, tex_path, doc_type, title, author, date,
-                             subtitle, institute, abstract, keywords, dark, twocolumn, nomath)
+                             subtitle, institute, abstract, keywords, dark,
+                             twocolumn, nomath, gov)
 
 
 # ============================================================
@@ -1020,6 +1025,8 @@ def main():
     parser.add_argument("--keywords", default="", help="关键词（覆盖自动提取）")
     parser.add_argument("--dark", action="store_true", help="深紫主题")
     parser.add_argument("--twocolumn", action="store_true", help="双栏（仅 paper）")
+    parser.add_argument("--gov", action="store_true",
+                        help="GB/T 9704 公文模式（仅 paper：国标页边距 + 三号仿宋 + 28磅行距 + 公文标题层级）")
     parser.add_argument("--no-math", action="store_true", dest="nomath",
                         help="禁用 unicode-math（无数学文档/读书笔记用）")
     parser.add_argument("--output", "-o", default="", help="输出 .tex 路径")
@@ -1056,7 +1063,8 @@ def main():
             args.title, args.author, args.date,
             args.subtitle, args.institute,
             args.abstract, args.keywords,
-            args.dark, args.twocolumn, args.nomath
+            args.dark, args.twocolumn, args.nomath,
+            getattr(args, 'gov', False)
         )
     elif ext in (".docx", ".doc"):
         result = convert_docx_to_tex(
