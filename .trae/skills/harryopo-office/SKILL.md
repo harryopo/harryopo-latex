@@ -31,6 +31,7 @@ harryopo-office/
 │   └── word/                             # Word (.docx) 模板引擎体系
 │       ├── md_to_word.py                 #   Markdown 中间态 → .docx（主入口）
 │       ├── word_template_engine.py       #   Word 模板引擎（渲染 API + OMML 公式）
+│       ├── track_changes.py              #   修订输出：AI 修改以原生 w:ins/w:del 写入二稿（改稿循环留痕）
 │       ├── template/                     #   docxtpl 模板填充子 skill
 │       │   ├── docx_template.py          #     主入口 CLI（extract/validate/render）
 │       │   ├── schema_extractor.py       #     模板占位符 → JSON Schema（类型推断）
@@ -208,7 +209,12 @@ office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
   ▼ ③ 生成红线稿（原生 w:ins/w:del 修订标记，不依赖本机 Word）：
      python office.py redline 初稿.docx 用户修改版.docx -o 红线稿.docx --author "张三"
   ▼ ④ AI 读红线稿解析修订意图（w:ins=用户新增意图 / w:del=用户否定内容 / 批注=修改要求）
-  ▼ ⑤ AI 修改 MD 中间态 → 重新渲染二稿
+  ▼ ⑤ AI 改 MD 中间态 → 重新渲染二稿；如需在**既有 docx 上**出二稿并留痕：
+     python scripts/word/track_changes.py 二稿前.docx 二稿.docx \
+       --rev '[{"op":"replace","find":"旧词","replace":"新词"},
+               {"op":"insert_after","anchor":"锚点段文本","text":"AI 新增段"},
+               {"op":"delete","find":"要删的文本"}]' --author "AI"
+     （输出带原生 w:ins/w:del，用户在 Word 里逐条接受/拒绝；纯 python-docx+lxml，无 Node 依赖）
 ```
 
 - 依赖：`pip install "python-redlines[docxodus]"`（MIT，内嵌 .NET 引擎免装 Word）

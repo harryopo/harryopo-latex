@@ -152,8 +152,8 @@ docx 渲染后核对 →  docx-preview（docxjs，Apache-2.0）静态 HTML 页
 - [x] GB/T 9704 公文参数校准 + 公文格式 lint（✅ 2026-09-05：paper.cls `gov` 选项国标版式 + convert/office `--gov` + gb9704_check.py lint + office.py `govcheck`；gov-notice 示例 10/10 全过；不影响默认学术排版。旧公文模板 docx 为 Word 默认边距，Word 模板国标化列 P2）
 - [x] kreuzberg 补 .doc/.xls/.ppt 档（✅ 2026-09-05：office.py 解析路由〇档，.doc 97-2003 老二进制首选；strip_kreuzberg_fieldcodes 清洗 TOC 域残留 41→0；E2E .doc→Word 全通）
 - [x] marker 2.0.0 A/B（❌ **2026-09-05 结论：不接入**。三条模型下载路全堵：HF 直连超时（墙）→ hf-mirror 401（Xet 存储不被镜像支持）→ HF_HUB_DISABLE_XET=1 后下载速度 15.8kB/s（全套 ~3GB 需 50+ 小时）。**维持 MinerU 为 PDF 深解析档**；marker 留 Assess，网络环境改善（代理/预下载模型）时可重测）
-- [ ] docx npm 9.7 修订 OOXML 结构评估 → 自研引擎修订输出（二稿带修订记录）
-- [ ] docling 接入决策（v2 遗留：跑复杂文档对比，质量达标才入库）
+- [x] docx npm 9.7 修订 OOXML 结构评估 → 自研引擎修订输出（✅ 2026-09-05：**结论是不引入 docx npm**——修订 OOXML 是公开标准（w:ins/w:del 样本从 Python-Redlines 红线稿解剖即得），python-docx + lxml 直构即可。落地 `word/track_changes.py`：replace/delete/insert_after 三类修订 → 二稿带原生修订标记（AI 改稿留痕），E2E applied=3 全绿；与 redline.py 构成改稿循环双向留痕）
+- [x] docling 接入决策（❌ **2026-09-05 判 Hold，与 marker 同因**：HTTP 探测证实其模型仓库（docling-project/*）同为 HF Xet 存储——hf-mirror 401、直连超时，本网络环境不可用；网络改善后与 marker 统一重测）
 
 ### P2（1 个月内）
 - [ ] PPT 输出链路（Output Contract 范式 + COM 参考实现）
