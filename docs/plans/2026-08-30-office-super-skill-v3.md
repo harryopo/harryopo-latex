@@ -148,8 +148,8 @@ docx 渲染后核对 →  docx-preview（docxjs，Apache-2.0）静态 HTML 页
 - [x] 顺带修复：md_to_word.py 补 HTML 注释剥离（与 convert.py 同规则，注释文本不再透进 Word 正文）
 
 ### P1（2 周内）
+- [x] **harryopo-build-mcp**（✅ 2026-09-05：build_mcp.py 三工具 build/diagnostics/lint + latex_diagnostics.py 诊断库；MCP 2.x stdio；smoke test 三工具全绿、真实编译 4 页 0 错误。踩坑：MCP 2.x FastMCP 改名 MCPServer；字体 Path=../fonts/ 要求编译目录为 templates 子目录——必须对齐 office.py 的项目根路径；\h 等正则非法转义在 Python 3.13 直接抛错）+ overleaf-mcp 7 项静态检查移植（✅ lint_tex L01-L07：好文件零误报、5 类坏文件全捕获）
 - [ ] GB/T 9704 公文参数校准（markdown2word/markdown-gongwen 规则对照）+ 公文格式 lint
-- [ ] harryopo-build-mcp + overleaf-mcp 7 项静态检查移植（编译诊断闭环）
 - [ ] marker 2.0.0 A/B（对 MinerU，跑自有文档集）；kreuzberg 补 .doc/.xls/.ppt 档
 - [ ] docx npm 9.7 修订 OOXML 结构评估 → 自研引擎修订输出（二稿带修订记录）
 - [ ] docling 接入决策（v2 遗留：跑复杂文档对比，质量达标才入库）
