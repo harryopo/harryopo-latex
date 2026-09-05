@@ -21,8 +21,9 @@ harryopo-office/
 │   ├── diagram_render.py                 # 图表统一渲染器（mermaid 流程图，被 office.py 调用）
 │   ├── diagram_design_render.py          # diagram-design HTML → PNG（--svg 仅截 SVG / --check 自检）
 │   ├── text_norm.py                      # 中文标点全角化 + 空格清理（护栏层，md_to_word/convert 共用）
+│   ├── redline.py                        # 两份 docx → 原生修订红线稿（python-redlines，改稿循环入口）
 │   ├── md2latex.py                       # math-notes MD → .tex（纯 Python 版；Pandoc 优先版在 templates/math-notes/md2latex.py）
-│   ├── mineru_cli.py                     # DOCX/PDF → MD（MinerU 解析 + 清洗 + HTML表格转LaTeX）
+│   ├── mineru_cli.py                     # DOCX/PDF → MD（MinerU 解析 + 清洗 + HTML表格转LaTeX；PDF 走官方 do_parse，DOCX 走 office 后端）
 │   ├── html_table_to_latex.py            # HTML 表格 → LaTeX（colspan/rowspan → multicolumn/multirow）
 │   ├── test-sample.md                    # 测试用 Markdown
 │   └── word/                             # Word (.docx) 模板引擎体系
@@ -161,6 +162,24 @@ office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
 | MD/DOCX 转 LaTeX | "md转latex"、"docx转pdf"、"markdown转tex" | 直接转换 |
 | 手写 LaTeX | "写论文"、"写报告"、"写笔记" | 提供骨架模板 |
 | 生成框架图 | "框架图"、"架构图"、"流程图"、"时序图"、"画个图"、"配图" | **先提问是否生成 → diagram-design 生成（可多类型选择）→ 渲染插入三条链路** |
+| 修订审阅/改稿对比 | "红线稿"、"修订"、"改了哪里"、"对比两份word"、"改稿" | **redline：AI 初稿 vs 用户修改版 → 原生修订红线稿** |
+
+### 修订审阅流程（改稿循环入口）
+
+**场景**：AI 生成了 Word 初稿，用户在 Word 里改完后希望 AI 理解改动、出二稿。
+
+```
+① AI 生成初稿（md_to_word 渲染产出 初稿.docx）
+  ▼ ② 用户在 Word 中修改（改字/删段/加段/批注）
+  ▼ ③ 生成红线稿（原生 w:ins/w:del 修订标记，不依赖本机 Word）：
+     python office.py redline 初稿.docx 用户修改版.docx -o 红线稿.docx --author "张三"
+  ▼ ④ AI 读红线稿解析修订意图（w:ins=用户新增意图 / w:del=用户否定内容 / 批注=修改要求）
+  ▼ ⑤ AI 修改 MD 中间态 → 重新渲染二稿
+```
+
+- 依赖：`pip install "python-redlines[docxodus]"`（MIT，内嵌 .NET 引擎免装 Word）
+- 引擎：默认 wmlcomparer；`--engine docxdiff` 用结构感知对比（0.3.0+，不可用自动回退）
+- 也可直接调 `python redline.py <original> <modified> -o <out> [--author 名字]`
 
 ### Word 生成流程（Markdown 中间态 → .docx）
 

@@ -637,6 +637,21 @@ def cmd_diagram(args):
         sys.exit(result.returncode)
 
 
+def cmd_redline(args):
+    """redline 子命令：两份 docx → 原生修订红线稿（委托 redline.py）"""
+    script = SCRIPT_DIR / 'redline.py'
+    argv = [sys.executable, str(script), args.original, args.modified,
+            '-o', args.output, '--author', args.author, '--engine', args.engine]
+    result = subprocess.run(argv, capture_output=True, text=True,
+                            encoding='utf-8', errors='replace')
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
 def cmd_info(args):
     """info 子命令：打印路径和环境信息"""
     print('=== 办公超级 Skill 环境信息 ===\n')
@@ -707,6 +722,16 @@ def main():
     p_dgm.add_argument('dgm_args', nargs=argparse.REMAINDER,
                        help='透传给 diagram_design_render.py 的参数')
     p_dgm.set_defaults(func=cmd_diagram)
+
+    # redline 子命令（委托 redline.py：两份 docx → 原生修订红线稿，改稿循环入口）
+    p_red = sub.add_parser('redline', help='两份 docx → 原生 Word 修订红线稿（改稿循环：AI 初稿 vs 用户修改版）')
+    p_red.add_argument('original', help='原始版 docx（AI 生成初稿）')
+    p_red.add_argument('modified', help='修改版 docx（用户改动后）')
+    p_red.add_argument('-o', '--output', required=True, help='输出红线稿路径')
+    p_red.add_argument('--author', default='AI Review', help='修订记录显示的作者名（默认 AI Review）')
+    p_red.add_argument('--engine', default='wmlcomparer', choices=['wmlcomparer', 'docxdiff'],
+                       help='对比算法（docxdiff 为结构感知引擎，不可用时自动回退）')
+    p_red.set_defaults(func=cmd_redline)
 
     # info 子命令
     p_info = sub.add_parser('info', help='打印环境信息')
