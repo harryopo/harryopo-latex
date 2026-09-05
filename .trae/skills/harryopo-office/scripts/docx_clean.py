@@ -293,6 +293,24 @@ def _fix_unicode_math(text: str) -> str:
     return text
 
 
+def strip_kreuzberg_fieldcodes(text: str) -> str:
+    """清洗 kreuzberg 提取老 .doc 时的 Word 域代码残留。
+
+    kreuzberg 对 .doc 的 TOC 域不做解释，透出原始域指令：
+      `TOC \\o "1-4" \\h \\z \\u...` 开头的目录域行
+      `HYPERLINK \\l "_TocNNN"标题\\t PAGEREF _TocNNN \\h N` 目录条目行
+    目录条目的标题文字埋在域代码里无法恢复为干净链接，整行删除（正文标题仍在）。
+    """
+    out = []
+    for line in text.splitlines():
+        if re.match(r'^\s*TOC \\', line):
+            continue
+        if re.search(r'HYPERLINK \\l "_Toc\d+"', line) or 'PAGEREF _Toc' in line:
+            continue
+        out.append(line)
+    return '\n'.join(out)
+
+
 # ============================================================
 # 主编排
 # ============================================================

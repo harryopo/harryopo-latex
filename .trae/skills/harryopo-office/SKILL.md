@@ -970,7 +970,7 @@ Pandoc 原生支持几乎所有 Markdown 扩展语法，无需手动映射：
 2. **读书笔记**：使用 `--no-math` 禁用 unicode-math
 3. **环境检查**：build.ps1 编译前自动检查 xelatex/字体/cls
 4. **代码块转义**：LaTeX 特殊字符在代码块中自动转义
-5. **DOCX 支持**：office.py 一键转换首选 `anydoc`（`pip install firecrawl-anydoc`，毫秒级 GFM 表格原生；含图文档自动回退 pandoc 保图片），需 `pip install python-docx`（pandoc 降级 + 表格回填）或 `winget install pandoc`
+5. **DOCX 支持**：office.py 一键转换首选 `anydoc`（`pip install firecrawl-anydoc`，毫秒级 GFM 表格原生；含图文档自动回退 pandoc 保图片），需 `pip install python-docx`（pandoc 降级 + 表格回填）或 `winget install pandoc`；**老 .doc（97-2003 二进制）首选 `kreuzberg`**（`pip install kreuzberg`，MIT，Rust 核 106 格式——四级路由中唯一稳定覆盖 .doc/.xls/.ppt 的档；TOC 域代码残留由 `strip_kreuzberg_fieldcodes` 清洗）
 6. **标题无编号**：convert.py 已改为 `\section*`/`\subsection*` 系列，目录通过 `\addcontentsline` 保留；`.cls` 中重定义 `\thesection` 等为空，手写 .tex 也生效
 7. **表格自适应**：convert.py 生成的表格使用 `tabularx{\textwidth}{>{\raggedright\arraybackslash}X...}`，caption 在下方；手写时同理，避免固定列宽导致越界
 8. **图片 caption**：独立行图片 `![](alt|path)` 自动识别为 `\begin{figure}...\caption{alt}...\end{figure}`，caption 在图下方

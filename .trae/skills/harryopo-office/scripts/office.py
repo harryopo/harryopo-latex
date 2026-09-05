@@ -434,18 +434,32 @@ def cmd_render(args):
         md_file = tmp_md
         md_text = None
         converter = 'none'
+        # 〇 档：老 .doc（97-2003 二进制格式）→ kreuzberg 首选
+        # （anydoc/pandoc/python-docx 对老二进制 .doc 均不可靠；kreuzberg Rust 核是
+        #   现有四级路由中唯一稳定覆盖 .doc/.xls/.ppt 的解析档。域代码残留由清洗层兜底。）
+        if input_file.suffix.lower() == '.doc':
+            try:
+                from kreuzberg import extract_file_sync
+                md_text = extract_file_sync(str(input_file)).content
+                converter = 'kreuzberg'
+            except ImportError:
+                print('[WARN] kreuzberg 未安装（.doc 老格式推荐: pip install kreuzberg），'
+                      '尝试降级路由', file=sys.stderr)
+            except Exception as exc:
+                print(f'[WARN] kreuzberg 解析 .doc 失败: {exc}，尝试降级路由', file=sys.stderr)
         # A 档 fast path：anydoc 首选（Rust 内核，毫秒级，GFM 表格原生）。
         # 含图片的文档回退旧链路（anydoc 内嵌图只渲染 alt 文本不落盘，丢图）。
-        try:
-            import anydoc
-            doc = anydoc.to_document(input_file.read_bytes())
-            if not doc.assets:
-                md_text = anydoc.to_markdown(str(input_file))
-                converter = 'anydoc'
-            else:
-                print('  [INFO] 文档含图片，anydoc 降级为 pandoc（保图片落盘）', file=sys.stderr)
-        except Exception:
-            pass  # anydoc 未安装 / 转换失败 → 降级 pandoc
+        if md_text is None:
+            try:
+                import anydoc
+                doc = anydoc.to_document(input_file.read_bytes())
+                if not doc.assets:
+                    md_text = anydoc.to_markdown(str(input_file))
+                    converter = 'anydoc'
+                else:
+                    print('  [INFO] 文档含图片，anydoc 降级为 pandoc（保图片落盘）', file=sys.stderr)
+            except Exception:
+                pass  # anydoc 未安装 / 转换失败 → 降级 pandoc
 
         if md_text is None:
             try:
@@ -483,7 +497,8 @@ def cmd_render(args):
         # table 需 python-docx 回填（extract_docx_tables）。
         from docx_clean import clean_pandoc_md, extract_docx_tables
         try:
-            tables = [] if converter in ('anydoc', 'markitdown') \
+            # kreuzberg 自带 GFM 表格输出；且 .doc 老格式非 zip，python-docx 无法回填
+            tables = [] if converter in ('anydoc', 'markitdown', 'kreuzberg') \
                 else extract_docx_tables(str(input_file))
         except ImportError:
             print('[ERROR] pandoc 链路需要 python-docx 回填表格，请安装: '
@@ -491,6 +506,9 @@ def cmd_render(args):
                   file=sys.stderr)
             sys.exit(1)
         cleaned = clean_pandoc_md(md_text, tables)
+        if converter == 'kreuzberg':
+            from docx_clean import strip_kreuzberg_fieldcodes
+            cleaned = strip_kreuzberg_fieldcodes(cleaned)
         tmp_md.write_text(cleaned, encoding='utf-8')
         print(f'  [OK] {tmp_md.name}（转换器 {converter}，清洗完成，表格 {len(tables)} 个）')
     elif input_file.suffix.lower() in MINERU_EXTS:
