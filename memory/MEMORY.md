@@ -873,5 +873,21 @@ web-editor 升级。
 - **tabularx 列计数**：X 列和 p{宽}>{装饰} 需正确解析（先剥 `{...}` 参数再数 [lcrpX] 字母），否则全文档误报
 - 每个表格只报第一处列数错误（避免刷屏）；占位图 placeholder 允许不存在（office.py 的占位机制）
 
+---
+
+## 2026-09-05（续2）：GB/T 9704 公文模式 --gov + govcheck（P1 第二项）
+
+### 交付
+- harryopo-paper.cls `gov` 选项（`\if@govmode` 分支）：国标页边距（37/35/28/26mm）、正文 `\zihao{3}` 仿宋、`\linespread{1.46}`（28 磅=16pt×1.2×1.46，版心 225mm 恰 22 行）、文件标题二号小标宋居中、层级标题（一、黑体 →（一）楷体 → 1. 仿宋加粗 →（1）仿宋）
+- convert.py/office.py `--gov` 透传（**gov 参数要经 convert_md_to_tex 包装链逐层传递，不能在中间层 getattr(args)**——第一版在无 args 的函数里取值直接 NameError）
+- `gb9704_check.py`：合规 lint（.docx 用 python-docx 读节属性/正文样式；.tex 检测 documentclass gov 选项后自动定位 cls 解析 gov 分支；--json 供 AI）；office.py `govcheck` 子命令
+- 验证：gov-notice 公文样例 10/10 全过 + PNG 目检（标题二号小标宋/正文三号仿宋疏朗行距/分级字体正确）；普通示例回归 4 页不变；旧公文模板 docx 如实报 7 项偏差（Word 模板国标化列后续）
+
+### 踩坑
+- **.cls 参数检查要锚定分支**：`\newif\if@govmode` 声明行会被 `\if@govmode(...)\fi` 非贪婪误当分支起点（截到 twocolumn 段）→ 用 `(?m)^\\if@govmode\n` 行首锚定排除声明行
+- 生成的 .tex 里没有 geometry/字号（都在 cls 里）——tex 模式 lint 必须先查 documentclass gov 选项再转查 cls 文件
+- 公文行距换算：Word"28 磅固定值" = LaTeX `16pt × 1.2 × linespread` → linespread ≈ 1.46
+
+
 
 
