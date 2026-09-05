@@ -902,6 +902,21 @@ web-editor 升级。
 - **维持 MinerU 为 PDF 深解析档**；marker 留 Assess（代理/预下载模型可重测）
 - 教训：**重模型依赖的候选档，先测网络可达性再谈集成**——A/B 成本主要在模型获取不在代码
 
+---
+
+## 2026-09-05（续4）：track_changes 修订输出（P1 清零）
+
+### 交付
+- `word/track_changes.py`：在既有 docx 上以原生修订标记应用修改（replace/delete/insert_after），输出二稿——AI 改稿留痕，与 redline.py（用户修改留痕）构成改稿循环双向闭环
+- E2E：applied=3（段内替换/删除/锚点插段）ins=3 del=2，二稿 python-docx 可重读
+- **docx npm 评估结论：不引入**——修订 OOXML 是公开标准（ECMA-376），样本从 Python-Redlines 红线稿解剖即得；python-docx + lxml 直构即可，避免 Node 子进程依赖
+- docling 判 Hold：HTTP 探测（curl -sIL 看响应头 X-Xet-Hash / xet-reconstruction-info）证实其模型仓库同为 HF Xet 存储——**不用装包就能收口的网络探测法**
+
+### 踩坑
+- lxml 属性 `xml:space` 必须写成 `{http://www.w3.org/XML/1998/namespace}space`（字面 'xml:space' 直接 ValueError）
+- 段内替换 MVP 限制：find 必须命中单 run 内文本（跨 run 与 docxtpl 占位符同类限制），引擎跳过并给出缩短建议
+
+
 
 
 
