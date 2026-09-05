@@ -888,6 +888,21 @@ web-editor 升级。
 - 生成的 .tex 里没有 geometry/字号（都在 cls 里）——tex 模式 lint 必须先查 documentclass gov 选项再转查 cls 文件
 - 公文行距换算：Word"28 磅固定值" = LaTeX `16pt × 1.2 × linespread` → linespread ≈ 1.46
 
+---
+
+## 2026-09-05（续3）：kreuzberg 老格式档接入 + marker A/B 结论
+
+### kreuzberg（commit 5bace2f）
+- 四级路由盲区补齐：.doc（97-2003 老二进制）此前 anydoc/pandoc/python-docx 全不可靠 → kreuzberg 4.10.2（MIT，Rust 核 35MB wheel 免模型）为〇档首选
+- COM 转存 .doc 测试样本 → 提取 → 清洗 → Word 渲染 E2E 全通
+- **kreuzberg 域代码残留**：TOC 域透出 `TOC \o`/`HYPERLINK \l "_Toc"`/`PAGEREF _Toc` 原始指令（实测 41 处）→ `strip_kreuzberg_fieldcodes` 清零；kreuzberg 自带 GFM 表格免 python-docx 回填（**.doc 非 zip，python-docx 打开会抛 ValueError**——免回填列表必须含 kreuzberg）
+
+### marker A/B 结论（❌ 不接入）
+- 三条模型下载路全堵：HF 直连超时（墙）→ hf-mirror 对 Xet 存储仓库 401 → `HF_HUB_DISABLE_XET=1` 绕过 Xet 后下载速度仅 15.8kB/s（全套 ~3GB 需 50+ 小时）
+- **维持 MinerU 为 PDF 深解析档**；marker 留 Assess（代理/预下载模型可重测）
+- 教训：**重模型依赖的候选档，先测网络可达性再谈集成**——A/B 成本主要在模型获取不在代码
+
+
 
 
 

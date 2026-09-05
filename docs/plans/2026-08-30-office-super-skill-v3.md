@@ -149,8 +149,9 @@ docx 渲染后核对 →  docx-preview（docxjs，Apache-2.0）静态 HTML 页
 
 ### P1（2 周内）
 - [x] **harryopo-build-mcp**（✅ 2026-09-05：build_mcp.py 三工具 build/diagnostics/lint + latex_diagnostics.py 诊断库；MCP 2.x stdio；smoke test 三工具全绿、真实编译 4 页 0 错误。踩坑：MCP 2.x FastMCP 改名 MCPServer；字体 Path=../fonts/ 要求编译目录为 templates 子目录——必须对齐 office.py 的项目根路径；\h 等正则非法转义在 Python 3.13 直接抛错）+ overleaf-mcp 7 项静态检查移植（✅ lint_tex L01-L07：好文件零误报、5 类坏文件全捕获）
-- [ ] GB/T 9704 公文参数校准（markdown2word/markdown-gongwen 规则对照）+ 公文格式 lint
-- [ ] marker 2.0.0 A/B（对 MinerU，跑自有文档集）；kreuzberg 补 .doc/.xls/.ppt 档
+- [x] GB/T 9704 公文参数校准 + 公文格式 lint（✅ 2026-09-05：paper.cls `gov` 选项国标版式 + convert/office `--gov` + gb9704_check.py lint + office.py `govcheck`；gov-notice 示例 10/10 全过；不影响默认学术排版。旧公文模板 docx 为 Word 默认边距，Word 模板国标化列 P2）
+- [x] kreuzberg 补 .doc/.xls/.ppt 档（✅ 2026-09-05：office.py 解析路由〇档，.doc 97-2003 老二进制首选；strip_kreuzberg_fieldcodes 清洗 TOC 域残留 41→0；E2E .doc→Word 全通）
+- [x] marker 2.0.0 A/B（❌ **2026-09-05 结论：不接入**。三条模型下载路全堵：HF 直连超时（墙）→ hf-mirror 401（Xet 存储不被镜像支持）→ HF_HUB_DISABLE_XET=1 后下载速度 15.8kB/s（全套 ~3GB 需 50+ 小时）。**维持 MinerU 为 PDF 深解析档**；marker 留 Assess，网络环境改善（代理/预下载模型）时可重测）
 - [ ] docx npm 9.7 修订 OOXML 结构评估 → 自研引擎修订输出（二稿带修订记录）
 - [ ] docling 接入决策（v2 遗留：跑复杂文档对比，质量达标才入库）
 
