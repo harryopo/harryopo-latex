@@ -838,4 +838,23 @@ web-editor 升级。
 - 断言脚本误报三例：tex `\author{## 一…}` 的空格是行首标记语法空格（应保留）、Word“目 录”是自动目录页固有字距、代码块在 tex 中是 verbatim 无围栏标记
 - 删引擎后示例 MD 里的引擎块要同步改写，否则 fail-fast 会拦住回归验证（先 grep 确认 PNG 存在再改引用）
 
+---
+
+## 2026-09-05：P0 收官（redline 修订审阅 + MinerU 3.4.5 双链路 + docx-preview 砍掉）
+
+### 1. Python-Redlines 修订审阅接入（v3 P0）
+- `scripts/redline.py`：两份 docx → 原生 w:ins/w:del 红线稿；`pip install "python-redlines[docxodus]"`（0.3.0，MIT，内嵌 .NET 引擎免装 Word；**清华镜像无此包，需 -i https://pypi.org/simple**）
+- office.py `redline` 子命令（委托透传）；SKILL.md 触发词"红线稿/修订/改了哪里"+ 修订审阅流程（①AI 初稿 →②用户改 →③redline 出红线稿 →④AI 解析修订意图 →⑤改 MD 出二稿）
+- E2E：替换（ins"与门控融合"）/删除（delText）/新增三类改动全产生正确标记；引擎默认 wmlcomparer，--engine docxdiff 结构感知可选
+
+### 2. MinerU 3.4.5 可用性修复
+- DOCX office 后端（office_docx_analyze）3.4.5 兼容，端到端全通（不需要模型）
+- **PDF 路径重写**：3.x pipeline 无稳定内部 API（PipelineAnalyze 已删，改 doc_analyze_streaming 流式）；官方 CLI 是"本地 mineru-api + HTTP"架构——**首次模型下载时健康检查必超时（8/05 踩坑 3.4.5 仍在）**；最终方案：直调官方统一入口 `mineru.cli.common.do_parse(backend='pipeline')`（仅留 f_dump_md，关闭可视化加速），MINERU_MODEL_SOURCE=modelscope 首跑自动下载模型；PDF+DOCX 双链路端到端验证全绿
+
+### 3. docx-preview 砍掉（决策）
+- Word COM 导出 PDF 已是权威核对（100% 所见即所得）；docx-preview 分页近似反而误导 → 方案书 v3 P0 勾除并记录理由；未来做浏览器端 docx 预览再评估
+
+### 4. 顺带修复
+- md_to_word.py 补 HTML 注释剥离（与 convert.py 同规则），注释文本此前会透进 Word 正文
+
 
