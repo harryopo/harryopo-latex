@@ -857,4 +857,21 @@ web-editor 升级。
 ### 4. 顺带修复
 - md_to_word.py 补 HTML 注释剥离（与 convert.py 同规则），注释文本此前会透进 Word 正文
 
+---
+
+## 2026-09-05（续）：harryopo-build-mcp 落地（P1 首项）
+
+### 交付
+- `latex_diagnostics.py` 纯函数诊断库：parse_log（错误/警告/Overfull/页数 + Package Error 续行合并 + 14 类错误中文修复建议）+ lint_tex 7 项静态预检（L01 环境配平 / L02 $配对 / L03 表格列数 / L04 悬空引用 / L05 重复label / L06 图片存在 / L07 括号配平）
+- `build_mcp.py`：harryopo-build-mcp（MCP 2.x stdio），三工具 build/diagnostics/lint；路径复用 office.py 常量
+- smoke test（stdio 客户端实调）：lint 好文件 0 误报、diagnostics 27页、build 真实编译 4页 0 错误
+
+### 踩坑（关键）
+- **MCP 2.x 改名**：`mcp.server.fastmcp.FastMCP` → `mcp.server.mcpserver.MCPServer`（pip install mcp 默认已是 2.1+）
+- **编译目录铁律**：base.sty 字体 `Path=../fonts/` 相对编译目录 → .tex 必须在 templates/ 子目录编译（build 工具自动拷入 PAPER_DIR 编译、产物拷回；两处模板库（项目根 vs skill 内嵌）即便当前一致也应以 office.py 路径为单一事实来源）
+- **Python 3.13 正则严格化**：`re` 模式里 `\h`（\hbox）等非法转义直接抛 PatternError——建议表/映射表的字符串模式必须转义字面反斜杠
+- **tabularx 列计数**：X 列和 p{宽}>{装饰} 需正确解析（先剥 `{...}` 参数再数 [lcrpX] 字母），否则全文档误报
+- 每个表格只报第一处列数错误（避免刷屏）；占位图 placeholder 允许不存在（office.py 的占位机制）
+
+
 
