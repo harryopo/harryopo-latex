@@ -27,6 +27,8 @@ import argparse
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Optional
@@ -48,23 +50,59 @@ def parse_docx(file_bytes: bytes, img_dir: str) -> tuple:
 
 
 def parse_pdf_or_image(file_path: str, img_dir: str, lang: str = "ch") -> tuple:
-    """用 MinerU pipeline 后端解析 PDF/图片（需 OCR）
+    """PDF/图片 → Markdown：调用官方 `mineru.cli.common.do_parse`（Python 直连）。
 
-    Returns: (middle_json, results)
+    3.x 的 pipeline 内部 API 改为流式接口（无稳定 `PipelineAnalyze` 可依赖），
+    官方 CLI 又是"本地 mineru-api 服务 + HTTP"架构（首次模型下载时健康检查超时，
+    见 8/05 踩坑记录）。因此 PDF/图片路径用官方统一入口 `do_parse`（backend=
+    'pipeline'，本地模型，首次运行自动从 modelscope 下载模型），仅保留 MD 产出，
+    关闭可视化/中间 JSON 等附加产物加速。清洗逻辑保持不变。
+
+    Returns: (fake_middle_json, None) —— fake_middle_json 带 '_md_text'，
+             供 middle_json_to_markdown 直接返回官方 MD。
     """
-    from mineru.backend.pipeline.pipeline_analyze import PipelineAnalyze
-    from mineru.backend.pipeline.model_init import AtomModelSingleton
-    from mineru.data.data_reader_writer import FileBasedDataWriter
+    file_path = Path(file_path)
+    stem = file_path.stem
+    out_dir = Path(img_dir).parent / 'mineru_official'
+    out_dir.mkdir(parents=True, exist_ok=True)
+    print(f'   [pipeline] do_parse {file_path.name} → {out_dir.name}/{stem}/'
+          f'（首次运行自动下载模型，约数 GB）')
+    from mineru.cli.common import do_parse
+    do_parse(
+        output_dir=str(out_dir),
+        pdf_file_names=[stem],
+        pdf_bytes_list=[file_path.read_bytes()],
+        p_lang_list=[lang],
+        backend='pipeline',
+        f_draw_layout_bbox=False,
+        f_draw_span_bbox=False,
+        f_dump_md=True,
+        f_dump_middle_json=False,
+        f_dump_model_output=False,
+        f_dump_orig_pdf=False,
+        f_dump_content_list=False,
+    )
 
+    md_candidates = sorted(out_dir.rglob(f'{stem}.md')) or sorted(out_dir.rglob('*.md'))
+    if not md_candidates:
+        raise RuntimeError(f'do_parse 未产出 MD: {out_dir}')
+    md_file = md_candidates[0]
+    md_text = md_file.read_text(encoding='utf-8')
+    print(f'   官方 MD: {md_file.relative_to(out_dir)} ({len(md_text)} chars)')
+
+    # 搬运 images 到 img_dir（保持 result.md 的相对引用可用）
     Path(img_dir).mkdir(parents=True, exist_ok=True)
-    image_writer = FileBasedDataWriter(img_dir)
+    moved = 0
+    for pattern in ('*.jpg', '*.jpeg', '*.png'):
+        for src in md_file.parent.rglob(pattern):
+            dst = Path(img_dir) / src.name
+            if not dst.exists():
+                shutil.copyfile(src, dst)
+                moved += 1
+    if moved:
+        print(f'   images: 搬运 {moved} 张 → {img_dir}')
 
-    # 加载模型（首次较慢）
-    model_manager = AtomModelSingleton()
-    model_manager.init(model_path=None)
-
-    analyzer = PipelineAnalyze(model_manager=model_manager, image_writer=image_writer)
-    return analyzer.analyze(file_path, lang=lang)
+    return {'_md_text': md_text}, None
 
 
 def middle_json_to_markdown(middle_json: dict, img_dir: str) -> str:
@@ -72,6 +110,10 @@ def middle_json_to_markdown(middle_json: dict, img_dir: str) -> str:
     from mineru.backend.office.office_middle_json_mkcontent import union_make as office_mk
     from mineru.backend.pipeline.pipeline_middle_json_mkcontent import union_make as pipeline_mk
     from mineru.utils.enum_class import MakeMode
+
+    # 官方 CLI 委托路径：MD 已由官方产出，直接返回
+    if '_md_text' in middle_json:
+        return middle_json['_md_text']
 
     pdf_info = middle_json.get('pdf_info', [])
     backend = middle_json.get('_backend', 'office')

@@ -370,6 +370,9 @@ def build_document(md_text, config_path=None, output_path='output.docx',
     """
     engine = WordTemplateEngine(config_path)
 
+    # 剥离 HTML 注释（`<!-- ... -->`，可跨行）——与 convert.py 同规则，防止注释文本透进 Word 正文
+    md_text = re.sub(r'<!--[\s\S]*?-->', '', md_text)
+
     # 中文标点/空格规范化（护栏：AI 产出英文标点/中英空格在入口统一清洗）
     md_text = normalize_markdown(md_text)
 

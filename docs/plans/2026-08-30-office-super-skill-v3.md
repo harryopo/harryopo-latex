@@ -142,9 +142,10 @@ docx 渲染后核对 →  docx-preview（docxjs，Apache-2.0）静态 HTML 页
 ## 6. 分阶段路线图（v3）
 
 ### P0（本周，1-2 天级动作）
-- [ ] markitdown 升级 ≥0.1.7 + MinerU 升 3.4.5（解析质量直接受益）
-- [ ] **Python-Redlines 接入**：生成版 vs 用户修改版 → 红线稿 diff（修订审阅 MVP）
-- [ ] docx-preview 静态核对页：office.py 渲染 Word 后附带 `output.docx.html` 核对页
+- [x] markitdown 升级 ≥0.1.7（✅ 2026-09-05 实测 0.1.7 已装）+ MinerU 升 3.4.5（✅ 2026-09-05 装机；DOCX office 后端端到端全通；PDF pipeline 改走官方 `do_parse` 直连——3.x 流式 API 无稳定内部接口、官方 CLI 是"本地 API 服务"架构首次下载必超时，8/05 踩坑确认仍在；模型首次自动下载）
+- [x] **Python-Redlines 接入**（✅ 2026-09-05）：`redline.py` + office.py `redline` 子命令（两份 docx → 原生 w:ins/w:del 红线稿，替换/删除/新增三类改动 E2E 验证通过）；SKILL.md 增"修订审阅流程"（改稿循环入口）
+- [x] ~~docx-preview 静态核对页~~（❌ **2026-09-05 砍掉**：Word COM 导出 PDF 已是权威核对方式，docx-preview 分页近似反而误导；未来做浏览器端 docx 预览再评估）
+- [x] 顺带修复：md_to_word.py 补 HTML 注释剥离（与 convert.py 同规则，注释文本不再透进 Word 正文）
 
 ### P1（2 周内）
 - [ ] GB/T 9704 公文参数校准（markdown2word/markdown-gongwen 规则对照）+ 公文格式 lint
@@ -171,9 +172,9 @@ docx 渲染后核对 →  docx-preview（docxjs，Apache-2.0）静态 HTML 页
 
 | 决策 | 项目 | 等级 | 动作 |
 |---|---|---|---|
-| **Adopt** | Python-Redlines | P0 | 修订审阅 MVP 依赖 |
-| **Adopt** | markitdown ≥0.1.7 / MinerU 3.4.5 升级 | P0 | 现有依赖升级 |
-| **Adopt** | docx-preview（docxjs） | P0 | 渲染后核对静态页 |
+| **Adopt** | Python-Redlines | P0 | ✅ 已接入（redline.py + office.py 子命令，2026-09-05） |
+| **Adopt** | markitdown ≥0.1.7 / MinerU 3.4.5 升级 | P0 | ✅ 已完成（2026-09-05） |
+| ~~Adopt~~ | docx-preview（docxjs） | ~~P0~~ | ❌ 已砍掉（PDF 核对已覆盖，分页近似误导） |
 | **Trial** | marker 2.0.0 / kreuzberg v4 | P1 | 解析候补档 A/B |
 | **Trial** | word-mcp-live | P1 | 实时修订会话（适配器封装） |
 | **Trial** | docx npm 9.7 修订结构 | P1 | 自研修订输出的 OOXML 蓝本 |
