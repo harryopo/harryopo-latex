@@ -22,6 +22,8 @@ harryopo-office/
 │   ├── diagram_design_render.py          # diagram-design HTML → PNG（--svg 仅截 SVG / --check 自检）
 │   ├── text_norm.py                      # 中文标点全角化 + 空格清理（护栏层，md_to_word/convert 共用）
 │   ├── redline.py                        # 两份 docx → 原生修订红线稿（python-redlines，改稿循环入口）
+│   ├── latex_diagnostics.py              # LaTeX 诊断纯函数库：日志解析（错误/警告/页数+修复建议）+ .tex 7 项预检
+│   ├── build_mcp.py                      # harryopo-build-mcp 服务：build/diagnostics/lint 三工具（MCP 2.x stdio）
 │   ├── md2latex.py                       # math-notes MD → .tex（纯 Python 版；Pandoc 优先版在 templates/math-notes/md2latex.py）
 │   ├── mineru_cli.py                     # DOCX/PDF → MD（MinerU 解析 + 清洗 + HTML表格转LaTeX；PDF 走官方 do_parse，DOCX 走 office 后端）
 │   ├── html_table_to_latex.py            # HTML 表格 → LaTeX（colspan/rowspan → multicolumn/multirow）
@@ -163,6 +165,22 @@ office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
 | 手写 LaTeX | "写论文"、"写报告"、"写笔记" | 提供骨架模板 |
 | 生成框架图 | "框架图"、"架构图"、"流程图"、"时序图"、"画个图"、"配图" | **先提问是否生成 → diagram-design 生成（可多类型选择）→ 渲染插入三条链路** |
 | 修订审阅/改稿对比 | "红线稿"、"修订"、"改了哪里"、"对比两份word"、"改稿" | **redline：AI 初稿 vs 用户修改版 → 原生修订红线稿** |
+
+### LaTeX 编译诊断闭环（harryopo-build-mcp）
+
+手写/生成的 .tex 编译失败时，AI 通过 MCP 工具获得"编译 → 结构化诊断 → 修复 → 重编译"自愈闭环：
+
+```
+① harryopo_lint(tex)      编译前静态预检（7 项：环境配平/$配对/表格列数/悬空引用/重复label/图片存在/括号配平）
+② harryopo_build(tex)     3 遍 XeLaTeX（TEXINPUTS 自动指向 harryopo 模板），返回页数/错误/警告+修复建议
+③ harryopo_diagnostics(tex) 解析既有 .log（不重编译）
+```
+
+- 运行：`python scripts/build_mcp.py`（stdio；MCP 客户端配置示例：`{"command": "python", "args": ["<skill>/scripts/build_mcp.py"]}`）
+- 依赖：`pip install mcp`（2.x）
+- 诊断形态：每条错误带 code/line/context/suggestion（中文修复建议，覆盖 14 类常见错误）
+- 编译目录约定：字体 `Path=../fonts/` 相对路径要求 tex 在 templates/ 子目录编译——build 工具自动拷入 templates/paper/ 并将产物拷回原目录
+- 纯函数库 `latex_diagnostics.py` 可独立复用（不依赖 MCP）
 
 ### 修订审阅流程（改稿循环入口）
 
