@@ -15,6 +15,8 @@
 \def\harryopo@theme{blue}
 \newif\if@twocolumnmode \@twocolumnmodefalse
 \DeclareOption{twocolumn}{\@twocolumnmodetrue}
+\newif\if@govmode \@govmodefalse
+\DeclareOption{gov}{\@govmodetrue}
 \DeclareOption{dark}{\def\harryopo@theme{dark}}
 \DeclareOption{nomath}{\def\harryopo@nomath{1}}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{ctexart}}
@@ -121,6 +123,41 @@
     \par\vspace{6pt}%
     {\bfseries\fzht\color{SubColor}（#1）}\hspace{0.5em}%
 }
+
+% ============================================================
+% 第五部分半：GB/T 9704-2012 公文模式（\documentclass[gov]{harryopo-paper}）
+% ============================================================
+% 页边距：上37 下35 左28 右26 mm；正文三号仿宋（16pt）；行距 28 磅
+%（baselineskip = 16pt × 1.2 × 1.46 ≈ 28pt，版心 225mm 恰排 22 行）
+% 层级标题（GB/T 9704 惯例）：一、黑体 ｜（一）楷体 ｜ 1. 仿宋加粗 ｜ （1）仿宋
+\if@govmode
+    \geometry{left=2.8cm, right=2.6cm, top=3.7cm, bottom=3.5cm, headheight=15pt}
+    \zihao{3}                       % 正文三号 16pt（仿宋，base.sty 已设 CJK 主字体）
+    \linespread{1.46}\selectfont    % 28 磅行距
+    % 文件标题：二号小标宋居中（覆盖 \maketitle）
+    \renewcommand{\maketitle}{%
+        \begin{center}
+            {\zihao{2}\fzdbs\color{DarkColor}\@title\par}
+            \vspace{0.6cm}
+        \end{center}}
+    % 层级标题覆盖（GB/T 9704 分级字体）
+    \titleformat{\section}
+        {\zihao{3}\fzht}
+        {}{0pt}{}
+    \titlespacing{\section}{0pt}{8pt}{4pt}
+    \titleformat{\subsection}
+        {\zihao{3}\fzkt}
+        {}{0pt}{}
+    \titlespacing{\subsection}{0pt}{4pt}{2pt}
+    \titleformat{\subsubsection}
+        {\zihao{3}\bfseries\fzfs}
+        {}{0pt}{}
+    \titlespacing{\subsubsection}{0pt}{2pt}{2pt}
+    \titleformat{\paragraph}
+        {\zihao{3}\fzfs}
+        {}{0pt}{}
+    \titlespacing{\paragraph}{0pt}{2pt}{0pt}
+\fi
 
 % ============================================================
 % 第六部分：论文信息命令

@@ -9,6 +9,13 @@
 | 论文全特性 | paper-showcase-word.docx | paper-showcase-paper.pdf | — | paper-showcase-paper.tex |
 | 报告 | report-word.docx | — | report-paper.pdf | report-report.tex |
 | 报告全特性 | report-showcase.processed-word.docx | — | report-showcase.processed-paper.pdf | report-showcase.processed-report.tex |
+| **公文（GB/T 9704）** | — | gov-notice-paper.pdf | — | gov-notice-paper.tex |
+
+**2026-09-05 更新（GB/T 9704 公文模式）**：
+
+- `--gov` 选项（仅 paper）：国标页边距（上37/下35/左28/右26mm）+ 三号仿宋正文 + 28 磅行距 + 公文标题层级（一、黑体/（一）楷体/1. 仿宋加粗）
+- 生成后用 `office.py govcheck <文件>` 核对合规性（.tex/.cls/.docx 均可检查，`--json` 供 AI 消费）
+- gov-notice 示例 10/10 项全过（`python .trae/skills/harryopo-office/scripts/office.py render output/examples/gov-notice.md --format paper --gov`）
 
 **2026-08-30 更新（主流程规范落地）**：
 

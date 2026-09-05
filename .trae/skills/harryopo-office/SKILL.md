@@ -165,6 +165,22 @@ office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
 | 手写 LaTeX | "写论文"、"写报告"、"写笔记" | 提供骨架模板 |
 | 生成框架图 | "框架图"、"架构图"、"流程图"、"时序图"、"画个图"、"配图" | **先提问是否生成 → diagram-design 生成（可多类型选择）→ 渲染插入三条链路** |
 | 修订审阅/改稿对比 | "红线稿"、"修订"、"改了哪里"、"对比两份word"、"改稿" | **redline：AI 初稿 vs 用户修改版 → 原生修订红线稿** |
+| 公文生成/公文格式检查 | "公文"、"红头文件"、"GB/T 9704"、"公文格式检查" | **render --gov（国标版式）→ govcheck 合规检查** |
+
+### GB/T 9704 公文模式（--gov）与格式合规检查（govcheck）
+
+```
+① python office.py render 通知.md --format paper --gov
+   （国标版式：页边距上37/下35/左28/右26mm、正文三号仿宋 16pt、28 磅行距、
+     文件标题二号小标宋居中、层级标题 一、黑体 →（一）楷体 → 1. 仿宋加粗 → （1）仿宋）
+② python office.py govcheck 产物.tex        # 或 .docx / .cls；--json 供 AI 消费
+   （10 项国标参数对照：页面/四边距/字号/行距/层级字体，输出 ✓/✗ 偏差清单）
+```
+
+- 实现位置：harryopo-paper.cls `gov` 选项（`\if@govmode` 分支）+ convert.py/office.py `--gov` 透传 + `gb9704_check.py`
+- **不影响默认排版**：不带 --gov 时一切照旧（学术 2.5cm 边距/论文层级标题）
+- 检查 .tex 时自动定位 harryopo-paper.cls 读取 gov 分支参数；检查 .docx 用 python-docx 读节属性
+- 已知现状：`蒸馏区/harryopo-公文模板.docx` 为 Word 默认边距（govcheck 如实报 7 项偏差）——它是历史蒸馏样本，Word 公文模板的国标化列为后续项
 
 ### LaTeX 编译诊断闭环（harryopo-build-mcp）
 

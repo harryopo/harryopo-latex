@@ -258,9 +258,9 @@ def render_word(md_file, output_dir, config_name='fangzheng', export_pdf=False,
 
 
 def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False,
-                 out_stem=None):
-    """链路2: MD → LaTeX PDF (paper/report，可双栏)"""
-    print(f'\n=== 链路2: MD → PDF ({doc_type}) ===')
+                 out_stem=None, gov=False):
+    """链路2: MD → LaTeX PDF (paper/report，可双栏；gov=GB/T 9704 公文模式)"""
+    print(f'\n=== 链路2: MD → PDF ({doc_type}{" 公文" if gov else ""}) ===')
     _ensure_tex_on_path()
     stem = out_stem or md_file.stem
     tex_file = output_dir / f'{stem}-{doc_type}.tex'
@@ -270,6 +270,8 @@ def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False,
            '--type', doc_type, '-o', str(tex_file)]
     if twocolumn:
         cmd.append('--twocolumn')
+    if gov:
+        cmd.append('--gov')
     ok, out, err = run(cmd, label='convert.py')
     if not ok:
         print(f'  [失败] {err}')
@@ -582,6 +584,7 @@ def cmd_render(args):
     if 'paper' in formats:
         results['paper'] = render_paper(md_file, output_dir,
                                         doc_type=args.type, twocolumn=args.twocolumn,
+                                        gov=getattr(args, 'gov', False),
                                         out_stem=base_stem)
     if 'notes' in formats:
         results['notes'] = render_notes(md_file, output_dir, out_stem=base_stem)
@@ -652,6 +655,20 @@ def cmd_redline(args):
         sys.exit(result.returncode)
 
 
+def cmd_govcheck(args):
+    """govcheck 子命令：GB/T 9704 公文格式合规检查（委托 gb9704_check.py）"""
+    script = SCRIPT_DIR / 'gb9704_check.py'
+    argv = [sys.executable, str(script), args.file] + (['--json'] if args.json else [])
+    result = subprocess.run(argv, capture_output=True, text=True,
+                            encoding='utf-8', errors='replace')
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
 def cmd_info(args):
     """info 子命令：打印路径和环境信息"""
     print('=== 办公超级 Skill 环境信息 ===\n')
@@ -708,6 +725,8 @@ def main():
                           help='文档类型（默认 paper；report 用 harryopo-report）')
     p_render.add_argument('--twocolumn', action='store_true',
                           help='双栏排版（仅 paper）')
+    p_render.add_argument('--gov', action='store_true',
+                          help='GB/T 9704 公文模式（仅 paper：国标页边距/三号仿宋/28磅行距/公文标题层级）')
     p_render.set_defaults(func=cmd_render)
 
     # template 子命令（委托 template_registry.py，注册表：入库/发现/schema）
@@ -732,6 +751,12 @@ def main():
     p_red.add_argument('--engine', default='wmlcomparer', choices=['wmlcomparer', 'docxdiff'],
                        help='对比算法（docxdiff 为结构感知引擎，不可用时自动回退）')
     p_red.set_defaults(func=cmd_redline)
+
+    # govcheck 子命令（委托 gb9704_check.py：公文格式合规检查）
+    p_gov = sub.add_parser('govcheck', help='GB/T 9704-2012 公文格式合规检查（.docx / .tex / .cls）')
+    p_gov.add_argument('file', help='待检查文件')
+    p_gov.add_argument('--json', action='store_true', help='输出 JSON（供 AI 消费）')
+    p_gov.set_defaults(func=cmd_govcheck)
 
     # info 子命令
     p_info = sub.add_parser('info', help='打印环境信息')
