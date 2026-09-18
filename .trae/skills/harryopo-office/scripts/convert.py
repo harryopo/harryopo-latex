@@ -529,7 +529,8 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
         for i, bib in enumerate(bib_lines, 1):
             # 去掉条目开头的 `[1] ` 前缀（thebibliography 自动编号，避免 [1][1]）
             bib_clean = re.sub(r'^\[\d+\]\s*', '', bib.strip())
-            lines.append(r"\bibitem{ref" + str(i) + "} " + bib_clean)
+            # parse_inline：转义 & % $ # 等（"Intel & Samsung" 裸 & 会炸编译）并保留行内格式
+            lines.append(r"\bibitem{ref" + str(i) + "} " + parse_inline(bib_clean))
         lines.append(r"\end{thebibliography}")
         lines.append("")
 
@@ -799,7 +800,8 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
         for i, bib in enumerate(bib_lines, 1):
             # 去掉条目开头的 `[1] ` 前缀（thebibliography 自动编号，避免 [1][1]）
             bib_clean = re.sub(r'^\[\d+\]\s*', '', bib.strip())
-            lines.append(r"\bibitem{ref" + str(i) + "} " + bib_clean)
+            # parse_inline：转义 & % $ # 等（"Intel & Samsung" 裸 & 会炸编译）并保留行内格式
+            lines.append(r"\bibitem{ref" + str(i) + "} " + parse_inline(bib_clean))
         lines.append(r"\end{thebibliography}")
         lines.append("")
 

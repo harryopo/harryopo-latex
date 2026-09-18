@@ -43,7 +43,9 @@
 
 % --- 数学 ---
 % 注意：不在此处加载 ctex！cls 已通过 ctexart/ctexrep 加载
-\ifx\harryopo@nomath0%
+% 陷阱：\ifx\harryopo@nomath0 恒为假（\ifx 拿宏与字符比永不相等），导致
+% unicode-math/XITS Math 从未生效、公式回退 Computer Modern——改用 \ifnum 展开比较
+\ifnum\harryopo@nomath=0 %
     \RequirePackage{unicode-math}
 \else
     \RequirePackage{amsmath}
@@ -126,7 +128,7 @@
 ]
 
 % --- 数学字体（可选） ---
-\ifx\harryopo@nomath0%
+\ifnum\harryopo@nomath=0 %
     \setmathfont{XITSMath}[
         Extension = .otf,
         UprightFont = *-Regular,
@@ -199,6 +201,9 @@
 \newtheorem{example}{例}[section]
 \newtheorem*{remark}{注}
 \numberwithin{equation}{section}
+% convert 产出文档全用 \section*（无编号），section 计数恒 0 会使公式号渲染成"(.1)"——
+% section=0 时只显示公式计数器，编号章节仍用"节.式"格式
+\renewcommand{\theequation}{\ifnum\value{section}=0\relax\arabic{equation}\else\arabic{section}.\arabic{equation}\fi}
 
 % ============================================================
 % 第六部分：代码高亮配置
