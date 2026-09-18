@@ -1016,3 +1016,10 @@ web-editor 升级。
 ### 追加修复（作者行空格双重丢失，b27b637）
 - **元信息行空格是字段分隔符不是噪音**：`> 作者：张三 计算机学院 2025000101` 被 text_norm 的 CJK 空格压缩粘连成"张三计算机学院"——对 副标题/作者/单位/学校/日期 行豁免 `_strip_cjk_spaces`（键集与 convert/md_to_word 元信息约定一致）
 - **xeCJK 吞中-中相邻普通空格**（零宽处理）：tex 里有空格 PDF 照样粘连 → `format_author` 把内部空格转显式控制空格 `\ `。教训：**CJK 排版链路里"空格"要在 normalize/tex/PDF 三层各自求证，任何一层都可能吃掉它**
+
+### 数学公式风格审计（用户要求"公式一律 TeX 罗马风格"，9e86f12）
+- **base.sty `\ifx\harryopo@nomath0` 恒假**：\ifx 比较"宏"与"字符"永不相等 → unicode-math/XITS Math 在 paper/report 链路**从未加载过**，所有历史公式都是 Computer Modern 回退。改 `\ifnum\harryopo@nomath=0`。与 slides 的 \ifstrequal 坑同族：**TeX 布尔判断必须验证真假两分支都可达**
+- **`\ifnum\value{section}=0\arabic{equation}` 新坑**：`=0` 后紧跟可展开成数字的宏会被数字扫描器粘连（0+1→"01"→≠0 恒假），必须 `=0\relax` 截断
+- 公式号 "(.1)"：convert 产出全用 \section*，numberwithin 下节号恒 0 → \theequation 特判 section=0 只显式号
+- convert.py 参考文献裸 `&` 炸编译（Misplaced alignment tab）→ bibitem 过 parse_inline 统一转义
+- 审计结论：notes（mathnotes cls）/slides（slides cls）本就无条件加载 XITS Math，正常；Word OMML 用 Cambria Math（Word 数学引擎标配罗马衬线数学字体），不动；**重编 7 个含公式官方示例 + README 画廊**，全量验证 XITSMath 嵌入、CM 清零
