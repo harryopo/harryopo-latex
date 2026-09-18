@@ -126,6 +126,7 @@ flowchart LR
 | CJK 文本规范化 | 双引擎自动接入（`normalize_markdown`） | 标点/空格治理 |
 | 图描述 MD 环节 | SKILL.md 主流程第⑤步（流程约束，非代码） | 画图前设计确认 |
 | GB/T 9704 合规检查（docx/tex/cls 三模） | `office.py govcheck 文件 [--json]` | 公文验收门 |
+| **公文生成双格式** | `office.py render x.md --format word --gov`（Word 侧 gov.json 配置驱动，govcheck 8/8 闭环）/ `--format paper --gov`（cls gov 选项） | 党政机关公文（2026-09-18 Word 侧补齐） |
 | LaTeX 编译诊断闭环 | MCP 三工具 / `latex_diagnostics` 库直调 | 编译排错 |
 | **演示文稿 PDF（beamer 三主题）** | `office.py render x.md --format slides [--theme blue/dark/plain]` | 答辩/路演/汇报（2026-09-18 新增） |
 
@@ -215,7 +216,7 @@ flowchart LR
 
 **限制（设计性）**：track_changes 单 run 匹配（跨 run 不支持）；docx_clean 反转义白名单外保持；registry latex schema 为 M2 占位（`tex-placeholder-v1`）；schema 类型推断全 string；marker/docling 网络阻塞判 Hold（HF Xet 存储墙）；Word 链路依赖本机 MS Office（Windows-only），LaTeX/PDF 链路跨平台；方正字体商用授权。
 
-**TODO 清单（方案书 v3 §6 未动项）**：✅ P2 演示文稿链路已完成（2026-09-18 定调 beamer/PDF 路线，harryopo-slides 三主题 + MD 自动链路，不做可编辑 .pptx）；⬜ 剩余 P2——word-mcp-live 适配器、Citra 证据回溯、模板注册表 v2（样式保真校验）、IDE 配置分发、旧公文 Word 模板国标化；⬜ P3 — Typst 通道、模板市场/多人协作、pdfcpu 后处理、HermesOffice 往返对标。代码内 TODO：【信息缺失——脚本注释无显式 TODO 标记，以上以方案书为准】
+**TODO 清单（方案书 v3 §6 未动项）**：✅ P2 演示文稿链路已完成（2026-09-18 定调 beamer/PDF 路线，harryopo-slides 三主题 + MD 自动链路，不做可编辑 .pptx）；✅ 公文 Word 模板国标化已完成（2026-09-18 `--format word --gov` + govcheck 8/8 闭环）；⬜ 剩余 P2——word-mcp-live 适配器、Citra 证据回溯、模板注册表 v2（样式保真校验）、IDE 配置分发；⬜ P3 — Typst 通道、模板市场/多人协作、pdfcpu 后处理、HermesOffice 往返对标。代码内 TODO：【信息缺失——脚本注释无显式 TODO 标记，以上以方案书为准】
 
 ## 9. 复用开发指引
 

@@ -974,6 +974,25 @@ web-editor 升级。
 - **allowframebreaks 会给帧标题强加罗马数字后缀（I/II）**：即未分帧也加 → 弃用自动分页（Overfull 警告比强行切帧可控，超长内容应精简 MD）
 - **`> **表1：xxx**` 的 pending_caption 要剥星号**（`re.sub(r'\*+','')`），否则表题渲染出字面 `**`——paper 链路早有同款处理，新引擎复用组件时漏了对齐
 
+---
+
+## 2026-09-18（续）：Word 公文模式 --gov（GB/T 9704 双格式闭环达成）
+
+### 交付
+- `word/configs/gov.json`：二号小标宋题 22pt / 三号仿宋正文 16pt / **28 磅固定行距（line_pt）** / 国标边距 3.7/3.5/2.8/2.6cm / 层级标题黑体→楷体→仿宋 / 全黑白配色——与 fangzheng/opensource 同构，纯配置驱动
+- 引擎支持：`_set_style`/`_set_spacing` 读 `line_pt`（固定值行距）；`add_body` 字号/行距/缩进从 `styles.body` 读取（原硬编码 12pt/Pt(12*chars)）——默认值不变，学术模式零回归
+- CLI：md_to_word `--gov`（config 快捷 + 无目录页 + 禁裸文本作者启发式）；office.py `render --format word --gov` 全链透传（render_word 加 gov 参数）
+- **验证闭环**：通知 MD → `office.py render --format word --gov` → `govcheck` 读 docx **8/8 全过 0 偏差**；普通 word 回归（目录页/作者行/正文）不受影响
+- SKILL.md：公文章节更新双格式命令 + 触发词表；frontmatter description 补演示/修订触发词；主流程⑧补 slides
+
+### 踩坑（连环两个，都是"配置传了但行为没切"）
+- **office.py 只传 `-c gov.json` 不传 `--gov`**：目录页仍插入、COM 域更新仍执行（Word COM 保存会按中英文边界重写 run 并丢显式 size——govcheck 采样读到 14pt/None 假象）、裸文本作者启发式仍生效（把"各有关单位："主送机关行和首段正文吞成 14pt 楷体作者行）。教训：**模式开关要全链走查（config 文件 ≠ 行为分支），生成端与检查端不一致时先解剖产物段落级样式再下结论**
+- **`--gov` 语义在 Word 侧要三件事齐动**：换 config + 跳目录页 + 禁作者启发式——单换 config 只是"字体对了"，版式行为（目录/启发式）是独立分支
+- 调试手法有效：引擎直出（绕过 office.py/COM）二分定位，一次就排除引擎嫌疑
+
+### P2 进度
+方案书 v3 P2 已完成 2/5：✅ 演示文稿链路（beamer）、✅ 公文 Word 模板国标化；剩 word-mcp-live 适配器、Citra 证据回溯、注册表 v2、IDE 配置分发
+
 
 
 

@@ -1,6 +1,6 @@
 ---
 name: "harryopo-office"
-description: "harryopo 办公文档超级 skill：Word / LaTeX 全格式。Word：Markdown 中间态 → 公文/学术 .docx（方正/开源字体一键切换，原生自动目录、OMML 数学公式、表格/图片/注释/参考文献规范排版）。LaTeX：论文/报告/笔记 PDF，支持从 Markdown/Word 自动转换，或手写 .tex。单双栏、蓝/黑主题、方正字体、XITS 数学、三线表。内置图表融合：diagram-design 编辑级图表（39 类型：架构/流程/时序/泳道/ER/桑基等）+ Mermaid 流程图自动渲染插入双链路。中文排版护栏：标点全角化 + 空格清理（text_norm.py，双引擎入口自动清洗）。触发词：写word、生成word、word文档、docx、公文模板、学术论文word、word转换、latex、论文、报告、PDF、tex、md转latex、word转latex、docx转pdf、markdown转tex、文档转换、架构图、流程图、时序图、框架图、画个图、配图、diagram-design。"
+description: "harryopo 办公文档超级 skill：Word / LaTeX 全格式。Word：Markdown 中间态 → 公文/学术 .docx（方正/开源字体一键切换，原生自动目录、OMML 数学公式、表格/图片/注释/参考文献规范排版）。LaTeX：论文/报告/笔记 PDF，支持从 Markdown/Word 自动转换，或手写 .tex。单双栏、蓝/黑主题、方正字体、XITS 数学、三线表。内置图表融合：diagram-design 编辑级图表（39 类型：架构/流程/时序/泳道/ER/桑基等）+ Mermaid 流程图自动渲染插入双链路。中文排版护栏：标点全角化 + 空格清理（text_norm.py，双引擎入口自动清洗）。演示文稿：harryopo-slides beamer 三主题（blue 学术/dark 路演/plain 商务）MD 自动转 16:9 PDF，含演讲备注与三线表公式。修订审阅双向留痕：redline 红线稿 + revise 改稿留痕。触发词：写word、生成word、word文档、docx、公文模板、学术论文word、word转换、latex、论文、报告、PDF、tex、md转latex、word转latex、docx转pdf、markdown转tex、文档转换、架构图、流程图、时序图、框架图、画个图、配图、diagram-design、演示文稿、答辩、路演、幻灯片、slides、红线稿、修订。"
 ---
 # harryopo-office
 
@@ -135,7 +135,8 @@ diagram-design 生成 HTML → PNG → self_check 自检 → 展示图片地址�
         → 需要补充说明时加 `> 注：xxx` 注释
   │
   ▼ ⑧ 最终输出
-office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
+office.py render → Word / LaTeX / 演示 PDF（可选 --pdf / --template 按模板出；
+        演示文稿 --format slides --theme blue|dark|plain，答辩/路演/汇报场景）
         → 产物统一归到 output/<项目名>/（md + docx + tex + pdf + figures/）
         → 提示用户：LaTeX 源码可直接在 IDE（VS Code + LaTeX Workshop）打开编辑实时预览
 ```
@@ -173,17 +174,20 @@ office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
 ### GB/T 9704 公文模式（--gov）与格式合规检查（govcheck）
 
 ```
-① python office.py render 通知.md --format paper --gov
-   （国标版式：页边距上37/下35/左28/右26mm、正文三号仿宋 16pt、28 磅行距、
-     文件标题二号小标宋居中、层级标题 一、黑体 →（一）楷体 → 1. 仿宋加粗 → （1）仿宋）
-② python office.py govcheck 产物.tex        # 或 .docx / .cls；--json 供 AI 消费
-   （10 项国标参数对照：页面/四边距/字号/行距/层级字体，输出 ✓/✗ 偏差清单）
+① LaTeX 公文：python office.py render 通知.md --format paper --gov
+   Word 公文：python office.py render 通知.md --format word --gov
+   （国标版式：页边距上37/下35/左28/右26mm、正文三号仿宋 16pt、28 磅固定行距、
+     文件标题二号小标宋居中、层级标题 一、黑体 →（一）楷体 → 1. 仿宋加粗 → （1）仿宋；
+     Word 侧由 configs/gov.json 驱动：无目录页、行内加粗黑体保留、全黑白配色）
+② python office.py govcheck 产物.docx      # 或 .tex / .cls；--json 供 AI 消费
+   （10 项国标参数对照：页面/四边距/字号/行距/层级字体，输出 ✓/✗ 偏差清单；
+     docx 实测 8/8 通过闭环，tex 下沉 cls 取真值）
 ```
 
-- 实现位置：harryopo-paper.cls `gov` 选项（`\if@govmode` 分支）+ convert.py/office.py `--gov` 透传 + `gb9704_check.py`
-- **不影响默认排版**：不带 --gov 时一切照旧（学术 2.5cm 边距/论文层级标题）
+- 实现位置：harryopo-paper.cls `gov` 选项（`\if@govmode` 分支）+ `word/configs/gov.json` + convert.py/md_to_word.py/office.py `--gov` 透传 + `gb9704_check.py`
+- **不影响默认排版**：不带 --gov 时一切照旧（学术 2.5cm 边距/目录页/论文层级标题）
 - 检查 .tex 时自动定位 harryopo-paper.cls 读取 gov 分支参数；检查 .docx 用 python-docx 读节属性
-- 已知现状：`蒸馏区/harryopo-公文模板.docx` 为 Word 默认边距（govcheck 如实报 7 项偏差）——它是历史蒸馏样本，Word 公文模板的国标化列为后续项
+- 注意：Word 公文模式**禁用裸文本作者启发式**（主送机关"各有关单位："与首段正文是正文不是作者，历史 bug 曾致 govcheck 采样到 14pt 楷体误报）；`蒸馏区/harryopo-公文模板.docx` 为历史蒸馏样本，保留原样
 
 ### LaTeX 编译诊断闭环（harryopo-build-mcp）
 
