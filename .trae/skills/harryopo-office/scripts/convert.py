@@ -981,6 +981,7 @@ def convert_docx_to_tex(
     dark: bool = False,
     twocolumn: bool = False,
     nomath: bool = False,
+    gov: bool = False,
 ) -> Optional[str]:
     """DOCX → Markdown → LaTeX"""
     md_path = docx_path.rsplit(".", 1)[0] + "_converted.md"
@@ -1072,7 +1073,7 @@ def main():
             args.title, args.author, args.date,
             args.subtitle, args.institute,
             args.abstract, args.keywords,
-            args.dark, args.twocolumn, args.nomath
+            args.dark, args.twocolumn, args.nomath, args.gov
         )
         if result is None:
             sys.exit(1)

@@ -60,7 +60,7 @@ def make_redline(original: Path, modified: Path, output: Path,
 
 def verify_redline(path: Path) -> dict:
     """校验红线稿含原生修订标记，返回统计（供 AI/用户确认生成质量）。"""
-    counts = {'ins': 0, 'del': 0, 'comments': 0}
+    counts = {'ins': 0, 'del': 0}
     with zipfile.ZipFile(path) as z:
         xml = z.read('word/document.xml').decode('utf-8', 'ignore')
     counts['ins'] = xml.count('<w:ins ')
