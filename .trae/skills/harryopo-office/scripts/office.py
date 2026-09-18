@@ -673,6 +673,21 @@ def cmd_redline(args):
         sys.exit(result.returncode)
 
 
+def cmd_revise(args):
+    """revise 子命令：在既有 docx 上以原生修订标记应用 AI 修改出二稿（委托 track_changes.py）"""
+    script = SCRIPT_DIR / 'word' / 'track_changes.py'
+    argv = [sys.executable, str(script), args.original, args.output,
+            '--rev', args.rev, '--author', args.author]
+    result = subprocess.run(argv, capture_output=True, text=True,
+                            encoding='utf-8', errors='replace')
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
 def cmd_govcheck(args):
     """govcheck 子命令：GB/T 9704 公文格式合规检查（委托 gb9704_check.py）"""
     script = SCRIPT_DIR / 'gb9704_check.py'
@@ -769,6 +784,15 @@ def main():
     p_red.add_argument('--engine', default='wmlcomparer', choices=['wmlcomparer', 'docxdiff'],
                        help='对比算法（docxdiff 为结构感知引擎，不可用时自动回退）')
     p_red.set_defaults(func=cmd_redline)
+
+    # revise 子命令（委托 word/track_changes.py：AI 改稿留痕出二稿，与 redline 构成双向闭环）
+    p_rev = sub.add_parser('revise', help='在既有 docx 上以原生修订标记应用 AI 修改出二稿（改稿留痕）')
+    p_rev.add_argument('original', help='初稿 docx')
+    p_rev.add_argument('output', help='输出二稿 docx 路径')
+    p_rev.add_argument('--rev', required=True,
+                       help='修订 JSON 数组，如 [{"op":"replace","find":"A","replace":"B"}]（op: replace/delete/insert_after）')
+    p_rev.add_argument('--author', default='AI Review', help='修订作者名（默认 AI Review）')
+    p_rev.set_defaults(func=cmd_revise)
 
     # govcheck 子命令（委托 gb9704_check.py：公文格式合规检查）
     p_gov = sub.add_parser('govcheck', help='GB/T 9704-2012 公文格式合规检查（.docx / .tex / .cls）')

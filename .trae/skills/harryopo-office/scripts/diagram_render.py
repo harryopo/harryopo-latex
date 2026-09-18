@@ -20,12 +20,8 @@ Word / paper / notes 双链路通过标准 `![alt](path)` 语法自动带图。
 """
 
 import hashlib
-import json
-import os
 import re
-import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 # 图表代码块正则（语言标签 = 引擎名）

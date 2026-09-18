@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
+r"""
 gb9704_check — GB/T 9704-2012《党政机关公文格式》合规检查
 =========================================================
 
@@ -9,7 +9,7 @@ gb9704_check — GB/T 9704-2012《党政机关公文格式》合规检查
 
 用法：
   python gb9704_check.py 文件.docx
-  python gb9704_check.py 文件.tex [--gov]      # --gov：按 gov 选项声明后的参数期望检查
+  python gb9704_check.py 文件.tex              # 自动从 \documentclass[...gov...] 识别公文模式并下沉 cls 校验
 
 国标核心参数（GB/T 9704-2012，公开标准）：
   页面        A4（210×297mm）

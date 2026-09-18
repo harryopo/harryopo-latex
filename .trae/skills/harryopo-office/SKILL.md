@@ -166,6 +166,7 @@ office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
 | 手写 LaTeX | "写论文"、"写报告"、"写笔记" | 提供骨架模板 |
 | 生成框架图 | "框架图"、"架构图"、"流程图"、"时序图"、"画个图"、"配图" | **先提问是否生成 → diagram-design 生成（可多类型选择）→ 渲染插入三条链路** |
 | 修订审阅/改稿对比 | "红线稿"、"修订"、"改了哪里"、"对比两份word"、"改稿" | **redline：AI 初稿 vs 用户修改版 → 原生修订红线稿** |
+| AI 改稿留痕出二稿 | "改这几处"、"带修订"、"留痕改"、"二稿"、"逐条接受" | **revise：既有 docx 上以 w:ins/w:del 应用 AI 修改（track_changes）** |
 | 公文生成/公文格式检查 | "公文"、"红头文件"、"GB/T 9704"、"公文格式检查" | **render --gov（国标版式）→ govcheck 合规检查** |
 
 ### GB/T 9704 公文模式（--gov）与格式合规检查（govcheck）
@@ -210,16 +211,18 @@ office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
      python office.py redline 初稿.docx 用户修改版.docx -o 红线稿.docx --author "张三"
   ▼ ④ AI 读红线稿解析修订意图（w:ins=用户新增意图 / w:del=用户否定内容 / 批注=修改要求）
   ▼ ⑤ AI 改 MD 中间态 → 重新渲染二稿；如需在**既有 docx 上**出二稿并留痕：
-     python scripts/word/track_changes.py 二稿前.docx 二稿.docx \
+     python office.py revise 二稿前.docx 二稿.docx \
        --rev '[{"op":"replace","find":"旧词","replace":"新词"},
                {"op":"insert_after","anchor":"锚点段文本","text":"AI 新增段"},
                {"op":"delete","find":"要删的文本"}]' --author "AI"
-     （输出带原生 w:ins/w:del，用户在 Word 里逐条接受/拒绝；纯 python-docx+lxml，无 Node 依赖）
+     （输出带原生 w:ins/w:del，用户在 Word 里逐条接受/拒绝；纯 python-docx+lxml，无 Node 依赖；
+       亦可裸调 python scripts/word/track_changes.py）
 ```
 
 - 依赖：`pip install "python-redlines[docxodus]"`（MIT，内嵌 .NET 引擎免装 Word）
 - 引擎：默认 wmlcomparer；`--engine docxdiff` 用结构感知对比（0.3.0+，不可用自动回退）
 - 也可直接调 `python redline.py <original> <modified> -o <out> [--author 名字]`
+- revise 的 `insert_after` 用 `anchor`/`text` 键，`replace`/`delete` 用 `find`/`replace` 键；replace 的 find 须落在同一 run 内（跨 run MVP 不支持，会跳过并提示）
 
 ### Word 生成流程（Markdown 中间态 → .docx）
 

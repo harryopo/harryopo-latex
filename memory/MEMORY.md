@@ -916,6 +916,31 @@ web-editor 升级。
 - lxml 属性 `xml:space` 必须写成 `{http://www.w3.org/XML/1998/namespace}space`（字面 'xml:space' 直接 ValueError）
 - 段内替换 MVP 限制：find 必须命中单 run 内文本（跨 run 与 docxtpl 占位符同类限制），引擎跳过并给出缩短建议
 
+---
+
+## 2026-09-18：Repo Wiki 构建 + 技术债清理（gov/revise/死代码）
+
+### Repo Wiki（新增 `docs/REPO_WIKI.md`）
+- 全仓遍历（679 文件，19 py 脚本 ~7900 行 + LaTeX 模板 + 68 文档）→ 十章节固定结构：概述/目录/模块架构(Mermaid)/**已实现能力清单(防重复造轮子)**/核心 API/配置环境变量/依赖官方要点/技术债/复用指引/检索索引
+- 作为 AI 协作持久知识库：新需求先查 §4 能力清单 + §5 API + §10 索引判断复用还是新增
+- 扫描新发现活 bug：`convert_docx_to_tex` gov 参数链断裂（见下）；此前未记录
+
+### 技术债清理（本批次，全部 E2E 验证）
+1. **gov 公文链 DOCX→TeX 断裂修复**（活 bug）：`convert_docx_to_tex` 签名缺 `gov` 参数却在 L1004 位置传 `gov` → DOCX 输入带 `--gov` 必 NameError；且 CLI DOCX 分支根本没透传 `--gov`。两处补齐：签名加 `gov: bool = False` + CLI 传 `args.gov`。E2E：DOCX→`\documentclass[gov]{harryopo-paper}`→xelatex×3 出 PDF 24KB exit 0
+2. **track_changes 注册为 `office.py revise` 子命令**（此前只能裸调 python scripts/word/track_changes.py）：三段式委托（cmd_revise + argparse original/output/--rev/--author），与 redline 构成改稿双向留痕对称入口。E2E：2 应用/0 跳过，二稿 w:ins=2 w:del=1 可重读。**关键**：`insert_after` 用 `anchor`/`text` 键，`replace`/`delete` 用 `find`/`replace` 键（测试时误用 find 做 anchor 被跳过，非代码 bug）
+3. **死代码/文档漂移清理**：`redline.verify_redline` 删恒 0 的 comments 死字段；`gb9704_check` docstring 删虚宣传的 `[--gov]`（实为从 `\documentclass[...gov...]` 自动检测）并改 raw docstring（`\d` 非法转义）；`diagram_render` 删双引擎收敛后未使用的 json/os/subprocess/tempfile 四导入
+4. SKILL.md 同步：修订审阅流程 ⑤ 改 `office.py revise` 主入口、触发词表加 revise 行
+
+### 验证
+- 零警告编译 6 脚本；子命令 7 个全注册（render/template/diagram/redline/revise/govcheck/info）
+- govcheck 查 cls 9/9 全过；super-diagram 块拦截仍 exit 1（动 diagram_render 导入后回归确认）
+- 当前 7 子命令：office.py 单一入口覆盖 生成/模板/图表/红线/修订/公文/环境
+
+### 经验
+- **透传链断裂是"新选项"功能的隐形杀手**：加 --gov 这类跨层参数，必须 grep 全链（CLI→包装函数→内核）确认每层都接住——第一版只在 paper 内核和 MD 主链加了，DOCX 旁路两处断裂都"看着编译通过"实则运行时 NameError/静默丢弃
+- **文档漂移**：CLI 参数宣传与实际 argparse 不符（gb9704 --gov）——写 docstring 用法时对着 argparse 实参核，别凭记忆
+- 活 bug 发现自 Repo Wiki 全仓扫描：定期做结构化全仓遍历能捞出增量开发遗漏的旁路缺陷
+
 
 
 
