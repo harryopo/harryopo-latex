@@ -173,6 +173,8 @@ class WordTemplateEngine:
         # 间距
         pf = style.paragraph_format
         pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        if cfg.get('line_pt'):
+            pf.line_spacing = Pt(cfg['line_pt'])   # 固定值行距（公文 28 磅）
         pf.space_before = Pt(cfg.get('space_before', 0))
         pf.space_after = Pt(cfg.get('space_after', 0))
 
@@ -198,15 +200,17 @@ class WordTemplateEngine:
         rFonts.set(qn('w:eastAsia'), cn_font)
         return run
 
-    def _set_spacing(self, para, before=0, after=0):
+    def _set_spacing(self, para, before=0, after=0, line_pt=None):
         pf = para.paragraph_format
         pf.space_before = Pt(before)
         pf.space_after = Pt(after)
         pf.line_spacing_rule = WD_LINE_SPACING.SINGLE
+        if line_pt:
+            pf.line_spacing = Pt(line_pt)
 
-    def _set_indent(self, para, chars=2):
+    def _set_indent(self, para, chars=2, size=12):
         pf = para.paragraph_format
-        pf.first_line_indent = Pt(12 * chars)
+        pf.first_line_indent = Pt(size * chars)
 
     def _get_font(self, key):
         return self.config['fonts'][key]
@@ -376,15 +380,17 @@ class WordTemplateEngine:
 
     def add_body(self, text, indent=True):
         """
-        正文段落（方正书宋，首行缩进，1倍行距）
+        正文段落（字体/字号/行距由 config styles.body 驱动；首行缩进 2 字符）
 
         支持行内 **加粗** 标记 → 黑体片段（如 "这是**重点**内容"）。
         """
+        body_cfg = self.config['styles']['body']
+        size = body_cfg.get('size', 12)
         p = self.doc.add_paragraph()
-        self._set_spacing(p, before=3, after=3)
+        self._set_spacing(p, before=3, after=3, line_pt=body_cfg.get('line_pt'))
         if indent:
-            self._set_indent(p, 2)
-        self._add_inline_runs(p, text, self._get_font('body'), size=12)
+            self._set_indent(p, 2, size=size)
+        self._add_inline_runs(p, text, self._get_font('body'), size=size)
 
     def add_list_item(self, text, level=0, marker='•'):
         """

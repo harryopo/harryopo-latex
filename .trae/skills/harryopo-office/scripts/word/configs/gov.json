@@ -1,0 +1,36 @@
+{
+    "name": "GB/T 9704 公文模式（方正字体）",
+    "description": "党政机关公文格式：二号小标宋标题、三号仿宋正文、28磅固定行距、国标页边距（37/35/28/26mm）、全黑白无彩",
+    "fonts": {
+        "title": "方正小标宋_GBK",
+        "heading1": "方正黑体_GBK",
+        "heading2": "方正楷体_GBK",
+        "heading3": "方正仿宋_GBK",
+        "heading4": "方正仿宋_GBK",
+        "body": "方正仿宋_GBK",
+        "annotation": "方正仿宋_GBK",
+        "english": "Times New Roman"
+    },
+    "colors": {
+        "dark": [0, 0, 0],
+        "main": [0, 0, 0],
+        "sub": [0, 0, 0],
+        "gray": [0, 0, 0]
+    },
+    "page": {
+        "width": 21.0,
+        "height": 29.7,
+        "margin_top": 3.7,
+        "margin_bottom": 3.5,
+        "margin_left": 2.8,
+        "margin_right": 2.6
+    },
+    "styles": {
+        "title": { "size": 22, "color": [0, 0, 0], "space_before": 36, "space_after": 8 },
+        "heading1": { "size": 16, "color": [0, 0, 0], "space_before": 12, "space_after": 6 },
+        "heading2": { "size": 16, "color": [0, 0, 0], "space_before": 6, "space_after": 6 },
+        "heading3": { "size": 16, "color": [0, 0, 0], "space_before": 6, "space_after": 6 },
+        "heading4": { "size": 16, "color": [0, 0, 0], "space_before": 6, "space_after": 6 },
+        "body": { "size": 16, "line_pt": 28, "space_before": 0, "space_after": 0 }
+    }
+}

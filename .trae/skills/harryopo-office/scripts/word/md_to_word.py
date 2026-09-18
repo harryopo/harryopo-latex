@@ -360,13 +360,16 @@ def _next_content_idx(lines, idx, n):
 
 
 def build_document(md_text, config_path=None, output_path='output.docx',
-                   update_toc=True, base_dir=None, export_pdf=False):
+                   update_toc=True, base_dir=None, export_pdf=False,
+                   gov=False):
     """解析 Markdown 中间态 → 生成 Word 文档
 
     base_dir: MD 文件所在目录，用于解析图片相对路径
               （office.py 等从别的 cwd 调用时，图片 `figures/xx.png`
                必须相对 MD 文件而非进程 cwd）
     export_pdf: 同时导出同名 PDF（Word COM 同会话完成）
+    gov: GB/T 9704 公文模式（无目录页；禁用裸文本作者启发式——
+         公文首段是主送机关/正文，不是作者行）
     """
     engine = WordTemplateEngine(config_path)
 
@@ -376,8 +379,9 @@ def build_document(md_text, config_path=None, output_path='output.docx',
     # 中文标点/空格规范化（护栏：AI 产出英文标点/中英空格在入口统一清洗）
     md_text = normalize_markdown(md_text)
 
-    # 自动目录放第一页（用户约定：目录第一页，正文从第二页开始）
-    engine.add_toc()
+    # 自动目录放第一页（用户约定：目录第一页，正文从第二页开始；公文无目录）
+    if not gov:
+        engine.add_toc()
 
     lines = md_text.split('\n')
     i = 0
@@ -439,7 +443,8 @@ def build_document(md_text, config_path=None, output_path='output.docx',
                             date_meta = content.split('：', 1)[-1].split(':', 1)[-1].strip()
                             j += 1
                             continue
-                    elif (not s.startswith('#')
+                    elif (not gov
+                          and not s.startswith('#')
                           and not s.startswith('![')
                           and not s.startswith('**')
                           and not re.match(r'^(摘要|关键词|作者|单位|学校|日期)[：:]', s)
@@ -674,6 +679,8 @@ def main():
                     help='不自动更新目录域（保留手动更新）')
     ap.add_argument('--pdf', action='store_true',
                     help='同时导出同名 PDF（Word COM ExportAsFixedFormat）')
+    ap.add_argument('--gov', action='store_true',
+                    help='GB/T 9704 公文模式（configs/gov.json：二号小标宋题/三号仿宋/28磅行距/国标边距，默认无目录）')
     args = ap.parse_args()
 
     md_path = Path(args.input)
@@ -683,15 +690,20 @@ def main():
 
     config_path = args.config
     if config_path is None:
-        config_path = str(Path(__file__).parent / 'configs' / 'fangzheng.json')
+        config_path = str(Path(__file__).parent / 'configs'
+                          / ('gov.json' if args.gov else 'fangzheng.json'))
 
     output = args.output or str(md_path.with_suffix('.docx'))
+
+    # 公文形态无目录页（用户显式 --no-toc 之外，--gov 也默认关闭）
+    update_toc = not (args.no_toc or args.gov)
 
     md_text = md_path.read_text(encoding='utf-8')
     try:
         build_document(md_text, config_path=config_path,
-                       output_path=output, update_toc=not args.no_toc,
-                       base_dir=md_path.parent, export_pdf=args.pdf)
+                       output_path=output, update_toc=update_toc,
+                       base_dir=md_path.parent, export_pdf=args.pdf,
+                       gov=args.gov)
     except ValueError as e:
         print(f'[ERROR] {e}', file=sys.stderr)
         sys.exit(1)

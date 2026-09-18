@@ -233,15 +233,22 @@ def convert_via_mineru(path, output_dir):
 # ============================================================
 
 def render_word(md_file, output_dir, config_name='fangzheng', export_pdf=False,
-                out_stem=None):
+                out_stem=None, gov=False):
     """链路1: MD → Word（可选同时导出 PDF）"""
     print('\n=== 链路1: MD → Word ===')
-    config = WORD_CONFIG_OS if config_name == 'opensource' else WORD_CONFIG_FZ
+    if config_name == 'gov':
+        config = SCRIPT_DIR / 'word' / 'configs' / 'gov.json'
+    elif config_name == 'opensource':
+        config = WORD_CONFIG_OS
+    else:
+        config = WORD_CONFIG_FZ
     stem = out_stem or md_file.stem
     output = output_dir / f'{stem}-word.docx'
 
     cmd = [sys.executable, str(WORD_SCRIPT), str(md_file),
            '-o', str(output), '-c', str(config)]
+    if gov:
+        cmd.append('--gov')
     if export_pdf:
         cmd.append('--pdf')
     ok, out, err = run(cmd, label='md_to_word')
@@ -644,8 +651,10 @@ def cmd_render(args):
     results = {}
 
     if 'word' in formats:
-        results['word'] = render_word(md_file, output_dir, args.config, args.pdf,
-                                      out_stem=base_stem)
+        results['word'] = render_word(md_file, output_dir,
+                                      'gov' if args.gov else args.config,
+                                      args.pdf, out_stem=base_stem,
+                                      gov=args.gov)
     if 'paper' in formats:
         results['paper'] = render_paper(md_file, output_dir,
                                         doc_type=args.type, twocolumn=args.twocolumn,
