@@ -314,9 +314,10 @@ def format_author(author_str: str) -> str:
     """规范化中文作者名：用顿号分隔（避免 \\and 在 twocolumn[] 中冲突）"""
     parts = re.split(r'[,，;；]+', author_str)
     parts = [p.strip() for p in parts if p.strip()]
-    if len(parts) <= 1:
-        return author_str.strip()
-    return "、".join(parts)
+    s = "、".join(parts) if parts else ""
+    # 中文字符间的普通空格会被 xeCJK 当零宽吞掉（"张三 计算机"→"张三计算机"），
+    # 转成显式控制空格 \ 保留字段分隔
+    return re.sub(r' +', r'\\ ', s)
 
 
 # ============================================================

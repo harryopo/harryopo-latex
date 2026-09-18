@@ -24,6 +24,7 @@ text_norm.py — 中文文本规范化（标点全角化 + 空格清理）
      - 行内代码 `...`
      - URL（markdown 链接/图片的 ](url) 与裸 http(s)://）
      - 行首缩进与 markdown 结构标记（# > - * + 1. 等）
+     - 元信息行（> 作者：/单位：/副标题：/日期：）的空格——字段分隔符有意义
 
 用法：
     from text_norm import normalize_markdown
@@ -47,6 +48,9 @@ _FENCE_RE = re.compile(r'^\s*(```|~~~)')
 _MATH_FENCE_RE = re.compile(r'^\s*\$\$\s*$')
 # 行首结构标记（缩进 + 标题/引用/列表/有序列表标记，整体保护不参与清洗）
 _LEADING_MARK_RE = re.compile(r'^(\s*(?:#{1,6}\s+|>\s?|[-*+]\s+|\d{1,3}[.)]\s+))')
+# 元信息行（`作者：张三 计算机学院 2025000101`）：空格是有意义的字段分隔符，
+# 不参与 CJK 空格压缩（键集与 convert.py / md_to_word.py 的元信息约定一致）
+_META_KEY_RE = re.compile(r'^(副标题|作者|单位|学校|日期)\s*[：:]')
 # 行内保护片段：行内代码 / 行内公式 / markdown URL 部分 ](...) / 裸 URL
 _INLINE_PROTECT_RE = re.compile(
     r'(`[^`\n]+`)'
@@ -132,7 +136,8 @@ def _normalize_line(line: str) -> str:
 
     rest = _INLINE_PROTECT_RE.sub(_save, rest)
     rest = _convert_punct(rest)
-    rest = _strip_cjk_spaces(rest)
+    if not _META_KEY_RE.match(rest):
+        rest = _strip_cjk_spaces(rest)
     rest = re.sub(
         '\x00(\\d+)\x00',
         lambda mo: parts[int(mo.group(1))],
