@@ -991,7 +991,7 @@ web-editor 升级。
 - 调试手法有效：引擎直出（绕过 office.py/COM）二分定位，一次就排除引擎嫌疑
 
 ### P2 进度
-方案书 v3 P2 已完成 2/5：✅ 演示文稿链路（beamer）、✅ 公文 Word 模板国标化；剩 word-mcp-live 适配器、Citra 证据回溯、注册表 v2、IDE 配置分发
+方案书 v3 P2 已完成 3/5：✅ 演示文稿链路（beamer）、✅ 公文 Word 模板国标化、✅ IDE 配置分发（`office.py ide [--dest]`：生成 .vscode/settings.json——LaTeX Workshop latexmk xelatex 配方 + TEXINPUTS 指项目 cls/fonts + markdown.styles 方正预览 CSS；数组键按内容去重追加保用户自定义 recipes/tools 不被抹掉，标量键覆盖；解析失败备份 .bak；幂等验证通过）；剩 word-mcp-live 适配器、Citra 证据回溯、注册表 v2
 
 
 

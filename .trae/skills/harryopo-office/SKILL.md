@@ -406,6 +406,11 @@ python template_registry.py remove user-xxx --force -d   # -d 同时删文件
 # office.py 统一入口（template 子命令透传注册表 CLI）
 python office.py template list
 python office.py render input.md --template harryopo-report   # 按模板路由渲染链路
+
+# IDE 配置分发：生成 .vscode/settings.json（LaTeX Workshop latexmk xelatex 配方
+# + TEXINPUTS 指项目 cls/fonts + markdown.styles 方正预览 CSS），数组键去重追加
+# 幂等可重跑；--dest 可分发到任意项目
+python office.py ide [--dest 别的项目根]
 ```
 
 **AI 按模板出文档工作流**：

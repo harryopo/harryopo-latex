@@ -761,6 +761,69 @@ def cmd_govcheck(args):
         sys.exit(result.returncode)
 
 
+def cmd_ide(args):
+    """ide 子命令：分发 LaTeX Workshop 编译配方 + 方正 MD 预览 CSS 到 .vscode/"""
+    import json
+    dest = Path(args.dest).resolve() if args.dest else PROJECT_ROOT
+    vscode = dest / '.vscode'
+    vscode.mkdir(exist_ok=True)
+
+    fwd = lambda p: str(p).replace('\\', '/')
+    css_target = vscode / 'harryopo-preview.css'
+    css_src = SKILL_DIR / 'templates' / 'previews' / 'harryopo-preview.css'
+    if css_src.exists():
+        shutil.copy2(str(css_src), str(css_target))
+        print(f'  [产物] {css_target}')
+
+    settings = {
+        'latex-workshop.latex.tools': [{
+            'name': 'harryopo-xelatex',
+            'command': 'latexmk',
+            'args': ['-pdf', '-xelatex', '-interaction=nonstopmode',
+                     '-outdir=%DIR%', '%DOC%'],
+            'env': {'TEXINPUTS': f'{fwd(CLS_DIR)}//;{fwd(FONTS_DIR)}//;'},
+        }],
+        'latex-workshop.latex.recipes': [
+            {'name': 'harryopo (xelatex)', 'tools': ['harryopo-xelatex']},
+        ],
+        'latex-workshop.latex.autoBuild.run': 'onSave',
+        'latex-workshop.view.pdf.viewer': 'tab',
+        'markdown.styles': [f'file:///{fwd(css_target).lstrip("/")}'],
+    }
+
+    conf = vscode / 'settings.json'
+    if conf.exists():
+        try:
+            merged = json.loads(conf.read_text(encoding='utf-8'))
+            if not isinstance(merged, dict):
+                raise ValueError('非 JSON 对象')
+        except (ValueError, json.JSONDecodeError):
+            shutil.copy2(str(conf), str(conf) + '.bak')
+            print(f'  [WARN] 原 settings.json 解析失败，已备份为 .bak')
+            merged = {}
+        merged.update({k: v for k, v in settings.items()
+                       if not isinstance(v, list)})
+        # 数组键按内容去重追加（保留用户已有 tools/recipes/styles）
+        for key in ('latex-workshop.latex.tools', 'latex-workshop.latex.recipes',
+                    'markdown.styles'):
+            existing = merged.get(key)
+            if not isinstance(existing, list):
+                existing = []
+            for item in settings[key]:
+                if item not in existing:
+                    existing.append(item)
+            merged[key] = existing
+        action = '合并更新'
+    else:
+        merged = settings
+        action = '新建'
+    conf.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + '\n',
+                    encoding='utf-8')
+    print(f'  [{action}] {conf}')
+    print('  用法：VS Code 装 LaTeX Workshop 后打开 .tex → 保存即自动编译（配方：harryopo xelatex）；')
+    print('        .md 预览（Ctrl+Shift+V）自动套用方正蓝主题样式')
+
+
 def cmd_info(args):
     """info 子命令：打印路径和环境信息"""
     print('=== 办公超级 Skill 环境信息 ===\n')
@@ -860,6 +923,11 @@ def main():
     p_gov.add_argument('file', help='待检查文件')
     p_gov.add_argument('--json', action='store_true', help='输出 JSON（供 AI 消费）')
     p_gov.set_defaults(func=cmd_govcheck)
+
+    # ide 子命令（IDE 配置模板化分发：LaTeX Workshop 配方 + 方正预览 CSS）
+    p_ide = sub.add_parser('ide', help='分发 IDE 配置到 .vscode/（LaTeX Workshop xelatex 配方 + MD 方正预览 CSS）')
+    p_ide.add_argument('--dest', default=None, help='目标项目根（默认本项目）')
+    p_ide.set_defaults(func=cmd_ide)
 
     # info 子命令
     p_info = sub.add_parser('info', help='打印环境信息')
