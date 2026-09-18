@@ -866,6 +866,151 @@ def convert_docx_via_python(docx_path: str) -> Optional[str]:
 # 主编排函数
 # ============================================================
 
+def assemble_slides(blocks: List[Tuple[str, str]], title: str, author: str,
+                    date: str, subtitle: str = "", institute: str = "",
+                    abstract: str = "", theme: str = "blue") -> str:
+    """组装 harryopo-slides .tex（beamer 演示，PDF 交付）
+
+    页面切分约定：首个 `# ` = 封面标题；后续 `# ` = \\section；
+    `## ` = 新 frame。帧内容先缓冲，闭合时决定是否启用 allowframebreaks
+    （含 display 公式的帧不启用——beamer 自动分页与 equation 编号冲突）。
+    """
+    lines: List[str] = []
+    docopt = f"[{theme}]" if theme and theme != "blue" else ""
+    lines.append(r"\documentclass" + docopt + r"{harryopo-slides}")
+    lines.append("")
+    title_clean = _clean_title(title)
+    lines.append(r"\title[" + title_clean + "]{" + title_clean + "}")
+    if subtitle:
+        lines.append(r"\subtitle{" + _clean_title(subtitle) + "}")
+    lines.append(r"\author{" + format_author(author) + "}")
+    if institute:
+        lines.append(r"\institute{" + institute + "}")
+    lines.append(r"\date{" + date + "}")
+    lines.append("")
+    lines.append(r"\begin{document}")
+    lines.append("")
+    lines.append(r"\begin{frame}[plain]")
+    lines.append(r"\titlepage")
+    lines.append(r"\end{frame}")
+    lines.append("")
+
+    def emit_frame(frame_title: str, body: List[str], has_math: bool):
+        if not body:
+            return
+        # 不用 allowframebreaks：beamer 会给分帧标题强加罗马数字后缀（I/II），
+        # 且溢出 Overfull 警告比强行切帧更可控——内容超长应精简 MD
+        lines.append(r"\begin{frame}{" + frame_title + "}")
+        lines.extend(body)
+        lines.append(r"\end{frame}")
+        lines.append("")
+
+    if abstract:
+        emit_frame("概要", [parse_inline(abstract)], False)
+
+    meta_re = re.compile(r'^\*{0,2}(作者|摘要|关键词)\*{0,2}[：:]')
+    first_h1 = True
+    cur_title: Optional[str] = None
+    cur_body: List[str] = []
+    cur_math = False
+    pending_caption: Optional[str] = None
+    bib_lines: List[str] = []
+
+    def flush_frame():
+        nonlocal cur_title, cur_body, cur_math
+        if cur_title is not None:
+            emit_frame(cur_title, cur_body, cur_math)
+        elif cur_body:
+            emit_frame(title_clean, cur_body, cur_math)
+        cur_title, cur_body, cur_math = None, [], False
+
+    for i, (btype, content) in enumerate(blocks):
+        if btype == BLOCK_BIB:
+            bib_lines.extend(b.strip() for b in content.split('\n') if b.strip())
+            continue
+        if btype == BLOCK_H1:
+            flush_frame()
+            if first_h1:
+                first_h1 = False
+                continue
+            lines.append(r"\section{" + _clean_title(content) + "}")
+            lines.append("")
+        elif btype == BLOCK_H2:
+            flush_frame()
+            cur_title = _clean_title(content)
+        elif btype in (BLOCK_H3, BLOCK_H4):
+            cur_body.append(r"{\bfseries " + _clean_title(content) + r"}\par\smallskip")
+        elif btype == BLOCK_TEXT and meta_re.match(content):
+            continue
+        elif btype == BLOCK_TEXT:
+            cur_body.append(parse_inline(content))
+            cur_body.append("")
+        elif btype == BLOCK_UL:
+            cur_body.extend(_render_nested_list(content, 'itemize'))
+        elif btype == BLOCK_OL:
+            cur_body.extend(_render_nested_list(content, 'enumerate'))
+        elif btype == BLOCK_QUOTE:
+            qc = content.strip()
+            if re.match(r'^(副标题|作者|单位|学校|日期)\s*[：:]', qc):
+                continue
+            if i > 0 and blocks[i - 1][0] in (BLOCK_TABLE, BLOCK_FIGURE) and qc.startswith('注'):
+                continue
+            m = re.match(r'^\*{0,2}表\s*\d+\s*[：:]\s*(.+)$', qc, re.DOTALL)
+            if m and i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_TABLE:
+                pending_caption = re.sub(r'\*+', '', m.group(1)).strip()
+                continue
+            cur_body.append(r"\begin{block}{}")
+            cur_body.append(parse_inline(qc))
+            cur_body.append(r"\end{block}")
+        elif btype == BLOCK_TABLE:
+            note = None
+            if i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_QUOTE \
+                    and blocks[i + 1][1].strip().startswith('注'):
+                note = blocks[i + 1][1].strip()
+            cur_body.extend(_parse_table_to_latex(content, pending_caption, note))
+            pending_caption = None
+        elif btype == BLOCK_FIGURE:
+            parts = content.split('\n', 1)
+            alt = parts[0].strip()
+            src = parts[1].strip() if len(parts) > 1 else ""
+            note = None
+            if i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_QUOTE \
+                    and blocks[i + 1][1].strip().startswith('注'):
+                note = blocks[i + 1][1].strip()
+            cur_body.append(r"\begin{center}\includegraphics[width=0.75\textwidth]{" + src + r"}\\[0.3em]")
+            cap = _strip_caption_num(alt)
+            if cap:
+                cur_body.append(r"{\footnotesize " + parse_inline(cap) + r"}")
+            if note:
+                cur_body.append(r"\\[0.2em]{\scriptsize " + parse_inline(note[1:].strip()) + r"}")
+            cur_body.append(r"\end{center}")
+        elif btype == BLOCK_MATH_DISPLAY:
+            cur_math = True
+            cur_body.append(r"\begin{equation}")
+            cur_body.append(content)
+            cur_body.append(r"\end{equation}")
+        elif btype == BLOCK_CODE:
+            code = content.split('\n', 1)[1] if '\n' in content else ""
+            cur_body.append(r"\begin{verbatim}" + "\n" + code + "\n" + r"\end{verbatim}")
+        elif btype == BLOCK_RAW_LATEX:
+            cur_body.append(content)
+        elif btype == BLOCK_HR:
+            continue
+
+    flush_frame()
+    if bib_lines:
+        body = [r"\small", r"\begin{enumerate}"]
+        for bib in bib_lines:
+            bib = re.sub(r'^\[\d+\]\s*', '', bib.strip())
+            body.append(r"  \item " + parse_inline(bib))
+        body.append(r"\end{enumerate}")
+        emit_frame("参考文献", body, False)
+
+    lines.append(r"\end{document}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def convert_md_to_tex(
     md_path: str,
     tex_path: str,
@@ -881,6 +1026,7 @@ def convert_md_to_tex(
     twocolumn: bool = False,
     nomath: bool = False,
     gov: bool = False,
+    theme: str = "blue",
 ) -> str:
     """主编排：MD → LaTeX .tex"""
     with open(md_path, "r", encoding="utf-8") as f:
@@ -953,6 +1099,9 @@ def convert_md_to_tex(
     if doc_type in ("report", "报告"):
         tex = assemble_report(blocks, title, author, date,
                              subtitle, institute, abstract, dark, nomath)
+    elif doc_type == "slides":
+        tex = assemble_slides(blocks, title, author, date,
+                              subtitle, institute, abstract, theme)
     else:
         tex = assemble_paper(blocks, title, author, date,
                             abstract, keywords, dark, twocolumn, nomath,
@@ -1015,8 +1164,10 @@ def main():
         epilog="示例: python convert.py report.md --type paper --twocolumn"
     )
     parser.add_argument("input", help="输入文件路径 (.md / .docx)")
-    parser.add_argument("--type", choices=["paper", "report"], default="paper",
-                        help="目标文档类型（默认 paper）")
+    parser.add_argument("--type", choices=["paper", "report", "slides"], default="paper",
+                        help="目标文档类型（默认 paper；slides = beamer 演示 PDF）")
+    parser.add_argument("--theme", choices=["blue", "dark", "plain"], default="blue",
+                        help="演示主题（仅 slides：blue 学术 / dark 路演 / plain 商务）")
     parser.add_argument("--title", default="", help="文档标题")
     parser.add_argument("--author", default="", help="作者（多作者用逗号分隔）")
     parser.add_argument("--date", default="", help="日期（默认今天）")
@@ -1048,7 +1199,7 @@ def main():
         # 放入同 skill 的 templates/ 对应目录
         skill_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         out_dir = os.path.join(skill_root, "templates",
-                              "paper" if args.type == "paper" else "report")
+                              {"paper": "paper", "slides": "slides"}.get(args.type, "report"))
         tex_path = os.path.join(out_dir, f"{base}.tex")
 
     print(f"[INFO] Input:  {input_path}")
@@ -1065,7 +1216,7 @@ def main():
             args.subtitle, args.institute,
             args.abstract, args.keywords,
             args.dark, args.twocolumn, args.nomath,
-            getattr(args, 'gov', False)
+            getattr(args, 'gov', False), theme=args.theme
         )
     elif ext in (".docx", ".doc"):
         result = convert_docx_to_tex(
