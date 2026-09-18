@@ -31,6 +31,14 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Windows GBK 控制台下 print('✅') 会 UnicodeEncodeError：统一切到 UTF-8
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, 'reconfigure'):
+        try:
+            _stream.reconfigure(encoding='utf-8', errors='replace')
+        except (ValueError, OSError):
+            pass
+
 # ============================================================
 # 路径常量（自动推算，不依赖运行目录）
 # ============================================================
@@ -74,6 +82,7 @@ MINERU_SCRIPT = SCRIPT_DIR / 'mineru_cli.py'
 def run(cmd, cwd=None, env_extra=None, check=True, label=''):
     """运行子进程，返回 (success, stdout, stderr)"""
     env = os.environ.copy()
+    env.setdefault('PYTHONIOENCODING', 'utf-8')  # 子脚本 GBK 控制台下打印 emoji 不崩
     if env_extra:
         env.update(env_extra)
     print(f'  [{label}] {" ".join(str(c) for c in cmd[:4])}...')

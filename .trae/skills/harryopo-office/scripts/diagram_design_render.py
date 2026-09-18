@@ -23,6 +23,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 
 def _run_self_check(html_path: Path) -> bool:
     """调用 diagram-design 自带 self_check.py 验证（无障碍契约/单文件安全）。"""
