@@ -998,3 +998,17 @@ web-editor 升级。
 
 
 
+
+---
+
+## 2026-09-18（续2）：SKILL 主流程实战验收——Linux 纠错综述论文全链路跑通
+
+### 背景与交付
+- 用户指定真实任务检验 skill 全流程：联网检索（EDAC/MCA、btrfs/ZFS scrub、Ceph 纠删码、Google DRAM 现场研究、dm-verity/fs-verity、故障预测）→ 写综述论文
+- 产物（`output/linux-ecc-paper/`，本地不入库）：MD 中间态 + paper/notes PDF + Word 三格式；图1 四层纵深防御架构图（diagram-design HTML→PNG 2x）真实嵌入（编译日志 + docx media 双重确认）
+- **主流程 8 步全走通**：元信息提问→内容→预览确认→配图提问→**图描述 MD 确认**→图生成审核→插图→渲染。用户逐环节拍板，无跳步
+
+### 新踩坑（Windows 编码，skill 全局性 bug 已修）
+- **GBK 控制台 print('✅') 崩**：office.py 自身与 diagram_design_render.py 在中文 Windows 终端下 UnicodeEncodeError——diagram 链路"PNG 已生成但退出码 1"的假性失败。修复：两脚本 stdout/stderr `reconfigure(encoding='utf-8', errors='replace')` + run() 子进程 env 补 `PYTHONIOENCODING=utf-8`（提交 e8fb3da 已推送）
+- **SVG 竖线渐变陷阱**：`linearGradient` 默认 objectBoundingBox，纯竖线 bbox 宽度为 0 → 箭杆整体消失；改 `gradientUnits="userSpaceOnUse"`。marker 默认 `markerUnits="strokeWidth"`，线宽 10 时箭头放大到 90px 巨三角——显式 `userSpaceOnUse` 定尺寸
+- `git add` 带 ignored 路径时报错但**非 ignored 路径仍会部分暂存**（状态 AD），暂存后要复核 `git status`
