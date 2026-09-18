@@ -1012,3 +1012,7 @@ web-editor 升级。
 - **GBK 控制台 print('✅') 崩**：office.py 自身与 diagram_design_render.py 在中文 Windows 终端下 UnicodeEncodeError——diagram 链路"PNG 已生成但退出码 1"的假性失败。修复：两脚本 stdout/stderr `reconfigure(encoding='utf-8', errors='replace')` + run() 子进程 env 补 `PYTHONIOENCODING=utf-8`（提交 e8fb3da 已推送）
 - **SVG 竖线渐变陷阱**：`linearGradient` 默认 objectBoundingBox，纯竖线 bbox 宽度为 0 → 箭杆整体消失；改 `gradientUnits="userSpaceOnUse"`。marker 默认 `markerUnits="strokeWidth"`，线宽 10 时箭头放大到 90px 巨三角——显式 `userSpaceOnUse` 定尺寸
 - `git add` 带 ignored 路径时报错但**非 ignored 路径仍会部分暂存**（状态 AD），暂存后要复核 `git status`
+
+### 追加修复（作者行空格双重丢失，b27b637）
+- **元信息行空格是字段分隔符不是噪音**：`> 作者：张三 计算机学院 2025000101` 被 text_norm 的 CJK 空格压缩粘连成"张三计算机学院"——对 副标题/作者/单位/学校/日期 行豁免 `_strip_cjk_spaces`（键集与 convert/md_to_word 元信息约定一致）
+- **xeCJK 吞中-中相邻普通空格**（零宽处理）：tex 里有空格 PDF 照样粘连 → `format_author` 把内部空格转显式控制空格 `\ `。教训：**CJK 排版链路里"空格"要在 normalize/tex/PDF 三层各自求证，任何一层都可能吃掉它**
