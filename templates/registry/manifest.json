@@ -84,6 +84,30 @@
       "usage_count": 0,
       "created_at": "2026-08-28",
       "updated_at": "2026-08-28"
+    },
+    {
+      "manifest_version": "1.0",
+      "id": "harryopo-slides",
+      "name": "harryopo 演示文稿（blue/dark/plain 三主题）",
+      "version": "1.0",
+      "format": "latex",
+      "category": "内置",
+      "engine": "harryopo-xelatex",
+      "source": "user",
+      "template_path": "latex/harryopo-slides.tex",
+      "schema_ref": "",
+      "preview": "",
+      "placeholder_syntax": "tex-placeholder-v1",
+      "tags": [
+        "演示",
+        "PPT",
+        "答辩",
+        "路演",
+        "汇报"
+      ],
+      "usage_count": 0,
+      "created_at": "2026-09-18",
+      "updated_at": "2026-09-18"
     }
   ]
 }

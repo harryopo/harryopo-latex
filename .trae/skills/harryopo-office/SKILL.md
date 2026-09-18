@@ -168,6 +168,7 @@ office.py render → Word / LaTeX（可选 --pdf / --template 按模板出）
 | 修订审阅/改稿对比 | "红线稿"、"修订"、"改了哪里"、"对比两份word"、"改稿" | **redline：AI 初稿 vs 用户修改版 → 原生修订红线稿** |
 | AI 改稿留痕出二稿 | "改这几处"、"带修订"、"留痕改"、"二稿"、"逐条接受" | **revise：既有 docx 上以 w:ins/w:del 应用 AI 修改（track_changes）** |
 | 公文生成/公文格式检查 | "公文"、"红头文件"、"GB/T 9704"、"公文格式检查" | **render --gov（国标版式）→ govcheck 合规检查** |
+| 演示文稿/答辩/路演 PPT | "演示"、"答辩 PPT"、"路演"、"slides"、"汇报幻灯片" | **render --format slides --theme blue/dark/plain（beamer PDF 交付，含演讲备注）** |
 
 ### GB/T 9704 公文模式（--gov）与格式合规检查（govcheck）
 
@@ -854,6 +855,32 @@ build.ps1 自动：
 \chapter{第一章}  \section{第一节}
 \end{document}
 ```
+
+### 演示文稿骨架（harryopo-slides，PDF 交付）
+
+```latex
+\documentclass{harryopo-slides}          % blue 学术（默认）
+% \documentclass[dark]{harryopo-slides}  % 深色路演（黑底白字，投影场景）
+% \documentclass[plain]{harryopo-slides} % 极简商务（黑白灰 + 朱红）
+\title[页眉短题]{演示主标题}              % optional 参数 = footline 短题
+\subtitle{副标题}  \author{张三 \and 李四}  \institute{单位}  \date{2026年9月}
+\begin{document}
+\begin{frame}[plain]\titlepage\end{frame}
+\begin{frame}{目录}\tableofcontents\end{frame}
+\section{章节名}                          % 自动进目录
+\begin{frame}{页标题}
+\begin{itemize}\item 要点 \item \alert{强调}\end{itemize}
+\[ E = mc^2 \]                            % XITS 数学原生
+\begin{block}{概念块}圆角块\end{block}
+\note{演讲者备注（导出 handout 模式可见）}
+\end{frame}
+\end{document}
+```
+
+- **编译**：`python office.py render 演示.md --format slides [--theme blue|dark|plain]`（自动链路：MD → assemble_slides → templates/slides 编译 → `<名>-slides.pdf`）；或手写 tex 后 xelatex ×2（cwd `templates/slides/`，`TEXINPUTS` 指 cls/fonts）
+- **MD 写法约定**：首个 `# ` = 封面标题，`# ` = 章节（进目录），`## ` = 一页 frame，`###/####` = 帧内粗体小标题，`> 注：` = block 框，`$$` = 编号公式，表格/列表/图片/参考文献同 paper 约定
+- **能力**：16:9、方正书宋正文+黑体标题+小标宋封面、booktabs 三线表（表题在下）、columns、`\note{}` 演讲备注（handout 模式双页导出）
+- **示例**：`templates/slides/example-{defense,pitch,weekly}.tex`（三主题全特性样张，PDF 已入库）
 
 ### 主题选项
 

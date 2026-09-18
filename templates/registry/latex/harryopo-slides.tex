@@ -1,0 +1,91 @@
+% harryopo-slides 示例：学术答辩（blue 主题）
+\documentclass{harryopo-slides}
+\title[多智能体知识服务平台]{知行读书：多智能体知识服务系统设计}
+\subtitle{毕业答辩 · 示例大学}
+\author{张三 \and 李四}
+\institute{示例大学 计算机学院}
+\date{2026年9月}
+\begin{document}
+
+\begin{frame}[plain]\titlepage\end{frame}
+
+\begin{frame}{汇报提纲}
+\tableofcontents
+\note{开场 30 秒：介绍题目与三位成员分工。}
+\end{frame}
+
+\section{研究背景}
+\begin{frame}{问题动机}
+\begin{itemize}
+  \item 传统文档工具链：AI 直接生成二进制，排版错误率高达 \alert{30\%}
+  \item 中文学术场景三重刚需：方正字体规范、公式保真、模板可复用
+  \item 核心命题：如何让 AI \textbf{只产出结构化数据}，排版交给引擎？
+\end{itemize}
+\note{强调 30\% 错误率来自 8 月真实测试统计，别念稿。}
+\end{frame}
+
+\begin{frame}{本文贡献}
+\begin{block}{结构化渲染范式}
+提出"Markdown 中间态 + 模板引擎保真渲染"双向链路，覆盖 Word / LaTeX / PDF 三格式互转。
+\end{block}
+\vspace{0.6em}
+\begin{block}{配套能力}
+编辑级图表双引擎、GB/T 9704 公文模式、修订审阅双向留痕。
+\end{block}
+\note{贡献页是评委关注点，停留时间放宽到 2 分钟。}
+\end{frame}
+
+\section{系统方法}
+\begin{frame}{总体架构}
+\begin{center}
+\includegraphics[width=0.72\textwidth]{figures/arch.png}
+\end{center}
+\vspace{-0.5em}
+\begin{center}\footnotesize 图1：四层系统架构（解析路由 → 中间态 → 渲染引擎 → 输出）\end{center}
+\note{指着图从下往上讲四层的职责。}
+\end{frame}
+
+\begin{frame}{成本衰减模型}
+渲染成本随迭代次数 $i$ 指数衰减，$\alpha$ 为模板复用率：
+\[ C_i = C_0 \cdot \alpha^{\,i}, \qquad \alpha \in (0,1) \]
+\begin{align}
+\frac{\partial C_i}{\partial \alpha} &= C_0 \, i \, \alpha^{\,i-1} < 0 \\
+\lim_{i \to \infty} C_i &= 0
+\end{align}
+\note{推导不必逐行讲，落点是"复用模板边际成本趋零"。}
+\end{frame}
+
+\section{实验与结论}
+\begin{frame}{对比实验}
+\begin{table}
+\centering
+\begin{tabular}{lcc}
+\toprule
+方法 & 排版准确率 & 单页耗时 \\
+\midrule
+AI 直接生成 & 68.5\% & 2.1s \\
+模板引擎渲染 & \alert{92.3\%} & 3.4s \\
+人工排版 & 99.1\% & 3600s \\
+\bottomrule
+\end{tabular}
+\caption{三类方法在 120 篇文档上的实测（表1）}
+\end{table}
+\note{92.3 与 30 的错误率呼应，是全文核心数据。}
+\end{frame}
+
+\begin{frame}{结论与展望}
+\begin{itemize}
+  \item 模板引擎范式使排版准确率较基线提升 \alert{23.8} 个百分点
+  \item 四级解析路由实现 25+ 输入格式统一归一为 Markdown
+  \item 展望：演示文稿链路（本次答辩 PPT 即由本系统产出）
+\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+\begin{center}
+\vspace{2em}{\Huge 谢谢各位老师}\\[1.5em]
+{\usebeamerfont{author}请批评指正}
+\end{center}
+\note{鞠躬，进入提问环节。}
+\end{frame}
+\end{document}

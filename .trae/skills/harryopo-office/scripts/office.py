@@ -56,6 +56,7 @@ CLS_DIR = TEMPLATES / 'cls'
 FONTS_DIR = TEMPLATES / 'fonts'
 PAPER_DIR = TEMPLATES / 'paper'
 NOTES_DIR = TEMPLATES / 'math-notes'
+SLIDES_DIR = TEMPLATES / 'slides'
 
 WORD_SCRIPT = SCRIPT_DIR / 'word' / 'md_to_word.py'
 CONVERT_SCRIPT = SCRIPT_DIR / 'convert.py'
@@ -375,6 +376,52 @@ def render_notes(md_file, output_dir, out_stem=None):
     return None
 
 
+def render_slides(md_file, output_dir, out_stem=None, theme='blue'):
+    """链路4: MD → 演示 PDF (harryopo-slides / beamer，16:9)"""
+    print(f'\n=== 链路4: MD → PDF (slides/{theme}) ===')
+    _ensure_tex_on_path()
+    stem = out_stem or md_file.stem
+    tex_file = output_dir / f'{stem}-slides.tex'
+
+    # Step 1: MD → TEX（slides 引擎）
+    ok, out, err = run([sys.executable, str(CONVERT_SCRIPT), str(md_file),
+                        '--type', 'slides', '--theme', theme,
+                        '-o', str(tex_file)], label='convert.py(slides)')
+    if not ok:
+        print(f'  [失败] {err}')
+        return None
+
+    # Step 2: 复制到 templates/slides/ 编译（字体 Path=../fonts/ 相对编译 cwd）
+    compile_tex = SLIDES_DIR / f'{stem}-e2e.tex'
+    shutil.copy2(str(tex_file), str(compile_tex))
+
+    # Step 2.5: 图表图片 + 占位图
+    src_figs = output_dir / 'figures'
+    if src_figs.exists():
+        dst_figs = SLIDES_DIR / 'figures'
+        dst_figs.mkdir(exist_ok=True)
+        for f in src_figs.glob('*.png'):
+            shutil.copy2(str(f), str(dst_figs / f.name))
+    ensure_placeholder_figures(SLIDES_DIR, md_file)
+
+    # Step 3: 编译（beamer 目录两遍即稳定）
+    texinputs = f'{CLS_DIR}//;{FONTS_DIR}//;'
+    for i in range(2):
+        ok, out, err = run(
+            ['xelatex', '-interaction=nonstopmode', compile_tex.name],
+            cwd=SLIDES_DIR, env_extra={'TEXINPUTS': texinputs},
+            check=False, label=f'xelatex #{i+1}'
+        )
+
+    pdf = SLIDES_DIR / compile_tex.with_suffix('.pdf').name
+    final_pdf = output_dir / f'{stem}-slides.pdf'
+    if pdf.exists() and pdf.stat().st_size > 5000:
+        collect_output(pdf, final_pdf)
+        return final_pdf
+    print('  [失败] PDF 未生成或过小')
+    return None
+
+
 # ============================================================
 # 主入口
 # ============================================================
@@ -606,6 +653,9 @@ def cmd_render(args):
                                         out_stem=base_stem)
     if 'notes' in formats:
         results['notes'] = render_notes(md_file, output_dir, out_stem=base_stem)
+    if 'slides' in formats:
+        results['slides'] = render_slides(md_file, output_dir,
+                                          out_stem=base_stem, theme=args.theme)
 
     # 汇总
     print('\n' + '=' * 50)
@@ -744,7 +794,9 @@ def main():
     p_render = sub.add_parser('render', help='渲染 MD 到多种格式')
     p_render.add_argument('input', help='输入 MD 文件路径')
     p_render.add_argument('--format', '-f', default='all',
-                          help='输出格式: word, paper, notes, all (默认 all)')
+                          help='输出格式: word, paper, notes, slides, all (默认 all；slides 需显式)')
+    p_render.add_argument('--theme', default='blue', choices=['blue', 'dark', 'plain'],
+                          help='演示主题（仅 slides：blue 学术 / dark 路演 / plain 商务）')
     p_render.add_argument('--config', '-c', default='fangzheng',
                           help='字体方案: fangzheng / opensource (默认 fangzheng)')
     p_render.add_argument('--output-dir', '-o', help='输出目录 (默认 MD 同级)')

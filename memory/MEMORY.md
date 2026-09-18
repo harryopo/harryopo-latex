@@ -941,6 +941,39 @@ web-editor 升级。
 - **文档漂移**：CLI 参数宣传与实际 argparse 不符（gb9704 --gov）——写 docstring 用法时对着 argparse 实参核，别凭记忆
 - 活 bug 发现自 Repo Wiki 全仓扫描：定期做结构化全仓遍历能捞出增量开发遗漏的旁路缺陷
 
+---
+
+## 2026-09-18：演示文稿链路 harryopo-slides.cls（P2 首项，beamer/PDF 路线）
+
+### 方向决策（用户拍板）
+"PPT" 立项先质疑后定调：项目主轴是文档撰写，用户明确 **PDF 就够** → 走 **beamer/ctexbeamer**（LaTeX 编译出 PDF），不做可编辑 .pptx。理由：复用现有 XeLaTeX+方正+XITS+编译诊断全链，公式原生完美，成本远低于 python-pptx 子系统。python-pptx 1.0.3 与 PowerPoint COM 16.0 本机均在，未来若要 .pptx 可另立项。
+
+### 交付
+- `templates/cls/harryopo-slides.cls` v1.0：基于 ctexbeamer，三主题 `[dark]`/`[plain]`/默认 blue；16:9；方正书宋正文+黑体标题+小标宋封面（`Path=../fonts/` 同 base.sty）；XITS 数学；booktabs 三线表；自定义 titlepage/frametitle（左标题+彩线+右上页码）/footline（左短题右页码）/block 圆角；`\note{}` 演讲备注；`\mode<handout>` 备注双页导出
+- 三套全特性示例（`templates/slides/example-{defense,pitch,weekly}.tex`）：答辩 9 页 / 路演 6 页 / 汇报 7 页，各含封面/目录/section/公式 align/三线表/图/block/note；xelatex×2 全零错误；PyMuPDF 截图目检三主题配色正确（blue 藏蓝白底、dark 黑底白字紫线、plain 黑白灰朱红）
+- 注册表新增 `harryopo-slides` 模板（用 example-defense.tex 登记，latex/harryopo-xelatex，内置类）
+- SKILL.md 补"演示文稿骨架"章节；示例 PDF 入库 output 之外（templates/slides/*.pdf）
+
+### 踩坑（关键）
+- **`\ifstrequal` 不展开宏参数**：主题分支 `\ifstrequal{\hrypslides@theme}{dark}{...}` 恒假（`{dark}` 比较的是宏名而非值），三主题全泄漏成 blue。改 `\newif\ifhrypslides@dark` 布尔开关 + `\DeclareOption{dark}{\hrypslides@darktrue}`——**LaTeX 选项判定用布尔开关，不用字符串比较**
+- **beamer 不默认加载 booktabs**：`\toprule/\midrule/\bottomrule` Undefined control sequence，cls 内 `\usepackage{booktabs}`
+- **beamer 默认强制 sans**：中文正文变黑体，`\usefonttheme{professionalfonts}` + `\AtBeginDocument{\renewcommand{\familydefault}{\rmdefault}\selectfont}` 恢复书宋正文
+- **beamercolorbox 的 `dp=` 与 `sep=true` 组合语法坏**（Missing number/Illegal unit）→ 改标准 `sep=0.3cm,left`
+- **fontspec/unicode-math 的 XITSMath 需 `UprightFont=*-Regular`**（字体文件名是 XITSMath-Regular.otf，无 `*` 通配会找不到）
+- **未定义颜色引用**：dark 分支 `fg=E69A2D` 直填 HTML 值报错，必须先 `\definecolor{GoldColor}{HTML}{E69A2D}` 再引用
+- **tex 内容生成禁裸 heredoc**：`<< EOF`（无引号）下 bash 展开 `$E`→空、`\d`→丢反斜杠，制造十几轮假象 bug；quated heredoc `<< 'EOF'` 或 Write 工具才安全（呼应"heredoc 传脚本不可靠"）
+
+### 自动链路收官（同日续）
+- `convert.py assemble_slides`：MD→beamer tex（首个 `#`=封面、`#`=section、`##`=frame、`###/####`=帧内粗体、`> 注`→block、`$$`→equation、表格/列表/图/参考文献全复用 paper 组件）；CLI `--type slides --theme`
+- `office.py render_slides`：链路4（templates/slides 编译 xelatex×2，figures 拷贝+占位图+大小校验，产物 `<名>-slides.pdf`）；`--format slides --theme blue|dark|plain`（all 不含 slides 需显式）
+- 注册表登记 `harryopo-slides`（第 5 条，用 example-defense.tex）；SKILL.md 触发词表+骨架+编译说明同步；REPO_WIKI 四链路同步
+- 回归全绿：slides 三主题 E2E EXIT=0（8 页 66KB）；word/paper/notes 不回归（33KB/89KB/112KB）；手写三示例零错误
+
+### 新踩坑（beamer 生态）
+- **beamer 不默认加载 tabularx/multirow**：convert 表格组件产出 tabularx 三线表 → slides 编译 18 错；cls 补 `\usepackage{tabularx,multirow}`
+- **allowframebreaks 会给帧标题强加罗马数字后缀（I/II）**：即未分帧也加 → 弃用自动分页（Overfull 警告比强行切帧可控，超长内容应精简 MD）
+- **`> **表1：xxx**` 的 pending_caption 要剥星号**（`re.sub(r'\*+','')`），否则表题渲染出字面 `**`——paper 链路早有同款处理，新引擎复用组件时漏了对齐
+
 
 
 

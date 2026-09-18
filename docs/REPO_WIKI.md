@@ -69,7 +69,7 @@ d:\ai\latex\
 
 | 层 | 模块 | 职责 |
 |----|------|------|
-| 入口编排 | `office.py` | 6 子命令：render / template / diagram / redline / govcheck / info；路径常量单一事实来源（CLS_DIR/FONTS_DIR/PAPER_DIR/NOTES_DIR）；ASCII 护栏；环境探测（tex/pandoc 补 PATH） |
+| 入口编排 | `office.py` | 7 子命令：render（word/paper/notes/slides 四链路）/ template / diagram / redline / revise / govcheck / info；路径常量单一事实来源（CLS_DIR/FONTS_DIR/PAPER_DIR/NOTES_DIR/SLIDES_DIR）；ASCII 护栏；环境探测（tex/pandoc 补 PATH） |
 | 解析层 | `mineru_cli.py` `docx_clean.py` `html_table_to_latex.py` + kreuzberg/anydoc/pandoc/markitdown | 任意格式 → MD 中间态 |
 | 引擎层 | `convert.py`(MD→tex) `md2latex.py`(笔记) `word/md_to_word.py`+`word_template_engine.py`(MD→docx) `tex2md.py`(tex→MD) | 双向转换与渲染 |
 | 护栏层 | `text_norm.py` | CJK 标点全角化 + 中西空格清理（双引擎入口统一接入） |
@@ -127,6 +127,7 @@ flowchart LR
 | 图描述 MD 环节 | SKILL.md 主流程第⑤步（流程约束，非代码） | 画图前设计确认 |
 | GB/T 9704 合规检查（docx/tex/cls 三模） | `office.py govcheck 文件 [--json]` | 公文验收门 |
 | LaTeX 编译诊断闭环 | MCP 三工具 / `latex_diagnostics` 库直调 | 编译排错 |
+| **演示文稿 PDF（beamer 三主题）** | `office.py render x.md --format slides [--theme blue/dark/plain]` | 答辩/路演/汇报（2026-09-18 新增） |
 
 ### 4.2 修订审阅（改稿双向留痕）
 - **redline**：`office.py redline 初稿.docx 修改稿.docx -o 红线稿.docx [--engine wmlcomparer|docxdiff]`——原生 w:ins/w:del，免装 Word
@@ -214,7 +215,7 @@ flowchart LR
 
 **限制（设计性）**：track_changes 单 run 匹配（跨 run 不支持）；docx_clean 反转义白名单外保持；registry latex schema 为 M2 占位（`tex-placeholder-v1`）；schema 类型推断全 string；marker/docling 网络阻塞判 Hold（HF Xet 存储墙）；Word 链路依赖本机 MS Office（Windows-only），LaTeX/PDF 链路跨平台；方正字体商用授权。
 
-**TODO 清单（方案书 v3 §6 未动项）**：P2 — PPT 输出链路（Output Contract 范式）、word-mcp-live 适配器、Citra 证据回溯、模板注册表 v2（样式保真校验）、IDE 配置分发、旧公文 Word 模板国标化；P3 — Typst 通道、模板市场/多人协作、pdfcpu 后处理、HermesOffice 往返对标。代码内 TODO：【信息缺失——脚本注释无显式 TODO 标记，以上以方案书为准】
+**TODO 清单（方案书 v3 §6 未动项）**：✅ P2 演示文稿链路已完成（2026-09-18 定调 beamer/PDF 路线，harryopo-slides 三主题 + MD 自动链路，不做可编辑 .pptx）；⬜ 剩余 P2——word-mcp-live 适配器、Citra 证据回溯、模板注册表 v2（样式保真校验）、IDE 配置分发、旧公文 Word 模板国标化；⬜ P3 — Typst 通道、模板市场/多人协作、pdfcpu 后处理、HermesOffice 往返对标。代码内 TODO：【信息缺失——脚本注释无显式 TODO 标记，以上以方案书为准】
 
 ## 9. 复用开发指引
 
