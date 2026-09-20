@@ -18,12 +18,11 @@
 | `harryopo-notes.cls`  | ⬜ 待开发    | 笔记文档类（plan.md 规划中）                |
 | `build.ps1`           | ✅ v4.2 完成 | 编译脚本：环境检查 + 3遍 XeLaTeX + 页数统计 |
 
-**已验证编译通过的示例**（0 失败）：
+**已验证编译通过的示例**（0 失败，2026-09-20 全量重编 + CM 字体护栏全绿）：
 
-- `showcase-paper.pdf`（单栏，8页，261KB）
-- `example-paper-twocolumn.pdf`（双栏，3页，164KB）
-- `showcase-report.pdf`（15页，235KB）
-- `example-report.pdf`（14页，242KB）
+- 模板源：`templates/paper/showcase-paper.tex`、`templates/report/showcase-report.tex`、`templates/math-notes/example-note.tex`、`templates/slides/example-{defense,pitch,weekly}.tex`
+- 官方产物：`output/examples/`（单栏/双栏/论文全特性/报告/报告全特性/公文 六示例，Word+PDF+LaTeX 三格式，见该目录 README）
+- 旧手写示例 example-paper*/example-report 已于 2026-09-20 移除（由 showcase 模板 + MD 自动链路取代）
 
 **独立子项目（不修改架构）**：
 

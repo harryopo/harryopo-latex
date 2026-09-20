@@ -8,7 +8,7 @@
 | 论文双栏 | paper-twocolumn-word.docx | paper-twocolumn-paper.pdf | — | paper-twocolumn-paper.tex |
 | 论文全特性 | paper-showcase-word.docx | paper-showcase-paper.pdf | — | paper-showcase-paper.tex |
 | 报告 | report-word.docx | — | report-paper.pdf | report-report.tex |
-| 报告全特性 | report-showcase.processed-word.docx | — | report-showcase.processed-paper.pdf | report-showcase.processed-report.tex |
+| 报告全特性 | report-showcase-word.docx | — | report-showcase-paper.pdf | report-showcase-report.tex |
 | **公文（GB/T 9704）** | — | gov-notice-paper.pdf | — | gov-notice-paper.tex |
 
 **2026-09-05 更新（GB/T 9704 公文模式）**：
@@ -21,7 +21,7 @@
 
 - **框架图**：paper-showcase / report-showcase 的架构图由 ASCII 字符画升级为真框架图（初版由 super-diagram 契约渲染；该引擎已于 2026-09-02 移除收敛为 diagram-design，示例 MD 现直接引用已渲染 PNG，见 `figures/`）；report-showcase 另含 Mermaid 业务流程图
 - **注释规范**：表注 / 图注统一渲染在**表格 / 图片下方**（`> 注：` 语法），两个 showcase 各有示范
-- 文件名带 `.processed`：因文档含图表代码块，渲染时先预处理为 PNG 再编译；`figures/` 存放渲染出的图片
+- 2026-09-20 精简：删除 `.processed` 中间态副本（与主 showcase 内容重复）与旧手写示例（example-paper*/example-report，已由 showcase 模板+MD 自动链路取代）；`figures/` 存放示例引用的图片
 
 ## 重新生成
 
