@@ -25,6 +25,7 @@ office.py — 办公超级 Skill 统一入口
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -173,6 +174,41 @@ def ensure_placeholder_figures(target_dir, md_file):
             print(f'  [占位] {target.name}')
 
 
+_CM_MATH_RE = re.compile(r'^CM(R|MI|SY|EX)\d{2}$')
+
+
+def _check_math_fonts(pdf_path):
+    r"""护栏：扫描 PDF 是否回退 Computer Modern 数学字体。
+
+    背景：base.sty 曾有 \ifx 恒假 bug 导致 unicode-math/XITS Math 从未加载，
+    公式静默回退 CM 多年无人察觉。CM 字体嵌入即数学字体链路失效的信号。
+    主路径 pymupdf 读字体表（字体名可能在压缩对象流内，裸字节扫描会漏检）；
+    无 pymupdf 时降级字节扫描。"""
+    hits = []
+    try:
+        import pymupdf
+    except ImportError:
+        pymupdf = None
+    if pymupdf is not None:
+        try:
+            doc = pymupdf.open(str(pdf_path))
+            names = {f[3].split('+')[-1] for i in range(len(doc)) for f in doc[i].get_fonts()}
+            doc.close()
+            hits = sorted(n for n in names if _CM_MATH_RE.match(n))
+        except Exception:
+            pass
+    else:
+        try:
+            data = pdf_path.read_bytes()
+            hits = sorted({m.group(0)[1:].decode() for m in
+                           re.finditer(rb'\+CM(?:R|MI|SY|EX)\d{2}', data)})
+        except OSError:
+            return
+    if hits:
+        print(f'  [WARN] 公式回退 Computer Modern {hits} —— 检查 unicode-math/'
+              r'\setmathfont 加载链（标准应为 XITS Math 罗马风格）')
+
+
 def collect_output(src, dst):
     """复制产物到输出目录（容错：目标被锁时自动加后缀）"""
     if src.exists():
@@ -182,6 +218,8 @@ def collect_output(src, dst):
             # 目标文件被锁（如 PDF 阅读器），换带时间戳的文件名
             dst = dst.with_stem(dst.stem + '-new')
             shutil.copy2(str(src), str(dst))
+        if dst.suffix.lower() == '.pdf':
+            _check_math_fonts(dst)
         print(f'  [产物] {dst.name} ({src.stat().st_size // 1024}KB)')
         return True
     return False
