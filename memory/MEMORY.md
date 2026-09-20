@@ -1031,3 +1031,9 @@ web-editor 升级。
   2. `Find.Execute(Replace=wdReplaceAll)` **无视 TrackRevisions 静默替换**（违反留痕铁律的隐形杀手）。正解：TrackRevisions=True 时对 `Range.Text` 赋值才生成原生 w:ins/w:del
   3. M365 登录态下修订/批注作者**固定取账号显示名**，`Application.UserName` 赋值不生效。正解：Save→关文档释放锁→OOXML 时间窗归因（w:date>=操作时刻）→重开
 - 护栏批次（0353c15）：collect_output 对一切 PDF 扫嵌入字体，CM 回退即 WARN；seed_builtins 去 d:\ai\latex 硬编码；mermaid 浏览器跨平台+失败回退 Chromium；CLAUDE.md 字体数 19
+
+### P2 推进：Citra 证据回溯 = 信息幻觉，自研 trace 替代（2026-09-20）
+- **核实**：WebSearch 两轮确认 GitHub 无方案书 v3 所述 "Citra 文档验证层（MIT 905★）"（同名项目是 3DS 模拟器）——立项调研时的幻觉，按差异必报记录；能力自研 `evidence_trace.py` + `office.py trace`
+- 归一化三板斧（假阳性 10→0，实测 31/31 全中、编造句正确 MISS）：① NFKC（PDF 数学斜体 𝑘 U+1D451 → k、全角→半角）② 只留汉字/字母/数字（弯直引号/破折号/括号全半角一律抹平）③ 行内公式剥壳不剥字（$k$→k；整个剥掉反而与 PDF 提取文本失配）
+- 切句陷阱：'.' 作句读会把 3.0/1.5 拦腰斩断——仅两侧非数字时才作边界
+- 教训：**方案书引用的外部项目必须逐一核实存在性再排期**，不存在的用自研顶位并显式记录

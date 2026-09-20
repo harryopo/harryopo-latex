@@ -69,7 +69,7 @@ d:\ai\latex\
 
 | 层 | 模块 | 职责 |
 |----|------|------|
-| 入口编排 | `office.py` | 9 子命令：render（word/paper/notes/slides 四链路）/ template / diagram / redline / revise / live / govcheck / ide / info；路径常量单一事实来源（CLS_DIR/FONTS_DIR/PAPER_DIR/NOTES_DIR/SLIDES_DIR）；ASCII 护栏；环境探测（tex/pandoc 补 PATH） |
+| 入口编排 | `office.py` | 10 子命令：render（word/paper/notes/slides 四链路）/ template / diagram / redline / revise / live / trace / govcheck / ide / info；路径常量单一事实来源（CLS_DIR/FONTS_DIR/PAPER_DIR/NOTES_DIR/SLIDES_DIR）；ASCII 护栏；环境探测（tex/pandoc 补 PATH） |
 | 解析层 | `mineru_cli.py` `docx_clean.py` `html_table_to_latex.py` + kreuzberg/anydoc/pandoc/markitdown | 任意格式 → MD 中间态 |
 | 引擎层 | `convert.py`(MD→tex) `md2latex.py`(笔记) `word/md_to_word.py`+`word_template_engine.py`(MD→docx) `tex2md.py`(tex→MD) | 双向转换与渲染 |
 | 护栏层 | `text_norm.py` | CJK 标点全角化 + 中西空格清理（双引擎入口统一接入） |
@@ -133,6 +133,7 @@ flowchart LR
 
 ### 4.2 修订审阅（改稿双向留痕）
 - **redline**：`office.py redline 初稿.docx 修改稿.docx -o 红线稿.docx [--engine wmlcomparer|docxdiff]`——原生 w:ins/w:del，免装 Word
+- **trace（证据回溯，evidence_trace.py）**：`office.py trace 源.pdf --md 提取.md -o 账本.json [--claim "论断"]`——pymupdf 逐页检索+NFKC/留汉字字母数字归一，段落→页码+bbox 证据账本；0 全中/1 有 MISS/2 参数错，可当质量门。方案书"Citra"经核实为信息幻觉（GitHub 无此工具），能力自研
 - **live（实时修订会话，word_live.py）**：`office.py live status|edit|comment|accept|reject <docx> [--find --replace/--text --author]`——COM 附着打开中的 Word 留痕改稿；COM 三坑（Range.Find 无视范围/Execute 替换静默/M365 作者名）解法见 SKILL.md
 - **track_changes / revise**：`office.py revise 初稿.docx 二稿.docx --rev '[{"op":"replace","find":"A","replace":"B"}]'`——AI 修改留痕（replace/delete 用 find/replace 键，insert_after 用 anchor/text 键）；亦可裸调 word/track_changes.py
 
@@ -220,7 +221,7 @@ flowchart LR
 
 **限制（设计性）**：track_changes 单 run 匹配（跨 run 不支持）；docx_clean 反转义白名单外保持；registry latex schema 为 M2 占位（`tex-placeholder-v1`）；schema 类型推断全 string；marker/docling 网络阻塞判 Hold（HF Xet 存储墙）；Word 链路依赖本机 MS Office（Windows-only），LaTeX/PDF 链路跨平台；方正字体商用授权。
 
-**TODO 清单（方案书 v3 §6 未动项）**：✅ P2 演示文稿链路已完成（2026-09-18 定调 beamer/PDF 路线，harryopo-slides 三主题 + MD 自动链路，不做可编辑 .pptx）；✅ 公文 Word 模板国标化已完成（2026-09-18 `--format word --gov` + govcheck 8/8 闭环）；✅ IDE 配置分发已完成（2026-09-18 `office.py ide`，LaTeX Workshop 配方 + 预览 CSS 幂等分发）；✅ word-mcp-live 适配层已完成（2026-09-20 `office.py live`：COM 实时修订会话 status/edit/comment/accept/reject，CLI 契约即适配器；实测三坑记录在 SKILL.md）；⬜ 剩余 P2——Citra 证据回溯、模板注册表 v2（样式保真校验）；⬜ P3 — Typst 通道、模板市场/多人协作、pdfcpu 后处理、HermesOffice 往返对标。代码内 TODO：【信息缺失——脚本注释无显式 TODO 标记，以上以方案书为准】
+**TODO 清单（方案书 v3 §6 未动项）**：✅ P2 演示文稿链路已完成（2026-09-18 定调 beamer/PDF 路线，harryopo-slides 三主题 + MD 自动链路，不做可编辑 .pptx）；✅ 公文 Word 模板国标化已完成（2026-09-18 `--format word --gov` + govcheck 8/8 闭环）；✅ IDE 配置分发已完成（2026-09-18 `office.py ide`，LaTeX Workshop 配方 + 预览 CSS 幂等分发）；✅ word-mcp-live 适配层已完成（2026-09-20 `office.py live`：COM 实时修订会话 status/edit/comment/accept/reject，CLI 契约即适配器；实测三坑记录在 SKILL.md）；✅ Citra 证据回溯已完成（2026-09-20 `office.py trace` 自研——调研核实 Citra 系方案书信息幻觉，GitHub 无此工具；实测 31/31 段落全中+编造句正确 MISS）；⬜ 剩余 P2——模板注册表 v2（样式保真校验）；⬜ P3 — Typst 通道、模板市场/多人协作、pdfcpu 后处理、HermesOffice 往返对标。代码内 TODO：【信息缺失——脚本注释无显式 TODO 标记，以上以方案书为准】
 
 ## 9. 复用开发指引
 
