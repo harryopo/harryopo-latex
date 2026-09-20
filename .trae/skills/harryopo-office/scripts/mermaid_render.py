@@ -32,6 +32,9 @@ MERMAID_RE = re.compile(
     re.DOTALL
 )
 
+# 系统浏览器启动失败后置 True：本进程内不再设 PUPPETEER_EXECUTABLE_PATH
+_BROWSER_FALLBACK = False
+
 
 def find_mermaid_blocks(md_text):
     """提取 MD 中所有 mermaid 代码块，返回 [(match_obj, code), ...]"""
@@ -52,14 +55,26 @@ def _ensure_puppeteer_path():
     if os.environ.get('PUPPETEER_EXECUTABLE_PATH'):
         return  # 已设置
     candidates = [
+        # Windows
         r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe',
         r'C:\Program Files\Microsoft\Edge\Application\msedge.exe',
         r'C:\Program Files\Google\Chrome\Application\chrome.exe',
         r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
+        # macOS
+        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+        # Linux
+        '/usr/bin/google-chrome', '/usr/bin/microsoft-edge', '/usr/bin/chromium',
+        '/snap/bin/chromium',
     ]
     for path in candidates:
         if os.path.exists(path):
             os.environ['PUPPETEER_EXECUTABLE_PATH'] = path
+            return
+    for exe in ('chrome', 'chromium', 'microsoft-edge'):
+        found = shutil.which(exe)
+        if found:
+            os.environ['PUPPETEER_EXECUTABLE_PATH'] = found
             return
 
 
@@ -75,7 +90,9 @@ def render_one(code, output_path, fmt='png'):
     Returns:
         True 如果成功，False 如果失败
     """
-    _ensure_puppeteer_path()
+    global _BROWSER_FALLBACK
+    if not _BROWSER_FALLBACK:
+        _ensure_puppeteer_path()
 
     mmdc = shutil.which('mmdc');
     if not mmdc:
@@ -96,10 +113,20 @@ def render_one(code, output_path, fmt='png'):
             '-o', str(output_path),
             '-t', 'default',      # 主题
             '-b', 'transparent',   # 透明背景
-            '-w', '1200',          # 宽度
         ]
+        if fmt == 'png':
+            cmd += ['-w', '1200']  # 宽度仅对位图生效；pdf/svg 矢量自适应
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30,
                                 encoding='utf-8', errors='replace')
+        if result.returncode != 0 and os.environ.get('PUPPETEER_EXECUTABLE_PATH'):
+            # 系统浏览器（Edge/Chrome）启动失败时回退 mmdc 自带 Chromium 重试一次
+            # （实测部分环境 Edge 以 PUPPETEER_EXECUTABLE_PATH 启动报 Code: 0）
+            print('[WARN] 指定浏览器启动失败，回退 mmdc 自带 Chromium 重试',
+                  file=sys.stderr)
+            _BROWSER_FALLBACK = True
+            os.environ.pop('PUPPETEER_EXECUTABLE_PATH')
+            result = subprocess.run(cmd, capture_output=True, text=True,
+                                    timeout=60, encoding='utf-8', errors='replace')
         if result.returncode != 0:
             print(f'[WARN] mmdc 渲染失败: {result.stderr.strip()[:200]}',
                   file=sys.stderr)
