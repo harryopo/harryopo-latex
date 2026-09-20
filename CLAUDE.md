@@ -232,7 +232,7 @@
 - **位置**: `d:\ai\latex\`
 - **项目定位**: 办公文档 AI 生产力平台（LaTeX + Word + 流程图 + PPT）
 - **核心模板**: `templates/cls/` — harryopo-base.sty + paper.cls + report.cls
-- **字体目录**: `templates/fonts/` — 18 个内嵌字体（方正+XITS+TeX Gyre Heros）
+- **字体目录**: `templates/fonts/` — 19 个内嵌字体（方正+XITS+TeX Gyre Heros+Latin Modern Mono+Courier）
 - **编译脚本**: `templates/build.ps1`
 - **转换 Skill**: `.trae/skills/harryopo-office/`
 - **记忆系统**: `memory/MEMORY.md`

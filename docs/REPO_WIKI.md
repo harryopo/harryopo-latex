@@ -205,15 +205,17 @@ flowchart LR
 
 ## 8. 技术债务、限制、TODO
 
-**已知缺陷**（2026-09-18 清理批次后）：
+**已知缺陷**（2026-09-20 护栏批次后）
+
+**公式字体护栏**：`office.py collect_output` 对一切 PDF 产物扫描嵌入字体，发现 CMR/CMMI/CMSY/CMEX 即打 `[WARN] 公式回退 Computer Modern`（unicode-math 链路失效信号，防 base.sty ifx 恒假类 bug 复发）：
 1. ✅ **已修** `convert_docx_to_tex` gov 参数链断裂 → DOCX→TeX `--gov` 现正常工作（签名补 gov + CLI 透传，E2E 出 gov PDF）
 2. ✅ **已修** `track_changes.py` 已注册为 `office.py revise` 子命令（与 redline 对称的改稿留痕入口）
-3. ⬜ 未处理 `mermaid_render.py` 与 `diagram_render.py` 存在近乎双生的 `find_blocks/code_hash/extract_and_render` 重复实现（低优先级）
+3. ⬜ 未处理 `mermaid_render.py` 与 `diagram_render.py` 存在近乎双生的 `find_blocks/code_hash/extract_and_render` 重复实现（低优先级，2026-09-20 评估：合并需回归两引擎全部调用方，暂缓）
 4. ✅ **已修** `verify_redline` comments 死字段已删；`gb9704_check` docstring `[--gov]` 虚宣传已改（实为从 documentclass 自动检测）
-5. ⬜ 未处理 `mermaid_render._ensure_puppeteer_path` 仅 Windows 硬编码，非 Win 失效；`fmt` 参数未参与 mmdc 命令行
+5. ✅ **已修**（2026-09-20）`_ensure_puppeteer_path` 补 macOS/Linux 候选 + PATH 探测；`fmt=png` 才传 `-w`；系统浏览器启动失败自动回退 mmdc 自带 Chromium（进程级记忆，实测 Edge Code:0 场景）
 6. ✅ **部分修** `diagram_render` 未使用 import（json/os/subprocess/tempfile）已删；self_check 缺失放行是设计保留
 7. ⬜ 未处理 `seed_builtins.py` 内置模板源路径硬编码 `d:\ai\latex\...`（跨机失效）
-8. ⬜ 未处理 CLAUDE.md 记"18 个内嵌字体"，实测 19 个（文档小偏差）
+8. ✅ **已修**（2026-09-20）CLAUDE.md 改 19 个（方正6+XITS7+Heros4+lmmono1+cour1）
 
 **限制（设计性）**：track_changes 单 run 匹配（跨 run 不支持）；docx_clean 反转义白名单外保持；registry latex schema 为 M2 占位（`tex-placeholder-v1`）；schema 类型推断全 string；marker/docling 网络阻塞判 Hold（HF Xet 存储墙）；Word 链路依赖本机 MS Office（Windows-only），LaTeX/PDF 链路跨平台；方正字体商用授权。
 

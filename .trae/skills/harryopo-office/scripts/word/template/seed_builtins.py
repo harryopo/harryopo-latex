@@ -19,15 +19,30 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.resolve()))
 from template_registry import register_template, load_manifest
 
+
+def _find_project_root():
+    """向上找含 templates/cls 的项目根（跳过 .trae 内副本，同 office.py 铁律）"""
+    here = Path(__file__).resolve()
+    for parent in here.parents:
+        if '.trae' in parent.parts:
+            continue
+        if (parent / 'templates' / 'cls').exists():
+            return parent
+    return None
+
+
+_ROOT = _find_project_root()
+_HERE = Path(__file__).parent.resolve()
+
 # (模板源文件, id, 显示名, 版本, 标签)
 BUILTINS = [
-    (r'd:\ai\latex\templates\paper\showcase-paper.tex',
+    (str(_ROOT / 'templates' / 'paper' / 'showcase-paper.tex') if _ROOT else '',
      'harryopo-paper', 'harryopo 论文模板', '4.0', ['学术', '论文']),
-    (r'd:\ai\latex\templates\report\showcase-report.tex',
+    (str(_ROOT / 'templates' / 'report' / 'showcase-report.tex') if _ROOT else '',
      'harryopo-report', 'harryopo 报告模板', '4.0', ['学术', '报告']),
-    (r'd:\ai\latex\templates\math-notes\example-note.tex',
+    (str(_ROOT / 'templates' / 'math-notes' / 'example-note.tex') if _ROOT else '',
      'harryopo-notes', 'harryopo 数理笔记模板', '1.0', ['笔记', '数学']),
-    (r'd:\ai\latex\.trae\skills\harryopo-office\scripts\word\template\examples\template.docx',
+    (str(_HERE / 'examples' / 'template.docx'),
      'docxtpl-example', 'docxtpl 模板填充示例', '1.0', ['示例', 'docx']),
 ]
 
