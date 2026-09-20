@@ -810,6 +810,22 @@ def cmd_live(args):
         sys.exit(result.returncode)
 
 
+def cmd_trace(args):
+    """trace 子命令：提取证据回溯（委托 evidence_trace.py）"""
+    script = SCRIPT_DIR / 'evidence_trace.py'
+    env = os.environ.copy()
+    env.setdefault('PYTHONIOENCODING', 'utf-8')
+    result = subprocess.run([sys.executable, str(script), args.pdf] + args.trace_args,
+                            capture_output=True, text=True, env=env,
+                            encoding='utf-8', errors='replace')
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
 def cmd_govcheck(args):
     """govcheck 子命令：GB/T 9704 公文格式合规检查（委托 gb9704_check.py）"""
     script = SCRIPT_DIR / 'gb9704_check.py'
@@ -988,6 +1004,13 @@ def main():
                              'edit <docx> --find A --replace B / '
                              'comment <docx> --find A --text 批注')
     p_live.set_defaults(func=cmd_live)
+
+    # trace 子命令（委托 evidence_trace.py：提取结果 → 源 PDF 页级证据回溯）
+    p_tr = sub.add_parser('trace', help='证据回溯：MD/论断逐段定位源 PDF 页码坐标（提取质检/引用溯源）')
+    p_tr.add_argument('pdf', help='源 PDF')
+    p_tr.add_argument('trace_args', nargs=argparse.REMAINDER,
+                      help='--md 提取结果.md / --claim "论断"（可多次） / -o 账本.json')
+    p_tr.set_defaults(func=cmd_trace)
 
     # govcheck 子命令（委托 gb9704_check.py：公文格式合规检查）
     p_gov = sub.add_parser('govcheck', help='GB/T 9704-2012 公文格式合规检查（.docx / .tex / .cls）')
