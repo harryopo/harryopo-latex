@@ -168,6 +168,7 @@ office.py render → Word / LaTeX / 演示 PDF（可选 --pdf / --template 按�
 | 生成框架图 | "框架图"、"架构图"、"流程图"、"时序图"、"画个图"、"配图" | **先提问是否生成 → diagram-design 生成（可多类型选择）→ 渲染插入三条链路** |
 | 修订审阅/改稿对比 | "红线稿"、"修订"、"改了哪里"、"对比两份word"、"改稿" | **redline：AI 初稿 vs 用户修改版 → 原生修订红线稿** |
 | AI 改稿留痕出二稿 | "改这几处"、"带修订"、"留痕改"、"二稿"、"逐条接受" | **revise：既有 docx 上以 w:ins/w:del 应用 AI 修改（track_changes）** |
+| Word 实时修订会话 | "实时改"、"在我打开的 Word 里改"、"加批注"、"接受修订" | **live：COM 附着打开中的 Word，留痕替换/批注/接受/拒绝（word_live）** |
 | 公文生成/公文格式检查 | "公文"、"红头文件"、"GB/T 9704"、"公文格式检查" | **render --gov（国标版式）→ govcheck 合规检查** |
 | 演示文稿/答辩/路演 PPT | "演示"、"答辩 PPT"、"路演"、"slides"、"汇报幻灯片" | **render --format slides --theme blue/dark/plain（beamer PDF 交付，含演讲备注）** |
 
@@ -228,6 +229,25 @@ office.py render → Word / LaTeX / 演示 PDF（可选 --pdf / --template 按�
 - 引擎：默认 wmlcomparer；`--engine docxdiff` 用结构感知对比（0.3.0+，不可用自动回退）
 - 也可直接调 `python redline.py <original> <modified> -o <out> [--author 名字]`
 - revise 的 `insert_after` 用 `anchor`/`text` 键，`replace`/`delete` 用 `find`/`replace` 键；replace 的 find 须落在同一 run 内（跨 run MVP 不支持，会跳过并提示）
+
+### Word 实时修订会话（live，方案书 v3 P2 word-mcp-live 适配层）
+
+**场景**：用户正开着 Word 改稿，AI 直接在这个会话里留痕改/加批注/接受拒绝——与 redline（离线对比）、revise（离线批量出二稿）构成三态改稿闭环。
+
+```
+python office.py live status  报告.docx                                    # 会话/修订/批注概览
+python office.py live edit    报告.docx --find "scrub" --replace "巡检清理"  # 修订模式全量替换（留痕）
+python office.py live comment 报告.docx --find "纠删码" --text "建议补充…"   # 首处命中加批注
+python office.py live accept|reject 报告.docx                               # 接受/拒绝全部修订
+```
+
+- 实现：`word/word_live.py`（pywin32 COM 本地后端）；**CLI 契约即适配层**——将来换 word-mcp-live 外部后端保持同命令不变
+- 附着策略：优先 `GetActiveObject` 连用户已开的 Word，绝不 Quit 用户实例；文档操作后保持打开（live 语义）
+- **COM 实测三坑（改 Word 自动化前必读）**：
+  1. `Range.Find` 经 COM 完全无视 Range 起点（每轮都返回文档头第一处命中，边搜边改会 200 次空转）——必须走 `Selection.Find + Collapse(wdCollapseEnd)` 逐轮推进收集位置，再**倒序**对 `Range.Text` 赋值替换
+  2. `Find.Execute(Replace=wdReplaceAll)` 会**无视修订模式直接静默替换**（违反留痕铁律）——修订留痕只能靠 TrackRevisions=True 时对 Range 赋值（生成原生 w:ins/w:del）
+  3. Microsoft 365 登录态下修订/批注作者固定取账号显示名，`Application.UserName` 赋值不生效——Save 后关文档释放文件锁 → OOXML 时间窗归因（只改 `w:date >= 操作时刻` 的标记，用户手工改稿不受影响）→ 重开文档同步内存态
+- 依赖：本机 MS Word + pywin32（Windows-only；COM 不可用退出码 2 明确报错，不静默降级）
 
 ### Word 生成流程（Markdown 中间态 → .docx）
 
