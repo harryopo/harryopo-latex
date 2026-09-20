@@ -1037,3 +1037,8 @@ web-editor 升级。
 - 归一化三板斧（假阳性 10→0，实测 31/31 全中、编造句正确 MISS）：① NFKC（PDF 数学斜体 𝑘 U+1D451 → k、全角→半角）② 只留汉字/字母/数字（弯直引号/破折号/括号全半角一律抹平）③ 行内公式剥壳不剥字（$k$→k；整个剥掉反而与 PDF 提取文本失配）
 - 切句陷阱：'.' 作句读会把 3.0/1.5 拦腰斩断——仅两侧非数字时才作边界
 - 教训：**方案书引用的外部项目必须逐一核实存在性再排期**，不存在的用自研顶位并显式记录
+
+### P2 收官：模板注册表 v2 样式保真校验（office.py style，2026-09-20）——P2 5/5 全部完成
+- `style_profile.py`：extract（sectPr 边距 + Normal/Heading1-3 → style-profile-v1 JSON）/ check（容差比对：字号±0.5pt、边距±0.05cm、字体精确）；实测学术自检✓公文自检✓交叉抓 18 项✓
+- 坑：python-docx `paragraph_format.line_spacing` 在固定值行距下返回 Length（EMU）——直存成 355600 巨数；须按 line_spacing_rule 结构化 {rule: exact/at_least, pt} vs {rule: multiple, value}
+- 至此方案书 v3 P2 五项全部落地：slides / 公文 Word / IDE 分发 / live 实时修订 / trace 证据回溯（Citra 自研替代）/ style 保真——P3 仅剩 Typst 通道、模板市场、pdfcpu、HermesOffice 对标（长期储备）

@@ -826,6 +826,22 @@ def cmd_trace(args):
         sys.exit(result.returncode)
 
 
+def cmd_style(args):
+    """style 子命令：模板样式档案提取/保真校验（委托 style_profile.py）"""
+    script = SCRIPT_DIR / 'style_profile.py'
+    env = os.environ.copy()
+    env.setdefault('PYTHONIOENCODING', 'utf-8')
+    result = subprocess.run([sys.executable, str(script)] + args.style_args,
+                            capture_output=True, text=True, env=env,
+                            encoding='utf-8', errors='replace')
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
 def cmd_govcheck(args):
     """govcheck 子命令：GB/T 9704 公文格式合规检查（委托 gb9704_check.py）"""
     script = SCRIPT_DIR / 'gb9704_check.py'
@@ -1011,6 +1027,12 @@ def main():
     p_tr.add_argument('trace_args', nargs=argparse.REMAINDER,
                       help='--md 提取结果.md / --claim "论断"（可多次） / -o 账本.json')
     p_tr.set_defaults(func=cmd_trace)
+
+    # style 子命令（委托 style_profile.py：模板样式档案 extract/check，注册表 v2 保真校验）
+    p_st = sub.add_parser('style', help='样式保真：style extract 模板.docx -o x.json / style check 产物.docx --profile x.json')
+    p_st.add_argument('style_args', nargs=argparse.REMAINDER,
+                      help='extract|check 及其参数')
+    p_st.set_defaults(func=cmd_style)
 
     # govcheck 子命令（委托 gb9704_check.py：公文格式合规检查）
     p_gov = sub.add_parser('govcheck', help='GB/T 9704-2012 公文格式合规检查（.docx / .tex / .cls）')

@@ -170,6 +170,7 @@ office.py render → Word / LaTeX / 演示 PDF（可选 --pdf / --template 按�
 | AI 改稿留痕出二稿 | "改这几处"、"带修订"、"留痕改"、"二稿"、"逐条接受" | **revise：既有 docx 上以 w:ins/w:del 应用 AI 修改（track_changes）** |
 | Word 实时修订会话 | "实时改"、"在我打开的 Word 里改"、"加批注"、"接受修订" | **live：COM 附着打开中的 Word，留痕替换/批注/接受/拒绝（word_live）** |
 | 证据回溯/提取质检 | "溯源"、"第几页"、"提取对不对"、"验证提取" | **trace：MD/论断逐段回源 PDF 定位页码坐标，输出证据账本 JSON** |
+| 样式保真校验 | "样式对不对"、"保真"、"和模板比对"、"提取样式档案" | **style：模板 extract 档案 JSON → 产物 check，边距/字体/字号/行距机器可比** |
 | 公文生成/公文格式检查 | "公文"、"红头文件"、"GB/T 9704"、"公文格式检查" | **render --gov（国标版式）→ govcheck 合规检查** |
 | 演示文稿/答辩/路演 PPT | "演示"、"答辩 PPT"、"路演"、"slides"、"汇报幻灯片" | **render --format slides --theme blue/dark/plain（beamer PDF 交付，含演讲备注）** |
 
@@ -263,6 +264,20 @@ python office.py trace 源.pdf --claim "某句论断" [--claim ...]
 - 归一化三板斧（实测假阳性清零：31/31 段落全中，编造句正确 MISS）：NFKC（数学斜体 𝑘→k、全角→半角）→ 只留汉字/字母/数字（抹平弯直引号/破折号/括号全半角）→ 公式剥壳不剥字（$k$→k）
 - 段落切句保护小数：'.' 仅在不夹数字时作句边界（3.0/1.5 不切断）；元信息行与独立公式块不参与回溯（渲染形态不同非丢失）
 - 退出码：0 全中 / 1 存在 MISS/partial（账本列出）/ 2 参数错误——可接入转换流水线做质量门
+
+### 样式保真校验（style，方案书 v3 P2 模板注册表 v2）
+
+**场景**：产物 docx 是否忠于模板样式（边距/字体/字号/行距），给注册表模板提供机器可比的样式真值。
+
+```
+python office.py style extract 模板.docx -o 样式档案.json     # 抽样式指纹（style-profile-v1）
+python office.py style check 产物.docx --profile 样式档案.json [--json]
+```
+
+- 实现：`style_profile.py`（python-docx 读 sectPr + Normal/Heading1-3 样式，含 rFonts eastAsia）
+- 档案 schema：`{margins:{top/bottom/left/right_cm}, styles:{body,h1,h2,h3}:{east_asia,ascii,size_pt,bold,line}}`；行距结构化区分 `multiple`（倍率）/`exact`/`at_least`（磅值）——固定行距 28 磅与 1.0 倍行距不再混淆（历史 bug：Length 直存成 355600 EMU 巨数）
+- 容差：字号 ±0.5pt、边距 ±0.05cm、行距 ±0.5pt/±0.15 倍；字体名精确匹配。退出码 0 一致 / 1 偏差清单 / 2 参数错
+- 实测锚点：学术档案自检 ✓、公文档案自检 ✓、学术档案×公文产物交叉校验正确抓出 18 项偏差（含 3.7cm 边距、16pt 仿宋、28 磅固定行距）
 
 ### Word 生成流程（Markdown 中间态 → .docx）
 
