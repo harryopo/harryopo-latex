@@ -1023,3 +1023,11 @@ web-editor 升级。
 - 公式号 "(.1)"：convert 产出全用 \section*，numberwithin 下节号恒 0 → \theequation 特判 section=0 只显式号
 - convert.py 参考文献裸 `&` 炸编译（Misplaced alignment tab）→ bibitem 过 parse_inline 统一转义
 - 审计结论：notes（mathnotes cls）/slides（slides cls）本就无条件加载 XITS Math，正常；Word OMML 用 Cambria Math（Word 数学引擎标配罗马衬线数学字体），不动；**重编 7 个含公式官方示例 + README 画廊**，全量验证 XITSMath 嵌入、CM 清零
+
+### P2 推进：word-mcp-live 适配层完成（office.py live，2026-09-20）
+- `word/word_live.py`：COM 本地后端实现 status/edit/comment/accept/reject 五命令（CLI 契约即适配层，外部 word-mcp-live 后端可替换）；与 redline/revise 构成三态改稿闭环
+- **Word COM 实测三坑（血泪，改 Word 自动化必读）**：
+  1. `Range.Find` 经 COM **完全无视 Range 起点**——每轮都返回文档头第一处命中；边搜边改 200 次空转同一坐标。正解：`Selection.Find + Collapse(0)` 逐轮推进收集位置，**倒序**赋值替换
+  2. `Find.Execute(Replace=wdReplaceAll)` **无视 TrackRevisions 静默替换**（违反留痕铁律的隐形杀手）。正解：TrackRevisions=True 时对 `Range.Text` 赋值才生成原生 w:ins/w:del
+  3. M365 登录态下修订/批注作者**固定取账号显示名**，`Application.UserName` 赋值不生效。正解：Save→关文档释放锁→OOXML 时间窗归因（w:date>=操作时刻）→重开
+- 护栏批次（0353c15）：collect_output 对一切 PDF 扫嵌入字体，CM 回退即 WARN；seed_builtins 去 d:\ai\latex 硬编码；mermaid 浏览器跨平台+失败回退 Chromium；CLAUDE.md 字体数 19

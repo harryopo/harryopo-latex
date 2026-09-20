@@ -794,6 +794,22 @@ def cmd_revise(args):
         sys.exit(result.returncode)
 
 
+def cmd_live(args):
+    """live 子命令：Word 实时修订会话（委托 word/word_live.py，COM 本地后端）"""
+    script = SCRIPT_DIR / 'word' / 'word_live.py'
+    env = os.environ.copy()
+    env.setdefault('PYTHONIOENCODING', 'utf-8')
+    result = subprocess.run([sys.executable, str(script)] + args.live_args,
+                            capture_output=True, text=True, env=env,
+                            encoding='utf-8', errors='replace')
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
 def cmd_govcheck(args):
     """govcheck 子命令：GB/T 9704 公文格式合规检查（委托 gb9704_check.py）"""
     script = SCRIPT_DIR / 'gb9704_check.py'
@@ -964,6 +980,14 @@ def main():
                        help='修订 JSON 数组，如 [{"op":"replace","find":"A","replace":"B"}]（op: replace/delete/insert_after）')
     p_rev.add_argument('--author', default='AI Review', help='修订作者名（默认 AI Review）')
     p_rev.set_defaults(func=cmd_revise)
+
+    # live 子命令（委托 word/word_live.py：COM 实时修订会话，与 redline/revise 构成三态改稿闭环）
+    p_live = sub.add_parser('live', help='Word 实时修订会话（附着打开中的 Word：修订替换/批注/接受/拒绝）')
+    p_live.add_argument('live_args', nargs=argparse.REMAINDER,
+                        help='word_live 参数: status|accept|reject <docx> / '
+                             'edit <docx> --find A --replace B / '
+                             'comment <docx> --find A --text 批注')
+    p_live.set_defaults(func=cmd_live)
 
     # govcheck 子命令（委托 gb9704_check.py：公文格式合规检查）
     p_gov = sub.add_parser('govcheck', help='GB/T 9704-2012 公文格式合规检查（.docx / .tex / .cls）')
