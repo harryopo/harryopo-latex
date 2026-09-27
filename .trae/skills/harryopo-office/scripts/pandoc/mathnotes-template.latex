@@ -12,10 +12,13 @@
 \setkeys{Gin}{width=0.85\textwidth,max width=\textwidth}
 
 $if(title)$
-\renewcommand{\mathtitle}{$title$}
+\renewcommand{\mathtitle}{$title$$if(subtitle)$\\[0.6em]{\Large\fzfs $subtitle$}$endif$}
 $endif$
 $if(author)$
 \renewcommand{\mathauthor}{$author$}
+$endif$
+$if(institute)$
+\renewcommand{\mathaffiliation}{$institute$}
 $endif$
 $if(date)$
 \date{$date$}

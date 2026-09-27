@@ -169,9 +169,14 @@ def ensure_placeholder_figures(target_dir, md_file):
         else:
             target = target_dir / img_name
         if not target.exists():
-            img = Image.new('RGB', (800, 400), '#F0F0F0')
-            img.save(str(target))
-            print(f'  [占位] {target.name}')
+            src = Path(md_file).parent / img_path
+            if src.is_file():
+                shutil.copy2(str(src), str(target))
+                print(f'  [复制] {target.name}')
+            else:
+                img = Image.new('RGB', (800, 400), '#F0F0F0')
+                img.save(str(target))
+                print(f'  [占位] {target.name}')
 
 
 _CM_MATH_RE = re.compile(r'^CM(R|MI|SY|EX)\d{2}$')
@@ -365,6 +370,65 @@ def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False,
     return None
 
 
+_NOTES_META_RE = re.compile(r'^>\s*(副标题|作者|单位|学校|日期)\s*[：:]\s*(.+)$')
+_NOTES_H_NUM_RE = re.compile(r'^(#{1,4})\s*[一二三四五六七八九十百]+、\s*(.+)$')
+_NOTES_SUB_NUM_RE = re.compile(r'^(#{2,4})\s*\d+(?:\.\d+)*[.、]\s*(.+)$')
+
+
+def _yaml_escape(v):
+    return '"' + v.replace('\\', '\\\\').replace('"', '\\"') + '"'
+
+
+def prep_notes_md(md_file, work_dir):
+    """notes 链路预处理：第一个 `# ` 主标题与其后的 `> 副标题/作者/单位/日期`
+    引用块抽成 pandoc YAML（喂封面 \mathtitle/\\mathauthor/\\mathaffiliation），
+    并剥掉标题手动编号——harryopo-mathnotes 自动编号「一、」「1.1」，不剥会双重编号。
+    识别不到该结构（或已有 YAML）则原样返回。"""
+    text = Path(md_file).read_text(encoding='utf-8')
+    if text.lstrip().startswith('---'):
+        return md_file
+    lines = text.splitlines()
+    meta = {}
+    out = []
+    i, n = 0, len(lines)
+    while i < n:
+        s = lines[i].strip()
+        if not meta.get('title') and s.startswith('# ') and not out:
+            meta['title'] = s[2:].strip()
+            i += 1
+            while i < n:
+                t = lines[i].strip()
+                if not t:
+                    i += 1
+                    continue
+                m = _NOTES_META_RE.match(t)
+                if not m:
+                    break
+                key = m.group(1)
+                val = m.group(2).strip()
+                if key == '副标题':
+                    meta['subtitle'] = val
+                elif key == '作者':
+                    meta['author'] = val
+                elif key in ('单位', '学校'):
+                    meta['institute'] = val
+                else:
+                    meta['date'] = val
+                i += 1
+            continue
+        m = _NOTES_H_NUM_RE.match(s) or _NOTES_SUB_NUM_RE.match(s)
+        out.append(f'{m.group(1)} {m.group(2)}' if m else lines[i])
+        i += 1
+    if 'title' not in meta:
+        return md_file
+    fm = ['---'] + [f'{k}: {_yaml_escape(meta[k])}'
+                    for k in ('title', 'subtitle', 'author', 'institute', 'date')
+                    if k in meta] + ['---']
+    dst = Path(work_dir) / (Path(md_file).stem + '-notes-src.md')
+    dst.write_text('\n'.join(fm) + '\n' + '\n'.join(out), encoding='utf-8')
+    return dst
+
+
 def render_notes(md_file, output_dir, out_stem=None):
     """链路3: MD → LaTeX PDF (math-notes)"""
     print('\n=== 链路3: MD → PDF (math-notes) ===')
@@ -376,13 +440,16 @@ def render_notes(md_file, output_dir, out_stem=None):
     # Step 1: MD → TEX（Pandoc 优先，纯 Python md2latex 回退）
     pandoc_exe = shutil.which('pandoc')
     if pandoc_exe:
+        src_md = prep_notes_md(md_file, output_dir)
         ok, out, err = run(
-            [pandoc_exe, str(md_file),
+            [pandoc_exe, str(src_md),
              f'--template={PANDOC_TEMPLATE}',
              f'--lua-filter={PANDOC_LUA}',
              '--standalone', '-o', str(tex_file)],
             label='pandoc'
         )
+        if src_md != md_file:
+            Path(src_md).unlink(missing_ok=True)
     else:
         # 回退：math-notes/md2latex.py（纯 Python 引擎，无外部依赖）
         md2latex = NOTES_DIR / 'md2latex.py'
