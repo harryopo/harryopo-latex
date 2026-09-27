@@ -533,6 +533,7 @@ python office.py ide [--dest 别的项目根]
 
 #### 第4步：生成（diagram-design 流程）
 
+0. **品牌皮肤（项目绑定）**：项目根 `.diagram-design` marker 声明 `profile: harryopo-blue` → 有效样式表读 `~/.diagram-design/profiles/harryopo-blue.md`（品牌 ink `#1A202C` / accent `#2B6CB0` / link `#1A365D`，paper 暖灰 `#F7F6F4`；`default.md` 为出厂快照可 reset）。marker 优先直读 profile，**不得把皮肤覆盖回安装目录的 style-guide.md**
 1. **读规范**：加载 `skills/diagram-design/SKILL.md` + 对应 `references/type-*.md`（按图类型选），先确认 type/size/复杂预算
 2. **写 HTML**：复制 `skills/diagram-design/assets/template.html`（或 `-dark`/`-full`）为底，按规范手写 SVG：
    - **语义 token**：`paper` 底 / `ink` 文字 / `muted` 次级 / `accent` 焦点色（≤2 个元素）；**中文环境字体栈必须补 `'Microsoft YaHei'`** fallback（模板原字体 Geist/Instrument Serif 无中文）
