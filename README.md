@@ -10,7 +10,6 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue?logo=windows)]()
 [![XeLaTeX](https://img.shields.io/badge/XeLaTeX-TeX%20Live%20%2F%20TinyTeX-008080)]()
 [![Office](https://img.shields.io/badge/MS%20Office-COM%20Automation-D83B01?logo=microsoftoffice)]()
-[![Docs](https://img.shields.io/badge/文档-docs%2Fplans-8A2BE2)](docs/plans/)
 [![English](https://img.shields.io/badge/English-README.en.md-success)](README.en.md)
 
 `AI 只产出结构化数据 → 模板引擎保真渲染` — 绝不让 AI 直接生成 .docx/.pdf 二进制
@@ -129,10 +128,7 @@ harryopo-office/
 | 文档 | 说明 |
 |---|---|
 | [SKILL.md](.trae/skills/harryopo-office/SKILL.md) | Skill 完整说明（触发词/主流程/全部约定） |
-| [方案书 v3](docs/plans/2026-08-30-office-super-skill-v3.md) | 架构与路线图（P0/P1 已全部落地） |
-| [调研报告](docs/research/) | 四轮开源方案调研（MCP 生态/生成转换/中文公文/修订审阅） |
 | [示例产物](output/examples/README.md) | 六份示例的重新生成命令与说明 |
-| [CLAUDE.md](CLAUDE.md) | Agent 协作规则 + 40+ 条踩坑警示 |
 
 ## 🙏 致谢
 

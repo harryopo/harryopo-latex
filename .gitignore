@@ -61,3 +61,15 @@ output/*
 # office.py 渲染副产物（e2e 转换 tex/pdf，不入库）
 templates/**/*-e2e.tex
 templates/**/*-e2e.pdf
+
+# 个人开发材料（2026-09-30 出库，仅本地保留）
+/蒸馏区/
+/docs/*
+!/docs/assets/
+/memory/
+/.learnings/
+/CLAUDE.md
+/test-e2e/
+/test-e2e-v2/
+/test-mineru-output/
+/测试区/
