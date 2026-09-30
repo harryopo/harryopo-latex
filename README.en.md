@@ -67,6 +67,9 @@ python -m playwright install chromium          # diagram PNG rendering
 # 2) One command: Markdown → Word + PDF
 python .trae/skills/harryopo-office/scripts/office.py render mydoc.md --format all
 
+# 2.5) Self-check (run after editing templates or on a new machine; exits 1 on problems)
+python .trae/skills/harryopo-office/scripts/office.py doctor
+
 # 3) Official-document mode (GB/T 9704)
 python .trae/skills/harryopo-office/scripts/office.py render notice.md --format paper --gov
 python .trae/skills/harryopo-office/scripts/office.py govcheck notice-paper.tex
@@ -90,9 +93,10 @@ python .trae/skills/harryopo-office/scripts/word/track_changes.py draft.docx v2.
 harryopo-office/
 ├── SKILL.md                    # trigger words + the full document workflow + conventions
 ├── scripts/
-│   ├── office.py               # unified entry (11 subcommands):
+│   ├── office.py               # unified entry (12 subcommands):
 │   │                           #   render / template / diagram / redline / revise / live
-│   │                           #   trace / style / govcheck / ide / info
+│   │                           #   trace / style / govcheck / ide / info / doctor
+│   ├── doctor.py               #   self-check: cls drift / required segments / toolchain / privacy
 │   ├── convert.py              #   MD → LaTeX (paper/report/notes/slides, incl. --gov)
 │   ├── tex2md.py               #   LaTeX → MD (reverse lane, feeds the Word renderer)
 │   ├── md2latex.py             #   MD → LaTeX pure-Python fallback engine (no deps)
@@ -132,8 +136,6 @@ request → ①AI writes MD intermediate → ②user reviews → ③diagram sugg
 | Doc | Description |
 |---|---|
 | [SKILL.md](.trae/skills/harryopo-office/SKILL.md) | Full skill reference (triggers / workflow / conventions) |
-| [Plan v3](docs/plans/2026-08-30-office-super-skill-v3.md) | Architecture & roadmap (P0/P1/P2 shipped, P3 backlog) |
-| [Research](docs/research/) | Four rounds of open-source surveys (MCP / generation / Chinese docs / revisions) |
 | [Examples](output/examples/README.md) | Regeneration commands for the six showcase documents |
 | [REPO_WIKI](docs/REPO_WIKI.md) | Repo knowledge base: capability list / API table / tech debt / reuse guide |
 

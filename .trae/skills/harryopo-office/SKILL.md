@@ -1,6 +1,6 @@
 ---
 name: "harryopo-office"
-description: "harryopo 办公文档超级 skill：Word / LaTeX 全格式。Word：Markdown 中间态 → 公文/学术 .docx（方正/开源字体一键切换，原生自动目录、OMML 数学公式、表格/图片/注释/参考文献规范排版）。LaTeX：论文/报告/笔记 PDF，支持从 Markdown/Word 自动转换，或手写 .tex。单双栏、蓝/黑主题、方正字体、XITS 数学、三线表。内置图表融合：diagram-design 编辑级图表（39 类型：架构/流程/时序/泳道/ER/桑基等）+ Mermaid 流程图自动渲染插入双链路。中文排版护栏：标点全角化 + 空格清理（text_norm.py，双引擎入口自动清洗）。演示文稿：harryopo-slides beamer 三主题（blue 学术/dark 路演/plain 商务）MD 自动转 16:9 PDF，含演讲备注与三线表公式。修订审阅双向留痕：redline 红线稿 + revise 改稿留痕。触发词：写word、生成word、word文档、docx、公文模板、学术论文word、word转换、latex、论文、报告、PDF、tex、md转latex、word转latex、docx转pdf、markdown转tex、文档转换、架构图、流程图、时序图、框架图、画个图、配图、diagram-design、演示文稿、答辩、路演、幻灯片、slides、红线稿、修订。"
+description: "harryopo 办公文档超级 skill：Word / LaTeX 全格式。Word：Markdown 中间态 → 公文/学术 .docx（方正/开源字体一键切换，原生自动目录、OMML 数学公式、表格/图片/注释/参考文献规范排版）。LaTeX：论文/报告/笔记 PDF，支持从 Markdown/Word 自动转换，或手写 .tex。单双栏、蓝/黑主题、方正字体、XITS 数学、三线表。内置图表融合：diagram-design 编辑级图表（39 类型：架构/流程/时序/泳道/ER/桑基等）+ Mermaid 流程图自动渲染插入双链路。中文排版护栏：标点全角化 + 空格清理（text_norm.py，双引擎入口自动清洗）。演示文稿：harryopo-slides beamer 三主题（blue 学术/dark 路演/plain 商务）MD 自动转 16:9 PDF，含演讲备注与三线表公式。修订审阅三态闭环：redline 红线稿 + revise 改稿留痕 + live 实时修订会话。环境自检：doctor（cls 双源漂移/必含段/工具链/隐私护栏，FAIL 退出码 1）。触发词：写word、生成word、word文档、docx、公文模板、学术论文word、word转换、latex、论文、报告、PDF、tex、md转latex、word转latex、docx转pdf、markdown转tex、文档转换、架构图、流程图、时序图、框架图、画个图、配图、diagram-design、演示文稿、答辩、路演、幻灯片、slides、红线稿、修订。"
 ---
 # harryopo-office
 
@@ -173,6 +173,27 @@ office.py render → Word / LaTeX / 演示 PDF（可选 --pdf / --template 按�
 | 样式保真校验 | "样式对不对"、"保真"、"和模板比对"、"提取样式档案" | **style：模板 extract 档案 JSON → 产物 check，边距/字体/字号/行距机器可比** |
 | 公文生成/公文格式检查 | "公文"、"红头文件"、"GB/T 9704"、"公文格式检查" | **render --gov（国标版式）→ govcheck 合规检查** |
 | 演示文稿/答辩/路演 PPT | "演示"、"答辩 PPT"、"路演"、"slides"、"汇报幻灯片" | **render --format slides --theme blue/dark/plain（beamer PDF 交付，含演讲备注）** |
+| 环境自检/模板不同步/排障 | "自检"、"体检"、"环境检查"、"模板不同步"、"公文模式失效"、"公式字体不对" | **doctor：cls 双源漂移 + 必含段 + 工具链 + 隐私护栏，有 FAIL 退出码 1** |
+
+### 环境自检（doctor）—— 改模板后 / 换机器后必跑
+
+```bash
+python office.py doctor              # 人类可读报告
+python office.py doctor --json       # 机器可读（AI 消费）
+python office.py doctor --skip-privacy  # 跳过 git 跟踪检查
+```
+
+五类检查，**任一 FAIL 即 exit 1**（可接 CI）：
+
+| 检查类 | 断言 | 典型症状 |
+|---|---|---|
+| **cls 双源同步** | 6 份 cls/mathnotes 副本与项目根 sha256 一致 | 改了 `templates/cls/` 却没同步 skill 内嵌副本 → 拷走后公文模式/公式字体失效 |
+| **cls 必含段** | `paper.cls` 含 `\if@govmode`；`base.sty` 含 `\ifnum\harryopo@nomath=0`；`slides.cls` 含 `\LoadClass{ctexbeamer}` | 缺段时**编译仍成功但结果静默错误**（如 `\ifx` 恒假 → XITS Math 永不加载，公式回退 Computer Modern） |
+| 关键路径 | 10 个必需目录/文件 + 两份字体数均为 19 | skill 装到新机器后目录不全 |
+| 工具链 | xelatex/pandoc/mmdc/浏览器 + 5 个 Python 依赖 | 换机器后缺依赖，链路静默降级 |
+| 隐私护栏 | 蒸馏区·memory·.learnings·CLAUDE.md·简历·测试区·`.qoder` 未被 git 跟踪 | 个人材料被误 `git add` |
+
+> **AI 使用建议**：用户报"公文模式失效""公式字体不对""拷到别的机器不能用"时，**先跑 doctor 定位**，不要凭猜测改代码。改完 `templates/` 后也必须重跑确认。
 
 ### GB/T 9704 公文模式（--gov）与格式合规检查（govcheck）
 

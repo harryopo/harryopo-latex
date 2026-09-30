@@ -1023,6 +1023,28 @@ def cmd_info(args):
         print('Pillow:    未安装!')
 
 
+def cmd_doctor(args):
+    """doctor 子命令：自检 + 防回归护栏（委托 doctor.py）
+
+    与 info 的区别：info 只打印环境，doctor 做断言——cls 双源漂移、
+    必含段缺失、敏感目录被误跟踪都会判 FAIL 并 exit 1，可接 CI。
+    """
+    script = SCRIPT_DIR / 'doctor.py'
+    argv = [sys.executable, str(script)]
+    if args.skip_privacy:
+        argv.append('--skip-privacy')
+    if args.json:
+        argv.append('--json')
+    result = subprocess.run(argv, capture_output=True, text=True,
+                            encoding='utf-8', errors='replace')
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog='office',
@@ -1121,6 +1143,12 @@ def main():
     # info 子命令
     p_info = sub.add_parser('info', help='打印环境信息')
     p_info.set_defaults(func=cmd_info)
+
+    # doctor 子命令（自检 + 防回归护栏，委托 doctor.py）
+    p_doctor = sub.add_parser('doctor', help='自检：cls 双源漂移 / 必含段 / 工具链 / 隐私护栏')
+    p_doctor.add_argument('--skip-privacy', action='store_true', help='跳过 git 跟踪检查')
+    p_doctor.add_argument('--json', action='store_true', help='输出 JSON（供 AI 消费）')
+    p_doctor.set_defaults(func=cmd_doctor)
 
     args = parser.parse_args()
     if not args.command:

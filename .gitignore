@@ -63,9 +63,16 @@ templates/**/*-e2e.tex
 templates/**/*-e2e.pdf
 
 # 个人开发材料（2026-09-30 出库，仅本地保留）
+# 注意：不能用 `/docs/*` —— 它排除的是目录本身，git 不会下降到目录内，
+# 后续 `!` 例外对目录内的文件一律无效（assets 画廊图当年就是这样"例外失败"的）。
+# 正确做法：只逐条排除要挡的路径，别整体排除 docs/。
 /蒸馏区/
-/docs/*
-!/docs/assets/
+/docs/plans/
+/docs/research/
+/docs/*.md
+# 知识库必须入库（README 与 SKILL.md 都链它）。注意：注释要单独一行，
+# 写在 `!` 模式后面会被 git 当成模式的一部分。
+!/docs/REPO_WIKI.md
 /memory/
 /.learnings/
 /CLAUDE.md
@@ -73,6 +80,10 @@ templates/**/*-e2e.pdf
 /test-e2e-v2/
 /test-mineru-output/
 /测试区/
+
+# 入库的 docs 内容：
+#   docs/assets/       README 效果展示画廊图
+#   docs/REPO_WIKI.md  AI 协作知识库（能力清单/API/技术债/复用指引）
 
 # 工具本地配置（不入库）
 /.qoder/

@@ -67,6 +67,9 @@ python -m playwright install chromium          # 图表 PNG 渲染
 # 2) 一键渲染：一份 Markdown → Word + PDF
 python .trae/skills/harryopo-office/scripts/office.py render 我的文档.md --format all
 
+# 2.5) 环境自检（改模板后 / 换机器后必跑，有问题 exit 1）
+python .trae/skills/harryopo-office/scripts/office.py doctor
+
 # 3) 公文模式（GB/T 9704）
 python .trae/skills/harryopo-office/scripts/office.py render 通知.md --format paper --gov
 python .trae/skills/harryopo-office/scripts/office.py govcheck 通知-paper.tex   # 合规自检
@@ -90,9 +93,10 @@ python .trae/skills/harryopo-office/scripts/word/track_changes.py 初稿.docx �
 harryopo-office/
 ├── SKILL.md                    # 触发词 + 文档生成主流程 + 全部约定（AI 读这一个文件就够）
 ├── scripts/
-│   ├── office.py               # 统一入口（11 子命令）：
+│   ├── office.py               # 统一入口（12 子命令）：
 │   │                           #   render / template / diagram / redline / revise / live
-│   │                           #   trace / style / govcheck / ide / info
+│   │                           #   trace / style / govcheck / ide / info / doctor
+│   ├── doctor.py               #   自检：cls 双源漂移 / 必含段 / 工具链 / 隐私护栏（FAIL→exit 1）
 │   ├── convert.py              #   MD → LaTeX（paper/report/notes/slides 四类型，含 --gov 公文模式）
 │   ├── tex2md.py               #   LaTeX → MD（反向链路，供 Word 渲染复用）
 │   ├── md2latex.py             #   MD → LaTeX 纯 Python 回退引擎（无外部依赖）
@@ -149,8 +153,6 @@ harryopo-office/
 |---|---|
 | [SKILL.md](.trae/skills/harryopo-office/SKILL.md) | Skill 完整说明（触发词/主流程/全部约定） |
 | [示例产物](output/examples/README.md) | 六份示例的重新生成命令与说明 |
-| [方案书 v3](docs/plans/2026-08-30-office-super-skill-v3.md) | 架构与路线图（P0/P1/P2 已收官，P3 储备） |
-| [调研报告](docs/research/) | 四轮开源方案深度调研（解析 / 生成 / 中文文档 / 修订审阅） |
 | [REPO_WIKI](docs/REPO_WIKI.md) | 全仓知识库：能力清单 / API 表 / 技术债 / 复用指引 |
 
 ## 🙏 致谢
