@@ -50,14 +50,17 @@ SKILL_DIR = SCRIPT_DIR.parent                          # .../harryopo-office/
 def _find_project_root():
     """从 skill 目录向上查找包含 templates/ 的目录。
     必须跳过 .trae 内的目录：skill 自带的 templates/ 副本会抢先命中，
-    导致 cls/字体/编译目录错误锚定到 skill 内副本。"""
+    导致 cls/字体/编译目录错误锚定到 skill 内副本。
+
+    找不到项目根时回退到 skill 自身（README 承诺的"整个目录拷走即用"场景）：
+    此时 templates/ 用的是 skill 内嵌分发件，且已随包携带 cls 与 fonts。"""
     for parent in [SKILL_DIR] + list(SKILL_DIR.parents):
         if '.trae' in parent.parts:
             continue
         if (parent / 'templates' / 'cls').exists():
             return parent
-    # 回退：假设标准结构 .../project_root/.trae/skills/harryopo-office/
-    return SKILL_DIR.parents[2]  # .../project_root/
+    print('[WARN] 未找到项目根 templates/，回退使用 skill 自带模板（自包含模式）')
+    return SKILL_DIR
 
 PROJECT_ROOT = _find_project_root()
 TEMPLATES = PROJECT_ROOT / 'templates'
@@ -339,6 +342,7 @@ def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False,
 
     # Step 2: 复制到 templates/paper/ 编译
     compile_tex = PAPER_DIR / f'{stem}-e2e.tex'
+    PAPER_DIR.mkdir(parents=True, exist_ok=True)
     shutil.copy2(str(tex_file), str(compile_tex))
 
     # Step 2.5: 复制图表图片（mermaid / super-diagram）到编译目录（如果有）
@@ -380,8 +384,8 @@ def _yaml_escape(v):
 
 
 def prep_notes_md(md_file, work_dir):
-    """notes 链路预处理：第一个 `# ` 主标题与其后的 `> 副标题/作者/单位/日期`
-    引用块抽成 pandoc YAML（喂封面 \mathtitle/\\mathauthor/\\mathaffiliation），
+    r"""notes 链路预处理：第一个 `# ` 主标题与其后的 `> 副标题/作者/单位/日期`
+    引用块抽成 pandoc YAML（喂封面 \mathtitle/\mathauthor/\mathaffiliation），
     并剥掉标题手动编号——harryopo-mathnotes 自动编号「一、」「1.1」，不剥会双重编号。
     识别不到该结构（或已有 YAML）则原样返回。"""
     text = Path(md_file).read_text(encoding='utf-8')
@@ -467,6 +471,7 @@ def render_notes(md_file, output_dir, out_stem=None):
 
     # Step 2: 复制到 templates/math-notes/ 编译
     compile_tex = NOTES_DIR / f'{stem}-e2e.tex'
+    NOTES_DIR.mkdir(parents=True, exist_ok=True)
     shutil.copy2(str(tex_file), str(compile_tex))
 
     # Step 2.5: 复制图表图片（mermaid / super-diagram）到编译目录（如果有）
@@ -514,6 +519,7 @@ def render_slides(md_file, output_dir, out_stem=None, theme='blue'):
 
     # Step 2: 复制到 templates/slides/ 编译（字体 Path=../fonts/ 相对编译 cwd）
     compile_tex = SLIDES_DIR / f'{stem}-e2e.tex'
+    SLIDES_DIR.mkdir(parents=True, exist_ok=True)
     shutil.copy2(str(tex_file), str(compile_tex))
 
     # Step 2.5: 图表图片 + 占位图

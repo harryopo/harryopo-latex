@@ -59,16 +59,19 @@ WORD_DIR = SCRIPT_DIR.parent                          # .../scripts/word/
 
 
 def _find_project_root():
-    """从脚本目录向上查找项目根（包含 templates/cls 且不在 .trae skill 内）"""
+    """从脚本目录向上查找项目根（包含 templates/cls 且不在 .trae skill 内）。
+    找不到时回退到 skill 自身（README 承诺的"整个目录拷走即用"场景）。"""
     for parent in [SCRIPT_DIR] + list(SCRIPT_DIR.parents):
         # 跳过 skill 目录内的 templates/ 副本（.trae 下），锚定真实项目根
         if (parent / 'templates' / 'cls').exists() and '.trae' not in parent.parts:
             return parent
-    return SCRIPT_DIR.parents[3]  # 回退：.../project_root/
+    print('[WARN] 未找到项目根 templates/，回退使用 skill 自带模板（自包含模式）')
+    return SCRIPT_DIR.parents[2]   # .../harryopo-office/
 
 
 PROJECT_ROOT = _find_project_root()
 REGISTRY_DIR = PROJECT_ROOT / 'templates' / 'registry'
+REGISTRY_DIR.mkdir(parents=True, exist_ok=True)
 MANIFEST = REGISTRY_DIR / 'manifest.json'
 
 MANIFEST_VERSION = '1.0'

@@ -21,14 +21,17 @@ from template_registry import register_template, load_manifest
 
 
 def _find_project_root():
-    """向上找含 templates/cls 的项目根（跳过 .trae 内副本，同 office.py 铁律）"""
+    """向上找含 templates/cls 的项目根（跳过 .trae 内副本，同 office.py 铁律）。
+    找不到时回退到 skill 自身（自包含模式），此时内置 latex 模板源可能不在包内，
+    main() 会逐条 [SKIP] 提示而非静默失败。"""
     here = Path(__file__).resolve()
     for parent in here.parents:
         if '.trae' in parent.parts:
             continue
         if (parent / 'templates' / 'cls').exists():
             return parent
-    return None
+    print('[WARN] 未找到项目根 templates/，回退使用 skill 自带模板（自包含模式）')
+    return here.parents[2]   # .../harryopo-office/
 
 
 _ROOT = _find_project_root()
@@ -36,11 +39,11 @@ _HERE = Path(__file__).parent.resolve()
 
 # (模板源文件, id, 显示名, 版本, 标签)
 BUILTINS = [
-    (str(_ROOT / 'templates' / 'paper' / 'showcase-paper.tex') if _ROOT else '',
+    (str(_ROOT / 'templates' / 'paper' / 'showcase-paper.tex'),
      'harryopo-paper', 'harryopo 论文模板', '4.0', ['学术', '论文']),
-    (str(_ROOT / 'templates' / 'report' / 'showcase-report.tex') if _ROOT else '',
+    (str(_ROOT / 'templates' / 'report' / 'showcase-report.tex'),
      'harryopo-report', 'harryopo 报告模板', '4.0', ['学术', '报告']),
-    (str(_ROOT / 'templates' / 'math-notes' / 'example-note.tex') if _ROOT else '',
+    (str(_ROOT / 'templates' / 'math-notes' / 'example-note.tex'),
      'harryopo-notes', 'harryopo 数理笔记模板', '1.0', ['笔记', '数学']),
     (str(_HERE / 'examples' / 'template.docx'),
      'docxtpl-example', 'docxtpl 模板填充示例', '1.0', ['示例', 'docx']),
