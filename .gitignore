@@ -73,3 +73,6 @@ templates/**/*-e2e.pdf
 /test-e2e-v2/
 /test-mineru-output/
 /测试区/
+
+# 工具本地配置（不入库）
+/.qoder/

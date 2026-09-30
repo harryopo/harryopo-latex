@@ -46,8 +46,12 @@
   ```
 
 - **🖼️ 内置图表引擎** — 在 MD 里写 ` ```mermaid ` 代码块或 diagram-design 规范，管线自动渲染 PNG、按"图注在下方 + `> 注：` 注释"规范插入；ASCII 字符画会被运行时护栏拦截
-- **✏️ 改稿循环双向留痕** — `redline`（用户改了什么：两份 docx diff 出红线稿）+ `track_changes`（AI 改了什么：二稿带原生 w:ins/w:del），全程 Word 原生修订标记
-- **🏛️ GB/T 9704 公文模式** — `--gov` 一键国标版式（页边距 37/35/28/26mm、三号仿宋、28 磅行距、层级标题字体），`govcheck` 十项合规自检
+- **📽️ 演示文稿链路** — `--format slides --theme blue/dark/plain`，MD → beamer 16:9 PDF（复用同一套字体/公式/三线表组件，含 `\note{}` 演讲备注与双页备注导出）
+- **✏️ 改稿循环三态闭环** — `redline`（用户改了什么：两份 docx diff 出红线稿）+ `revise`（AI 改了什么：二稿带原生 w:ins/w:del）+ `live`（实时：附着打开中的 Word 做替换/批注/接受/拒绝）
+- **🔍 证据回溯** — `office.py trace` 逐段把 MD 论断定位回源 PDF 的页码与坐标（NFKC + 字符集归一 + 公式剥壳，规避数学斜体字符造成的假阳性）
+- **🎯 样式保真校验** — `office.py style extract/check`：导出模板样式画像（边距 + 标题层级）并对产物做容差比对，捕捉"套了模板但格式走样"
+- **🧰 IDE 配置一键分发** — `office.py ide` 生成 `.vscode/settings.json`：LaTeX Workshop xelatex 配方 + TEXINPUTS + 方正预览 CSS（幂等，不覆盖用户自定义）
+- **🏛️ GB/T 9704 公文模式** — `--gov` 一键国标版式（页边距 37/35/28/26mm、三号仿宋、28 磅行距、层级标题字体），LaTeX 与 Word 双格式，`govcheck` 十项合规自检
 - **🔧 harryopo-build-mcp** — LaTeX 编译诊断闭环 MCP：编译 → 结构化错误（错误码+行号+修复建议）→ 修复 → 重编译，附 7 项 .tex 静态预检
 - **🇨🇳 中文排版护栏** — text_norm 统一清洗 AI 产物的英文标点/中英空格（公文风格），代码块/公式/URL 自动保护
 
@@ -86,18 +90,34 @@ python .trae/skills/harryopo-office/scripts/word/track_changes.py 初稿.docx �
 harryopo-office/
 ├── SKILL.md                    # 触发词 + 文档生成主流程 + 全部约定（AI 读这一个文件就够）
 ├── scripts/
-│   ├── office.py               # 统一入口：render / redline / govcheck / diagram / template / info
-│   ├── convert.py              #   MD → LaTeX（含 --gov 公文模式）
-│   ├── word/md_to_word.py      #   MD → Word（OMML 公式/三线表/自动目录）
-│   ├── word/track_changes.py   #   修订输出（AI 改稿留痕）
+│   ├── office.py               # 统一入口（11 子命令）：
+│   │                           #   render / template / diagram / redline / revise / live
+│   │                           #   trace / style / govcheck / ide / info
+│   ├── convert.py              #   MD → LaTeX（paper/report/notes/slides 四类型，含 --gov 公文模式）
+│   ├── tex2md.py               #   LaTeX → MD（反向链路，供 Word 渲染复用）
+│   ├── md2latex.py             #   MD → LaTeX 纯 Python 回退引擎（无外部依赖）
+│   ├── text_norm.py            #   中文排版护栏（标点全角化 + CJK 空格清理，双引擎共用）
+│   ├── word/md_to_word.py      #   MD → Word（OMML 公式/三线表/自动目录/公文模式）
+│   ├── word/track_changes.py   #   修订输出（AI 改稿留痕，w:ins/w:del）
+│   ├── word/word_live.py       #   Word COM 实时修订会话（status/edit/comment/accept/reject）
 │   ├── redline.py              #   红线稿 diff（用户改稿留痕）
+│   ├── evidence_trace.py       #   证据回溯（MD 逐段定位源 PDF 页码坐标）
+│   ├── style_profile.py        #   样式保真校验（extract/check，style-profile-v1）
+│   ├── docx_clean.py           #   DOCX 清洗 + 表格回填
+│   ├── html_table_to_latex.py  #   HTML 表格 → LaTeX（保留 colspan/rowspan）
 │   ├── mineru_cli.py           #   PDF/DOCX 深解析（MinerU）
-│   ├── latex_diagnostics.py    #   LaTeX 诊断库（日志解析 + 7 项预检）
+│   ├── diagram_render.py       #   图表块调度（双引擎 + ASCII 字符画拦截）
+│   ├── diagram_design_render.py#   diagram-design HTML → PNG
+│   ├── mermaid_render.py       #   Mermaid → PNG（跨平台浏览器回退）
+│   ├── latex_diagnostics.py    #   LaTeX 诊断库（日志解析 + L01-L07 静态预检）
 │   ├── build_mcp.py            #   harryopo-build-mcp（编译诊断闭环 MCP 服务）
-│   └── gb9704_check.py         #   公文格式合规检查
+│   ├── gb9704_check.py         #   公文格式合规检查
+│   └── pandoc/                 #   notes 链路 pandoc 模板 + lua filter
 ├── skills/diagram-design/      # 编辑级图表规范（39 类型）
-└── templates/                  # 自包含 LaTeX 模板（cls + 19 字体，TEXINPUTS 免安装）
+└── templates/                  # 自包含 LaTeX 模板（4 cls + flushend + 19 字体，TEXINPUTS 免安装）
 ```
+
+> 五条输出链路均可**脱离本仓库独立运行**（把整个目录拷到任意机器即可）：`word` / `paper` / `notes` / `report` / `slides`。
 
 **给 AI 的推荐工作流**（SKILL.md 已固化）：
 
@@ -129,6 +149,9 @@ harryopo-office/
 |---|---|
 | [SKILL.md](.trae/skills/harryopo-office/SKILL.md) | Skill 完整说明（触发词/主流程/全部约定） |
 | [示例产物](output/examples/README.md) | 六份示例的重新生成命令与说明 |
+| [方案书 v3](docs/plans/2026-08-30-office-super-skill-v3.md) | 架构与路线图（P0/P1/P2 已收官，P3 储备） |
+| [调研报告](docs/research/) | 四轮开源方案深度调研（解析 / 生成 / 中文文档 / 修订审阅） |
+| [REPO_WIKI](docs/REPO_WIKI.md) | 全仓知识库：能力清单 / API 表 / 技术债 / 复用指引 |
 
 ## 🙏 致谢
 

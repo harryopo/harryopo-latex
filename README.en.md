@@ -46,8 +46,12 @@
   ```
 
 - **🖼️ Built-in diagram engine** — write a ` ```mermaid ` block or diagram-design spec in your MD; the pipeline renders PNG and inserts it with caption-below + note conventions. ASCII-art diagrams are blocked by a runtime guard.
-- **✏️ Two-way revision tracking** — `redline` (what the user changed: diff two docx into a native redline draft) + `track_changes` (what the AI changed: second draft with native w:ins/w:del marks)
-- **🏛️ GB/T 9704 official-document mode** — `--gov` applies the national standard layout (margins 37/35/28/26mm, size-3 FangSong body, 28pt leading, hierarchical heading fonts); `govcheck` runs a 10-item compliance audit
+- **📽️ Presentation lane** — `--format slides --theme blue/dark/plain`: MD → beamer 16:9 PDF, reusing the same font / equation / booktabs components, with `\note{}` speaker notes and two-up note export
+- **✏️ Three-state revision loop** — `redline` (what the user changed: diff two docx into a native redline draft) + `revise` (what the AI changed: second draft with native w:ins/w:del) + `live` (real-time: attach to an open Word doc for replace / comment / accept / reject)
+- **🔍 Evidence tracing** — `office.py trace` locates each MD claim back to a page and coordinate in the source PDF (NFKC + charset normalisation + formula unwrapping to suppress false positives from math-italic characters)
+- **🎯 Style-fidelity check** — `office.py style extract/check` exports a template style profile (margins + heading levels) and compares a product against it, catching "template applied but formatting drifted"
+- **🧰 One-command IDE setup** — `office.py ide` writes `.vscode/settings.json`: a LaTeX Workshop xelatex recipe, TEXINPUTS, and FangZheng preview CSS (idempotent, preserves your custom recipes)
+- **🏛️ GB/T 9704 official-document mode** — `--gov` applies the national standard layout (margins 37/35/28/26mm, size-3 FangSong body, 28pt leading, hierarchical heading fonts) in both LaTeX and Word; `govcheck` runs a 10-item compliance audit
 - **🔧 harryopo-build-mcp** — LaTeX compile-diagnosis loop as an MCP server: build → structured errors (code + line + fix suggestion) → fix → rebuild, plus a 7-item .tex static lint
 - **🇨🇳 Chinese typography guard** — text_norm normalizes AI-generated half-width punctuation and CJK spacing, with code blocks / math / URLs protected
 
@@ -86,18 +90,34 @@ python .trae/skills/harryopo-office/scripts/word/track_changes.py draft.docx v2.
 harryopo-office/
 ├── SKILL.md                    # trigger words + the full document workflow + conventions
 ├── scripts/
-│   ├── office.py               # unified entry: render / redline / govcheck / diagram / template
-│   ├── convert.py              #   MD → LaTeX (incl. --gov official mode)
-│   ├── word/md_to_word.py      #   MD → Word (OMML equations / booktabs / native TOC)
-│   ├── word/track_changes.py   #   tracked-changes output (AI edit trail)
+│   ├── office.py               # unified entry (11 subcommands):
+│   │                           #   render / template / diagram / redline / revise / live
+│   │                           #   trace / style / govcheck / ide / info
+│   ├── convert.py              #   MD → LaTeX (paper/report/notes/slides, incl. --gov)
+│   ├── tex2md.py               #   LaTeX → MD (reverse lane, feeds the Word renderer)
+│   ├── md2latex.py             #   MD → LaTeX pure-Python fallback engine (no deps)
+│   ├── text_norm.py            #   Chinese typography guardrails (shared by both engines)
+│   ├── word/md_to_word.py      #   MD → Word (OMML / booktabs / native TOC / gov mode)
+│   ├── word/track_changes.py   #   tracked-changes output (AI edit trail, w:ins/w:del)
+│   ├── word/word_live.py       #   Word COM live revision session (edit/comment/accept/reject)
 │   ├── redline.py              #   redline diff (user edit trail)
+│   ├── evidence_trace.py       #   evidence tracing (locate claims in the source PDF)
+│   ├── style_profile.py        #   style-fidelity check (extract/check, style-profile-v1)
+│   ├── docx_clean.py           #   DOCX cleanup + table backfill
+│   ├── html_table_to_latex.py  #   HTML tables → LaTeX (preserves colspan/rowspan)
 │   ├── mineru_cli.py           #   deep PDF/DOCX parsing (MinerU)
-│   ├── latex_diagnostics.py    #   LaTeX diagnostics (log parsing + 7-item lint)
+│   ├── diagram_render.py       #   diagram block dispatcher (dual engine + ASCII guard)
+│   ├── diagram_design_render.py#   diagram-design HTML → PNG
+│   ├── mermaid_render.py       #   Mermaid → PNG (cross-platform browser fallback)
+│   ├── latex_diagnostics.py    #   LaTeX diagnostics (log parsing + L01-L07 lint)
 │   ├── build_mcp.py            #   harryopo-build-mcp (compile-diagnosis MCP server)
-│   └── gb9704_check.py         #   official-document compliance audit
+│   ├── gb9704_check.py         #   official-document compliance audit
+│   └── pandoc/                 #   notes-lane pandoc template + lua filter
 ├── skills/diagram-design/      # editorial diagram specs (39 types)
-└── templates/                  # self-contained LaTeX templates (cls + 19 fonts, no install)
+└── templates/                  # self-contained LaTeX templates (4 cls + flushend + 19 fonts)
 ```
+
+> All five output lanes — `word` / `paper` / `notes` / `report` / `slides` — run **standalone**, outside this repo. Copy the directory anywhere and it works.
 
 **Recommended AI workflow** (solidified in SKILL.md):
 
@@ -112,10 +132,10 @@ request → ①AI writes MD intermediate → ②user reviews → ③diagram sugg
 | Doc | Description |
 |---|---|
 | [SKILL.md](.trae/skills/harryopo-office/SKILL.md) | Full skill reference (triggers / workflow / conventions) |
-| [Plan v3](docs/plans/2026-08-30-office-super-skill-v3.md) | Architecture & roadmap (P0/P1 fully shipped) |
+| [Plan v3](docs/plans/2026-08-30-office-super-skill-v3.md) | Architecture & roadmap (P0/P1/P2 shipped, P3 backlog) |
 | [Research](docs/research/) | Four rounds of open-source surveys (MCP / generation / Chinese docs / revisions) |
 | [Examples](output/examples/README.md) | Regeneration commands for the six showcase documents |
-| [CLAUDE.md](CLAUDE.md) | Agent rules + 40+ documented pitfalls |
+| [REPO_WIKI](docs/REPO_WIKI.md) | Repo knowledge base: capability list / API table / tech debt / reuse guide |
 
 ## 🙏 Acknowledgements
 
