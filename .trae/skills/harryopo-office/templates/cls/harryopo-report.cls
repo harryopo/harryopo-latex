@@ -41,61 +41,42 @@
 % 第四部分：页眉页脚（无横线）
 % ============================================================
 
-% 正文页眉：左=日期 · 章标题（楷体），右=页码
-\fancypagestyle{fancy}{
-    \fancyhf{}
-    \fancyhead[L]{\small\fzkt\@date\quad\ifx\leftmark\@empty\else\textperiodcentered\quad\leftmark\fi}
-    \fancyhead[R]{\small\thepage}
-    \renewcommand{\headrulewidth}{0pt}
-}
-% 封面/章首页：左=日期，右=页码
-\fancypagestyle{plain}{
-    \fancyhf{}
-    \fancyhead[L]{\small\fzkt\@date}
-    \fancyhead[R]{\small\thepage}
-    \renewcommand{\headrulewidth}{0pt}
-}
-\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
-\pagestyle{fancy}
+% 使用基础包中的统一页眉配置
+\harryopo@setup@header{chaptermark}
+% 报告模板覆盖章节标记格式（在统一配置之后，否则会被覆盖）
+\renewcommand{\chaptermark}[1]{\markboth{第\thechapter 章\quad #1}{}}
 
 % ============================================================
-% 第五部分：章标题格式（带编号）
+% 第五部分：章标题格式
 % ============================================================
 
-% 章编号：保持 ctexrep 默认的中文章节名（第一章、第二章……）
-% 节以下编号：使用阿拉伯数字（1.1、1.1.1、1.1.1.1），不继承中文章号
-\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
-\renewcommand{\thesubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-% 章标题：大号小标宋 + 深色，格式"第一章 标题"
+% 章标题：大号小标宋 + 深色
 \titleformat{\chapter}[hang]
     {\huge\fzxb\color{DarkColor}}
-    {\thechapter}{1em}{}
+    {第\thechapter 章}{1em}{}
 \titlespacing{\chapter}{0pt}{20pt}{16pt}
 
-% 节标题：方正大标宋 + 蓝色，格式"1.1 标题"
+% 节标题：方正大标宋 + 蓝色
 \titleformat{\section}
     {\Large\fzdbs\color{MainColor}}
     {\thesection}{1em}{}
 \titlespacing{\section}{0pt}{16pt}{10pt}
 
-% 小节标题：方正黑体 + 辅色，格式"1.1.1 标题"
+% 小节标题：黑体 + 辅色
 \titleformat{\subsection}
-    {\large\bfseries\fzht\color{SubColor}}
+    {\large\bfseries\color{SubColor}}
     {\thesubsection}{1em}{}
 \titlespacing{\subsection}{1em}{12pt}{6pt}
 
-% 小小节标题：方正楷体，格式"1.1.1.1 标题"
+% 小小节标题：方正楷体
 \titleformat{\subsubsection}
     {\normalsize\fzkt\color{MainColor!80!black}}
     {\thesubsubsection}{1em}{}
 \titlespacing{\subsubsection}{2em}{8pt}{4pt}
 
 % 括号式小标题：\subhead{标题名}
-% 注意：不再使用 \noindent，保证后续段落正常段首缩进 2 字符
 \newcommand{\subhead}[1]{%
-    \par\vspace{6pt}%
+    \par\vspace{6pt}\noindent
     {\bfseries\fzht\color{SubColor}（#1）}\hspace{0.5em}%
 }
 
@@ -245,12 +226,8 @@
 \newcommand{\printfunding}{%
     \ifdefined\@fundproject\relax
         \ifx\@fundproject\@empty\else
-            \vspace{0.5cm}\par
-            \begingroup
-                \small
-                \parindent=2em\relax
-                \indent{\color{gray}\@fundproject}\par
-            \endgroup
+            \vspace{0.5cm}
+            \noindent{\small\color{gray}\@fundproject\par}
         \fi
     \fi
 }

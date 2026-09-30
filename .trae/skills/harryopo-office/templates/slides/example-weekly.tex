@@ -1,0 +1,63 @@
+% harryopo-slides 示例：商务汇报（plain 主题）
+\documentclass[plain]{harryopo-slides}
+\title[2026 H1 工作汇报]{办公文档 AI 平台 · 2026 上半年工作汇报}
+\author{文档技术组 张三}
+\institute{示例集团 信息技术部}
+\date{2026年9月18日}
+\begin{document}
+
+\begin{frame}[plain]\titlepage\end{frame}
+
+\begin{frame}{目录}
+\tableofcontents
+\note{三分钟内讲完，问题环节多留时间。}
+\end{frame}
+
+\section{本期成果}
+\begin{frame}{关键交付}
+\begin{itemize}
+  \item 文档平台三链路全部上线：Word / 论文 PDF / 笔记 PDF
+  \item 修订审阅闭环：红线稿 + 改稿留痕双向能力（\alert{P0 全量收官}）
+  \item GB/T 9704 公文模式：格式合规检查 9/9 通过
+  \item 全面代码审查：修复 17 项稳定性问题
+\end{itemize}
+\end{frame}
+
+\begin{frame}{效能数据}
+\begin{table}
+\centering
+\begin{tabular}{lccc}
+\toprule
+指标 & Q1 & Q2 & 环比 \\
+\midrule
+月均生成文档 & 320 & 1450 & \alert{+353\%} \\
+渲染成功率 & 96.1\% & 99.4\% & +3.3pp \\
+平均出稿耗时 & 41s & 12s & $-71\%$ \\
+\bottomrule
+\end{tabular}
+\caption{平台效能半年对比（表1）}
+\end{table}
+\note{出稿耗时下降主要归功于解析路由分级。}
+\end{frame}
+
+\section{问题与对策}
+\begin{frame}{遗留问题}
+\begin{block}{现状风险}
+模板注册表跨机部署依赖硬编码路径；mermaid 渲染在非 Windows 平台浏览器探测失效。
+\end{block}
+\textbf{对策}：路径探测统一收敛到 office.py 常量；P2 建立平台适配层。
+\end{frame}
+
+\section{下步计划}
+\begin{frame}{2026 H2 计划}
+\begin{enumerate}
+  \item 演示文稿链路（本次汇报即其产出验证）
+  \item PPT/Excel 输出立项评估
+  \item 模板市场与权限体系预研
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[plain]
+\begin{center}\vspace{2em}{\LARGE 谢谢，请指示}\end{center}
+\end{frame}
+\end{document}

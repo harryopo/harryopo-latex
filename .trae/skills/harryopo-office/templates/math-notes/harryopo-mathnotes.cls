@@ -93,12 +93,18 @@
   }
 }
 
-\setmathfont{XITSMath}[
-    Extension = .otf,
-    UprightFont = *-Regular,
-    BoldFont = *-Bold,
-    Path = ./fonts/
-]
+\IfFontExistsTF{XITSMath-Regular.otf}{%
+  \setmathfont{XITSMath-Regular.otf}[
+    Path=./fonts/,
+    BoldFont=XITSMath-Bold.otf,
+  ]
+}{%
+  \IfFontExistsTF{XITS Math}{%
+    \setmathfont{XITS Math}
+  }{%
+    \setmathfont{TeX Gyre Termes Math}
+  }
+}
 
 \everymath{\displaystyle}       % 行内公式 Displaystyle（笔记风格）
 
