@@ -1035,6 +1035,8 @@ def cmd_doctor(args):
         argv.append('--skip-privacy')
     if args.json:
         argv.append('--json')
+    if args.stats:
+        argv.append('--stats')
     result = subprocess.run(argv, capture_output=True, text=True,
                             encoding='utf-8', errors='replace')
     if result.stdout:
@@ -1145,9 +1147,11 @@ def main():
     p_info.set_defaults(func=cmd_info)
 
     # doctor 子命令（自检 + 防回归护栏，委托 doctor.py）
-    p_doctor = sub.add_parser('doctor', help='自检：cls 双源漂移 / 必含段 / 工具链 / 隐私护栏')
+    p_doctor = sub.add_parser('doctor', help='自检：语法/cls 双源/必含段/工具链/隐私/文档时效（FAIL→exit 1）')
     p_doctor.add_argument('--skip-privacy', action='store_true', help='跳过 git 跟踪检查')
     p_doctor.add_argument('--json', action='store_true', help='输出 JSON（供 AI 消费）')
+    p_doctor.add_argument('--stats', action='store_true',
+                          help='只输出仓库画像统计（更新文档数字用，不要手写）')
     p_doctor.set_defaults(func=cmd_doctor)
 
     args = parser.parse_args()

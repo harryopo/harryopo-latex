@@ -1,7 +1,8 @@
 # Repo Wiki — d:\ai\latex 办公文档 AI 生产力平台
 
-> 生成方式：AI 全仓遍历（679 个入库文件，核心为 19 个 Python 脚本 ~7900 行 + LaTeX 模板体系 + 68 篇文档）
-> 最后验证：2026-09-30 | 覆盖：P2 收官 + skill 自包含修复
+> 生成方式：AI 全仓遍历（561 个入库文件，核心为 28 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~16773 行 + LaTeX 模板体系 + 91 篇文档）
+> 数字来源：`office.py doctor --stats` 实时统计，**不要手写**——手写的数字必然漂移（本次修正前此处声明 679 文件/19 脚本/~7900 行，实际已到 561/44/16773）。`office.py doctor` 会校验本行 5 项数字与实际是否一致，不一致报 WARN。
+> 最后验证：2026-09-30 | 覆盖：P2 收官 + skill 自包含修复 + doctor 护栏
 > 本文件是 AI 协作知识库：新需求开发前先检索第 4/9/10 章，优先复用，防止重复造轮子。
 
 ## 1. 项目概述
@@ -19,37 +20,43 @@
 - 修订：python-redlines（内嵌 .NET Docxodus）+ 自研 track_changes（ECMA-376 w:ins/w:del 直构）
 - 服务化：harryopo-build-mcp（MCP 2.x stdio）；Word/PPT COM（pywin32，仅 Windows）
 - 运行：Windows + Python 3.10+（当前 Anaconda 3.13）+ TinyTeX + pandoc 3.11；无服务端部署形态，纯本地 CLI/skill
+- 自检：office.py doctor（52 项断言，FAIL→exit 1，可接 CI）
 
-**阶段**：开发中（方案书 v3 P0/P1 已收官，P2 待启动）。
+**阶段**：**维护期**（方案书 v3 P0 3/3 · P1 6/6 · P2 5/5 全部收官；P3 四项未启动）。
 
 ## 2. 仓库目录结构
 
 ```
 d:\ai\latex\
 ├── README.md / README.en.md        # 中英双语门面 + 效果 gallery（docs/assets 6 类截图）
-├── CLAUDE.md                       # AI 协作规则：13 硬规则 + 30 踩坑警示（总 43 条）
-├── memory/MEMORY.md                # 项目全史记忆（923 行/36 节，每批次追加，含经验沉淀）
+├── CLAUDE.md                       # AI 协作规则：13 硬规则 + 踩坑警示（本地未入库）
+├── memory/MEMORY.md                # 项目全史记忆（本地未入库，每批次追加）
 ├── .trae/skills/harryopo-office/   # ★ 核心 skill（自包含，可整体拷贝分发）
-│   ├── SKILL.md                    #   流程定义：8 步主流程 + 8 硬约束 + 11 触发词路由
+│   ├── SKILL.md                    #   流程定义：主流程 + 硬约束 + 触发词路由
 │   ├── scripts/                    #   全部功能脚本（见 §3/§4）
-│   │   ├── office.py               #     ★ 统一主入口（6 子命令总编排）
+│   │   ├── office.py               #     ★ 统一主入口（12 子命令总编排）
+│   │   ├── doctor.py               #     自检护栏（52 项断言，FAIL→exit 1）
 │   │   ├── convert.py md2latex.py tex2md.py docx_clean.py mineru_cli.py
 │   │   │   html_table_to_latex.py text_norm.py                    # 转换/清洗引擎
 │   │   ├── redline.py gb9704_check.py                              # 修订/公文
-│   │   ├── build_mcp.py latex_diagnostics.py                       # MCP 编译诊断
+│   │   ├── build_mcp.py latex_diagnostics.py evidence_trace.py     # MCP 诊断/证据回溯
+│   │   │   style_profile.py docx_template.py                       # 样式保真/模板填充
 │   │   ├── diagram_render.py diagram_design_render.py mermaid_render.py  # 图表
 │   │   ├── pandoc/                 #     mathnotes-template.latex + mathnotes-table.lua
 │   │   ├── word/                   #     md_to_word.py / word_template_engine.py /
-│   │   │                             track_changes.py / configs/×2 / template/ 五件套
+│   │   │                             track_changes.py / word_live.py / configs/×2 / template/ 五件套
 │   │   └── word/template/          #     docxtpl 子 skill + 模板注册表
 │   ├── skills/diagram-design/      #   内嵌图表规范（117+ HTML 示例、53 references、self_check）
+│   ├── fonts/                      #   19 文件：方正 FZ*JW×6 + XITS + texgyreheros 等
 │   └── templates/                  #   skill 自带 LaTeX 模板副本（编译以项目根为准，见 §9）
 ├── templates/                      # 项目根 LaTeX 模板体系（编译单一事实来源）
-│   ├── cls/                        #   base.sty v4.2 / paper.cls v4.0(含 gov) / report.cls / flushend.sty
+│   ├── cls/                        #   base.sty v4.2 / paper.cls v4.0(含 gov) / report.cls
+│   │                               #   slides.cls v1.0(beamer) / flushend.sty
 │   ├── fonts/                      #   19 文件：方正 FZ*JW×6 + XITS + texgyreheros 等
 │   ├── paper/ report/              #   编译工作目录（office.py/build_mcp 拷入 *-e2e.tex）
+│   ├── slides/                     #   演示示例（example-{defense,pitch,weekly}）
 │   ├── math-notes/                 #   独立体系（mathnotes.cls v1.0，不加载 base.sty）
-│   ├── registry/                   #   模板注册表 manifest.json（4 内置模板 + schemas）
+│   ├── registry/                   #   模板注册表 manifest.json（5 内置模板 + schemas）
 │   ├── previews/                   #   agent-architecture.md（skill 内另有 5 示例+CSS）
 │   └── build.ps1                   #   编译脚本 v4.2（环境自检+TEXINPUTS+xelatex×3）
 ├── docs/plans/ (10) research/ (14) # 方案书 v1→v3 演进 + 全部调研报告
@@ -227,14 +234,30 @@ flowchart LR
 
 | 检查类 | 断言内容 | 对应债项 |
 |---|---|---|
+| **语法检查** | 28 个脚本在 `SyntaxWarning` 升级为异常的模式下 `ast.parse` —— 等价于"非法转义即失败" | 踩坑 27/31 |
 | cls 双源同步 | 6 份 cls/mathnotes 副本与项目根 sha256 一致（不一致报 FAIL 并给差异行数） | §8-10 |
 | cls 必含段 | `paper.cls` 含 `\if@govmode`、`base.sty` 含 `\ifnum\harryopo@nomath=0`（**两份都坏时也能独立报错**）、`slides.cls` 含 `\LoadClass{ctexbeamer}`、`base.sty` 含 tikz positioning | §8-9/10 |
 | 关键路径 | 10 个必需目录/文件存在 + 两份字体数均为 19 | — |
 | 工具链 | xelatex/pandoc/mmdc/系统浏览器 + 5 个 Python 依赖 | — |
 | 隐私护栏 | 蒸馏区·memory·.learnings·CLAUDE.md·简历·test-e2e·测试区·`.qoder` 确认未被 git 跟踪 | — |
 | gitignore 有效性 | 上述路径逐个 `git check-ignore` 确认**规则真的生效**（不只是"当前没文件被跟踪"） | — |
+| 文档时效 | REPO_WIKI 头部画像的入库文件数与实际一致（规范 4.4「过期自动降级」） | — |
 
-用法：`python .trae/skills/harryopo-office/scripts/office.py doctor [--json] [--skip-privacy]`；有 FAIL 时 **exit 1**，可直接接 CI/CI 前置钩子。当前基线：**50 OK / 0 WARN / 0 FAIL**。
+用法：
+```bash
+python .trae/skills/harryopo-office/scripts/office.py doctor [--json] [--skip-privacy]
+python .trae/skills/harryopo-office/scripts/office.py doctor --stats   # 只出仓库画像，供文档引用
+```
+有 FAIL 时 **exit 1**，可直接接 CI/CI 前置钩子。当前基线：**52 OK / 0 WARN / 0 FAIL**。
+
+**验收流程（对应通用规范 3.2 的五步）**——本项目无测试框架，用下列可执行命令替代：
+
+| 规范步骤 | 本项目落地 | 命令 |
+|---|---|---|
+| 1 语法检查 / 2 类型检查 | `doctor` 的语法检查（ast + SyntaxWarning-as-error） | `office.py doctor` |
+| 3 单元测试 | 无框架；靠"注入真 bug 验证护栏"替代 | 改护栏后手动注入验证 |
+| 4 集成验证 | 五链路实跑 + govcheck | `office.py render ... --format word,paper` / `govcheck` |
+| 5 回归检查 | doctor 全绿 + 产物基线比对 | `office.py doctor` |
 
 > ⚠️ **gitignore 的两个经典失效（2026-09-30 实际踩到，直接影响隐私）**：
 > 1. **目录级排除会让 `!` 例外失效**——`/docs/*` 排除的是 `docs` 目录本身，git 不会下降到目录内去评估后续规则，所以 `!/docs/assets/`、`!/docs/REPO_WIKI.md` 对目录内的文件**一律不生效**。当时 `docs/assets/` 画廊图能入库是**历史遗留**（文件早于规则入库），新文件会被无声挡掉。正确做法：别整体排除目录，逐条排除要挡的路径（`/docs/plans/`、`/docs/research/`、`/docs/*.md` + 例外）。

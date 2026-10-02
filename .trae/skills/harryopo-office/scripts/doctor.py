@@ -18,6 +18,7 @@ import re
 import shutil
 import subprocess
 import sys
+import warnings
 from pathlib import Path
 
 # ============================================================
@@ -271,17 +272,146 @@ def check_privacy(project_root: Path, rep: Report):
             rep.add(WARN, 'gitignore 有效性', 'git 不可用，跳过规则检查')
 
 
+def check_syntax(skill_dir: Path, rep: Report):
+    """规范 3.2 第 1-2 步：语法检查 + 类型检查（本项目无 linter/type checker，
+    用 ast.parse 在 SyntaxWarning 升级为异常的模式下手写这两项）。
+
+    `-W error::SyntaxWarning` 等价于把非法转义告警当错误——本项目历史上
+    多次踩到 `\\h` / `\\mathx` 这类非 raw docstring 与正则的非法转义
+    （CLAUDE.md 踩坑 27/31），靠默认告警容易被忽略。
+    """
+    import ast
+    scripts = sorted(p for p in (skill_dir / 'scripts').rglob('*.py')
+                     if '__pycache__' not in p.parts)
+    bad = []
+    for p in scripts:
+        try:
+            src = p.read_text(encoding='utf-8', errors='replace')
+            with warnings.catch_warnings():
+                warnings.simplefilter('error', SyntaxWarning)
+                ast.parse(src, filename=str(p))
+        except SyntaxWarning as e:
+            bad.append(f'{p.name}: 非法转义 {e.msg}')
+        except SyntaxError as e:
+            bad.append(f'{p.name}:{e.lineno}: {e.msg}')
+        except OSError as e:
+            bad.append(f'{p.name}: 读取失败 {e}')
+    if bad:
+        for b in bad:
+            rep.add(FAIL, '语法检查', b)
+    else:
+        rep.add(OK, '语法检查', f'{len(scripts)} 个脚本零 SyntaxWarning / SyntaxError')
+
+
+# ============================================================
+# 5. 仓库画像统计（供 REPO_WIKI 头部引用，避免手写数字漂移）
+# ============================================================
+
+def collect_stats(project_root: Path) -> dict:
+    """实时统计仓库画像。不手写、不缓存——文档引用这些数字时用
+    `office.py doctor --stats` 取当前值，杜绝"声明与实际脱节"。
+
+    py_files 拆两个口径，避免把参考仓库/工具脚本算进核心：
+    - py_core：harryopo-office skill 自身（自研产品代码）
+    - py_other：其余（shared 几何库、tikz converter、参考资料脚本等）
+    """
+    stats = {'tracked_files': 0, 'py_core': 0, 'py_other': 0,
+             'py_lines': 0, 'md_files': 0}
+    try:
+        out = subprocess.run(['git', '-C', str(project_root), 'ls-files'],
+                             capture_output=True, text=True,
+                             encoding='utf-8', errors='replace', timeout=30)
+        if out.returncode == 0:
+            files = [f for f in out.stdout.splitlines() if f.strip()]
+            stats['tracked_files'] = len(files)
+            stats['md_files'] = sum(1 for f in files if f.endswith('.md'))
+            for f in files:
+                if not f.endswith('.py'):
+                    continue
+                # 只统计入库文件，避免本地产物混入
+                if 'harryopo-office/scripts/' in f.replace('\\', '/'):
+                    stats['py_core'] += 1
+                else:
+                    stats['py_other'] += 1
+                p = project_root / f
+                try:
+                    stats['py_lines'] += len(
+                        p.read_text(encoding='utf-8', errors='replace').splitlines())
+                except OSError:
+                    pass
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return stats
+
+
+def render_stats_line(project_root: Path) -> str:
+    """生成 REPO_WIKI 头部那一行画像（可直接粘贴）"""
+    s = collect_stats(project_root)
+    return (f"> 生成方式：AI 全仓遍历（{s['tracked_files']} 个入库文件，"
+            f"核心为 {s['py_core']} 个 Python 脚本（skill 自研）"
+            f"+ {s['py_other']} 个辅助脚本，共 ~{s['py_lines']} 行 + "
+            f"LaTeX 模板体系 + {s['md_files']} 篇文档）")
+
+
+def check_stats_freshness(project_root: Path, rep: Report, wiki_rel='docs/REPO_WIKI.md'):
+    """时效标记检查（规范 4.4「过期信息自动降级为待核验」）：
+    逐个比对 Wiki 头部画像行里的每个数字与实际，不一致即 WARN。
+
+    四个数字全查而非只查文件数——`py_lines` 尤其易漂：改一次 doctor.py
+    自身行数就变。只查一个数字等于给假安全感。
+    """
+    wiki = project_root / wiki_rel
+    if not wiki.exists():
+        return
+    text = wiki.read_text(encoding='utf-8', errors='replace')
+    s = collect_stats(project_root)
+
+    # 声明值：（顺序固定）入库文件数 / skill 自研脚本数 / 辅助脚本数 / 行数 / 文档数
+    patterns = [
+        (r'（(\d+)\s*个入库文件', s['tracked_files'], '入库文件数'),
+        (r'核心为\s*(\d+)\s*个 Python 脚本', s['py_core'], 'skill 自研脚本数'),
+        (r'\+\s*(\d+)\s*个辅助脚本', s['py_other'], '辅助脚本数'),
+        (r'共\s*~(\d+)\s*行', s['py_lines'], 'Python 行数'),
+        (r'\+\s*(\d+)\s*篇文档', s['md_files'], '文档篇数'),
+    ]
+    missing, drift = [], []
+    for pat, actual, label in patterns:
+        m = re.search(pat, text)
+        if not m:
+            missing.append(label)
+            continue
+        claimed = int(m.group(1))
+        if claimed != actual:
+            drift.append(f'{label} 声明 {claimed} / 实际 {actual}（{actual - claimed:+d}）')
+
+    if missing:
+        rep.add(WARN, '文档时效',
+                f'{wiki_rel} 头部画像行缺字段：{"、".join(missing)}——'
+                f'用 `office.py doctor --stats` 取当前值整行替换')
+    if drift:
+        rep.add(WARN, '文档时效',
+                f'{wiki_rel} 头部画像已漂移：{"；".join(drift)}——'
+                f'用 `office.py doctor --stats` 取当前值整行替换')
+    if not missing and not drift:
+        rep.add(OK, '文档时效',
+                f'{wiki_rel} 头部画像 5 项全部与实际一致'
+                f'（{s["tracked_files"]} 文件 / {s["py_core"]}+{s["py_other"]} 脚本 / '
+                f'~{s["py_lines"]} 行 / {s["md_files"]} 文档）')
+
+
 # ============================================================
 # 入口
 # ============================================================
 
 def run_doctor(project_root: Path, skill_dir: Path, skip_privacy=False):
     rep = Report()
+    check_syntax(skill_dir, rep)
     check_paths(project_root, skill_dir, rep)
     check_cls_sync(project_root, skill_dir, rep)
     check_toolchain(rep)
     if not skip_privacy:
         check_privacy(project_root, rep)
+    check_stats_freshness(project_root, rep)
     return rep
 
 
@@ -290,11 +420,18 @@ def main():
     ap = argparse.ArgumentParser(description='harryopo-office 自检（环境 + 防回归护栏）')
     ap.add_argument('--skip-privacy', action='store_true', help='跳过 git 跟踪检查')
     ap.add_argument('--json', action='store_true', help='输出 JSON（供 AI 消费）')
+    ap.add_argument('--stats', action='store_true',
+                    help='只输出仓库画像统计（供文档引用，避免手写数字漂移）')
     args = ap.parse_args()
 
     here = Path(__file__).resolve()
     skill_dir = here.parent.parent
     project_root = _find_project_root(skill_dir)
+
+    if args.stats:
+        print(render_stats_line(project_root))
+        return 0
+
     rep = run_doctor(project_root, skill_dir, skip_privacy=args.skip_privacy)
 
     if args.json:
