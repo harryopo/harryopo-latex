@@ -66,6 +66,27 @@
     },
     {
       "manifest_version": "1.0",
+      "id": "harryopo-book",
+      "name": "harryopo 书籍模板",
+      "version": "1.0",
+      "format": "latex",
+      "category": "全局",
+      "engine": "harryopo-xelatex",
+      "source": "builtin",
+      "template_path": "latex/harryopo-book.tex",
+      "schema_ref": "",
+      "preview": "",
+      "placeholder_syntax": "tex-placeholder-v1",
+      "tags": [
+        "书籍",
+        "教材"
+      ],
+      "usage_count": 0,
+      "created_at": "2026-09-30",
+      "updated_at": "2026-09-30"
+    },
+    {
+      "manifest_version": "1.0",
       "id": "docxtpl-example",
       "name": "docxtpl 模板填充示例",
       "version": "1.0",

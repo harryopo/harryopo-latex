@@ -1014,6 +1014,84 @@ def assemble_slides(blocks: List[Tuple[str, str]], title: str, author: str,
     return "\n".join(lines)
 
 
+def assemble_book(blocks: List[Tuple[str, str]], title: str, author: str,
+                  date: str, subtitle: str, institute: str,
+                  abstract: str, dark: bool, nomath: bool = False,
+                  a5paper: bool = False) -> str:
+    """组装 harryopo-book .tex（书籍/教材：章级编号 + frontmatter 三段式）
+
+    实现策略：复用 assemble_report 的完整块渲染链（表格/代码/公式/引用/
+    图表 caption 逻辑约 90 行，复制一份必然与上游漂移），再对生成的 tex
+    做书籍化改写：
+      1. 换类名为 harryopo-book
+      2. \\chapter*/\\section*/\\subsection* 去星 → 恢复真实编号
+      3. 插入 \\frontmatter / \\mainmatter / \\backmatter 三段式
+      4. 摘要改用 \\bookabstract（book 类的书籍摘要命令）
+
+    与 report/paper 的差异根源：report/paper 隐藏编号是因为 convert 产出
+    只到 section 层级、编号会失真；书籍需要章内编号与交叉引用，故保留。
+    """
+    docopts = []
+    if dark:
+        docopts.append("dark")
+    if a5paper:
+        docopts.append("a5paper")
+    if nomath:
+        docopts.append("nomath")
+    optstr = ",".join(docopts)
+    head = (r"\documentclass[" + optstr + r"]{harryopo-book}") if optstr \
+        else r"\documentclass{harryopo-book}"
+
+    tex = assemble_report(blocks, title, author, date, subtitle, institute,
+                          abstract, dark, nomath)
+
+    # 1) 换类名 + 选项。
+    #    注意：report 输出的顺序是 \title…\date…\begin{document}，
+    #    \documentclass 在最前。直接删旧的再补新的会把 \documentclass
+    #    插到 \begin{document} 之后（LaTeX 报错），故必须替换首行。
+    m = re.search(r'^\\documentclass(\[[^\]]*\])?\{harryopo-report\}', tex, re.M)
+    if not m:
+        return tex  # 结构与预期不符，交由调用方报错而非静默产出坏文件
+    tex = tex[:m.start()] + head + tex[m.end():]
+
+    # 2) 去星恢复真实编号（书籍正文需章内编号体系）。
+    #    ⚠️ 同时剥掉 MD 里的手写编号：源文档普遍写 "## 1 引言"（隐藏编号
+    #    模式下由作者手工编号），而 book 走自动编号，不剥会渲染成
+    #    "第0章 1 引言"（实测目录与正文均出现重复编号）。
+    tex = tex.replace(r"\chapter*{", r"\chapter{")
+    tex = tex.replace(r"\section*{", r"\section{")
+    tex = tex.replace(r"\subsection*{", r"\subsection{")
+    # report 同时输出了 \addcontentsline，其中带同一手写编号，需一并剥
+    tex = re.sub(r'(\\addcontentsline\{toc\}\{chapter\}\{)\s*\d+(\.\d+)*\s*',
+                 r'\1', tex)
+    tex = re.sub(r'(\\addcontentsline\{toc\}\{section\}\{)\s*\d+(\.\d+)*\s*',
+                 r'\1', tex)
+    tex = re.sub(r'(\\addcontentsline\{toc\}\{subsection\}\{)\s*\d+(\.\d+)*\s*',
+                 r'\1', tex)
+    # 标题本体同样剥
+    tex = re.sub(r'(\\chapter\{)\s*\d+(\.\d+)*\s*', r'\1', tex)
+    tex = re.sub(r'(\\section\{)\s*\d+(\.\d+)*\s*', r'\1', tex)
+    tex = re.sub(r'(\\subsection\{)\s*\d+(\.\d+)*\s*', r'\1', tex)
+
+    # 3) 三段式：封面/目录走 frontmatter，正文起 mainmatter
+    tex = tex.replace(r"\maketitle", "\\frontmatter\n\\maketitle", 1)
+    tex = tex.replace(r"\tableofcontents",
+                      "\\tableofcontents\n\\mainmatter", 1)
+
+    # 4) 摘要改用书籍摘要命令。
+    #    \bookabstract{…} 是单参数命令，参数内不能有空行（空行会提前结束
+    #    段落 → "Paragraph ended before \bookabstract was closed"）。
+    #    report 的 abstract 环境允许空行，故先把内部空行压成单换行。
+    m_abs = re.search(r'\\begin\{abstract\}(.*?)\\end\{abstract\}', tex, re.S)
+    if m_abs:
+        body = re.sub(r'\n\s*\n+', ' ', m_abs.group(1)).strip()
+        tex = (tex[:m_abs.start()]
+               + r"\bookabstract{" + body + "}"
+               + tex[m_abs.end():])
+
+    return tex
+
+
 def convert_md_to_tex(
     md_path: str,
     tex_path: str,
@@ -1030,6 +1108,7 @@ def convert_md_to_tex(
     nomath: bool = False,
     gov: bool = False,
     theme: str = "blue",
+    a5paper: bool = False,
 ) -> str:
     """主编排：MD → LaTeX .tex"""
     with open(md_path, "r", encoding="utf-8") as f:
@@ -1102,6 +1181,10 @@ def convert_md_to_tex(
     if doc_type in ("report", "报告"):
         tex = assemble_report(blocks, title, author, date,
                              subtitle, institute, abstract, dark, nomath)
+    elif doc_type in ("book", "书", "书籍"):
+        tex = assemble_book(blocks, title, author, date,
+                            subtitle, institute, abstract, dark, nomath,
+                            a5paper=a5paper)
     elif doc_type == "slides":
         tex = assemble_slides(blocks, title, author, date,
                               subtitle, institute, abstract, theme)
@@ -1167,7 +1250,7 @@ def main():
         epilog="示例: python convert.py report.md --type paper --twocolumn"
     )
     parser.add_argument("input", help="输入文件路径 (.md / .docx)")
-    parser.add_argument("--type", choices=["paper", "report", "slides"], default="paper",
+    parser.add_argument("--type", choices=["paper", "report", "slides", "book"], default="paper",
                         help="目标文档类型（默认 paper；slides = beamer 演示 PDF）")
     parser.add_argument("--theme", choices=["blue", "dark", "plain"], default="blue",
                         help="演示主题（仅 slides：blue 学术 / dark 路演 / plain 商务）")

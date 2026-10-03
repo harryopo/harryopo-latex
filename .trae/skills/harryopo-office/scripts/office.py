@@ -69,6 +69,7 @@ FONTS_DIR = TEMPLATES / 'fonts'
 PAPER_DIR = TEMPLATES / 'paper'
 NOTES_DIR = TEMPLATES / 'math-notes'
 SLIDES_DIR = TEMPLATES / 'slides'
+BOOK_DIR = TEMPLATES / 'book'
 
 WORD_SCRIPT = SCRIPT_DIR / 'word' / 'md_to_word.py'
 CONVERT_SCRIPT = SCRIPT_DIR / 'convert.py'
@@ -553,6 +554,60 @@ def render_slides(md_file, output_dir, out_stem=None, theme='blue'):
 # 主入口
 # ============================================================
 
+def render_book(md_file, output_dir, out_stem=None, dark=False,
+                a5paper=False):
+    """链路5: MD → 书籍 PDF (harryopo-book / ctexbook)
+
+    与 render_slides 同构：convert.py --type book → templates/book/ 编译
+    → collect_output。xelatex 三遍（book 有目录与章起始页，需多遍收敛）。
+    """
+    print(f'\n=== 链路5: MD → PDF (book{"/a5" if a5paper else ""}) ===')
+    _ensure_tex_on_path()
+    stem = out_stem or md_file.stem
+    tex_file = output_dir / f'{stem}-book.tex'
+
+    # Step 1: MD → TEX（book 引擎）
+    cmd = [sys.executable, str(CONVERT_SCRIPT), str(md_file),
+           '--type', 'book', '-o', str(tex_file)]
+    if dark:
+        cmd.append('--dark')
+    ok, out, err = run(cmd, label='convert.py(book)')
+    if not ok:
+        print(f'  [失败] {err}')
+        return None
+
+    # Step 2: 复制到 templates/book/ 编译（字体 Path=../fonts/ 相对编译 cwd）
+    compile_tex = BOOK_DIR / f'{stem}-e2e.tex'
+    BOOK_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(str(tex_file), str(compile_tex))
+
+    # Step 2.5: 图表图片 + 占位图
+    src_figs = output_dir / 'figures'
+    if src_figs.exists():
+        dst_figs = BOOK_DIR / 'figures'
+        dst_figs.mkdir(exist_ok=True)
+        for f in src_figs.glob('*.png'):
+            shutil.copy2(str(f), str(dst_figs / f.name))
+    ensure_placeholder_figures(BOOK_DIR, md_file)
+
+    # Step 3: 编译（目录/章起始页需三遍收敛）
+    texinputs = f'{CLS_DIR}//;{FONTS_DIR}//;'
+    for i in range(3):
+        ok, out, err = run(
+            ['xelatex', '-interaction=nonstopmode', compile_tex.name],
+            cwd=BOOK_DIR, env_extra={'TEXINPUTS': texinputs},
+            check=False, label=f'xelatex #{i+1}'
+        )
+
+    pdf = BOOK_DIR / compile_tex.with_suffix('.pdf').name
+    final_pdf = output_dir / f'{stem}-book.pdf'
+    if pdf.exists() and pdf.stat().st_size > 5000:
+        collect_output(pdf, final_pdf)
+        return final_pdf
+    print('  [失败] PDF 未生成或过小')
+    return None
+
+
 def cmd_render(args):
     """render 子命令：渲染 MD 到多种格式"""
     # ---- 模板路由校验（优先）：按注册表模板决定渲染链路（v1 模板注册表）----
@@ -588,6 +643,12 @@ def cmd_render(args):
             if tpl['id'] == 'harryopo-notes':
                 if 'notes' not in formats:
                     formats.append('notes')
+            elif tpl['id'] == 'harryopo-book':
+                # 书籍链路（harryopo-book / ctexbook）。
+                # ⚠️ 必须显式加分支——否则会落到下面的 paper 分支，
+                # 把书籍模板静默渲染成论文。
+                if 'book' not in formats:
+                    formats.append('book')
             elif 'paper' not in formats:
                 formats.append('paper')
         elif tpl['format'] == 'docx':
@@ -785,6 +846,11 @@ def cmd_render(args):
     if 'slides' in formats:
         results['slides'] = render_slides(md_file, output_dir,
                                           out_stem=base_stem, theme=args.theme)
+    if 'book' in formats:
+        results['book'] = render_book(md_file, output_dir,
+                                      out_stem=base_stem,
+                                      dark=(args.theme == 'dark'),
+                                      a5paper=getattr(args, 'a5paper', False))
 
     # 汇总
     print('\n' + '=' * 50)
@@ -1058,9 +1124,13 @@ def main():
     p_render = sub.add_parser('render', help='渲染 MD 到多种格式')
     p_render.add_argument('input', help='输入 MD 文件路径')
     p_render.add_argument('--format', '-f', default='all',
-                          help='输出格式: word, paper, notes, slides, all (默认 all；slides 需显式)')
+                          help='输出格式: word, paper, notes, slides, book, all '
+                               '(默认 all；slides/book 需显式)')
     p_render.add_argument('--theme', default='blue', choices=['blue', 'dark', 'plain'],
-                          help='演示主题（仅 slides：blue 学术 / dark 路演 / plain 商务）')
+                          help='演示主题（仅 slides：blue 学术 / dark 路演 / plain 商务）；'
+                               'book 仅取 dark/blue')
+    p_render.add_argument('--a5paper', action='store_true',
+                          help='书籍用 A5 开本（仅 book）')
     p_render.add_argument('--config', '-c', default='fangzheng',
                           help='字体方案: fangzheng / opensource (默认 fangzheng)')
     p_render.add_argument('--output-dir', '-o', help='输出目录 (默认 MD 同级)')

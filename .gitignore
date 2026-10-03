@@ -62,6 +62,27 @@ output/*
 templates/**/*-e2e.tex
 templates/**/*-e2e.pdf
 
+# 自检样张编译产物（templates/book/selftest-book.* 只入库 .tex 源文件）
+templates/book/selftest-book.pdf
+templates/book/selftest-book.toc
+templates/book/selftest-book.out
+templates/book/selftest-book.lof
+templates/book/selftest-book.lot
+templates/book/build*.log
+# book 调试截图（渲染抽帧用，非交付物）
+templates/book/shot_*.png
+
+# chinese-book（kaobook 第三方）编译产物：只入库 .tex 源与 styles/
+templates/chinese-book/main.pdf
+templates/chinese-book/main.lol
+templates/chinese-book/main.mw
+templates/chinese-book/main.idx
+templates/chinese-book/main.bbl
+templates/chinese-book/main.blg
+templates/chinese-book/main.lof
+templates/chinese-book/main.lot
+templates/chinese-book/[a-z].log
+
 # 个人开发材料（2026-09-30 出库，仅本地保留）
 # 注意：不能用 `/docs/*` —— 它排除的是目录本身，git 不会下降到目录内，
 # 后续 `!` 例外对目录内的文件一律无效（assets 画廊图当年就是这样"例外失败"的）。

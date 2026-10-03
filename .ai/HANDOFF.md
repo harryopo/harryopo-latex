@@ -11,8 +11,8 @@
 |---|---|---|
 | 项目 | harryopo 办公文档 AI 生产力平台 | ✅ |
 | 阶段 | **维护期**（P0 3/3 · P1 6/6 · P2 5/5 收官；P3 四项未启动） | ✅ |
-| 交付形态 | 自包含 Agent Skill，12 个子命令 | ✅ |
-| 健康检查基线 | `office.py doctor` → **51 OK / 0 WARN / 0 FAIL** | ✅ |
+| 交付形态 | 自包含 Agent Skill，12 个子命令 / 5 条输出链路（word·paper·notes·slides·book） | ✅ |
+| 健康检查基线 | `office.py doctor` → **58 OK / 0 WARN / 0 FAIL** | ✅ |
 | 远程同步 | `origin/main` = 本地 HEAD | ✅ |
 
 ---
@@ -90,7 +90,7 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 | P3 | Typst 0.15 第三输出通道 | 方案书 §6 长期储备 |
 | P3 | 可编辑 .pptx 输出链路 | 2026-09-18 降级项；python-pptx 1.0.3 + PowerPoint COM 本机可用 |
 | P3 | 模板市场 / 多人协作 / pdfcpu / HermesOffice | 长期储备 |
-| 低 | `harryopo-book.cls` | 书籍文档类，方案书未列入 P3 |
+
 | 低 | `code_hash` 单点收敛 | `mermaid_render` / `diagram_render` 各一份（2 行），已判定不值得动 |
 
 ---

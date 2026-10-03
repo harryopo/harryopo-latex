@@ -15,6 +15,23 @@
 \ProcessOptions\relax
 
 \let\thmname\relax % Workaround to get rid of an annoying error
+% 本包下方用 \addto\captions<lang> 定义多语言题注短名（german/danish/
+% english/italian/russian）。这些宏由 babel 提供，未加载 babel 时全部
+% 报 Undefined control sequence（同包的 kaobiblioCJKsc 用
+% \@ifpackageloaded{babel} 做了守卫，此处原为上游 kaobook 的疏漏）。
+%
+% babel 只用英/德/丹/意/俄五种语言的题注短名做定义，实际文档是中文。
+% ⚠️ 不能用裸 \RequirePackage{babel}：babel 的 english 语言钩子会与
+% varioref/caption 的 \extrasenglish 形成无限递归（"TeX capacity
+% exceeded"）。也不能把语言名直接当 babel 选项传（报 Unknown option）。
+% 正确写法是 \babelprovide 惰性加载——不设默认语言，只提供
+% \addto\captions<lang> 所需的 \captions<lang> 宏。
+\RequirePackage{babel}
+\babelprovide[import,main]{english}
+\babelprovide[import]{danish}
+\babelprovide[import]{german}
+\babelprovide[import]{italian}
+\babelprovide[import]{russian}
 \RequirePackage{amsthm} % Needed by cleveref
 \RequirePackage{varioref}
 \RequirePackage{hyperref}

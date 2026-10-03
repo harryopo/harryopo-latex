@@ -1,0 +1,74 @@
+% harryopo-book.cls 自检样张（不用于交付，仅验证类文件可编译）
+\documentclass[11pt,a4paper]{harryopo-book}
+
+\title{书籍文档类自检样张}
+\subtitle{验证五级字体阶梯 / 定理编号 / 教学盒子 / 旁注 / 双面页眉}
+\author{harryopo}
+\bookseries{自检样张}
+\institute{harryopo-office}
+\date{2026年9月30日}
+
+\begin{document}
+\frontmatter
+\maketitle
+\tableofcontents
+
+\mainmatter
+\chapter{章级结构}
+\section{节与五级字体阶梯}
+\subsection{小节：黑体}
+\subsubsection{小小节：楷体}
+\subhead{括号式小标题示例}
+正文段落使用方正书宋，正文加粗应使用 {\fzht 黑体} 而非 \textbf。
+
+\bianzhu[旁注]{这是右侧旁注，仿宋小字，用于补充说明。}
+
+\begin{theorem}[勾股定理]
+直角三角形两直角边平方和等于斜边平方。
+\end{theorem}
+\begin{definition}
+勾股定理中的三条边分别称为直角边与斜边。
+\end{definition}
+\begin{remark}
+本环境与定义共享计数器。
+\end{remark}
+
+公式编号应为章级：
+\begin{equation}
+  \int_0^1 x^2 \,\mathrm{d}x = \frac{1}{3}
+\end{equation}
+
+\chapter{六种教学盒子}
+\section{核心概念}
+\begin{keyconcept}
+向量空间是线性代数的基本对象。
+\end{keyconcept}
+
+\section{例}
+\begin{examplebox}
+求矩阵 $A$ 的特征值。
+\end{examplebox}
+
+\section{小贴士}
+\begin{tipbox}
+计算前先看清题目要求的是行空间还是列空间。
+\end{tipbox}
+
+\section{注意}
+\begin{warningbox}
+相似不等于合同，行列式与迹在相似变换下不变。
+\end{warningbox}
+
+\section{练习}
+\begin{practicebox}
+证明：可逆矩阵的逆矩阵可逆。
+\end{practicebox}
+
+\section{解答}
+\begin{answerbox}
+设 $A^{-1}$ 存在，则 $A^{-1}$ 与 $A$ 的行列式互为倒数，故均非零。
+\end{answerbox}
+
+\backmatter
+\chapter*{附录}
+\end{document}

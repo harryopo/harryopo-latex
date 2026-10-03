@@ -94,6 +94,19 @@ REQUIRED_SEGMENTS = {
     'harryopo-slides.cls': [
         (r'\\LoadClass\[.*\]\{ctexbeamer\}', 'beamer 基类（\\LoadClass；.cls 用它而非 \\documentclass）'),
     ],
+    # harryopo-book 的三处静默失效点（均为实测踩出，删掉不会报错、
+    # 只会让排版悄悄坏掉）：
+    'harryopo-book.cls': [
+        (r'\\LoadClass\[.*\]\{ctexbook\}',
+         'ctexbook 基类（\\LoadClass；写成 \\documentclass 会静默失效）'),
+        (r'\\numberwithin\{equation\}\{chapter\}',
+         '公式章级编号（base.sty 是 section 级，book 不覆盖会编成"节.式"）'),
+        (r'\\newmdenv', '教学盒子底板（mdframed；6 种盒子靠它，缺失则全部退化）'),
+        (r'\\fancyhead\[L\]',
+         '双面页眉（[L] 单槽 + \\ifodd 分流；用 [LE]/[RO] 会被 ctexbook 重映射）'),
+        (r'\\newcommand\{\\bianzhu\}',
+         '右侧旁注命令（\\bianzhu/\\bianzhutu，方案书规格要求）'),
+    ],
 }
 
 # 需保持一致的文件（项目根为准，单向同步到 skill）
@@ -102,6 +115,7 @@ SYNC_FILES = [
     'cls/harryopo-paper.cls',
     'cls/harryopo-report.cls',
     'cls/harryopo-slides.cls',
+    'cls/harryopo-book.cls',
     'cls/flushend.sty',
     'math-notes/harryopo-mathnotes.cls',
 ]

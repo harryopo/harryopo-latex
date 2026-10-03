@@ -51,7 +51,7 @@ function Test-Prerequisites {
     }
 
     # 6. .cls 文件
-    foreach ($cls in @("harryopo-paper.cls","harryopo-report.cls","harryopo-base.sty")) {
+    foreach ($cls in @("harryopo-paper.cls","harryopo-report.cls","harryopo-book.cls","harryopo-base.sty")) {
         $p = Join-Path $ClsDir $cls
         if (-not (Test-Path $p)) {
             Write-Host "[FATAL] Missing: cls/$cls" -ForegroundColor Red
@@ -146,7 +146,7 @@ if ($Category) {
     $Dir = Join-Path $ScriptDir $Category
     if (Test-Path $Dir) { Get-ChildItem $Dir -Filter "*.tex" | %{ $Targets += $_.FullName } }
 } else {
-    foreach ($cat in @("paper","report")) {
+    foreach ($cat in @("paper","report","book")) {
         $Dir = Join-Path $ScriptDir $cat
         if (Test-Path $Dir) { Get-ChildItem $Dir -Filter "*.tex" | %{ $Targets += $_.FullName } }
     }
@@ -157,7 +157,7 @@ $Targets = $Targets | Select-Object -Unique
 
 if ($Clean) {
     Write-Host "[CLEAN] Removing all temp files..." -ForegroundColor Yellow
-    foreach ($cat in @("paper","report")) {
+    foreach ($cat in @("paper","report","book")) {
         $Dir = Join-Path $ScriptDir $cat
         if (Test-Path $Dir) { Clear-TempFiles $Dir }
     }

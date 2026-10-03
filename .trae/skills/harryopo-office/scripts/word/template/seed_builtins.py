@@ -45,6 +45,10 @@ BUILTINS = [
      'harryopo-report', 'harryopo 报告模板', '4.0', ['学术', '报告']),
     (str(_ROOT / 'templates' / 'math-notes' / 'example-note.tex'),
      'harryopo-notes', 'harryopo 数理笔记模板', '1.0', ['笔记', '数学']),
+    (str(_ROOT / 'templates' / 'book' / 'selftest-book.tex'),
+     'harryopo-book', 'harryopo 书籍模板', '1.0', ['书籍', '教材']),
+    (str(_ROOT / 'templates' / 'slides' / 'example-defense.tex'),
+     'harryopo-slides', 'harryopo 演示模板', '1.0', ['演示', '答辩']),
     (str(_HERE / 'examples' / 'template.docx'),
      'docxtpl-example', 'docxtpl 模板填充示例', '1.0', ['示例', 'docx']),
 ]
