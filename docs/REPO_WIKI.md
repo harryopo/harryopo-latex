@@ -1,6 +1,6 @@
 # Repo Wiki — d:\ai\latex 办公文档 AI 生产力平台
 
-> 生成方式：AI 全仓遍历（569 个入库文件，核心为 28 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~16991 行 + LaTeX 模板体系 + 92 篇文档）
+> 生成方式：AI 全仓遍历（582 个入库文件，核心为 28 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~16996 行 + LaTeX 模板体系 + 92 篇文档）
 > 数字来源：`office.py doctor --stats` 实时统计，**不要手写**——手写的数字必然漂移（本次修正前此处声明 679 文件/19 脚本/~7900 行，实际已到 561/44/16773）。`office.py doctor` 会校验本行 5 项数字与实际是否一致，不一致报 WARN。
 > 最后验证：2026-09-30 | 覆盖：P2 收官 + skill 自包含修复 + doctor 护栏
 > 本文件是 AI 协作知识库：新需求开发前先检索第 4/9/10 章，优先复用，防止重复造轮子。
@@ -315,7 +315,7 @@ GB/T 9704 规定四级标题**同为三号**、靠字体区分（一、黑体／
 python .trae/skills/harryopo-office/scripts/office.py doctor [--json] [--skip-privacy]
 python .trae/skills/harryopo-office/scripts/office.py doctor --stats   # 只出仓库画像，供文档引用
 ```
-有 FAIL 时 **exit 1**，可直接接 CI/CI 前置钩子。当前基线：**67 OK / 0 WARN / 0 FAIL**。
+有 FAIL 时 **exit 1**，可直接接 CI/CI 前置钩子。当前基线：**68 OK / 0 WARN / 0 FAIL**。
 
 **验收流程（对应通用规范 3.2 的五步）**——本项目无测试框架，用下列可执行命令替代：
 
