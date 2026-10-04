@@ -8,22 +8,30 @@
 \ProvidesPackage{kaoWinCJKsc}[2024/01/01 v2.0 FZ Font Config]
 
 % ── 字体路径 ──
-\newcommand{\fontpath}{C:/Windows/Fonts/}
+% 原为 C:/Windows/Fonts/ + GBK 名（方正书宋_GBK / FZHei-B01 …），
+% 换机器即失效，且这些字体的**子集没有拉丁字形**——标题里的数字与英文
+% 会整段变 null 空字符（实测 PDF 提取出上千个 \x00）。
+% 统一指向项目内嵌字体 templates/fonts/，与 harryopo-base.sty 同一套。
+\newcommand{\fontpath}{../fonts/}
 
-% ── 方正核心字体 ──
-\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzsong{方正书宋_GBK}    %方正书宋  fzsong
-\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzhei{FZHei-B01}       %方正黑体  fzhei
-\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzkai{方正楷体_GBK}     %方正楷体  fzkai
-\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzfs{FZFSFW}           %方正仿宋  fzfs
-%
-% ── 方正小标宋（最大标题专用） ──
-\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzxiaobiaosong{FZXBSJW}  %方正小标宋  fzxiaobiaosong
-%
-% ── 方正黑体（标题用，别名 yh 兼容旧代码） ──
-\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\yh{FZHei-B01}           %方正黑体  yh
+% ⚠️ 不要给 \newCJKfontfamily 加 BoldFont/ItalicFont。
+%   FZ*JW 系列没有独立的粗体/斜体字形，一旦声明 BoldFont=…，xeCJK 会去找
+%   "TU/<族>/b/n" 形状并报 undefined，随后回退 nullfont——所有非 CJK 字符
+%   （连字符、拉丁字母、数字）在 PDF 里变成 null 空字符。
+%   实测：加上后 main.pdf 出现 1127 个 \x00；去掉后归零。
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzsong{FZSSJW}    %方正书宋
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzhei{FZHTJW}     %方正黑体
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzkai{FZKTJW}     %方正楷体
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzfs{FZFSJW}      %方正仿宋
 
-% ── 装饰字体（可选） ──
-\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzli{FZLiShu-S01S}      %方正隶书  fzli
+% ── 方正小标宋（最大标题专用）──
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzxiaobiaosong{FZXBSJW}
+
+% ── 方正黑体（标题用，别名 yh 兼容旧代码）──
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\yh{FZHTJW}
+
+% ── 装饰字体（可选）：隶书项目内未内嵌，回退仿宋而非系统字体 ──
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzli{FZFSJW}
 \newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzshti{FZShuTi-S05S}    %方正舒体  fzshti
 \newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzyao{FZYaoTi-M06S}     %方正姚体  fzyao
 
@@ -135,6 +143,14 @@
 
 % 代码块增强
 \RequirePackage{listings}
+% ⚠️ 必须加载 xeCJK-listings：listings 默认把整段当 verbatim 交给
+% **单一拉丁字体**排版，块内的中文注释无法参与 xeCJK 的断行与字形整形，
+% 于是整段中文变成 null 空字符（正文与边注因此完全正常，只有代码块里的
+% 中文注释是方块）。xeCJK-listings 把 lstlisting 接入 xeCJK 管线。
+\RequirePackage{xeCJK-listings}
+% CJK 用书宋（代码块里的中文注释）。等宽的 \ttfamily 只管拉丁字符，
+% 块内中文由 xeCJK-listings 按 \setCJKmonofont 走——cour 无 CJK 字形，
+% 故这里显式改用 FZSSJW（方正书宋），保证中文注释能正常显示。
 \lstset{
     basicstyle=\ttfamily\footnotesize,
     breaklines=true,
@@ -146,5 +162,18 @@
     commentstyle=\color{green!50!black},
     stringstyle=\color{red!70!black},
     showstringspaces=false,
+    % xeCJK-listings：让 lstlisting 内的中文走 xeCJK 整形（否则整段方块）
+    alsoletter=*,
+    columns=flexible,
+}
+% 代码块内的中文注释用方正书宋（有 CJK 字形），Latin 仍走 cour
+\setCJKmonofont[Path=\fontpath, Extension=.TTF]{FZSSJW}
+
+% ⚠️ kaobook 自带的 kaolstplain（正文里的 lstlisting 与边栏里嵌套的
+%   lstlisting 都用它）在 \kaoCJKsc.sty:922 定义，只设了 basicstyle，
+%   没接 xeCJK → 块内中文注释是方块。此处覆盖它，把 CJK 补上。
+\lstdefinestyle{kaolstplain}{
+    alsoletter=*,
+    columns=flexible,
 }
 \endinput

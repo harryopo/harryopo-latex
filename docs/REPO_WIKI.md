@@ -1,6 +1,6 @@
 # Repo Wiki — d:\ai\latex 办公文档 AI 生产力平台
 
-> 生成方式：AI 全仓遍历（569 个入库文件，核心为 28 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~16944 行 + LaTeX 模板体系 + 92 篇文档）
+> 生成方式：AI 全仓遍历（569 个入库文件，核心为 28 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~16991 行 + LaTeX 模板体系 + 92 篇文档）
 > 数字来源：`office.py doctor --stats` 实时统计，**不要手写**——手写的数字必然漂移（本次修正前此处声明 679 文件/19 脚本/~7900 行，实际已到 561/44/16773）。`office.py doctor` 会校验本行 5 项数字与实际是否一致，不一致报 WARN。
 > 最后验证：2026-09-30 | 覆盖：P2 收官 + skill 自包含修复 + doctor 护栏
 > 本文件是 AI 协作知识库：新需求开发前先检索第 4/9/10 章，优先复用，防止重复造轮子。
@@ -159,6 +159,69 @@ flowchart LR
 ### 4.4 基础设施（复用点）
 `office.py` 可 import：`run()`(subprocess utf-8 封装)、`_ensure_tex_on_path()`/`_ensure_pandoc_on_path()`(PATH 探测)、`collect_output()`(锁文件改名容错)、`ensure_placeholder_figures()`(先从 MD 同级目录回源复制真图，确缺才占位)、路径常量。委托模式：子命令 subprocess 透传，零重复实现。
 
+## 4.5 统一排版规范（harryopo-typography）
+
+`templates/cls/harryopo-typography.sty` 是**五类文档的排版唯一事实来源**。
+2026-09-30 建立——此前每类自带一套字号/色板/目录定义，导致"字号很大很小都有、
+颜色不统一"（典型：paper 四级标题全无 `\color` 而同篇 `\subhead` 是蓝色；
+report 目录四级全 `\large` 无层级差；mathnotes 的 section 23pt 反而小于
+subsection 的 `\huge`≈20.7pt）。
+
+### 接入方式
+
+```latex
+\RequirePackage{harryopo-base}        % 提供色宏与 \fzxt 字体命令
+\hrpapplyall                          % 字号阶梯 + 标题色阶 + 题注 + 代码块 + \subhead
+\hrptocsetup                         % 目录层级（可选，默认无横线）
+\hrptitleformat{chapter}              % 可选：类自定义章标题
+```
+
+### 字号阶梯（绝对值，跨类一致）
+
+用 `\zihao`（中文印刷字号）而非 `\Large`/`\large` 相对字号——相对字号随基准 pt 浮动，
+11pt 下 `\Large`=14.4pt、12pt 下=17.28pt，跨类必乱。
+
+| 层级 | 宏 | 值 | 字体 | 颜色 |
+|---|---|---|---|---|
+| 章/书名 | `\hrpTitleSize` | 二号 22pt | 小标宋 `\fzxb` | `DarkColor` |
+| 一级 | `\hrpH1Size` | 三号 16pt | 大标宋 `\fzdbs` | `MainColor` |
+| 二级 | `\hrpH2Size` | 四号 14pt | 黑体 `\fzht` | `SubColor` |
+| 三级 | `\hrpH3Size` | 小四 12pt | 楷体 `\fzkt` | `MainColor!75!black` |
+| 正文 | — | 小四 12pt | 书宋 | 黑 |
+| 题注 | `\hrpSmallSize` | 五号 10.5pt | 仿宋 `\fzfs` | — |
+| 代码 | `\hrpMonoSize` | 小四 12pt | JetBrains Mono | — |
+
+行距统一 `\hrpLineSpread` = 1.25。
+
+### 基准 pt
+
+| 类 | 基准 | 说明 |
+|---|---|---|
+| paper / report / book | 11pt | 三者已统一（report 原 12pt） |
+| mathnotes | 9pt | extarticle 专属，紧凑笔记排版；但**已补上 1.25 行距**（此前完全没有，正文偏紧） |
+| slides | beamer | 不适用 |
+
+### 例外：公文模式（`--gov`）
+
+GB/T 9704 规定四级标题**同为三号**、靠字体区分（一、黑体／（一）楷体／1. 仿宋加粗／
+（1）仿宋），这是国标硬要求，**不参与统一阶梯**，由 `harryopo-paper.cls` 的
+`\if@govmode` 分支覆写。但公文**目录**仍走统一阶梯。
+
+### 目录层级
+
+章（小标宋）→ 节（大标宋 + MainColor）→ 小节（楷体 + 淡蓝黑），页码统一正文字号。
+目录标题下**默认不画横线**（`\hrp@tocrule` 开关可开）。
+
+> ⚠️ 目录/标题样式里**不能用 `\hrpH1Size` 这类宏名**，必须写展开值
+> （`\zihao{3}\fzdbs`）。tocloft 与 titlesec 会把定义原样写进 `.toc`/`.aux`，
+> 到 `\begin{document}` 之后再展开会报 Undefined control sequence。
+
+### 代码块约定
+
+- **无行号**（`numbers=none`）、**无边框**（`frame=none`）
+- 等宽 JetBrains Mono（OFL 1.1，允许嵌入分发）
+- 底色 `TinyColor` 极浅蓝，关键字 `SubColor` 加粗，注释淡蓝斜体
+
 ## 5. 核心 API & 公共函数文档
 
 | 函数/接口 | 作用 | 入参 | 返回 | 注意事项 |
@@ -240,9 +303,7 @@ flowchart LR
 |---|---|---|
 | **语法检查** | 28 个脚本在 `SyntaxWarning` 升级为异常的模式下 `ast.parse` —— 等价于"非法转义即失败" | 踩坑 27/31 |
 | cls 双源同步 | 6 份 cls/mathnotes 副本与项目根 sha256 一致（不一致报 FAIL 并给差异行数） | §8-10 |
-| cls 必含段 | `paper.cls` 含 `\if@govmode`、`base.sty` 含 `\ifnum\harryopo@nomath=0`（**两份都坏时也能独立报错**）、`slides.cls` 含 `\LoadClass{ctexbeamer}`、`base.sty` 含 tikz positioning、`book.cls` 含 `\LoadClass{ctexbook}` + `
-umberwithin{equation}{chapter}` + `
-ewmdenv` + `ancyhead[L]` + `ianzhu` | §8-9/10 |
+| cls 必含段 | `typography.sty` 6 项（代码块 `numbers=none`/`frame=none`、目录一级绝对字号、目录页码正文字号、统一行距）+ `paper.cls` 3 项（`\hrpapplyall`/tocloft/`\if@govmode`）+ `report.cls` 2 项 + `book.cls` 5 项 | §8-9/10 |
 | 关键路径 | 10 个必需目录/文件存在 + 两份字体数均为 19 | — |
 | 工具链 | xelatex/pandoc/mmdc/系统浏览器 + 5 个 Python 依赖 | — |
 | 隐私护栏 | 蒸馏区·memory·.learnings·CLAUDE.md·简历·test-e2e·测试区·`.qoder` 确认未被 git 跟踪 | — |
@@ -254,7 +315,7 @@ ewmdenv` + `ancyhead[L]` + `ianzhu` | §8-9/10 |
 python .trae/skills/harryopo-office/scripts/office.py doctor [--json] [--skip-privacy]
 python .trae/skills/harryopo-office/scripts/office.py doctor --stats   # 只出仓库画像，供文档引用
 ```
-有 FAIL 时 **exit 1**，可直接接 CI/CI 前置钩子。当前基线：**58 OK / 0 WARN / 0 FAIL**。
+有 FAIL 时 **exit 1**，可直接接 CI/CI 前置钩子。当前基线：**67 OK / 0 WARN / 0 FAIL**。
 
 **验收流程（对应通用规范 3.2 的五步）**——本项目无测试框架，用下列可执行命令替代：
 

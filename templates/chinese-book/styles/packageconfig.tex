@@ -41,3 +41,38 @@
 
 % ── Markdown 支持 ──
 \usepackage{markdown}
+
+% ============================================================
+% 字体最终设定（必须在 kaoWinCJKsc / unicode-math 之后）
+%
+% ⚠️ 为什么要覆盖：kaoCJKsc.sty 的 \kao@fontmethodModern 会执行
+%     \setromanfont{Libertinus Serif} / \setmonofont{Liberation Mono}，
+%    但本机 TinyTeX **没有安装任何 Libertinus 字体文件**
+%    （tlmgr 装的 libertinus / libertinus-otf 只有 .sty，没有 .otf）。
+%    fontspec 于是回退到 nullfont，所有拉丁字母、数字、连字符在 PDF 里
+%    变成 null 空字符——实测 main.pdf 有 1127 个 \x00，整片"乱码"。
+%    对照组：只排中文的正文完全正常，只有走 \setmainfont/\ttfamily 的
+%    片段（代码、URL、边注里的命令名）出问题。
+%
+%    正解：改用项目内嵌字体（与 harryopo-base.sty 同一套），不依赖系统字体。
+%      正文拉丁 → XITS（已内嵌，含完整拉丁字形）
+%      等宽     → cour（Courier New，已内嵌）
+%    本文件由 main.tex 在 \usepackage{kaoWinCJKsc} 之后 \input，
+%    是最后一个能安全覆盖 \kao@fontmethodModern 的位置。
+% ============================================================
+\setmainfont[
+    Path       = ../fonts/,
+    Extension  = .otf,
+    BoldFont   = XITS-Bold,
+    ItalicFont = XITS-Italic,
+    BoldItalicFont = XITS-BoldItalic
+]{XITS-Regular}
+\setsansfont[
+    Path       = ../fonts/,
+    Extension  = .otf,
+    BoldFont   = texgyreheros-bold,
+    ItalicFont = texgyreheros-italic,
+    BoldItalicFont = texgyreheros-bolditalic
+]{texgyreheros-regular}
+\setmonofont[Path=../fonts/, Extension=.ttf]{cour}
+\setCJKmonofont[Path=../fonts/, Extension=.ttf]{cour}

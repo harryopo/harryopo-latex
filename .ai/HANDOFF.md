@@ -12,7 +12,7 @@
 | 项目 | harryopo 办公文档 AI 生产力平台 | ✅ |
 | 阶段 | **维护期**（P0 3/3 · P1 6/6 · P2 5/5 收官；P3 四项未启动） | ✅ |
 | 交付形态 | 自包含 Agent Skill，12 个子命令 / 5 条输出链路（word·paper·notes·slides·book） | ✅ |
-| 健康检查基线 | `office.py doctor` → **58 OK / 0 WARN / 0 FAIL** | ✅ |
+| 健康检查基线 | `office.py doctor` → **67 OK / 0 WARN / 0 FAIL** | ✅ |
 | 远程同步 | `origin/main` = 本地 HEAD | ✅ |
 
 ---

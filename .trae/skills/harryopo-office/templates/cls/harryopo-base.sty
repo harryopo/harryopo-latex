@@ -146,9 +146,14 @@
     BoldItalicFont = *-bolditalic,
     Path = ../fonts/
 ]
-\setmonofont{lmmono10-regular}[
-    Extension = .otf,
-    Path = ../fonts/
+% 等宽：JetBrains Mono（OFL 1.1，见 fonts/LICENSE-JetBrainsMono.txt）
+% 原为 lmmono10-regular（Latin Modern Mono 克隆），字形偏窄、l/1/I 易混行
+\setmonofont{JetBrainsMono-Regular}[
+    Extension = .ttf,
+    Path = ../fonts/,
+    BoldFont       = JetBrainsMono-Bold,
+    ItalicFont     = JetBrainsMono-Italic,
+    BoldItalicFont = JetBrainsMono-BoldItalic
 ]
 
 % --- 中文字体 — 方正系列 ---
@@ -209,69 +214,11 @@
 % 第六部分：代码高亮配置
 % ============================================================
 
-\lstdefinestyle{pystyle}{
-    language=Python,
-    backgroundcolor=\color{gray!5},
-    commentstyle=\color{green!50!black},
-    keywordstyle=\color{blue!60!black}\bfseries,
-    numberstyle=\tiny\ttfamily\color{gray},
-    stringstyle=\color{orange!80!black},
-    basicstyle=\ttfamily\small,
-    breakatwhitespace=false,
-    breaklines=true,
-    captionpos=b,
-    keepspaces=true,
-    numbers=left,
-    numbersep=8pt,
-    showspaces=false,
-    showstringspaces=false,
-    showtabs=false,
-    tabsize=4,
-    frame=single,
-    framesep=4pt,
-    framerule=0.5pt,
-    rulecolor=\color{gray!30},
-    xleftmargin=2em,
-    xrightmargin=0pt,
-    framexleftmargin=2em,
-    aboveskip=8pt,
-    belowskip=8pt,
-}
-\lstdefinestyle{bashstyle}{
-    language=bash,
-    backgroundcolor=\color{gray!5},
-    commentstyle=\color{green!50!black},
-    keywordstyle=\color{blue!60!black}\bfseries,
-    numberstyle=\tiny\ttfamily\color{gray},
-    basicstyle=\ttfamily\small,
-    breaklines=true,
-    numbers=left,
-    numbersep=8pt,
-    frame=single,
-    framesep=4pt,
-    framerule=0.5pt,
-    rulecolor=\color{gray!30},
-    xleftmargin=2em,
-    aboveskip=8pt,
-    belowskip=8pt,
-    captionpos=b,
-}
-\lstdefinestyle{plainstyle}{
-    backgroundcolor=\color{gray!5},
-    numberstyle=\tiny\ttfamily\color{gray},
-    basicstyle=\ttfamily\small,
-    breaklines=true,
-    numbers=left,
-    numbersep=8pt,
-    frame=single,
-    framesep=4pt,
-    framerule=0.5pt,
-    rulecolor=\color{gray!30},
-    xleftmargin=2em,
-    aboveskip=8pt,
-    belowskip=8pt,
-    captionpos=b,
-}
+% 代码块样式已迁至 harryopo-typography.sty：
+%   \hrpcodestyles 提供 pystyle / bashstyle / plainstyle——
+%   JetBrains Mono + 无行号 + 无边框 + 极浅蓝底 + 统一字号。
+%   行内代码 \inlinecode 保留在此（正文级样式，与规范色一致）。
+
 \newcommand{\inlinecode}[1]{%
     \texttt{\color{MainColor!80!black}#1}%
 }
@@ -321,5 +268,14 @@
     \expandafter\renewcommand\csname #1\endcsname[1]{\markboth{##1}{}}%
     \pagestyle{fancy}%
 }
+
+% ============================================================
+% 第十部分：统一排版规范（harryopo-typography）
+%
+% ⚠️ 必须在 base.sty 末尾加载——规范要用到本包定义的色宏与 \fzxt 字体命令，
+%    提前加载会因宏未定义而报错。五类文档通过 base.sty 自动继承。
+%    各 .cls 只需 \RequirePackage{harryopo-typography} + \hrpapplyall。
+% ============================================================
+\RequirePackage{harryopo-typography}
 
 \endinput

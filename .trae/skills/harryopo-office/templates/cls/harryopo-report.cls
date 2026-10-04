@@ -17,7 +17,10 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{ctexrep}}
 \ProcessOptions\relax
 
-\LoadClass[a4paper,12pt]{ctexrep}
+% 统一为 11pt 与 paper/book 对齐（规范用绝对 \zihao 字号，基准 pt
+% 只影响 \normalsize 与行距；12pt 会让正文比另两类明显偏大——即用户报
+% 的"正文字体字号不统一、很大很小都有"）。
+\LoadClass[a4paper,11pt]{ctexrep}
 
 % ============================================================
 % 第二部分：依赖包加载
@@ -38,6 +41,14 @@
 \geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm, headheight=15pt}
 
 % ============================================================
+% 第三点五部分：接入统一排版规范（harryopo-typography）
+% 字号阶梯 / 标题色阶 / 目录层级 / 题注 / 代码块 / \subhead 全部由此接管。
+% 章标题、节标题与 \subhead 的自定义定义见第五部分（覆写在规范之后）。
+% ============================================================
+\hrpapplyall
+\hrptocsetup
+
+% ============================================================
 % 第四部分：页眉页脚（无横线）
 % ============================================================
 
@@ -50,35 +61,13 @@
 % 第五部分：章标题格式
 % ============================================================
 
-% 章标题：大号小标宋 + 深色
-\titleformat{\chapter}[hang]
-    {\huge\fzxb\color{DarkColor}}
-    {第\thechapter 章}{1em}{}
-\titlespacing{\chapter}{0pt}{20pt}{16pt}
+% 章标题：小标宋 + 深色（用规范里的 chapter 格式，保持与 book 一致）
+\hrptitleformat{chapter}
 
-% 节标题：方正大标宋 + 蓝色
-\titleformat{\section}
-    {\Large\fzdbs\color{MainColor}}
-    {\thesection}{1em}{}
-\titlespacing{\section}{0pt}{16pt}{10pt}
-
-% 小节标题：黑体 + 辅色
-\titleformat{\subsection}
-    {\large\bfseries\color{SubColor}}
-    {\thesubsection}{1em}{}
-\titlespacing{\subsection}{1em}{12pt}{6pt}
-
-% 小小节标题：方正楷体
-\titleformat{\subsubsection}
-    {\normalsize\fzkt\color{MainColor!80!black}}
-    {\thesubsubsection}{1em}{}
-\titlespacing{\subsubsection}{2em}{8pt}{4pt}
-
-% 括号式小标题：\subhead{标题名}
-\newcommand{\subhead}[1]{%
-    \par\vspace{6pt}\noindent
-    {\bfseries\fzht\color{SubColor}（#1）}\hspace{0.5em}%
-}
+% 节/小节/小小节：统一走规范（字号阶梯 + 标题色阶 + 间距）
+\hrptitleformat{section}
+\hrptitleformat{subsection}
+\hrptitleformat{subsubsection}
 
 % ============================================================
 % 第六部分：报告信息命令
@@ -171,16 +160,12 @@
 
 % ============================================================
 % 第十部分：目录配置
+%
+% ⚠️ 目录层级/字号/页码字号已由 \hrptocsetup（第三点五部分）统一接管。
+%    此前此处把 \cftchapfont/\cftsecfont/\cftsubsecfont/\cftchappagefont
+%    **四级全设为 \large**，目录里章/节/小节与页码一样大、没有层级差——
+%    即用户报的"目录层级缩放反了"。同类问题在 book.cls 也存在。
 % ============================================================
-
-\renewcommand{\contentsname}{目\quad 录}
-\renewcommand{\cfttoctitlefont}{\hfill\LARGE\fzxb\color{DarkColor}}
-\renewcommand{\cftaftertoctitle}{\hfill}
-\renewcommand{\cftchapfont}{\large\fzht}
-\renewcommand{\cftsecfont}{\large}
-\renewcommand{\cftsubsecfont}{\large}
-\renewcommand{\cftchappagefont}{\large}
-\renewcommand{\cftdotsep}{1}
 
 % --- 插图/表格目录融入目录（降级为节标题） ---
 \let\harryopo@oldlistoffigures\listoffigures

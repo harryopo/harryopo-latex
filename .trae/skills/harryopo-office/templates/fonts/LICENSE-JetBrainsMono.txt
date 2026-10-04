@@ -1,0 +1,10 @@
+JetBrains Mono
+Copyright (c) 2001-2025 JetBrains s.r.o. (https://www.jetbrains.com)
+Licensed under the SIL Open Font License, Version 1.1
+https://scripts.sil.org/OFL
+
+本目录收录 JetBrains Mono 的 Regular / Bold / Italic / BoldItalic 四个字重
+（TTF，OFL 1.1 允许嵌入与再分发），用途：harryopo 全家桶的代码块等宽字体。
+
+选它的原因：连字（ligature）清晰、字母 l/1 与 I 区分度高、字宽偏窄，
+中文技术文档里混排代码不易串行；替代原 Latin Modern Mono（lmmono10）。

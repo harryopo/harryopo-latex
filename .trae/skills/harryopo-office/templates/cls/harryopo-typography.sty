@@ -1,0 +1,291 @@
+% ============================================================
+% harryopo-typography.sty — harryopo 全家桶统一排版规范 (v1.0)
+% 风格：字号阶梯 / 标题色阶 / 标题格式 / 目录层级 / 题注 / 代码块
+%
+% 这是**唯一事实来源**。五个文档类（paper / report / book / mathnotes
+% / slides）都引用本文件的宏，不再各写一套——此前"字号很大很小都有、
+% 颜色不统一"的根因就是每类自带一套字号/色板定义。
+%
+% 依赖：必须在本包之前加载 harryopo-base.sty（提供 MainColor 等色宏
+%      与 \fzxt 系列字体命令）。
+%
+% 用法：
+%   \RequirePackage{harryopo-base}
+%   \RequirePackage{harryopo-typography}
+%   \hrpsetup{body=11pt}                     % 声明基准字号
+%   \hrptitleformat{section}                 % 一键套用规范
+%   \hrptocsetup                            % 目录层级
+% ============================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{harryopo-typography}[2026/09/30 v1.0 harryopo unified typography spec]
+
+\RequirePackage{kvoptions}
+
+% ============================================================
+% 第一部分：可配置项（各文档类按需覆盖）
+% ============================================================
+
+\SetupKeyvalOptions{family=hrp, prefix=hrp@}
+
+% 基准正文类（决定整套阶梯的绝对值）
+\DeclareStringOption[11pt]{body}         % 正文基准：11pt / 10pt
+% 主题（由 harryopo-base 的 \harryopo@theme 决定色板）
+\DeclareStringOption[blue]{theme}
+\DeclareBoolOption[false]{tocrule}       % 目录标题下是否画横线（默认否）
+
+\DeclareDefaultOption{\PassOptionsToPackage{\CurrentOption}{harryopo-typography}}
+\ProcessKeyvalOptions*
+
+% ============================================================
+% 第二部分：字号阶梯
+%
+% ⚠️ 用 \zihao（中文印刷字号）而非 \Large/\large 相对字号。
+% 原因：相对字号随 base pt 浮动，11pt 下 \Large=14.4pt、12pt 下=17.28pt，
+% 跨类就乱；\zihao 是绝对值（八号=5pt…初号=42pt），五类完全一致。
+% 这正是"很大很小都有"的根治点。
+%
+%   \zihao{2}   = 22pt   书名/章标题
+%   \zihao{3}   = 16pt   一级标题
+%   \zihao{4}   = 14pt   二级标题
+%   \zihao{-4}  = 12pt   三级标题 / 正文
+%   \zihao{5}   = 10.5pt 题注 / 表格
+%   \zihao{-5}  = 9pt    代码 / 页眉页脚
+% ============================================================
+
+\newcommand{\hrpTitleSize}{\zihao{2}}    % 书名 / 章标题
+\newcommand{\hrpH1Size}{\zihao{3}}       % 一级标题
+\newcommand{\hrpH2Size}{\zihao{4}}       % 二级标题
+\newcommand{\hrpH3Size}{\zihao{-4}}      % 三级标题
+\newcommand{\hrpBodySize}{\zihao{-4}}    % 正文
+\newcommand{\hrpSmallSize}{\zihao{5}}     % 图/表题注
+\newcommand{\hrpMonoSize}{\zihao{-4}}     % 代码
+\newcommand{\hrpHeaderSize}{\zihao{-5}}   % 页眉页脚
+
+% 行距（统一；此前 mathnotes 完全没设 setstretch，是"很小"的主因）
+\newcommand{\hrpLineSpread}{1.25}
+
+% ============================================================
+% 第三部分：标题色阶
+%
+% ⚠️ 只用 base.sty 的六个色宏，禁止裸色名（如 DeepSkyBlue）。
+% 此前 paper 四级标题全部无 \color（纯黑），而同篇 \subhead 是蓝色，
+% 这就是"颜色不统一"的直接原因。
+% ============================================================
+
+\newcommand{\hrpH1Color}{\color{MainColor}}               % 一级：深蓝
+\newcommand{\hrpH2Color}{\color{SubColor}}                % 二级：中蓝
+\newcommand{\hrpH3Color}{\color{MainColor!75!black}}      % 三级：淡蓝黑
+\newcommand{\hrpBodyColor}{\color{black}}                  % 正文：黑
+
+% ============================================================
+% 第四部分：标题格式与间距
+%
+% \hrptitleformat{层级}
+%   自动套用规范的字号 + 字体 + 颜色 + 间距，类只需一行调用。
+%   允许通过 \hrptitleformat* 覆盖某项。
+% ============================================================
+
+\newcommand{\hrptitleformat}[1]{%
+  \csname hrp@titleformat@#1\endcsname
+}
+
+% ⚠️ 下面所有 \hrptitleformat@{...} 里的字号/颜色**直接写展开值**
+%    （\zihao{3}\fzdbs\color{MainColor}），不写 \hrpH1Size 这类宏名。
+%    原因：titlesec 会把 titleformat 的第一个参数原样存进 .aux/.toc，
+%    到 \begin{document} 之后再展开。本包是 .sty，在文档类加载阶段
+%    \RequirePackage 进来，此处 \newcommand 的宏定义虽然已存在，但
+%    宏体在**文档正文分组之外**被调用时，某些 LaTeX 版本的
+%    \csname 路径会丢失——实测报 "\hrpH1Size undefined"（40 处）。
+%    写死展开值可完全规避，且与 .toc 的情形（见 \hrptocsetup 注释）
+%    是同一类问题，统一处理。
+
+% 一级（section）：大标宋 + 主色
+\newcommand{\hrp@titleformat@section}{%
+  \titleformat{\section}{\zihao{3}\fzdbs\color{MainColor}}{\thesection}{1em}{}%
+  \titlespacing{\section}{0pt}{16pt}{10pt}%
+}
+
+% 二级（subsection）：黑体 + 辅色
+\newcommand{\hrp@titleformat@subsection}{%
+  \titleformat{\subsection}{\zihao{4}\fzht\color{SubColor}}{\thesubsection}{1em}{}%
+  \titlespacing{\subsection}{1em}{12pt}{6pt}%
+}
+
+% 三级（subsubsection）：楷体 + 淡蓝黑
+\newcommand{\hrp@titleformat@subsubsection}{%
+  \titleformat{\subsubsection}{\zihao{-4}\fzkt\color{MainColor!75!black}}{\thesubsubsection}{1em}{}%
+  \titlespacing{\subsubsection}{2em}{8pt}{4pt}%
+}
+
+% 段（paragraph）：仿宋
+\newcommand{\hrp@titleformat@paragraph}{%
+  \titleformat{\paragraph}{\zihao{-4}\fzfs}{\zhnumber{\paragraph}}{1em}{}%
+  \titlespacing{\paragraph}{2em}{6pt}{2pt}%
+}
+
+% 章（chapter）：小标宋 + 深色 + 装饰细线
+\newcommand{\hrp@titleformat@chapter}[2][\zihao{2}]{%
+  \titleformat{\chapter}[block]{#1\fzxb\color{DarkColor}}%
+    {第\thechapter 章}{1em}{}[\vspace{-0.6em}\rule{\textwidth}{1.2pt}]%
+  \titlespacing{\chapter}{0pt}{20pt}{16pt}%
+}
+
+% 括号式小标题 \subhead{文字}（正文级标题，贯通全五类）
+\newcommand{\subhead}[1]{%
+  \par\vspace{6pt}\noindent
+  {\fzht\color{SubColor}（#1）}\hspace{0.5em}%
+}
+
+% ============================================================
+% 第五部分：目录层级
+%
+% ⚠️ 三条硬约束（均为实测踩坑）：
+%  1) 章/节/小节三级必须**有大小差**。此前 report.cls 四级全 \large，
+%     目录看起来"每条一样大"，正是用户报的"缩放反了"。
+%  2) 目录标题下**不画横线**（用户明确要求）。此前 book.cls 有 \rule。
+%  3) 页码统一用正文字号，不要跟条目同字号（此前 \large 的页码很扎眼）。
+% ============================================================
+
+\newcommand{\hrptocsetup}{%
+  % 目录标题
+  \renewcommand{\contentsname}{目\quad 录}%
+  \cfttoctitlefont{\hfill\zihao{2}\fzxb\color{DarkColor}}%
+  \ifhrp@tocrule
+    \cftaftertoctitle{\hfill\par\vspace{6pt}\rule{\textwidth}{1.2pt}\par}%
+  \else
+    \cftaftertoctitle{\hfill}%
+  \fi
+  % ⚠️ 这里必须用 \hrpTitleSize 等的**展开值**，不能直接写宏名。
+  %    tocloft 会把 \cftsecfont 的**当前定义**写进 .toc 文件；而 .toc 是在
+  %    \begin{document} 之后读的，那时 \fzdbs/\fzxb 等 \hryp* CJK 字体命令
+  %    所在的头部分组已结束 → 报 "Undefined control sequence"（实测 59 处）。
+  %    写成 \zihao{4}\fzdbs 这种"可展开的 token 串"则 .toc 重新读时
+  %    \fzdbs 依然可用（它在 .sty 里是全局 \newCJKfontfamily）。
+  %
+  % 章级：小标宋 + 深色
+  \renewcommand{\cftchapfont}{\fzxb\color{DarkColor}}%
+  \renewcommand{\cftchappagefont}{\normalfont\color{DarkColor}}%
+  \renewcommand{\cftchapleader}{\normalfont\cftdotfill{\cftchapdotsep}}%
+  \renewcommand{\cftchapafterindent}{0pt}%
+  % 一级：大标宋 + 主色（明显大于二级——此前四级同 \large 即"缩放反了"）
+  \renewcommand{\cftsecfont}{\zihao{4}\fzdbs\color{MainColor}}%
+  \renewcommand{\cftsecpagefont}{\normalfont}%
+  \renewcommand{\cftsecleader}{\dotfill}%
+  % 二级：楷体 + 淡蓝黑
+  \renewcommand{\cftsubsecfont}{\zihao{-4}\fzkt\color{MainColor!80!black}}%
+  \renewcommand{\cftsubsecpagefont}{\normalfont}%
+  \renewcommand{\cftsubsecleader}{\dotfill}%
+  \renewcommand{\cftsecskip}{5pt}%
+  \renewcommand{\cftsubsecskip}{2pt}%
+  % 章编号框要容纳 ctex 的"第X章"三字。
+  % ⚠️ \cftchapnumwidth 只在有 chapter 级的类（ctexrep/ctexbook）里存在；
+  %    ctexart（paper 用）没有章，直接 \setlength 会报 Undefined control
+  %    sequence，故按 \@ifundefined 守卫。
+  \@ifundefined{cftchapnumwidth}{%
+    \newlength\cftchapnumwidth
+    \setlength\cftchapnumwidth}{1.8em}%
+  \else
+    \setlength\cftchapnumwidth}{1.8em}%
+  \fi
+  % 只列到二级
+  \setcounter{tocdepth}{2}%
+}
+
+% ============================================================
+% 第六部分：题注（图/表）
+% ============================================================
+
+\newcommand{\hrpcaptionsetup}{%
+  \DeclareCaptionFont{hrpcap}{\fzfs}%
+  \DeclareCaptionLabelFormat{hrpzhlabel}{{\fzht #1 #2}\;}%
+  \captionsetup{labelformat=hrpzhlabel,labelsep=quad,%
+                font={\hrpSmallSize,hrpcap},skip=6pt}%
+  \captionsetup[table]{position=bottom}%
+  \captionsetup[subfigure]{labelformat=simple,labelsep=space,%
+                           font={\hrpHeaderSize,hrpcap}}%
+}
+
+% ============================================================
+% 第七部分：代码块规范
+%
+% ⚠️ 需求：无行号、无边框、极浅底色、等宽字体（JetBrains Mono）。
+% ⚠️ 本项目 TeX Live 的 listings 是**精简版**（无 lstd@ 宏），
+%    **不支持 \lstdefinestyle{x}[style=y] 继承语法**（实测报
+%    "Package keyval Error: alsostyle undefined"）。故三个样式各写
+%    完整一遍——看似重复，但这是当前环境唯一可行写法。
+% ============================================================
+
+\newcommand{\hrpcodebasestyle}{%
+  \lstset{%
+    basicstyle=\ttfamily\hrpMonoSize,%
+    numbers=none,               % 无行号
+    frame=none,                 % 无边框
+    backgroundcolor=\color{TinyColor},%
+    keywordstyle=\color{SubColor}\bfseries,%
+    commentstyle=\color{MainColor!60!black}\itshape,%
+    stringstyle=\color{DarkColor},%
+    breaklines=true,%
+    breakatwhitespace=false,%
+    keepspaces=true,%
+    showstringspaces=false,%
+    showspaces=false,%
+    showtabs=false,%
+    tabsize=4,%
+    columns=fullflexible,%
+    xleftmargin=0pt,%
+    aboveskip=10pt,%
+    belowskip=10pt,%
+  }%
+}
+
+% 三个语言样式（扁平写法，见上方警告）
+\newcommand{\hrpcodestyles}{%
+  \lstdefinestyle{pystyle}{%
+    language=Python,%
+    basicstyle=\ttfamily\hrpMonoSize,%
+    numbers=none,frame=none,%
+    backgroundcolor=\color{TinyColor},%
+    keywordstyle=\color{SubColor}\bfseries,%
+    commentstyle=\color{MainColor!60!black}\itshape,%
+    stringstyle=\color{DarkColor},%
+    breaklines=true,breakatwhitespace=false,keepspaces=true,%
+    showstringspaces=false,showspaces=false,showtabs=false,tabsize=4,%
+    columns=fullflexible,xleftmargin=0pt,aboveskip=10pt,belowskip=10pt%
+  }%
+  \lstdefinestyle{bashstyle}{%
+    language=bash,%
+    basicstyle=\ttfamily\hrpMonoSize,%
+    numbers=none,frame=none,%
+    backgroundcolor=\color{TinyColor},%
+    keywordstyle=\color{SubColor}\bfseries,%
+    commentstyle=\color{MainColor!60!black}\itshape,%
+    stringstyle=\color{DarkColor},%
+    breaklines=true,breakatwhitespace=false,keepspaces=true,%
+    showstringspaces=false,showspaces=false,showtabs=false,tabsize=4,%
+    columns=fullflexible,xleftmargin=0pt,aboveskip=10pt,belowskip=10pt%
+  } %
+  \lstdefinestyle{plainstyle}{%
+    basicstyle=\ttfamily\hrpMonoSize,%
+    numbers=none,frame=none,%
+    backgroundcolor=\color{TinyColor},%
+    keywordstyle=\color{SubColor}\bfseries,%
+    commentstyle=\color{MainColor!60!black}\itshape,%
+    stringstyle=\color{DarkColor},%
+    breaklines=true,breakatwhitespace=false,keepspaces=true,%
+    showstringspaces=false,showspaces=false,showtabs=false,tabsize=4,%
+    columns=fullflexible,xleftmargin=0pt,aboveskip=10pt,belowskip=10pt%
+  }%
+}
+
+% 一键应用全部规范
+\newcommand{\hrpapplyall}{%
+  \setstretch{\hrpLineSpread}%
+  \hrptitleformat{section}%
+  \hrptitleformat{subsection}%
+  \hrptitleformat{subsubsection}%
+  \hrptitleformat{paragraph}%
+  \hrpcaptionsetup%
+  \hrpcodestyles%
+}
+
+\endinput

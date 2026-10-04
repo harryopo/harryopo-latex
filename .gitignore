@@ -108,3 +108,7 @@ templates/chinese-book/[a-z].log
 
 # 工具本地配置（不入库）
 /.qoder/
+
+# book 链路临时验证文件（codecheck.* 是开发期手写的样式检查样张）
+templates/book/codecheck.tex
+templates/book/codecheck.pdf

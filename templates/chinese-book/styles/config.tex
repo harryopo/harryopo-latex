@@ -4,9 +4,23 @@
 % 原为 Windows 系统字体（Path=C:/Windows/Fonts/ + GBK 名），换机器即失效。
 % 改指向项目内嵌字体（templates/fonts/，与 harryopo-base.sty 同一套），
 % 保证 skill 整体拷走后仍能编译。路径相对本文件：styles/ → ../fonts/
-\setCJKmainfont[Path=../fonts/, Extension=.TTF]{FZSSJW}
-\setCJKsansfont[Path=../fonts/, Extension=.TTF]{FZHTJW}
-\setCJKmonofont[Path=../fonts/, Extension=.TTF]{FZHTJW}
+%
+% ⚠️ 加载顺序很关键：kaoCJKsc.sty 里的 \kao@fontmethodModern 会
+% \RequirePackage{unicode-math} 并 \setmonofont{Liberation Mono}，
+% 那是**在之后**执行的，会覆盖此处设定。main.tex 的顺序是
+%   config.tex → \usepackage{kaoWinCJKsc} → kaoCJKsc.sty
+% 所以等宽字体必须放在 kaoWinCJKsc **之后**才生效——见文件末尾。
+% ⚠️ FZ*JW 只有单一字重，kaobook 却会请求 b/n（粗）m/it（斜）形状
+%   （章节标题用 \fzhei\bfseries、\emph 用斜体）。xeCJK 找不到这些形状时
+%   回退 nullfont，于是**所有拉丁字符与连字符**在 PDF 里变成 null 空字符
+%   （实测 main.pdf 有 1127 个 \x00）。
+%   正解：用 AutoFakeBold/FakeSlant 让 xeCJK 用同一字重"伪造"粗斜，
+%   而不是去找不存在的粗体字形。Latin 部分交回 Libertinus（有完整字形）。
+\setCJKmainfont[Path=../fonts/, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZSSJW}
+\setCJKsansfont[Path=../fonts/, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZHTJW}
+\setCJKmonofont[Path=../fonts/, Extension=.ttf]{cour}
 
 % ── 中文本土化字符串 ──
 \renewcommand{\contentsname}{目\quad 录}
@@ -38,3 +52,6 @@
 % twoside=false 时页眉显示
 \lehead{\leftmark}
 \rohead{\leftmark}
+% 等宽/拉丁字体的最终设定在 styles/packageconfig.tex 末尾——
+% 必须放在 kaoWinCJKsc（会 \setmainfont{Libertinus Serif}）之后才能生效，
+% 详见那里的说明。

@@ -160,6 +160,18 @@
 }
 
 % ===================== 颜色定义 =====================
+% ⚠️ 本类是**独立体系**（不加载 harryopo-base.sty），所以 base.sty 的六个
+%   标题色宏（MainColor/SubColor/DarkColor…）在这里不存在。此前标题只能用
+%   svgnames 的 DeepSkyBlue，与 paper/report/book 的 #1A365D/#2B6CB0
+%   不是同一个蓝，跨类看颜色"不统一"。
+%   现内联与 base.sty:98-105 完全一致的取值，使五类色板同源。
+\definecolor{MainColor}{HTML}{1A365D}   % 深蓝——一级标题
+\definecolor{SubColor}{HTML}{2B6CB0}   % 中蓝——二级标题
+\definecolor{SmallColor}{HTML}{4299E1}
+\definecolor{TinyColor}{HTML}{EBF8FF}
+\definecolor{DarkColor}{HTML}{1A202C}
+\definecolor{AccentColor}{HTML}{C53030}
+
 \definecolor{formalshade}{rgb}{0.95,0.95,0.95}
 \definecolor{defbar}{gray}{0.55}
 \definecolor{answerbg}{rgb}{0.90,0.96,1.0}
@@ -171,6 +183,13 @@
 \definecolor{tipsbg}{RGB}{238, 249, 255}     % 提示：微蓝底
 \definecolor{warnsline}{RGB}{135, 200, 240}  % 警告：浅天蓝
 \definecolor{warnsbg}{RGB}{245, 251, 255}    % 警告：近乎白底
+
+% ===================== 行距 =====================
+% ⚠️ 本类此前**完全没有设正文行距**（唯一的 \linespread{1.1} 在边注
+%   辅助命令的局部分组里），行距退回 extarticle 9pt 的 10/12pt，
+%   比其余四类（base.sty 的 \setstretch{1.25}）明显更紧——这正是用户报
+%   的"正文看起来很小"。现与全家桶对齐到 1.25。
+\setstretch{1.25}
 
 % ===================== 脚注样式 =====================
 \setlength{\footnotesep}{0.5em}
@@ -185,36 +204,39 @@
 \renewcommand{\headrulewidth}{0pt}
 
 % ===================== 标题字体大小 =====================
+% ⚠️ 此前用绝对 \fontsize{34}{20}/{30}{20}/{23}{20}（继承自 12pt 文档），
+%   造成层级倒置：section 是 23pt，而 subsection 用 \huge，在 9pt extarticle
+%   基准下 \huge≈20.74pt —— **父级比子级还小**。这正是用户报的
+%   "标题字号很大很小都有"。现统一走 harryopo-typography 的绝对
+%   \zihao 阶梯（16/14/12pt），与 paper/report/book 完全一致。
 \newcommand*{\TitleFont}{%
-  \usefont{\encodingdefault}{\rmdefault}{m}{n}%
-  \fontsize{34}{20}\selectfont}
-\newcommand*{\TitleFontb}{%
-  \usefont{\encodingdefault}{\rmdefault}{m}{n}%
-  \fontsize{30}{20}\selectfont}
+  \normalfont\zihao{2}\selectfont}
+% \TitleFontb 已删除——全仓仅定义、零引用（死代码）。
 \newcommand*{\TitleFontc}{%
-  \usefont{\encodingdefault}{\rmdefault}{m}{n}%
-  \fontsize{23}{20}\selectfont}
+  \normalfont\zihao{3}\selectfont}
 
 % ===================== 节标题格式 =====================
 % section: "一、标题"（中文编号 + 顿号）
 \titleformat{\section}
-  {\normalfont\TitleFontc\fzdbs\color{DeepSkyBlue}}
+  {\normalfont\TitleFontc\fzdbs\color{MainColor}}
   {\fzht \chinese{section}、}
   {0.5em}
   {}
 \renewcommand{\thesection}{\arabic{section}}
 
 % subsection: "1.1 标题"（阿拉伯数字）
+% ⚠️ 颜色此前与 section 同为 DeepSkyBlue（零层级差），且 subsubsection
+%   干脆无颜色（纯黑）——颜色随层级递减。改为规范的 SubColor → 淡蓝黑。
 \titleformat{\subsection}
-  {\normalfont\huge\fzxbs\color{DeepSkyBlue}}
+  {\normalfont\zihao{4}\fzht\color{SubColor}}
   {\thesubsection}
   {1em}
   {}
 \titlespacing*{\subsection}{0pt}{12pt}{6pt}
 
-% subsubsection: "1.1.1 标题"（阿拉伯数字，黑体）
+% subsubsection: "1.1.1 标题"（阿拉伯数字，楷体）
 \titleformat{\subsubsection}
-  {\normalfont\Large\fzht}
+  {\normalfont\zihao{-4}\fzkt\color{MainColor!75!black}}
   {\thesubsubsection}
   {1em}
   {}

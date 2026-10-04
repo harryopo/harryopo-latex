@@ -94,6 +94,25 @@ REQUIRED_SEGMENTS = {
     'harryopo-slides.cls': [
         (r'\\LoadClass\[.*\]\{ctexbeamer\}', 'beamer 基类（\\LoadClass；.cls 用它而非 \\documentclass）'),
     ],
+    # harryopo-typography 是五类共用的排版规范（2026-09-30 新增）。
+    # 下列断言守护的是"删掉也不报错、只会让排版悄悄坏掉"的点：
+    'harryopo-typography.sty': [
+        (r'\\lstdefinestyle\{pystyle\}', 'Python 代码样式（用户明确要求：无行号）'),
+        (r'numbers=none',                '代码块禁用行号（numbers=none）'),
+        (r'frame=none',                  '代码块无边框（frame=none）'),
+        (r'\\cftsecfont\}\{\\zihao\{4\}\\fzdbs',
+                                        '目录一级条目用绝对字号（缺层级差即"缩放反了"）'),
+        (r'\\cftsecpagefont\}\{\\normalfont\}', '目录页码用正文字号（不随条目放大）'),        (r'\\newcommand\{\\hrpLineSpread\}', '统一行距（mathnotes 此前完全没设，正文偏紧）'),
+    ],
+    'harryopo-paper.cls': [
+        (r'\\hrpapplyall',               '接入统一排版规范'),
+        (r'tocloft',                     '目录需 tocloft（此前用 ctexart 默认目录，无层级无色）'),
+        (r'\\if@govmode',                'GB/T 9704 公文模式（四级标题同三号，国标硬要求）'),
+    ],
+    'harryopo-report.cls': [
+        (r'\\hrpapplyall',               '接入统一排版规范'),
+        (r'\\hrptocsetup',               '目录走统一层级'),
+    ],
     # harryopo-book 的三处静默失效点（均为实测踩出，删掉不会报错、
     # 只会让排版悄悄坏掉）：
     'harryopo-book.cls': [
@@ -112,6 +131,7 @@ REQUIRED_SEGMENTS = {
 # 需保持一致的文件（项目根为准，单向同步到 skill）
 SYNC_FILES = [
     'cls/harryopo-base.sty',
+    'cls/harryopo-typography.sty',
     'cls/harryopo-paper.cls',
     'cls/harryopo-report.cls',
     'cls/harryopo-slides.cls',
@@ -184,14 +204,19 @@ def check_paths(project_root: Path, skill_dir: Path, rep: Report):
         rep.add(OK if path.exists() else FAIL, '关键路径', f'{label}: {path}'
                 + ('' if path.exists() else '  ← 缺失'))
 
-    # 字体数量（19 个是基线：方正6 + XITS7 + Heros4 + lmmono1 + cour1）
+    # 字体数量（24 个是基线，2026-09-30 起）：
+    #   方正 6 + XITS 7 + Heros 4 + lmmono 1 + cour 1 = 19
+    #   + JetBrains Mono 4（代码块等宽，SIL OFL 1.1）
+    #   + LICENSE-JetBrainsMono.txt（字体许可说明，也计文件数）
+    FONT_BASELINE = 24
     for label, path in (('项目根 fonts', project_root / 'templates' / 'fonts'),
                         ('skill fonts', skill_dir / 'templates' / 'fonts')):
         if not path.exists():
             continue
         n = len([f for f in path.iterdir() if f.is_file()])
-        rep.add(OK if n == 19 else WARN, '关键路径', f'{label}: {n} 个字体'
-                + ('' if n == 19 else f'（基线 19，差 {n - 19:+d}）'))
+        rep.add(OK if n == FONT_BASELINE else WARN, '关键路径', f'{label}: {n} 个字体'
+                + ('' if n == FONT_BASELINE
+                   else f'（基线 {FONT_BASELINE}，差 {n - FONT_BASELINE:+d}）'))
 
 
 # ============================================================

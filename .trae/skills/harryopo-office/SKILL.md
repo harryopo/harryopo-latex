@@ -59,7 +59,7 @@ harryopo-office/
     │   ├── harryopo-paper.cls            #   论文文档类（单/双栏 + nomath）v4.0
     │   ├── harryopo-report.cls           #   报告文档类（封面 + 目录）v4.0
     │   └── flushend.sty                  #   双栏末页栏平衡（TinyTeX 缺包时的项目自包含副本）
-    ├── fonts/                            # 内嵌字体（19个文件，无需系统安装）
+    ├── fonts/                            # 内嵌字体（24个文件，无需系统安装）
     ├── book/                             # 书籍编译目录（harryopo-book，ctexbook）
     ├── previews/                         # 示例文档 + 预览方案（5 个最新示例 md）
     │   ├── README.md                     #   示例清单 + office.py 生成命令 + 元信息约定
@@ -188,7 +188,7 @@ python office.py doctor --skip-privacy  # 跳过 git 跟踪检查
 
 | 检查类 | 断言 | 典型症状 |
 |---|---|---|
-| **cls 双源同步** | 7 份 cls/mathnotes 副本与项目根 sha256 一致 | 改了 `templates/cls/` 却没同步 skill 内嵌副本 → 拷走后公文模式/公式字体失效 |
+| **cls 双源同步** | 8 份 cls/mathnotes/typography 副本与项目根 sha256 一致 | 改了 `templates/cls/` 却没同步 skill 内嵌副本 → 拷走后公文模式/公式字体失效 |
 | **cls 必含段** | `paper.cls` 含 `\if@govmode`；`base.sty` 含 `\ifnum\harryopo@nomath=0`；`slides.cls` 含 `\LoadClass{ctexbeamer}` | 缺段时**编译仍成功但结果静默错误**（如 `\ifx` 恒假 → XITS Math 永不加载，公式回退 Computer Modern） |
 | 关键路径 | 10 个必需目录/文件 + 两份字体数均为 19 | skill 装到新机器后目录不全 |
 | 工具链 | xelatex/pandoc/mmdc/浏览器 + 5 个 Python 依赖 | 换机器后缺依赖，链路静默降级 |
@@ -1059,7 +1059,7 @@ Pandoc 原生支持几乎所有 Markdown 扩展语法，无需手动映射：
 | `{table}[htbp]` | 三线表 |
 | `{figure}[htbp]` | 插图 |
 | `{figure*}[tbp]` | 跨栏插图（双栏） |
-| `{lstlisting}[style=pystyle]` | Python 代码 |
+| `{lstlisting}[style=pystyle]` | Python 代码（无行号、无边框，JetBrains Mono）|
 | `{algorithm}[htbp]` | 算法伪代码（仅 paper） |
 
 ### 环境（math-notes）

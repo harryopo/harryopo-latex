@@ -394,6 +394,10 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
     meta_re = re.compile(r'^\*{0,2}(作者|摘要|关键词)\*{0,2}[：:]')
     keywords_in_text_re = re.compile(r'(?m)^\*{0,2}关键词[：:].+$')
     pending_caption: Optional[str] = None
+    # 双栏下单栏可用宽度是 \columnwidth；沿用 \textwidth 会让图/表撑破
+    # 栏宽压到右栏文字上（实测 paper-twocolumn 的表格横跨双栏盖住右栏）。
+    # 同一变量被图片分支与表格分支共用，必须定义在循环之外。
+    figwidth = "\\columnwidth" if twocolumn else "\\textwidth"
 
     for i, (btype, content) in enumerate(blocks):
         if btype == BLOCK_BIB:
@@ -492,7 +496,8 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
                 if qc.startswith('注'):
                     note = qc
                     i += 1  # 消费表注块
-            lines.extend(_parse_table_to_latex(content, pending_caption, note))
+            lines.extend(_parse_table_to_latex(content, pending_caption, note,
+                                               twocolumn=twocolumn))
             pending_caption = None
         elif btype == BLOCK_RAW_LATEX:
             # MinerU 清洗后的 LaTeX 代码（longtable/tabular 等）直接透传
@@ -512,7 +517,7 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
             # caption 放在 \includegraphics 之后（图下方）；编号去重（自动编号）
             lines.append(r"\begin{figure}[htbp]")
             lines.append(r"  \centering")
-            lines.append(r"  \includegraphics[width=0.85\textwidth]{" + src + "}")
+            lines.append(r"  \includegraphics[width=0.85" + figwidth + r"]{" + src + "}")
             if alt:
                 lines.append(r"  \caption{" + _strip_caption_num(alt) + "}")
             if note:
@@ -538,13 +543,17 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
     return "\n".join(lines)
 
 
-def _parse_table_to_latex(raw: str, caption: str = "", note: str = "") -> List[str]:
+def _parse_table_to_latex(raw: str, caption: str = "", note: str = "",
+                          twocolumn: bool = False) -> List[str]:
     """将 Markdown 表格转为 booktabs 三线表（tabularx 自适应宽度 + 标题在表格下方）
 
     Args:
         raw: Markdown 表格原文
         caption: 表格标题（渲染在表格下方）
         note: 表注（渲染在标题下方，如 `注：xxx`）
+        twocolumn: 双栏模式。窄表限宽栏宽（columnwidth）；列数 ≥5 的宽表
+            自动改用 table* 跨栏（paper.cls 已有该环境 + dblfloatfix）。
+            单栏时 columnwidth == textwidth，故两种模式都安全。
     """
     rows = raw.strip().split('\n')
     if len(rows) < 2:
@@ -573,9 +582,21 @@ def _parse_table_to_latex(raw: str, caption: str = "", note: str = "") -> List[s
     else:
         aligns = ['l'] * ncols
 
-    # 用 tabularx 列说明：每列 X，并加 >{\raggedright\arraybackslash} 避免过宽
-    col_spec = ' '.join('>{\\raggedright\\arraybackslash}X' for _ in range(ncols))
+    # 用 tabularx 列说明：X 列按 Markdown 对齐方式分配列格式。
+    # ⚠️ 此前 aligns 算完从不使用、这里硬编码全部 \raggedright，
+    #    导致 Markdown 的 `:---:`（居中）/`---:`（右对齐）被静默丢弃。
+    _spec_map = {'l': '>{\\raggedright\\arraybackslash}X',
+                 'c': '>{\\centering\\arraybackslash}X',
+                 'r': '>{\\raggedleft\\arraybackslash}X'}
+    col_spec = ' '.join(_spec_map[a] for a in aligns[:ncols])
     data_rows = rows[2:] if len(rows) > 2 else []
+
+    # 跨栏判定：双栏 + 列数多（≥SPAN_COLS）时表格用 table* 跳跈栏，
+    # 否则压进单栏。双栏下单栏宽是 \columnwidth 而非 \textwidth——
+    # 沿用 \textwidth 会撑破栏宽、压到右栏文字上（实测）。
+    SPAN_COLS = 5
+    use_double = bool(twocolumn) and ncols >= SPAN_COLS
+    width = r'\textwidth' if use_double else r'\columnwidth'
 
     # 转义表头/单元格（防止 &、% 等被误解）
     def _esc(cell: str) -> str:
@@ -604,10 +625,14 @@ def _parse_table_to_latex(raw: str, caption: str = "", note: str = "") -> List[s
         return s
 
     lines = []
-    lines.append(r"\begin{table}[htbp]")
+    # 跨栏浮动体只能用 [t]（双栏浮动体不支持 h/bp，会被推到浮动页）
+    if use_double:
+        lines.append(r"\begin{table*}[t]")
+    else:
+        lines.append(r"\begin{table}[htbp]")
     lines.append(r"  \centering")
     lines.append(r"  \small")
-    lines.append(r"  \begin{tabularx}{\textwidth}{" + col_spec + r"}")
+    lines.append(r"  \begin{tabularx}{" + width + r"}{" + col_spec + r"}")
     lines.append(r"    \toprule")
     lines.append("    " + header_line)
     lines.append(r"    \midrule")
@@ -625,7 +650,7 @@ def _parse_table_to_latex(raw: str, caption: str = "", note: str = "") -> List[s
         lines.append(r"  \caption{" + _strip_caption_num(caption) + "}")
     if note:
         lines.append(r"  {\fzkt\footnotesize " + parse_inline(note) + "}")
-    lines.append(r"\end{table}")
+    lines.append(r"\end{table*}" if use_double else r"\end{table}")
     lines.append("")
     return lines
 
@@ -765,6 +790,7 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
                 if qc.startswith('注'):
                     note = qc
                     i += 1  # 消费表注块
+            # report/book 的类未开 twocolumn 选项（单栏），固定 False
             lines.extend(_parse_table_to_latex(content, pending_caption, note))
             pending_caption = None
         elif btype == BLOCK_RAW_LATEX:
@@ -784,6 +810,7 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
             # caption 放在 \includegraphics 之后（图下方）；编号去重（自动编号）
             lines.append(r"\begin{figure}[htbp]")
             lines.append(r"  \centering")
+            # report 类未开 twocolumn 选项（单栏），固定 textwidth
             lines.append(r"  \includegraphics[width=0.85\textwidth]{" + src + "}")
             if alt:
                 lines.append(r"  \caption{" + _strip_caption_num(alt) + "}")

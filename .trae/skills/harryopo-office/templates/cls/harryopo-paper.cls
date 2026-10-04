@@ -34,6 +34,9 @@
 
 \RequirePackage{harryopo-base}
 \RequirePackage{dblfloatfix}
+% 目录：此前 paper 完全没加载 tocloft，用的是 ctexart 默认目录
+%（衬线 \bfseries、无字号层级、无色），是五类里目录最没规范的一个。
+\RequirePackage{tocloft}
 
 \if@twocolumnmode
     \RequirePackage{flushend}
@@ -60,6 +63,15 @@
     \geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm,
               headheight=15pt}
 \fi
+
+% ============================================================
+% 第三点五部分：接入统一排版规范（harryopo-typography）
+% 字号阶梯 / 标题色阶 / 目录层级 / 题注 / 代码块 / \subhead 全部由此接管。
+% 公文模式（\if@govmode，第五部分）随后覆写字号——GB/T 9704 规定四级
+% 标题同为三号、靠字体区分，属国标硬要求，不受统一阶梯影响。
+% ============================================================
+\hrpapplyall
+\hrptocsetup
 
 % ============================================================
 % 第四部分：页眉页脚（无横线）
@@ -91,31 +103,19 @@
 \renewcommand{\thesection}{}
 \renewcommand{\thesubsection}{}
 \renewcommand{\thesubsubsection}{}
-
-% 一级标题 section：方正大标宋 + 黑色
-\titleformat{\section}
-    {\Large\fzdbs\bfseries}
-    {}{0pt}{}
-\titlespacing{\section}{0pt}{16pt}{10pt}
-
-% 二级标题 subsection：方正黑体 + 黑色
-\titleformat{\subsection}
-    {\large\bfseries\fzht}
-    {}{0pt}{}
-\titlespacing{\subsection}{1em}{12pt}{6pt}
-
-% 三级标题 subsubsection：方正楷体 + 黑色
-\titleformat{\subsubsection}
-    {\normalsize\fzkt\bfseries}
-    {}{0pt}{}
-\titlespacing{\subsubsection}{2em}{8pt}{4pt}
-
-% 四级标题 paragraph：方正黑体 + 黑色（公文 ① 层级）
+% paper 的 convert 产出只到 section 层级且全部用 \section*（隐藏编号），
+% 故段级编号一并隐藏，否则手动写 \paragraph 时会冒出 "0.1" 之类。
 \renewcommand{\theparagraph}{}
-\titleformat{\paragraph}
-    {\normalsize\bfseries\fzht}
-    {}{0pt}{}
-\titlespacing{\paragraph}{2em}{6pt}{2pt}
+
+% 一级~四级标题：统一走规范（字号阶梯 + 标题色阶 + 间距）
+% ⚠️ 此前四级标题**全部无 \color**（纯黑），而同文档的 \subhead 是蓝色
+% SubColor、作者简介是 MainColor——同页出现蓝/黑混杂，即用户报的
+% "字体颜色没统一"。规范里一级 MainColor → 二级 SubColor →
+% 三级淡蓝黑，与 report/book 完全一致。
+\hrptitleformat{section}
+\hrptitleformat{subsection}
+\hrptitleformat{subsubsection}
+\hrptitleformat{paragraph}
 
 % 括号式小标题：\subhead{标题名} → （标题名）黑体后接正文
 % 注意：不再使用 \noindent，保证后续段落正常段首缩进 2 字符
