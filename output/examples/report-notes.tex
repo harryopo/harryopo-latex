@@ -1,0 +1,480 @@
+% ============================================================
+%  harryopo-mathnotes Pandoc LaTeX 模板
+%  用法: pandoc input.md --template=pandoc/mathnotes-template.latex
+%        --lua-filter=pandoc/mathnotes-table.lua -o output.pdf
+% ============================================================
+\documentclass{harryopo-mathnotes}
+
+% Pandoc 图片绑定命令兼容层
+\providecommand{\pandocbounded}[1]{#1}
+% 图片宽度约束：防止大图撑满页面
+\usepackage{graphicx}
+\setkeys{Gin}{width=0.85\textwidth,max width=\textwidth}
+
+
+\begin{document}
+
+% ===================== 封面 =====================
+\newgeometry{top=3cm,bottom=2.5cm,left=4cm,right=4cm}
+\maketitle
+\thispagestyle{empty}
+\cleardoublepage
+
+% ===================== 目录 =====================
+
+% ===================== 正文 =====================
+\strictpagecheck
+\setcounter{page}{1}
+\restoregeometry
+\onehalfspacing
+
+\section{基于深度学习的智慧交通流量预测系统设计报告}\label{ux57faux4e8eux6df1ux5ea6ux5b66ux4e60ux7684ux667aux6167ux4ea4ux901aux6d41ux91cfux9884ux6d4bux7cfbux7edfux8bbeux8ba1ux62a5ux544a}
+
+\begin{quote}
+作者：王明 计算机学院 2503010102 单位：示例大学 日期：2026年8月29日
+\end{quote}
+
+\section{第一章 绪论}\label{ux7b2cux4e00ux7ae0-ux7eeaux8bba}
+
+\subsection{1.1
+研究背景与意义}\label{ux7814ux7a76ux80ccux666fux4e0eux610fux4e49}
+
+随着城市化进程的加速，交通拥堵已成为深圳等大型城市面临的严峻挑战。传统的交通流量预测方法------如时间序列分析和统计回归------难以捕捉复杂的时空依赖关系，在面对突发状况时预测精度大幅下降。
+
+基于深度学习的智慧交通预测系统，能够通过路网拓扑建模和时序演化分析，提供更准确的预测结果，从而辅助交通管理部门进行科学决策。
+
+\subsection{1.2
+国内外研究现状}\label{ux56fdux5185ux5916ux7814ux7a76ux73b0ux72b6}
+
+\subsubsection{1.2.1
+国外研究现状}\label{ux56fdux5916ux7814ux7a76ux73b0ux72b6}
+
+国外学者较早开始研究交通流量预测问题。文献 {[}1{]} 提出基于 LSTM
+的预测模型，在 METR-LA 数据集上取得良好效果。文献 {[}2{]}
+进一步引入图卷积网络，建模路网空间结构。
+
+\subsubsection{1.2.2
+国内研究现状}\label{ux56fdux5185ux7814ux7a76ux73b0ux72b6}
+
+国内研究多聚焦于特定城市的实际场景。文献 {[}3{]}
+针对北京市的交通特点提出了改进的 GRU 模型。文献 {[}4{]}
+则研究了深圳的交通流特性，构建了融合多源数据的预测框架。
+
+\subsection{1.3
+主要研究内容}\label{ux4e3bux8981ux7814ux7a76ux5185ux5bb9}
+
+本报告的主要研究内容包括：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{数据集构建}：采集深圳市福田区 6 个月的交通流量数据
+\item
+  \textbf{模型设计}：设计图卷积-时序混合网络架构
+\item
+  \textbf{系统实现}：开发完整的 B/S 架构 Web 系统
+\item
+  \textbf{部署验证}：在真实场景中验证系统有效性
+\end{enumerate}
+
+\subsection{1.4
+报告组织结构}\label{ux62a5ux544aux7ec4ux7ec7ux7ed3ux6784}
+
+本报告共分六章：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{第一章} 绪论
+\item
+  \textbf{第二章} 相关技术与理论基础
+\item
+  \textbf{第三章} 需求分析与系统设计
+\item
+  \textbf{第四章} 模型设计与实现
+\item
+  \textbf{第五章} 系统测试与结果分析
+\item
+  \textbf{第六章} 总结与展望
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{第二章
+相关技术与理论基础}\label{ux7b2cux4e8cux7ae0-ux76f8ux5173ux6280ux672fux4e0eux7406ux8bbaux57faux7840}
+
+\subsection{2.1
+深度学习基础}\label{ux6df1ux5ea6ux5b66ux4e60ux57faux7840}
+
+\subsubsection{2.1.1
+卷积神经网络（CNN）}\label{ux5377ux79efux795eux7ecfux7f51ux7edccnn}
+
+卷积神经网络是处理网格结构数据（如图像）的经典架构。其核心思想是通过卷积核提取局部特征，再通过池化层降维。
+
+\subsubsection{2.1.2
+循环神经网络（RNN）}\label{ux5faaux73afux795eux7ecfux7f51ux7edcrnn}
+
+循环神经网络擅长处理序列数据。LSTM 通过门控机制解决了传统 RNN
+的梯度消失问题。
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ImportTok{import}\NormalTok{ torch}
+\ImportTok{import}\NormalTok{ torch.nn }\ImportTok{as}\NormalTok{ nn}
+
+\KeywordTok{class}\NormalTok{ TrafficPredictor(nn.Module):}
+    \KeywordTok{def} \FunctionTok{\_\_init\_\_}\NormalTok{(}\VariableTok{self}\NormalTok{, in\_dim, hidden\_dim, out\_dim, num\_layers}\OperatorTok{=}\DecValTok{2}\NormalTok{):}
+        \BuiltInTok{super}\NormalTok{().}\FunctionTok{\_\_init\_\_}\NormalTok{()}
+        \VariableTok{self}\NormalTok{.lstm }\OperatorTok{=}\NormalTok{ nn.LSTM(}
+\NormalTok{            input\_size}\OperatorTok{=}\NormalTok{in\_dim,}
+\NormalTok{            hidden\_size}\OperatorTok{=}\NormalTok{hidden\_dim,}
+\NormalTok{            num\_layers}\OperatorTok{=}\NormalTok{num\_layers,}
+\NormalTok{            batch\_first}\OperatorTok{=}\VariableTok{True}\NormalTok{,}
+\NormalTok{            dropout}\OperatorTok{=}\FloatTok{0.2}
+\NormalTok{        )}
+        \VariableTok{self}\NormalTok{.fc }\OperatorTok{=}\NormalTok{ nn.Linear(hidden\_dim, out\_dim)}
+
+    \KeywordTok{def}\NormalTok{ forward(}\VariableTok{self}\NormalTok{, x):}
+        \CommentTok{\# x: (batch, seq\_len, in\_dim)}
+\NormalTok{        lstm\_out, \_ }\OperatorTok{=} \VariableTok{self}\NormalTok{.lstm(x)}
+        \ControlFlowTok{return} \VariableTok{self}\NormalTok{.fc(lstm\_out[:, }\OperatorTok{{-}}\DecValTok{1}\NormalTok{, :])}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{2.2 图神经网络}\label{ux56feux795eux7ecfux7f51ux7edc}
+
+\subsubsection{2.2.1
+图卷积网络（GCN）}\label{ux56feux5377ux79efux7f51ux7edcgcn}
+
+图卷积网络将传统卷积操作推广到图结构数据，能够有效建模节点间的拓扑关系。
+
+\begin{quote}
+\textbf{公式 2.1} GCN 层的传播规则：
+\[H^{(l+1)} = \sigma\left(\tilde{D}^{-1/2} \tilde{A} \tilde{D}^{-1/2} H^{(l)} W^{(l)}\right)\]
+\end{quote}
+
+其中 \(\tilde{A} = A + I\) 为加自环的邻接矩阵，\(\tilde{D}\)
+为对应的度矩阵。
+
+\subsubsection{2.2.2
+图注意力网络（GAT）}\label{ux56feux6ce8ux610fux529bux7f51ux7edcgat}
+
+GAT 通过注意力机制自适应地学习邻居节点的权重，进一步提升性能。
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{>{\hsize=1.778\hsize\linewidth=\hsize\raggedright\arraybackslash}X>{\hsize=0.593\hsize\linewidth=\hsize\centering\arraybackslash}X>{\hsize=0.593\hsize\linewidth=\hsize\centering\arraybackslash}X>{\hsize=1.037\hsize\linewidth=\hsize\centering\arraybackslash}X}
+\toprule
+\textbf{模型} & \textbf{MAE} & \textbf{RMSE} & \textbf{MAPE (\%)} \\
+\midrule
+HA & 6.02 & 9.78 & 17.50 \\
+LSTM & 4.27 & 6.85 & 12.20 \\
+DCRNN & 3.05 & 5.12 & 8.90 \\
+Graph WaveNet & 2.69 & 4.65 & 7.60 \\
+\textbf{本文模型} & \textbf{2.31} & \textbf{3.98} & \textbf{6.45} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{2.3 本章小结}\label{ux672cux7ae0ux5c0fux7ed3}
+
+本章系统梳理了深度学习与图神经网络的基础理论，为后续模型设计奠定了理论基础。
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{第三章
+需求分析与系统设计}\label{ux7b2cux4e09ux7ae0-ux9700ux6c42ux5206ux6790ux4e0eux7cfbux7edfux8bbeux8ba1}
+
+\subsection{3.1 功能性需求}\label{ux529fux80fdux6027ux9700ux6c42}
+
+\subsubsection{3.1.1
+数据采集模块}\label{ux6570ux636eux91c7ux96c6ux6a21ux5757}
+
+\begin{itemize}
+\tightlist
+\item
+  支持实时接入路口摄像头数据
+\item
+  支持 CSV/JSON 批量导入
+\item
+  数据清洗与异常值处理
+\end{itemize}
+
+\subsubsection{3.1.2
+预测服务模块}\label{ux9884ux6d4bux670dux52a1ux6a21ux5757}
+
+\begin{itemize}
+\tightlist
+\item
+  支持未来 15/30/60 分钟多粒度预测
+\item
+  预测结果可视化展示
+\item
+  预测准确率实时监控
+\end{itemize}
+
+\subsection{3.2
+非功能性需求}\label{ux975eux529fux80fdux6027ux9700ux6c42}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{性能}：单次预测响应时间 \textless{} 200ms
+\item
+  \textbf{可用性}：系统 7×24 小时稳定运行
+\item
+  \textbf{可扩展性}：支持横向扩展至 100+ 节点
+\end{itemize}
+
+\subsection{3.3
+系统架构设计}\label{ux7cfbux7edfux67b6ux6784ux8bbeux8ba1}
+
+系统采用前后端分离的 B/S 架构：
+
+\begin{verbatim}
+┌─────────────────────────────────────────────────┐
+│               浏览器（Vue + ECharts）              │
+└─────────────────┬───────────────────────────────┘
+                  │ HTTPS / WebSocket
+┌─────────────────▼───────────────────────────────┐
+│          后端服务（FastAPI + Uvicorn）              │
+│  ┌─────────┐ ┌──────────┐ ┌──────────────┐      │
+│  │ 模型推理 │ │ 数据管理 │ │ 用户认证      │      │
+│  └─────────┘ └──────────┘ └──────────────┘      │
+└─────────────────┬───────────────────────────────┘
+                  │ TCP / RPC
+┌─────────────────▼───────────────────────────────┐
+│         模型服务（PyTorch + TorchServe）            │
+└─────────────────────────────────────────────────┘
+\end{verbatim}
+
+\begin{quote}
+\textbf{架构特点}：前后端通过 RESTful API 解耦，模型服务可独立扩容，支持
+GPU 集群推理。
+\end{quote}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{第四章
+模型设计与实现}\label{ux7b2cux56dbux7ae0-ux6a21ux578bux8bbeux8ba1ux4e0eux5b9eux73b0}
+
+\subsection{4.1 数据预处理}\label{ux6570ux636eux9884ux5904ux7406}
+
+\subsubsection{4.1.1 数据集描述}\label{ux6570ux636eux96c6ux63cfux8ff0}
+
+本报告使用深圳市福田区 2024 年 1 月至 6 月的交通流量数据，包含：
+
+\begin{itemize}
+\tightlist
+\item
+  156 个关键路口的实时车流量
+\item
+  5 分钟粒度采样，共约 50 万条记录
+\item
+  天气、节假日等外部特征
+\end{itemize}
+
+\subsubsection{4.1.2 特征工程}\label{ux7279ux5f81ux5de5ux7a0b}
+
+\begin{itemize}
+\tightlist
+\item
+  时序特征：小时、星期、是否节假日
+\item
+  空间特征：路口邻接关系、路段长度
+\item
+  外部特征：天气、温度、特殊事件
+\end{itemize}
+
+\subsection{4.2 模型架构}\label{ux6a21ux578bux67b6ux6784}
+
+\subsubsection{4.2.1 整体架构}\label{ux6574ux4f53ux67b6ux6784}
+
+模型由\textbf{空间建模}和\textbf{时序建模}两部分组成：
+
+\begin{quote}
+\textbf{空间建模}：使用 GAT 建模路口间的空间依赖关系
+
+\textbf{时序建模}：使用 GRU 建模时序演化规律
+
+\textbf{融合层}：拼接空间与时序特征，通过全连接层输出最终预测
+\end{quote}
+
+\subsubsection{4.2.2 损失函数}\label{ux635fux5931ux51fdux6570}
+
+本报告使用 Masked MAE 损失，对缺失值不参与梯度计算：
+
+\begin{quote}
+\textbf{公式 4.1} Masked MAE 损失：
+\[L = \frac{\sum_{i} m_i \cdot |y_i - \hat{y}_i|}{\sum_{i} m_i + \epsilon}\]
+\end{quote}
+
+其中 \(m_i \in \{0, 1\}\) 为掩码标记，\(\epsilon\) 为防止除零的小常数。
+
+\subsection{4.3 训练策略}\label{ux8badux7ec3ux7b56ux7565}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{优化器}：Adam（lr=1e-3, weight\_decay=1e-5）
+\item
+  \textbf{学习率调度}：ReduceLROnPlateau（factor=0.5, patience=5）
+\item
+  \textbf{批量大小}：64
+\item
+  \textbf{训练轮数}：100（early stopping，patience=10）
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{第五章
+系统测试与结果分析}\label{ux7b2cux4e94ux7ae0-ux7cfbux7edfux6d4bux8bd5ux4e0eux7ed3ux679cux5206ux6790}
+
+\subsection{5.1 测试环境}\label{ux6d4bux8bd5ux73afux5883}
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{>{\hsize=0.615\hsize\linewidth=\hsize\raggedright\arraybackslash}X>{\hsize=1.385\hsize\linewidth=\hsize\raggedright\arraybackslash}X}
+\toprule
+\textbf{组件} & \textbf{配置} \\
+\midrule
+CPU & Intel Xeon Gold 6248 @ 2.5GHz × 2 \\
+GPU & NVIDIA Tesla V100 32GB \\
+内存 & 128GB DDR4 \\
+操作系统 & Ubuntu 20.04 LTS \\
+深度学习框架 & PyTorch 2.0 + CUDA 11.8 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{5.2 性能测试}\label{ux6027ux80fdux6d4bux8bd5}
+
+\subsubsection{5.2.1 预测精度}\label{ux9884ux6d4bux7cbeux5ea6}
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{>{\hsize=1.391\hsize\linewidth=\hsize\raggedright\arraybackslash}X>{\hsize=0.696\hsize\linewidth=\hsize\centering\arraybackslash}X>{\hsize=0.696\hsize\linewidth=\hsize\centering\arraybackslash}X>{\hsize=1.217\hsize\linewidth=\hsize\centering\arraybackslash}X}
+\toprule
+\textbf{预测时长} & \textbf{MAE} & \textbf{RMSE} & \textbf{MAPE (\%)} \\
+\midrule
+15 分钟 & 1.92 & 3.21 & 5.12 \\
+30 分钟 & 2.31 & 3.98 & 6.45 \\
+60 分钟 & 2.87 & 4.76 & 8.13 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{5.2.2
+系统响应时间}\label{ux7cfbux7edfux54cdux5e94ux65f6ux95f4}
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{>{\hsize=0.621\hsize\linewidth=\hsize\centering\arraybackslash}X>{\hsize=1.241\hsize\linewidth=\hsize\centering\arraybackslash}X>{\hsize=1.138\hsize\linewidth=\hsize\centering\arraybackslash}X}
+\toprule
+\textbf{并发数} & \textbf{平均响应 (ms)} & \textbf{P99 响应 (ms)} \\
+\midrule
+10 & 45 & 89 \\
+50 & 78 & 156 \\
+100 & 124 & 245 \\
+200 & 198 & 387 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{5.3 案例分析}\label{ux6848ux4f8bux5206ux6790}
+
+以福田区深南大道-华富路口为例：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{工作日早高峰}（8:00-9:00）：预测车流量 1,250 辆/小时，实际
+  1,287 辆/小时（误差 2.9\%）
+\item
+  \textbf{周末晚高峰}（18:00-19:00）：预测 980 辆/小时，实际 952
+  辆/小时（误差 2.9\%）
+\item
+  \textbf{特殊事件}（2024 年跨年夜）：预测 2,150 辆/小时，实际 2,398
+  辆/小时（误差 10.4\%，仍优于基线）
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{第六章
+总结与展望}\label{ux7b2cux516dux7ae0-ux603bux7ed3ux4e0eux5c55ux671b}
+
+\subsection{6.1 工作总结}\label{ux5de5ux4f5cux603bux7ed3}
+
+本报告完成的主要工作包括：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  系统梳理了智慧交通预测领域的国内外研究现状
+\item
+  构建了基于图卷积-时序网络的混合预测模型
+\item
+  设计并实现了完整的 B/S 架构 Web 预测系统
+\item
+  在深圳市福田区真实场景中验证了系统有效性
+\end{enumerate}
+
+\subsection{6.2 主要创新点}\label{ux4e3bux8981ux521bux65b0ux70b9}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{多尺度时空融合}：同时建模短期突变与长期趋势
+\item
+  \textbf{外部特征自适应融合}：自动学习天气、节假日等外部因素的影响
+\item
+  \textbf{边缘-云端协同部署}：在保证精度的同时提升响应速度
+\end{itemize}
+
+\subsection{6.3 不足与展望}\label{ux4e0dux8db3ux4e0eux5c55ux671b}
+
+本系统仍存在以下不足：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  模型可解释性有待加强
+\item
+  极端天气下的预测精度需进一步提升
+\item
+  暂未支持跨城市迁移
+\end{enumerate}
+
+未来将探索：
+
+\begin{itemize}
+\tightlist
+\item
+  引入因果推断提升可解释性
+\item
+  研究联邦学习支持跨城市协同训练
+\item
+  集成大语言模型实现自然语言交互式查询
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\subsection{参考文献}\label{ux53c2ux8003ux6587ux732e}
+
+{[}1{]} Li Y, Yu R, Shahabi C, et al.~Diffusion convolutional recurrent
+neural network: Data-driven traffic forecasting{[}C{]}. ICLR, 2018.
+
+{[}2{]} Zhao L, Song Y, Zhang C, et al.~T-GCN: A temporal graph
+convolutional network for traffic prediction{[}J{]}. IEEE Transactions
+on Intelligent Transportation Systems, 2019, 21(9): 3848-3858.
+
+{[}3{]} 王伟, 李强. 基于改进 GRU 的城市交通流量预测方法{[}J{]}.
+计算机应用研究, 2022, 39(5): 1452-1456.
+
+{[}4{]} 陈晓, 刘洋. 融合多源数据的深圳交通流预测研究{[}J{]}.
+智能系统学报, 2023, 18(3): 567-575.
+
+\end{document}

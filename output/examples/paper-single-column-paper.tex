@@ -2,7 +2,7 @@
 
 \title{基于注意力机制的轻量化图像分类方法研究}
 \author{张三\ 计算机学院\ 2025000101\\ \fzfs\small 示例大学}
-\date{2026年09月18日}
+\date{2026年10月04日}
 
 
 \begin{document}
@@ -47,7 +47,7 @@ MobileNetV3通过深度可分离卷积和SE注意力机制实现高效推理；S
 \begin{table}[htbp]
   \centering
   \small
-  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+  \begin{tabularx}{\columnwidth}{>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
     \toprule
     {\fzht 模型} & {\fzht Top-1 (\%)} & {\fzht Params (M)} & {\fzht FLOPs (G)} \\
     \midrule
@@ -141,7 +141,7 @@ class LightweightAttention(nn.Module):
 \begin{table}[htbp]
   \centering
   \small
-  \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+  \begin{tabularx}{\columnwidth}{>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
     \toprule
     {\fzht 模块} & {\fzht Top-1 (\%)} & {\fzht Params (M)} & {\fzht FLOPs (G)} \\
     \midrule
