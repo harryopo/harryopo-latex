@@ -34,6 +34,9 @@
 \renewcommand{\partname}{第}
 \renewcommand{\chaptername}{}
 \renewcommand{\appendixname}{附\quad 录}
+% \abstractname 由 biblatex 提供，本文档没引 biblatex → 直接 \renewcommand 会报
+% "Command \abstractname undefined"。先兜底再改。
+\providecommand{\abstractname}{Abstract}
 \renewcommand{\abstractname}{摘\quad 要}
 
 % ── 禁用连字符 ──

@@ -33,7 +33,14 @@
 \RequirePackage{fontspec}
 \RequirePackage{xeCJK}
 \RequirePackage{zhnumber}
-\RequirePackage{titlesec}
+% ⚠️ 不要加载 titlesec。
+%   上游 kaobook 根本不用它（本文件与 chapters/ 里零 \titleformat/\title spacing），
+%   是中文适配层多加的。它与 KOMA-Script 的章节命令冲突：加载后 KOMA 自己的
+%   \chapterheading 等被 titlesec 接管，但没人给新命令定义格式，于是每个
+%   \section / \chapter 都报 "Package titlesec Error: No format for this
+%   command"，并连锁产生 98 处 "Missing number" / "Illegal unit of measure"，
+%   最终在图题处 parameter stack 溢出（TeX capacity exceeded）中断编译。
+%   章节标题格式由 KOMA-Script 的 \chapterheading 等自行处理（见下方 KOMA 分支）。
 
 % Define \Ifthispageodd (with a capital 'i') to make kaobook compatible with older KOMAScript versions
 \@ifpackagelater{scrbase}{2019/12/22}{%
@@ -656,20 +663,27 @@
 
 % Detect whether there is a caption in the current environment by switching the kaocaption toggle when \caption is called. If there is no caption, reset the floatsetup. Without this fix, the floatrow package will align the environment to the main text if there is a caption, but to the margin if there is no caption.
 \newtoggle{kaocaption}
-\AtBeginEnvironment{figure}{%
-	\let\oldcaption\caption%
-	\RenewDocumentCommand{\caption}{s o m}{%
-		\IfBooleanTF{#1}{%
-			\oldcaption*{#3}%
+% ⚠️ 原始写法 \let\oldcaption\caption +\RenewDocumentCommand{\caption}…会无限递归。
+%   AtBeginEnvironment{figure} 对**每个** figure 都跑一遍，而 \caption 是全局
+%   重定义命令：第一次进入 figure 时 \let 保存的是真正的 \caption；此后
+%   \caption 已被包装成"包装过的 \caption"，第二次进入 figure 时
+%   \oldcaption 就指向了包装版，包装版再调包装版 → parameter stack 溢出
+%   （TeX capacity exceeded，编译在第一个 figure 的 \caption 处就中断，
+%   实测连页面都没输出）。
+%   正解：把真正的 \caption 一次性存进 \kao@realcaption，之后所有包装
+%   只引用它，永不重新 \let。
+\let\kao@realcaption\caption
+\RenewDocumentCommand{\caption}{s o m}{%
+	\IfBooleanTF{#1}{%
+		\kao@realcaption*{#3}%
+	}{%
+		\IfValueTF{#2}{%
+			\kao@realcaption[#2]{#3}%
 		}{%
-			\IfValueTF{#2}{%
-				\oldcaption[#2]{#3}%
-			}{%
-				\oldcaption{#3}%
-			}%
+			\kao@realcaption{#3}%
 		}%
-		\toggletrue{kaocaption}%
 	}%
+	\toggletrue{kaocaption}%
 }
 \AtEndEnvironment{figure}{%
 	\iftoggle{kaocaption}{%
@@ -680,15 +694,16 @@
 	\togglefalse{kaocaption}%
 }
 \AtBeginEnvironment{table}{%
-	\let\oldcaption\caption%
+	% 与 figure 同理：见上面 \kao@realcaption 的说明。此处只需把包装挂上，
+	% 不再 \let\oldcaption（否则 table 也会自我递归）。
 	\RenewDocumentCommand{\caption}{s o m}{%
 		\IfBooleanTF{#1}{%
-			\oldcaption*{#3}%
+			\kao@realcaption*{#3}%
 		}{%
 			\IfValueTF{#2}{%
-				\oldcaption[#2]{#3}%
+				\kao@realcaption[#2]{#3}%
 			}{%
-				\oldcaption{#3}%
+				\kao@realcaption{#3}%
 			}%
 		}%
 		\toggletrue{kaocaption}%
@@ -1149,16 +1164,45 @@
 	\RequirePackage{amssymb} % Must be loaded before unicode-math
 	\RequirePackage[force]{filehook} % Fixes an error
 	\RequirePackage{unicode-math} % Math fonts in xetexorluatex
-	\setromanfont[ % Libertinus Serif font
-		Scale=1.04
-	]{Libertinus Serif}
-	\setsansfont[ % Libertinus Sans font
-		Scale=1
-	]{Libertinus Sans}
-	\setmonofont[ % Libertinus Mono font
-		Scale=.89
-	]{Liberation Mono}
-	\setmathfont{Libertinus Math} % Libertinus Math font
+	% ⚠️ 四个字体逐个探测：Libertinus / Liberation 是 TeX Live 的字体名，
+	%   但 tlmgr 装的 libertinus-otf / liberation 常常只有 .sty 没有 .otf
+	%   （本机就是如此），fontspec 于是报 "cannot be found" 并回退 nullfont。
+	%   回退不是安全的：unicode-math 的数学族名（\mathrm/\mathbb）跟着解析不出
+	%   度量，实测连锁出 142 处 "Missing number" + 142 处 "Illegal unit of
+	%   measure"，并引发 titlesec "No format"，最终 TeX capacity exceeded 中断。
+	%   探测不到就退回项目内嵌字体（templates/fonts/，与 harryopo-base.sty
+	%   同一套），保证换机器也能编译。
+	\IfFontExistsTF{Libertinus Serif}{%
+		\setromanfont[Scale=1.04]{Libertinus Serif}%
+	}{%
+		\setromanfont[
+			Path=../fonts/, Extension=.otf,
+			BoldFont=XITS-Bold, ItalicFont=XITS-Italic,
+			BoldItalicFont=XITS-BoldItalic
+		]{XITS-Regular}%
+	}
+	\IfFontExistsTF{Libertinus Sans}{%
+		\setsansfont[Scale=1]{Libertinus Sans}%
+	}{%
+		\setsansfont[
+			Path=../fonts/, Extension=.otf,
+			BoldFont=texgyreheros-bold, ItalicFont=texgyreheros-italic,
+			BoldItalicFont=texgyreheros-bolditalic
+		]{texgyreheros-regular}%
+	}
+	\IfFontExistsTF{Liberation Mono}{%
+		\setmonofont[Scale=.89]{Liberation Mono}%
+	}{%
+		\setmonofont[Path=../fonts/, Extension=.ttf]{cour}%
+	}
+	\IfFontExistsTF{Libertinus Math}{%
+		\setmathfont{Libertinus Math} % Libertinus Math font
+	}{%
+		\setmathfont[
+			Path=../fonts/, Extension=.otf,
+			BoldFont=XITSMath-Bold, BoldItalicFont=XITSMath-Bold
+		]{XITSMath}%
+	}
 	\ifluatex
 	\else
 		\RequirePackage{morewrites} % Fix some errors related to floats (not necessary with LuaLaTeX

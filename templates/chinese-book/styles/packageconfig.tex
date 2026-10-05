@@ -2,11 +2,15 @@
 % 在 \begin{document} 之前加载
 
 % ── 中文兼容包 ──
+% ⚠️ footmisc 已被 kaoCJKsc.sty:442 带着hang/flushmargin/stable 加载过了
+%   （上游还特意注释掉了 perpage）。这里再 \usepackage[perpage,symbol*]{footmisc}
+%   会报 "Option clash"。选项必须**提前**用 \PassOptionsToPackage 声明，
+%   否则类已经加载完、声明就晚了。
+\PassOptionsToPackage{perpage,symbol*}{footmisc}
 \usepackage{xeCJKfntef}          % 中文下划线/着重号
 \usepackage{xpinyin}             % 拼音
 \usepackage{indentfirst}         % 中文段落首行缩进
 \usepackage{pifont}              % 中文编号符号
-\usepackage[perpage,symbol*]{footmisc} % 脚注符号
 \usepackage{zhlipsum}            % 中文测试文本
 
 % ── 表格增强 ──
@@ -34,6 +38,8 @@
 \usepackage{array}               % 表格列格式
 \usepackage{tabularx}            % 等宽表格
 \usepackage{booktabs}            % 三线表
+\usepackage{subcaption}           % 子图/子表（floatrow 并不自动提供 subfigure 环境，
+                                 %  tuxiangyubiaoge.tex:194 直接用了 \begin{subfigure}）
 \usepackage{float}               % 浮动体控制
 
 % ── 超链接 ──
@@ -74,5 +80,40 @@
     ItalicFont = texgyreheros-italic,
     BoldItalicFont = texgyreheros-bolditalic
 ]{texgyreheros-regular}
-\setmonofont[Path=../fonts/, Extension=.ttf]{cour}
-\setCJKmonofont[Path=../fonts/, Extension=.ttf]{cour}
+% ⚠️ 等宽字体必须给全四个字重。cour（Courier New）在本机只有单一字重，
+%   代码块里的 \textbf / \emph 会让 xeCJK 请求 b/n、m/it 形状 → 报
+%   "Font shape TU/cour(2)/b/n undefined" 并回退到 m/n，回退后**CJK 族
+%   一起失效**，块内中文改由拉丁主字体 XITS 渲染 → 全部缺字形
+%   （实测 XITS-Regular/Italic/Bold 三处合计 691 条 Missing character）。
+%   JetBrains Mono 是项目内嵌字体（SIL OFL 1.1，允许嵌入分发），
+%   Regular/Italic/Bold/BoldItalic 四字重齐全。
+\setmonofont[
+    Path       = ../fonts/,
+    Extension  = .ttf,
+    ItalicFont = JetBrainsMono-Italic,
+    BoldFont   = JetBrainsMono-Bold,
+    BoldItalicFont = JetBrainsMono-BoldItalic
+]{JetBrainsMono-Regular}
+
+% ⚠️ 数学字体必须一并切走，否则整份文档连锁崩。
+%   kaoCJKsc.sty:1161 的 \setmathfont{Libertinus Math} 指向**本机没有安装**
+%   的字体（tlmgr 装的 libertinus-otf 只有 .sty 没有 .otf），unicode-math
+%   找不到就回退，于是 \mathrm/\mathbb 等数学族名解析不出度量 —— 实测
+%   142 处 "Missing number, treated as zero" + 142 处 "Illegal unit of
+%   measure"，并连锁引发 titlesec 49 处 "No format for this command"，
+%   最终在图题处 parameter stack 溢出（TeX capacity exceeded）中断编译。
+%   连带症状：中文被主字体 XITS（纯拉丁数学字体）渲染 → 1258 条
+%   Missing character，中文整段从 PDF 里丢失。
+%   正解：换成项目内嵌的 XITSMath 三件套（含 Math-Bold）。
+\setmathfont[
+    Path       = ../fonts/,
+    Extension  = .otf,
+    BoldFont   = XITSMath-Bold,
+    BoldItalicFont = XITSMath-Bold
+]{XITSMath}
+% ⚠️ CJK 等宽**必须用带中文字形的字体**，不能用 cour。
+%   cour（Courier New）只有拉丁字形，被 xeCJK 用作 CJK 等宽字体后，
+%   代码块里的中文注释全部找不到字形 → 显示为方块
+%   （实测 main.pdf 代码块内中文全是 □，日志 320 条 Missing character）。
+%   FZSSJW（方正书宋）是项目内嵌字体，含完整 CJK 字形。
+\setCJKmonofont[Path=../fonts/, Extension=.TTF]{FZSSJW}

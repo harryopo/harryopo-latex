@@ -37,6 +37,14 @@
 \RequirePackage{hyperref}
 \RequirePackage[capitalise,nameinlink,noabbrev]{cleveref}
 
+% ⚠️ 本机 iftex 是新版（TeX Live 2026）：只提供 \ifxetex / \RequireXeTeX，
+%   **不再定义 \XeLaTeX**（旧版有）。kaobook 是 2024 年的包，示例文档
+%   fulu.tex 里 6 处 \XeLaTeX{} 全部报 Undefined control sequence。
+%   不要转发到 \XeTeX —— 新版 iftex 用 \IFTEX@let 定义的 \XeTeX 在
+%   \ifxetex 为假时并不存在，转发过去照样报 Undefined。这里直接给字面文本。
+\providecommand{\XeLaTeX}{XeLaTeX}
+\providecommand{\LuaLaTeX}{LuaLaTeX}
+
 
 %----------------------------------------------------------------------------------------
 %	LANGUAGE-SPECIFIC STRINGS
@@ -185,6 +193,10 @@
 \newcommand{\labremark}[1]{\label{remark:#1}}
 \newcommand{\labexample}[1]{\label{example:#1}}
 \newcommand{\labexercise}[1]{\label{exercise:#1}}
+% chapters/shuxue.tex:95 在 corollary 环境里用了 \labcor，但上游 kaobook 的
+% kaorefs.sty 只有 labdef/labthm/labassum/labprop/lablemma/labremark 这一组，
+% 没有推论标签 —— 属示例文档臆造。补上，命名与同组保持一致（cor: 前缀）。
+\newcommand{\labcor}[1]{\label{cor:#1}}
 
 
 %----------------------------------------------------------------------------------------

@@ -272,6 +272,12 @@
 %----------------------------------------------------------------------------------------
 
 \renewcommand{\partname}{第}
+% \partpagemarkname 原本由 titlesec 提供。titlesec 与 KOMA-Script 的章节命令
+% 冲突（加载后无人 \titleformat，每个 \section 都报 "No format for this
+% command"，并连锁产生 98 处度量错误 → TeX capacity exceeded 中断），
+% 已从 kaoCJKsc.sty 移除。这里 \providecommand 兜底，本地化只需一个中文词，
+% 不必为此把 titlesec 拉回来。
+\providecommand{\partpagemarkname}{部分}
 \renewcommand{\partpagemarkname}{部分}
 
 %----------------------------------------------------------------------------------------

@@ -14,32 +14,52 @@
 % 统一指向项目内嵌字体 templates/fonts/，与 harryopo-base.sty 同一套。
 \newcommand{\fontpath}{../fonts/}
 
-% ⚠️ 不要给 \newCJKfontfamily 加 BoldFont/ItalicFont。
-%   FZ*JW 系列没有独立的粗体/斜体字形，一旦声明 BoldFont=…，xeCJK 会去找
-%   "TU/<族>/b/n" 形状并报 undefined，随后回退 nullfont——所有非 CJK 字符
-%   （连字符、拉丁字母、数字）在 PDF 里变成 null 空字符。
-%   实测：加上后 main.pdf 出现 1127 个 \x00；去掉后归零。
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzsong{FZSSJW}    %方正书宋
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzhei{FZHTJW}     %方正黑体
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzkai{FZKTJW}     %方正楷体
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzfs{FZFSJW}      %方正仿宋
+% ⚠️ FZ*JW 系列是**单一字重静态字体**（fontTools 实测无 fvar、无 Bold 文件），
+%   但 kaobook 会请求 b/n（粗）与 m/it（斜）形状——章节标题 \fzhei\bfseries、
+%   \emph 斜体都会触发。xeCJK 找不到就报
+%   "Could not resolve font FZFSJW/B"，该字体族注册失败，
+%   于是**边注等使用该族的内容回退到主字体 XITS（纯拉丁）**，
+%   整段中文找不到字形被丢弃（实测 main.log 85 条 Missing character，
+%   全部来自 \marginnote）。
+%   正解：用 AutoFakeBold/AutoFakeSlant 让 xeCJK 就地伪造粗斜，
+%   而不是去找不存在的字形。
+% ⚠️ 同样不要声明 BoldFont=/ItalicFont=——那会让 xeCJK 去找真实字形并失败。
+%   实测：声明后 main.pdf 出现 1127 个 \x00；改用 AutoFake 后归零。
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzsong{FZSSJW}    %方正书宋
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzhei{FZHTJW}     %方正黑体
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzkai{FZKTJW}     %方正楷体
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzfs{FZFSJW}      %方正仿宋
 
 % ── 方正小标宋（最大标题专用）──
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzxiaobiaosong{FZXBSJW}
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzxiaobiaosong{FZXBSJW}
 
 % ── 方正黑体（标题用，别名 yh 兼容旧代码）──
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\yh{FZHTJW}
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\yh{FZHTJW}
 
-% ── 装饰字体（可选）：隶书项目内未内嵌，回退仿宋而非系统字体 ──
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF]\fzli{FZFSJW}
-\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzshti{FZShuTi-S05S}    %方正舒体  fzshti
-\newCJKfontfamily[Path=\fontpath, Extension=.ttf]\fzyao{FZYaoTi-M06S}     %方正姚体  fzyao
+% ── 装饰字体：项目未内嵌舒体/姚体，回退到内嵌仿宋而非系统字体 ──
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzli{FZFSJW}
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzshti{FZFSJW}
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzyao{FZFSJW}
 
-% ── 备用系统字体 ──
-\newCJKfontfamily\song{SimSun}                                 %宋体  song
-\newCJKfontfamily\hei{SimHei}                                  %黑体  hei
-\newCJKfontfamily\kai{KaiTi}                                   %楷体  kai
-\newCJKfontfamily\fs{FangSong}                                %仿宋  fs
+% ── 备用字体族：原为 SimSun/SimHei/KaiTi/FangSong 系统字体，换机器即失效
+%   （且这些系统字体缺 CJK 字形时会静默丢字）。一律指向内嵌字体。──
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\song{FZSSJW}
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\hei{FZHTJW}
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\kai{FZKTJW}
+\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fs{FZFSJW}
 
 %----------------------------------------------------------------------------------------
 % 等宽代码字体（公式/代码用，优先级：Cascadia Code > Consolas > Courier New）
@@ -54,16 +74,34 @@
 }
 %
 % 边注字体：方正仿宋
-\renewcommand*{\marginfont}{\fzfs\footnotesize\justifying\frenchspacing}
+% ⚠️ \fzfs 后面**必须紧跟 \rmfamily**。
+%   \newCJKfontfamily 只声明 CJK 族，对拉丁字体不生效；而 marginnote 的边注
+%   盒子会整体切到该族的 latin 分支，导致中文被主字体（本机为 XITS，纯拉丁
+%   数学字体）渲染 → 整段中文找不到字形被丢弃。
+%   最小复现（scrbook + marginnote + \marginfont）：
+%     \marginfont{\fzfs…}              → Missing character 41
+%     \marginfont{\fzfs\rmfamily…}    → Missing character 0
+%   \rmfamily 把拉丁主字体切回来，xeCJK 才能对中文正确选到 CJK 族。
+\renewcommand*{\marginfont}{\fzfs\rmfamily\footnotesize\justifying\frenchspacing}
 
 % ── 修正 @margin@par 中的 normalfont → fzfs ──
+%   同理，末尾也要补 \rmfamily。
+%   ⚠️ \RaggedRightParindent 的**大写 I 是错的**：ragged2e 定义的是
+%   Parindent（小写 i）。写成 ParIndent 会报 Undefined control sequence，
+%   并连锁触发 142 处 "Missing number"（第 5 行 \setlength 的参数解析失败）。
 \renewcommand{\@margin@par}{%
     \justifying%
-    \setlength{\RaggedRightParIndent}{0em}%
+    \setlength{\RaggedRightParindent}{0em}%
     \setlength{\parindent}{0em}%
     \setlength{\parskip}{0.5pc}%
     \frenchspacing%
     \fzfs% 方正仿宋
+    \rmfamily% 切回拉丁主字体（缺了会让边注中文全部丢失）
+    \ttfamily{\CJKfamily{fzfs}}% 边注里的 \url/\texttt 会切到等宽；
+    %   xeCJK 此时按**字体名**去解析 CJK 等宽族，而内嵌字体没装进系统，
+    %   解析不到就报 "The font FZFSJW cannot be found"（实测 3 处，
+    %   全在 yizhexu.tex:18 的边注 \url 上），URL 整段不输出。
+    %   显式绑到已注册的字族 \fzfs，绕开字体名查找。
     \footnotesize%
 }
 
@@ -167,7 +205,14 @@
     columns=flexible,
 }
 % 代码块内的中文注释用方正书宋（有 CJK 字形），Latin 仍走 cour
-\setCJKmonofont[Path=\fontpath, Extension=.TTF]{FZSSJW}
+% ⚠️ 这里必须写**文件名**而不是字体名 {FZSSJW}。
+%   边注（\marginnote）里的内容会被 kaobook 装进 lrbox 延迟到出页时才排，
+%   此时 fontspec 按字体名去系统/缓存里查 FZSSJW —— 内嵌字体没有安装到系统，
+%   查不到就报 "The font FZSSJW cannot be found"（实测 3 处，全在
+%   yizhexu.tex:18 的边注 \url 上）。给完整文件名让 XeTeX 直接按路径加载，
+%   绕开字体名查找。
+\setCJKmonofont[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZSSJW}
 
 % ⚠️ kaobook 自带的 kaolstplain（正文里的 lstlisting 与边栏里嵌套的
 %   lstlisting 都用它）在 \kaoCJKsc.sty:922 定义，只设了 basicstyle，
@@ -176,4 +221,13 @@
     alsoletter=*,
     columns=flexible,
 }
+
+% ⚠️ listings 1.11b（2025/11）与 xeCJK-listings 3.10.6（2026/08）版本错配：
+%   新版 listings 已移除内部宏 \lst@setcatcodes，而 xeCJK-listings 的
+%   \lst@Init 钩子仍在调用它 → 每个 lstlisting 都报
+%   "Undefined control sequence. \lstlisting ->\def \lstenv@name …
+%   \lst@setcatcodes"（实测 tuxiangyubiaoge.tex:246 等处）。
+%   空实现兜底：新版 listings 里 catcode 由 \lst@Init 自行处理，
+%   缺失这一步不影响输出。
+\providecommand{\lst@setcatcodes}{}
 \endinput
