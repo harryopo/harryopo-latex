@@ -1,0 +1,72 @@
+# harryopo-office skill CI
+# 设计约束（2026-10-11 第四轮调研 Adopt 项）：
+#   - Word 链路依赖 Windows + MS Office COM，方正字体授权与 COM 不可入 CI
+#   - 因此只跑两条无 Office 依赖的线：①纯 Python 检查器（秒级）②Linux XeLaTeX 渲染门
+#   - LaTeX 渲染用仓库自包含字体（templates/fonts/ 已入库），无需系统字体
+name: skill-ci
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Python 检查器（规范包/盲审/导入）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 安装依赖（无 Office/无 playwright）
+        run: pip install python-docx pyyaml latex2mathml
+      - name: office.py 可导入（模块级语法/依赖体检）
+        run: python .trae/skills/harryopo-office/scripts/office.py info
+      - name: 规范包检查（gov 示例须 10/10）
+        run: |
+          python .trae/skills/harryopo-office/scripts/rulepack_check.py \
+            output/examples/gov-notice-paper.tex
+      - name: 规则包清单非空
+        run: |
+          n=$(python .trae/skills/harryopo-office/scripts/rulepack_check.py --list-packs | wc -l)
+          echo "可用规则包: $n"
+          test "$n" -ge 1
+      - name: blindcheck 抓得到暴露点（gov 示例含作者/单位元信息，应命中）
+        run: |
+          python .trae/skills/harryopo-office/scripts/blindcheck.py \
+            output/examples/gov-notice.md --json > /tmp/blind.json
+          n=$(python -c "import json;print(json.load(open('/tmp/blind.json'))['finding_count'])")
+          echo "发现 $n 处"
+          test "$n" -ge 1
+      - name: blindcheck 自身源码应干净（对照）
+        run: python .trae/skills/harryopo-office/scripts/blindcheck.py \
+            .trae/skills/harryopo-office/scripts/blindcheck.py
+
+  latex-render:
+    name: XeLaTeX 渲染门（Linux 自包含字体）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 安装 TeX（xetex + 中文 + 常用宏包）
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            texlive-xetex texlive-lang-chinese texlive-latex-recommended \
+            texlive-latex-extra texlive-fonts-recommended
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 安装依赖
+        run: pip install python-docx pyyaml latex2mathml
+      - name: 渲染论文单栏示例（MD → LaTeX → PDF）
+        run: |
+          python .trae/skills/harryopo-office/scripts/office.py render \
+            output/examples/paper-single-column.md --format paper
+      - name: 断言 PDF 产出
+        run: |
+          f=output/examples/paper-single-column-paper.pdf
+          test -f "$f"
+          sz=$(stat -c%s "$f")
+          echo "PDF $sz bytes"
+          test "$sz" -gt 50000

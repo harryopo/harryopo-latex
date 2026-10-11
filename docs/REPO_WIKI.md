@@ -1,8 +1,8 @@
 # Repo Wiki — d:\ai\latex 办公文档 AI 生产力平台
 
-> 生成方式：AI 全仓遍历（603 个入库文件，核心为 28 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~16996 行 + LaTeX 模板体系 + 93 篇文档）
+> 生成方式：AI 全仓遍历（603 个入库文件，核心为 28 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~16799 行 + LaTeX 模板体系 + 93 篇文档）
 > 数字来源：`office.py doctor --stats` 实时统计，**不要手写**——手写的数字必然漂移（本次修正前此处声明 679 文件/19 脚本/~7900 行，实际已到 561/44/16773）。`office.py doctor` 会校验本行 5 项数字与实际是否一致，不一致报 WARN。
-> 最后验证：2026-10-11（二次） | 覆盖：chinese-book 错误 7→3 + floatrow caption 恢复渲染
+> 最后验证：2026-10-11（三次） | 覆盖：规范包架构（rulepack_check）+ blindcheck 盲审隐匿检查
 > 本文件是 AI 协作知识库：新需求开发前先检索第 4/9/10 章，优先复用，防止重复造轮子。
 > **AI 接手入口**：先读本文件（架构/能力/技术债）+ `.ai/HANDOFF.md`（当前状态/关键决策/下一步），再读 `.trae/skills/harryopo-office/SKILL.md`（AI 行为契约）。**代码是唯一真值源**，记忆文件（`CLAUDE.md` / `memory/MEMORY.md`）在 .gitignore 内且会过期，仅作参考。改模板或提交前跑 `office.py doctor`。
 
@@ -39,9 +39,9 @@ d:\ai\latex\
 │   │   ├── doctor.py               #     自检护栏（52 项断言，FAIL→exit 1）
 │   │   ├── convert.py md2latex.py tex2md.py docx_clean.py mineru_cli.py
 │   │   │   html_table_to_latex.py text_norm.py                    # 转换/清洗引擎
-│   │   ├── redline.py gb9704_check.py                              # 修订/公文
+│   │   ├── redline.py blindcheck.py                                # 修订/盲审隐匿
 │   │   ├── build_mcp.py latex_diagnostics.py evidence_trace.py     # MCP 诊断/证据回溯
-│   │   │   style_profile.py docx_template.py                       # 样式保真/模板填充
+│   │   │   style_profile.py docx_template.py rulepack_check.py     # 样式保真/模板填充/规范包
 │   │   ├── diagram_render.py diagram_design_render.py mermaid_render.py  # 图表
 │   │   ├── pandoc/                 #     mathnotes-template.latex + mathnotes-table.lua
 │   │   ├── word/                   #     md_to_word.py / word_template_engine.py /
@@ -79,13 +79,13 @@ d:\ai\latex\
 
 | 层 | 模块 | 职责 |
 |----|------|------|
-| 入口编排 | `office.py` | 12 子命令：render（word/paper/notes/slides/book 五链路）/ template / diagram / redline / revise / live / trace / style / govcheck / ide / info；路径常量单一事实来源（CLS_DIR/FONTS_DIR/PAPER_DIR/NOTES_DIR/SLIDES_DIR/BOOK_DIR）；ASCII 护栏；环境探测（tex/pandoc 补 PATH） |
+| 入口编排 | `office.py` | 13 子命令：render（word/paper/notes/slides/book 五链路）/ template / diagram / redline / revise / live / trace / style / govcheck（规则包驱动，rules/ 可插拔）/ blindcheck（盲审隐匿）/ ide / info；路径常量单一事实来源（CLS_DIR/FONTS_DIR/PAPER_DIR/NOTES_DIR/SLIDES_DIR/BOOK_DIR）；ASCII 护栏；环境探测（tex/pandoc 补 PATH） |
 | 解析层 | `mineru_cli.py` `docx_clean.py` `html_table_to_latex.py` + kreuzberg/anydoc/pandoc/markitdown | 任意格式 → MD 中间态 |
 | 引擎层 | `convert.py`(MD→tex) `md2latex.py`(笔记) `word/md_to_word.py`+`word_template_engine.py`(MD→docx) `tex2md.py`(tex→MD) | 双向转换与渲染 |
 | 护栏层 | `text_norm.py` | CJK 标点全角化 + 中西空格清理（双引擎入口统一接入） |
 | 图表层 | `diagram_render.py`(MD 块自动) `mermaid_render.py`(mmdc) `diagram_design_render.py`(HTML→PNG) + shared/diagram_geometry.py | 双引擎出图 |
 | 修订层 | `redline.py`(用户改动留痕) `word/track_changes.py`(AI 改动留痕) | 改稿双向闭环 |
-| 公文层 | `gb9704_check.py` + paper.cls `gov` 选项 | 国标生成 + 合规 lint |
+| 公文层 | `rulepack_check.py`（规则包驱动，rules/gbt9704-2012.yaml 内置）+ paper.cls `gov` 选项 + `blindcheck.py`（盲审隐匿） | 国标生成 + 合规 lint + 盲审检查 |
 | 模板层 | `word/template/` 五件套 | docxtpl 填充 + 注册表元数据 |
 | 服务层 | `build_mcp.py` + `latex_diagnostics.py` | MCP 编译诊断闭环 |
 
@@ -366,7 +366,7 @@ P2 逐项：✅ 演示文稿链路（2026-09-18 定调 beamer/PDF 路线，harry
 |--------|------|---------|
 | 生成 Word / docx / 方正字体 / OMML 公式 / 三线表 / 目录 / 悬挂缩进 | §4.1,§5 | word/md_to_word.py, word/word_template_engine.py |
 | 论文 / 报告 / PDF / 双栏 / 主题 / 笔记 | §4.1 | convert.py, templates/cls/, md2latex.py |
-| 公文 / GB-T 9704 / gov / 仿宋三号 / 页边距 | §4.1 | gb9704_check.py, paper.cls(gov 分支) |
+| 公文 / GB-T 9704 / gov / 仿宋三号 / 页边距 / 规则包 / 盲审 | §4.1 | rulepack_check.py + rules/*.yaml, paper.cls(gov 分支), blindcheck.py |
 | 转换 / 解析 / docx pdf 图片 pptx / 老 .doc / 扫描件 / 域代码 | §3.2 | office.py 解析路由, mineru_cli.py, docx_clean.py, kreuzberg |
 | LaTeX 转 Word / 反向 | §4.1 | tex2md.py |
 | 模板 / docxtpl / schema / 注册表 / 保真填充 | §4.1 | word/template/ 五件套, templates/registry/ |

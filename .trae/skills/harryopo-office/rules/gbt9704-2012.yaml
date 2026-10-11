@@ -1,0 +1,49 @@
+# harryopo 规范包（Rule Pack）—— gb9704-2012 内置包
+# 适用：GB/T 9704-2012《党政机关公文格式》
+# 结构说明见同目录 README.md；本文件可复制为学校/期刊规范包的起点。
+schema: harryopo-rulepack/1
+name: GB/T 9704-2012 党政机关公文格式
+basis_doc: GB/T 9704-2012（公开国家标准）
+
+# ── .docx 模式检查参数（python-docx 读节属性/正文样式）──
+docx:
+  page:
+    width_mm: 210.0
+    height_mm: 297.0
+    tol_mm: 1.5
+    basis: "2.1 页面"
+  margins:
+    top:    { mm: 37.0, tol_mm: 1.0, basis: "2.2 页边距" }
+    bottom: { mm: 35.0, tol_mm: 1.0, basis: "2.2 页边距" }
+    left:   { mm: 28.0, tol_mm: 1.0, basis: "2.2 页边距" }
+    right:  { mm: 26.0, tol_mm: 1.0, basis: "2.2 页边距" }
+  body:
+    size_pt: 16.0          # 三号
+    tol_pt: 0.6
+    size_basis: "9.2 字体字号"
+    font_keywords: [仿宋, FangSong, FZFS]   # 命中任一即通过
+    font_basis: "9.2 字体字号"
+  line:
+    pt: 28.0               # 固定值行距；倍数行距判 FAIL
+    tol_pt: 1.1
+    basis: "9.3 行距"
+
+# ── .tex/.cls 模式检查参数（解析 harryopo-paper.cls gov 分支）──
+tex:
+  margins:
+    top:    { mm: 37.0, tol_mm: 1.0, basis: "2.2 页边距" }
+    bottom: { mm: 35.0, tol_mm: 1.0, basis: "2.2 页边距" }
+    left:   { mm: 28.0, tol_mm: 1.0, basis: "2.2 页边距" }
+    right:  { mm: 26.0, tol_mm: 1.0, basis: "2.2 页边距" }
+  body_zihao:
+    value: "3"             # 期望 \zihao{3}
+    basis: "9.2 字体字号"
+  linespread:
+    value: 1.46            # 28 磅 ≈ 16pt × 1.2 × 1.46
+    tol: 0.05
+    pt_label: 28
+    basis: "9.3 行距"
+  heading_fonts:           # 为空数组 = 跳过层级字体检查
+    - { macro: fzht, label: 一级标题黑体, basis: "9.2 层级字体" }
+    - { macro: fzkt, label: 二级标题楷体, basis: "9.2 层级字体" }
+    - { macro: fzfs, label: 三级标题仿宋, basis: "9.2 层级字体" }

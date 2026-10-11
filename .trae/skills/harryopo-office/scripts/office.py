@@ -982,9 +982,27 @@ def cmd_style(args):
 
 
 def cmd_govcheck(args):
-    """govcheck 子命令：GB/T 9704 公文格式合规检查（委托 gb9704_check.py）"""
-    script = SCRIPT_DIR / 'gb9704_check.py'
-    argv = [sys.executable, str(script), args.file] + (['--json'] if args.json else [])
+    """govcheck 子命令：规范包驱动的排版合规检查（委托 rulepack_check.py）"""
+    script = SCRIPT_DIR / 'rulepack_check.py'
+    argv = [sys.executable, str(script)]
+    if getattr(args, 'list_packs', False):
+        argv.append('--list-packs')
+    else:
+        argv += [args.file, '--pack', args.pack] + (['--json'] if args.json else [])
+    result = subprocess.run(argv, capture_output=True, text=True,
+                            encoding='utf-8', errors='replace')
+    if result.stdout:
+        print(result.stdout, end='')
+    if result.stderr:
+        print(result.stderr, end='', file=sys.stderr)
+    if result.returncode != 0:
+        sys.exit(result.returncode)
+
+
+def cmd_blindcheck(args):
+    """blindcheck 子命令：盲审版个人信息隐匿检查（委托 blindcheck.py）"""
+    script = SCRIPT_DIR / 'blindcheck.py'
+    argv = [sys.executable, str(script), args.target] + (['--json'] if args.json else [])
     result = subprocess.run(argv, capture_output=True, text=True,
                             encoding='utf-8', errors='replace')
     if result.stdout:
@@ -1201,11 +1219,20 @@ def main():
                       help='extract|check 及其参数')
     p_st.set_defaults(func=cmd_style)
 
-    # govcheck 子命令（委托 gb9704_check.py：公文格式合规检查）
-    p_gov = sub.add_parser('govcheck', help='GB/T 9704-2012 公文格式合规检查（.docx / .tex / .cls）')
-    p_gov.add_argument('file', help='待检查文件')
+    # govcheck 子命令（委托 rulepack_check.py：规范包驱动的合规检查，内置 GB/T 9704-2012）
+    p_gov = sub.add_parser('govcheck', help='规范包合规检查（.docx/.tex/.cls；内置 GB/T 9704-2012，可插拔规则包见 rules/README.md）')
+    p_gov.add_argument('file', nargs='?', help='待检查文件')
+    p_gov.add_argument('--pack', default='gbt9704-2012',
+                       help='规则包名或 YAML 路径（默认 gbt9704-2012）')
+    p_gov.add_argument('--list-packs', action='store_true', help='列出可用规则包')
     p_gov.add_argument('--json', action='store_true', help='输出 JSON（供 AI 消费）')
     p_gov.set_defaults(func=cmd_govcheck)
+
+    # blindcheck 子命令（委托 blindcheck.py：盲审版个人信息隐匿检查）
+    p_blind = sub.add_parser('blindcheck', help='盲审版个人信息隐匿检查（.tex/.md，目录递归）')
+    p_blind.add_argument('target', help='文件或目录')
+    p_blind.add_argument('--json', action='store_true', help='输出 JSON（供 AI 消费）')
+    p_blind.set_defaults(func=cmd_blindcheck)
 
     # ide 子命令（IDE 配置模板化分发：LaTeX Workshop 配方 + 方正预览 CSS）
     p_ide = sub.add_parser('ide', help='分发 IDE 配置到 .vscode/（LaTeX Workshop xelatex 配方 + MD 方正预览 CSS）')

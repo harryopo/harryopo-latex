@@ -1,6 +1,16 @@
 ---
 name: "harryopo-office"
-description: "harryopo 办公文档超级 skill：Word / LaTeX 全格式。Word：Markdown 中间态 → 公文/学术 .docx（方正/开源字体一键切换，原生自动目录、OMML 数学公式、表格/图片/注释/参考文献规范排版）。LaTeX：论文/报告/笔记 PDF，支持从 Markdown/Word 自动转换，或手写 .tex。单双栏、蓝/黑主题、方正字体、XITS 数学、三线表。内置图表融合：diagram-design 编辑级图表（39 类型：架构/流程/时序/泳道/ER/桑基等）+ Mermaid 流程图自动渲染插入双链路。中文排版护栏：标点全角化 + 空格清理（text_norm.py，双引擎入口自动清洗）。演示文稿：harryopo-slides beamer 三主题（blue 学术/dark 路演/plain 商务）MD 自动转 16:9 PDF，含演讲备注与三线表公式。修订审阅三态闭环：redline 红线稿 + revise 改稿留痕 + live 实时修订会话。环境自检：doctor（cls 双源漂移/必含段/工具链/隐私护栏，FAIL 退出码 1）。触发词：写word、生成word、word文档、docx、公文模板、学术论文word、word转换、latex、论文、报告、PDF、tex、md转latex、word转latex、docx转pdf、markdown转tex、文档转换、架构图、流程图、时序图、框架图、画个图、配图、diagram-design、演示文稿、答辩、路演、幻灯片、slides、红线稿、修订。"
+description: "harryopo 办公文档超级 skill：Word / LaTeX 全格式。Word：Markdown 中间态 → 公文/学术 .docx（方正/开源字体一键切换，原生自动目录、OMML 数学公式、表格/图片/注释/参考文献规范排版）。LaTeX：论文/报告/笔记 PDF，支持从 Markdown/Word 自动转换，或手写 .tex。单双栏、蓝/黑主题、方正字体、XITS 数学、三线表。内置图表融合：diagram-design 编辑级图表（39 类型：架构/流程/时序/泳道/ER/桑基等）+ Mermaid 流程图自动渲染插入双链路。中文排版护栏：标点全角化 + 空格清理（text_norm.py，双引擎入口自动清洗）。演示文稿：harryopo-slides beamer 三主题（blue 学术/dark 路演/plain 商务）MD 自动转 16:9 PDF，含演讲备注与三线表公式。修订审阅三态闭环：redline 红线稿 + revise 改稿留痕 + live 实时修订会话。合规检查：govcheck 规范包驱动（内置 GB/T 9704-2012，可插拔学校/期刊规范包）+ blindcheck 盲审版个人信息隐匿检查。环境自检：doctor（cls 双源漂移/必含段/工具链/隐私护栏，FAIL 退出码 1）。"
+when_to_use: >-
+  触发于：写 word/论文/报告/公文/幻灯片；md 转 latex/docx/pdf；word 转 latex 或 pdf；
+  扫描件/图片 pdf 转可编辑文档；画架构图/流程图/时序图；学位论文盲审版隐匿检查（blindcheck）；
+  公文/学位论文/期刊格式合规检查（govcheck，可换规范包）；LaTeX 编译失败要结构化诊断；
+  用户模板套填（docxtpl）。不触发：纯代码重构、网页开发、与文档生成无关的数据分析。
+metadata:
+  category: office-document-generation
+  tags: [latex, word, docx, pdf, 公文, 学位论文, xelatex, 方正字体, omml, 三线表, 幻灯片, 规范包, 盲审]
+  version: "7.1.0"
+  last_updated: "2026-10-11"
 ---
 # harryopo-office
 
@@ -22,7 +32,9 @@ harryopo-office/
 │   ├── diagram_design_render.py          # diagram-design HTML → PNG（--svg 仅截 SVG / --check 自检）
 │   ├── text_norm.py                      # 中文标点全角化 + 空格清理（护栏层，md_to_word/convert 共用）
 │   ├── redline.py                        # 两份 docx → 原生修订红线稿（python-redlines，改稿循环入口）
+│   ├── blindcheck.py                     # 盲审版个人信息隐匿检查（学号/邮箱/致谢/基金/导师）
 │   ├── latex_diagnostics.py              # LaTeX 诊断纯函数库：日志解析（错误/警告/页数+修复建议）+ .tex 7 项预检
+│   ├── rulepack_check.py                 # 规范包驱动合规检查（rules/*.yaml 可插拔；内置 GB/T 9704-2012）
 │   ├── build_mcp.py                      # harryopo-build-mcp 服务：build/diagnostics/lint 三工具（MCP 2.x stdio）
 │   ├── md2latex.py                       # math-notes MD → .tex（纯 Python 版；Pandoc 优先版在 templates/math-notes/md2latex.py）
 │   ├── mineru_cli.py                     # DOCX/PDF → MD（MinerU 解析 + 清洗 + HTML表格转LaTeX；PDF 走官方 do_parse，DOCX 走 office 后端）
@@ -172,7 +184,8 @@ office.py render → Word / LaTeX / 演示 PDF（可选 --pdf / --template 按�
 | Word 实时修订会话 | "实时改"、"在我打开的 Word 里改"、"加批注"、"接受修订" | **live：COM 附着打开中的 Word，留痕替换/批注/接受/拒绝（word_live）** |
 | 证据回溯/提取质检 | "溯源"、"第几页"、"提取对不对"、"验证提取" | **trace：MD/论断逐段回源 PDF 定位页码坐标，输出证据账本 JSON** |
 | 样式保真校验 | "样式对不对"、"保真"、"和模板比对"、"提取样式档案" | **style：模板 extract 档案 JSON → 产物 check，边距/字体/字号/行距机器可比** |
-| 公文生成/公文格式检查 | "公文"、"红头文件"、"GB/T 9704"、"公文格式检查" | **render --gov（国标版式）→ govcheck 合规检查** |
+| 公文生成/公文格式检查 | "公文"、"红头文件"、"GB/T 9704"、"公文格式检查" | **render --gov（国标版式）→ govcheck 合规检查（可换规范包）** |
+| 盲审/匿名化检查 | "盲审"、"隐匿"、"匿名检查"、"投稿前检查" | **blindcheck：扫描学号/邮箱/致谢/基金/导师等身份暴露点** |
 | 演示文稿/答辩/路演 PPT | "演示"、"答辩 PPT"、"路演"、"slides"、"汇报幻灯片" | **render --format slides --theme blue/dark/plain（beamer PDF 交付，含演讲备注）** |
 | 环境自检/模板不同步/排障 | "自检"、"体检"、"环境检查"、"模板不同步"、"公文模式失效"、"公式字体不对" | **doctor：cls 双源漂移 + 必含段 + 工具链 + 隐私护栏，有 FAIL 退出码 1** |
 
@@ -209,7 +222,7 @@ python office.py doctor --skip-privacy  # 跳过 git 跟踪检查
      docx 实测 8/8 通过闭环，tex 下沉 cls 取真值）
 ```
 
-- 实现位置：harryopo-paper.cls `gov` 选项（`\if@govmode` 分支）+ `word/configs/gov.json` + convert.py/md_to_word.py/office.py `--gov` 透传 + `gb9704_check.py`
+- 实现位置：harryopo-paper.cls `gov` 选项（`\if@govmode` 分支）+ `word/configs/gov.json` + convert.py/md_to_word.py/office.py `--gov` 透传 + `rulepack_check.py`（**规则包驱动**：参数在 `rules/*.yaml`，内置 gbt9704-2012；学校/期刊规范复制该包改数值即可，schema 说明见 rules/README.md）
 - **不影响默认排版**：不带 --gov 时一切照旧（学术 2.5cm 边距/目录页/论文层级标题）
 - 检查 .tex 时自动定位 harryopo-paper.cls 读取 gov 分支参数；检查 .docx 用 python-docx 读节属性
 - 注意：Word 公文模式**禁用裸文本作者启发式**（主送机关"各有关单位："与首段正文是正文不是作者，历史 bug 曾致 govcheck 采样到 14pt 楷体误报）；`蒸馏区/harryopo-公文模板.docx` 为历史蒸馏样本，保留原样
