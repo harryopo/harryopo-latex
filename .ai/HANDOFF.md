@@ -11,7 +11,7 @@
 |---|---|---|
 | 项目 | harryopo 办公文档 AI 生产力平台 | ✅ |
 | 阶段 | **维护期**（P0 3/3 · P1 6/6 · P2 5/5 收官；P3 四项未启动） | ✅ |
-| 交付形态 | 自包含 Agent Skill，12 个子命令 / 5 条输出链路（word·paper·notes·slides·book） | ✅ |
+| 交付形态 | 自包含 Agent Skill，13 个子命令 / 5 条输出链路（word·paper·notes·slides·book）+ 规则包合规检查/盲审隐匿 | ✅ |
 | 健康检查基线 | `office.py doctor` → **68 OK / 0 WARN / 0 FAIL** | ✅ |
 | chinese-book | 缺字形 691→0；错误 7→**3** 且**三个丢失的边栏 caption 已全部恢复渲染**（floatrow 报错降为处理期告警，恢复后输出正确） | ✅ |
 | 远程同步 | `origin/main` = 本地 HEAD（2026-10-11 接手轮发现 6 commit 漏推，已补推核验） | ✅ |
@@ -234,6 +234,10 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 | 低 | ~~lstlisting 孤儿环境连锁~~ | ✅ 2026-10-11 已清（7→3）：paiban.tex 示例行含**字面 \end{lstlisting}**，扫描器按 token 匹配提前闭合环境。唯一可靠修法=内容行不出现完整序列（加空格/前后加字均无效——listings 比较忽略空白）；陷阱已写进源码注释 |
 | 低 | 工作区残留 | ✅ 2026-10-11 已清：probe2.tex 删除（字体排错探针，任务完结）；templates/{book,math-notes,slides}/figures/ 图表副本入库（与 paper/figures 先例一致） |
 | P3 | Typst 0.15 第三输出通道 | 方案书 §6 长期储备 |
+| P3 增补 | ~~规范包架构~~ ✅ 2026-10-11（rulepack_check.py + rules/gbt9704-2012.yaml + 自制指南，gov-notice 对照逐行一致） | 第四轮调研 Adopt |
+| P3 增补 | ~~blindcheck 子命令~~ ✅ 2026-10-11（身份暴露点扫描：元信息/学号/邮箱/手机号/致谢基金/导师/路径，gov 示例命中 2/干净源 0 误报） | 第四轮调研 Adopt |
+| P3 增补 | ~~SKILL.md frontmatter 四件套~~ ✅ 2026-10-11（when_to_use 正反例 + metadata version/tags；argument-hint 不适用非单命令 skill） | 第四轮调研 Adopt |
+| P3 增补 | ~~skill 仓库 CI~~ ✅ 2026-10-11（.github/workflows/ci.yml：lint + latex-render 两 job，首跑随本次 push 触发） | 第四轮调研 Adopt |
 | P3 | 可编辑 .pptx 输出链路 | 2026-09-18 降级项；python-pptx 1.0.3 + PowerPoint COM 本机可用 |
 | P3 | 模板市场 / 多人协作 / pdfcpu / HermesOffice | 长期储备 |
 | 低 | `code_hash` 单点收敛 | `mermaid_render` / `diagram_render` 各一份（2 行），已判定不值得动 |
