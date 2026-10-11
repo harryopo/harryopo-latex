@@ -242,8 +242,12 @@ Write-Host "编译完成！"
     backgroundcolor=\color{gray!5},
     keywordstyle=\color{blue!60!black},
 }
-% 使用：\begin{lstlisting}[style=mystyle] ... \end{lstlisting}
+% 使用：\begin{lstlisting}[style=mystyle] 代码写在这里（闭合标签与环境同名）
 \end{lstlisting}
+% ⚠️ 上面列表的内容行**不能出现完整的字面 \end{lstlisting} 序列**——lstlisting
+%   的结束扫描器按 token 匹配，内容里出现完整序列会让环境提前闭合，真正的
+%   \end 变孤儿并连锁 4 个错误（实测；行内加空格也躲不过——listings 比较时
+%   忽略空白；在序列前后加普通文字同样无效）。示例行只能以"同环境名"示意。
 
 %----------------------------------------------------------------------------------------
 
