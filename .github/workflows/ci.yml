@@ -44,8 +44,8 @@ jobs:
       - name: blindcheck 对照（规则包 YAML 应零发现）
         # ⚠️ 不能拿 blindcheck.py 自身当对照——其规则源码里的转义序列
         #    （如 \\thanks\{）会被自己的规则命中
-        run: python .trae/skills/harryopo-office/scripts/blindcheck.py \
-            .trae/skills/harryopo-office/rules/gbt9704-2012.yaml
+        # ⚠️ run 续行会保留下一行前导空格（实测踩坑），路径参数写单行
+        run: python .trae/skills/harryopo-office/scripts/blindcheck.py .trae/skills/harryopo-office/rules/gbt9704-2012.yaml
 
   latex-render:
     name: XeLaTeX 渲染门（Linux 自包含字体）
