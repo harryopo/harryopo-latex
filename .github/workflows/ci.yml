@@ -41,9 +41,11 @@ jobs:
           n=$(python -c "import json;print(json.load(open('/tmp/blind.json'))['finding_count'])")
           echo "发现 $n 处"
           test "$n" -ge 1
-      - name: blindcheck 自身源码应干净（对照）
+      - name: blindcheck 对照（规则包 YAML 应零发现）
+        # ⚠️ 不能拿 blindcheck.py 自身当对照——其规则源码里的转义序列
+        #    （如 \\thanks\{）会被自己的规则命中
         run: python .trae/skills/harryopo-office/scripts/blindcheck.py \
-            .trae/skills/harryopo-office/scripts/blindcheck.py
+            .trae/skills/harryopo-office/rules/gbt9704-2012.yaml
 
   latex-render:
     name: XeLaTeX 渲染门（Linux 自包含字体）
