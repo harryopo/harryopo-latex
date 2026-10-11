@@ -34,8 +34,10 @@ jobs:
           test "$n" -ge 1
       - name: blindcheck 抓得到暴露点（gov 示例含作者/单位元信息，应命中）
         run: |
+          # blindcheck 有发现时退出 1，而 Actions 默认 bash -e 会当场中断步骤——
+          # 故先 || true 放行，再用 JSON 计数断言"确实找到了"
           python .trae/skills/harryopo-office/scripts/blindcheck.py \
-            output/examples/gov-notice.md --json > /tmp/blind.json
+            output/examples/gov-notice.md --json > /tmp/blind.json || true
           n=$(python -c "import json;print(json.load(open('/tmp/blind.json'))['finding_count'])")
           echo "发现 $n 处"
           test "$n" -ge 1
@@ -53,7 +55,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             texlive-xetex texlive-lang-chinese texlive-latex-recommended \
-            texlive-latex-extra texlive-fonts-recommended
+            texlive-latex-extra texlive-fonts-recommended texlive-science
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
