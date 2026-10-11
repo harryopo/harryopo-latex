@@ -693,6 +693,15 @@
 	}%
 	\togglefalse{kaocaption}%
 }
+% ⚠️ figure* 必须单独挂结束钩子：AtEndEnvironment 只按环境名精确匹配，
+%   figure* 的结束不会触发 figure 的钩子 → kaocaption 开关从 figure* 结束
+%   一直泄漏到下一个浮动体（2026-10-11 排查 floatrow "Caption(s) lost" 时定位）。
+%   ⚠️ 此钩子只复位开关，不加 RawFloats/centering——实测钩子里的 \RawFloats
+%   会泄漏到后续浮动体，让下一个 table 也报 "Caption(s) lost"。
+%   figure* 的 caption 修复在浮动体**内容首行**放 \RawFloats（见章节源码）。
+\AtEndEnvironment{figure*}{%
+	\togglefalse{kaocaption}%
+}
 \AtBeginEnvironment{table}{%
 	% 与 figure 同理：见上面 \kao@realcaption 的说明。此处只需把包装挂上，
 	% 不再 \let\oldcaption（否则 table 也会自我递归）。

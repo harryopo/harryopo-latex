@@ -70,6 +70,7 @@
 可以使用 \Environment{figure*} 环境创建一幅跨越整个页面宽度的宽版图像\index{宽版图像}：
 
 \begin{figure*}[h!]
+    \RawFloats% floatrow 不管理 figure*（floatsetup[figure*] 无效），必须用标准 caption
     \centering
     \fbox{\parbox{0.85\textwidth}{\centering\vspace{2.5cm}
     宽版图像示例\\
