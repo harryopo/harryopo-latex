@@ -14,7 +14,7 @@
 | 交付形态 | 自包含 Agent Skill，12 个子命令 / 5 条输出链路（word·paper·notes·slides·book） | ✅ |
 | 健康检查基线 | `office.py doctor` → **68 OK / 0 WARN / 0 FAIL** | ✅ |
 | chinese-book | 编译中断已解除（58 页完整输出），余 691 条缺字形待查 | ⚠️ |
-| 远程同步 | `origin/main` = 本地 HEAD | ✅ |
+| 远程同步 | `origin/main` = 本地 HEAD（2026-10-11 接手轮发现 6 commit 漏推，已补推核验） | ✅ |
 
 ---
 
@@ -28,6 +28,26 @@
 | `memory/MEMORY.md` | 会话流水（1180 行，**本地未入库**，只作参考） | ❌ |
 
 > ⚠️ **已知反模式**：`CLAUDE.md` / `MEMORY.md` 在 `.gitignore` 内，克隆仓库的人看不到。涉及项目铁律时，优先读已入库的 `SKILL.md` + `REPO_WIKI.md`。
+
+---
+
+## 2026-10-11 会话：接手轮——intake 核验 + 漂移修复（交接补全）
+
+### 本次完成
+
+| # | 工作 | 验证 |
+|---|---|---|
+| 1 | super-memory intake 全量核验：本文件 + `docs/REPO_WIKI.md` + `memory/MEMORY.md` 尾部交叉印证 | ✅ 核验记录见 memory/MEMORY.md「2026-10-11」节（本地文件） |
+| 2 | **漂移修复**：远程同步声明过期——6 个 commit（10-03~10-05 全部成果）未推送，origin/main 停在 10-02 | ✅ 补推后 `git log origin/main..main \| wc -l` = 0 |
+| 3 | **漂移修复**：REPO_WIKI 头部画像漂移（582→592 文件、92→93 文档，doctor 报 WARN）→ 按 `doctor --stats` 实时值替换 | ✅ doctor 回到 **68 OK / 0 WARN / 0 FAIL** |
+| 4 | 10-05 会话补录进 memory/MEMORY.md（此前只记在本文件，本地流水断档） | ✅ 已追加（本地文件，不入库） |
+| 5 | 工作区残留登记：根目录 `probe2.tex`（chinese-book 排错探针）+ `templates/{book,math-notes,slides}/figures/` 未跟踪图表 PNG（五链路回归管线副本；`templates/paper/figures` 有入库先例）——**未清理**，是否入库待用户决定 | ⚠️ 仅登记 |
+
+### 核验结论（接手者重点）
+
+- 12 个子命令实测存在：render / template / diagram / redline / revise / live / trace / style / govcheck / ide / info / doctor
+- `CLAUDE.md` 与 `memory/` 确在 `.gitignore`（97/99 行）——**仓库里没有会话流水是设计而非事故**；入库知识三件套 = `SKILL.md` + `docs/REPO_WIKI.md` + 本文件
+- doctor 基线 68 OK 是回归红线：改模板/换机器/提交前必跑（见「可复现验证命令」§1）
 
 ---
 
