@@ -13,7 +13,7 @@
 | 阶段 | **维护期**（P0 3/3 · P1 6/6 · P2 5/5 收官；P3 四项未启动） | ✅ |
 | 交付形态 | 自包含 Agent Skill，12 个子命令 / 5 条输出链路（word·paper·notes·slides·book） | ✅ |
 | 健康检查基线 | `office.py doctor` → **68 OK / 0 WARN / 0 FAIL** | ✅ |
-| chinese-book | 编译中断已解除（58 页完整输出），余 691 条缺字形待查 | ⚠️ |
+| chinese-book | **缺字形已清零**（2026-10-11，691→0；3 处 FZFSJW 错误同根因一并消失）；余 7 个非字体错误（floatrow/glossaries/listings，不影响输出） | ✅ |
 | 远程同步 | `origin/main` = 本地 HEAD（2026-10-11 接手轮发现 6 commit 漏推，已补推核验） | ✅ |
 
 ---
@@ -48,6 +48,25 @@
 - 12 个子命令实测存在：render / template / diagram / redline / revise / live / trace / style / govcheck / ide / info / doctor
 - `CLAUDE.md` 与 `memory/` 确在 `.gitignore`（97/99 行）——**仓库里没有会话流水是设计而非事故**；入库知识三件套 = `SKILL.md` + `docs/REPO_WIKI.md` + 本文件
 - doctor 基线 68 OK 是回归红线：改模板/换机器/提交前必跑（见「可复现验证命令」§1）
+
+### 本次完成（续）：chinese-book 691 条缺字形清零（当日第二项）
+
+**根因**（最小对照实验实锤，见 commit 5cc19ec）：`kaoWinCJKsc.sty` 13 处声明把 fontspec
+特性写在命令名之前——`\newCJKfontfamily[Path=...]\fzA{FZSSJW}`。xeCJK 语法是
+`\newCJKfontfamily[族名]\命令[特性]{字体}`，**特性整串被解析成"族名"**：13 个声明共用
+垃圾族名互相 Redefining（日志可见），`\fzsong` 等命令注册的字体**不带 AutoFakeBold/Slant
+也不带 Path**。凡对该族内容加粗/斜体（字体演示块 `\textbf`、kaobook 边注斜体），
+b/it/bi 形状解析失败 → 族回退主字体 XITS（纯拉丁）→ 中文 Missing character。
+
+修复：13 处改为标准语法并显式注册族名（fzsong/fzhei/fzkt/fzfs/…，使既有
+`\CJKfamily{fzfs}` 引用按原意生效）。验证：missing **691→0**、errors 10→7
+（3 处 "FZFSJW cannot be found" 同根因一并消失=原"低"待办边注 \url 解决）、
+pages 58 不变、capacity 0、doctor 68 OK、zimubiao 页渲染目检四组字体样张全真实输出。
+
+**教训**：上轮 10-05 会话修的"AutoFakeBold 补齐"实际没生效（特性被吃了），但当时
+验证指标（\x00 文本层计数）恰好归零，造成"已修好"的假象——**修完要验"机制生效"
+而不只是"指标变化"**；另 10-05 会话把 3 处 FZFSJW 错误归因于"\url 延迟展开"，
+实为同一语法问题，归因时两个现象同根因的情况要主动并案。
 
 ---
 
@@ -180,9 +199,10 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 
 | 优先级 | 事项 | 说明 |
 |---|---|---|
-| **中** | chinese-book 691 条缺字形 | 2026-10-05 遗留。集中在 `zimubiao`/`fulu` 两章表格内 `\lstinline` 混排；最小样例复现不出，需在完整类下 `\errorcontextlines` 二分。只影响 PDF 文本层，不影响编译与页数 |
-| 低 | chinese-book 边注 `\url` 不显示 | 3 处 fontspec FZFSJW 查找失败；边注文字正常，仅 URL 丢失。延迟展开 + 内嵌字体无系统名导致 |
+| ~~中~~ | ~~chinese-book 691 条缺字形~~ | ✅ 2026-10-11 已解决（\newCJKfontfamily 语法陷阱，见当日会话节） |
+| ~~低~~ | ~~chinese-book 边注 `\url` 不显示~~ | ✅ 2026-10-11 已解决（与缺字形同根因，3 处 FZFSJW 错误消失） |
 | 低 | 恢复 `sibling=theorem` 共享编号 | 现在 proposition/lemma/corollary 各自独立编号。需升级 thmtools（本机 tlmgr 不在 PATH） |
+| 低 | chinese-book 余 7 个非字体错误 | floatrow Caption lost ×2 / glossaries \endcsname ×1 / Undefined ×1 / listings 类 ×2 等，均不影响编译与页数（exit 后 PDF 完整输出 58 页）；未注册为正式债务，顺手可清 |
 | P3 | Typst 0.15 第三输出通道 | 方案书 §6 长期储备 |
 | P3 | 可编辑 .pptx 输出链路 | 2026-09-18 降级项；python-pptx 1.0.3 + PowerPoint COM 本机可用 |
 | P3 | 模板市场 / 多人协作 / pdfcpu / HermesOffice | 长期储备 |
