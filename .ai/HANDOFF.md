@@ -237,7 +237,7 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 | P3 增补 | ~~规范包架构~~ ✅ 2026-10-11（rulepack_check.py + rules/gbt9704-2012.yaml + 自制指南，gov-notice 对照逐行一致） | 第四轮调研 Adopt |
 | P3 增补 | ~~blindcheck 子命令~~ ✅ 2026-10-11（身份暴露点扫描：元信息/学号/邮箱/手机号/致谢基金/导师/路径，gov 示例命中 2/干净源 0 误报） | 第四轮调研 Adopt |
 | P3 增补 | ~~SKILL.md frontmatter 四件套~~ ✅ 2026-10-11（when_to_use 正反例 + metadata version/tags；argument-hint 不适用非单命令 skill） | 第四轮调研 Adopt |
-| P3 增补 | ~~skill 仓库 CI~~ ✅ 2026-10-11（.github/workflows/ci.yml：lint + latex-render 两 job，首跑随本次 push 触发） | 第四轮调研 Adopt |
+| P3 增补 | ~~skill 仓库 CI~~ ✅ 2026-10-11 全绿（.github/workflows/ci.yml：lint + latex-render 两 job。**首跑三坑留档**：①Actions 默认 bash -e——被检工具"有发现退出 1"会当场中断步骤，须 \|\| true 后断言计数 ②ubuntu texlive 分包：algorithm2e 在 texlive-science 不在 latex-extra ③YAML run 续行保留下一行前导空格——路径参数写单行；另 blindcheck 自检对照不能用其源码（规则转义序列被自身规则命中），对照文件用 rules/*.yaml） | 第四轮调研 Adopt |
 | P3 | 可编辑 .pptx 输出链路 | 2026-09-18 降级项；python-pptx 1.0.3 + PowerPoint COM 本机可用 |
 | P3 | 模板市场 / 多人协作 / pdfcpu / HermesOffice | 长期储备 |
 | 低 | `code_hash` 单点收敛 | `mermaid_render` / `diagram_render` 各一份（2 行），已判定不值得动 |
