@@ -13,7 +13,7 @@
 | 阶段 | **维护期**（P0 3/3 · P1 6/6 · P2 5/5 收官；P3 四项未启动） | ✅ |
 | 交付形态 | 自包含 Agent Skill，12 个子命令 / 5 条输出链路（word·paper·notes·slides·book） | ✅ |
 | 健康检查基线 | `office.py doctor` → **68 OK / 0 WARN / 0 FAIL** | ✅ |
-| chinese-book | **缺字形已清零**（2026-10-11，691→0；3 处 FZFSJW 错误同根因一并消失）；余 7 个非字体错误（floatrow/glossaries/listings，不影响输出） | ✅ |
+| chinese-book | 缺字形已清零（2026-10-11，691→0）；错误 7→**3**（lstlisting 孤儿环境连锁已清，余 2 floatrow + 1 endcsname，见待办表） | ✅ |
 | 远程同步 | `origin/main` = 本地 HEAD（2026-10-11 接手轮发现 6 commit 漏推，已补推核验） | ✅ |
 
 ---
@@ -67,6 +67,19 @@ pages 58 不变、capacity 0、doctor 68 OK、zimubiao 页渲染目检四组字�
 验证指标（\x00 文本层计数）恰好归零，造成"已修好"的假象——**修完要验"机制生效"
 而不只是"指标变化"**；另 10-05 会话把 3 处 FZFSJW 错误归因于"\url 延迟展开"，
 实为同一语法问题，归因时两个现象同根因的情况要主动并案。
+
+### 本次完成（续2）：chinese-book 错误 7→3（当日第三项）
+
+| 项 | 结果 |
+|---|---|
+| lstlisting 孤儿环境连锁（4 错） | ✅ **已清**：paiban.tex:245 示例行含字面 `\end{lstlisting}` → 扫描器提前闭合 → 真 \end 孤儿。修法=内容行不出现完整序列。**无效法留档**：行内加空格（listings 比较忽略空白）、序列前后加普通文字 |
+| floatrow Caption lost ×2 | ⚠️ 未清，已精确定位：wide-fig（全书唯一 figure*，floatrow 未管理该类型；floatsetup/改 figure 均无效，widefigure 环境未定义）+ yinyong 表（\centering 前置假设已证伪）。**边栏标题真丢**，需自建 widefigure 或细读 kaocaption toggle |
+| endcsname ×1 | ⚠️ 记档：markdown 包 glossaries 主题第三方交互（preamble 期非致命），按"不动第三方包"原则不修 |
+| 工作区残留 | ✅ 已清：probe2.tex 删除；三个 figures 副本目录入库 |
+
+**方法论教训（本轮实测）**：①对比"正常 vs 失败"样本前先确认样本真实性——把
+lstlisting 里的代码示例当成了真浮动体，对比结论全部作废；②修法失败要留档
+（无效法清单防止后人重走），本次 4 个无效修法已写进待办表。
 
 ---
 
@@ -202,7 +215,9 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 | ~~中~~ | ~~chinese-book 691 条缺字形~~ | ✅ 2026-10-11 已解决（\newCJKfontfamily 语法陷阱，见当日会话节） |
 | ~~低~~ | ~~chinese-book 边注 `\url` 不显示~~ | ✅ 2026-10-11 已解决（与缺字形同根因，3 处 FZFSJW 错误消失） |
 | 低 | 恢复 `sibling=theorem` 共享编号 | 现在 proposition/lemma/corollary 各自独立编号。需升级 thmtools（本机 tlmgr 不在 PATH） |
-| 低 | chinese-book 余 7 个非字体错误 | floatrow Caption lost ×2 / glossaries \endcsname ×1 / Undefined ×1 / listings 类 ×2 等，均不影响编译与页数（exit 后 PDF 完整输出 58 页）；未注册为正式债务，顺手可清 |
+| 低 | chinese-book 余 3 个错误 | ①floatrow "Caption(s) lost" ×2（wide-fig 的 figure* 未被 floatrow 管理 + yinyong 表，**边栏标题真丢**）：已试 4 法均无效（figure*→figure 连坐新错 / floatsetup[figure*]（未注册类型）/ \centering 前置（无关））；类里 widefigure 环境未定义（floatsetup 条目是死配置），可行方向=自建 widefigure（floatrow DeclareNewFloatType）或细读 kaocaption toggle（kaoCJKsc.sty:664）②endcsname ×1=markdown 包 glossaries 主题第三方交互（preamble 期，非致命，按"不动第三方包"原则记档） |
+| 低 | ~~lstlisting 孤儿环境连锁~~ | ✅ 2026-10-11 已清（7→3）：paiban.tex 示例行含**字面 \end{lstlisting}**，扫描器按 token 匹配提前闭合环境。唯一可靠修法=内容行不出现完整序列（加空格/前后加字均无效——listings 比较忽略空白）；陷阱已写进源码注释 |
+| 低 | 工作区残留 | ✅ 2026-10-11 已清：probe2.tex 删除（字体排错探针，任务完结）；templates/{book,math-notes,slides}/figures/ 图表副本入库（与 paper/figures 先例一致） |
 | P3 | Typst 0.15 第三输出通道 | 方案书 §6 长期储备 |
 | P3 | 可编辑 .pptx 输出链路 | 2026-09-18 降级项；python-pptx 1.0.3 + PowerPoint COM 本机可用 |
 | P3 | 模板市场 / 多人协作 / pdfcpu / HermesOffice | 长期储备 |
