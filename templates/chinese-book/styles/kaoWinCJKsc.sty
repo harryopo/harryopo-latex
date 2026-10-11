@@ -25,41 +25,50 @@
 %   而不是去找不存在的字形。
 % ⚠️ 同样不要声明 BoldFont=/ItalicFont=——那会让 xeCJK 去找真实字形并失败。
 %   实测：声明后 main.pdf 出现 1127 个 \x00；改用 AutoFake 后归零。
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzsong{FZSSJW}    %方正书宋
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzhei{FZHTJW}     %方正黑体
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzkai{FZKTJW}     %方正楷体
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzfs{FZFSJW}      %方正仿宋
+% ⚠️⚠️ \newCJKfontfamily 的**语法陷阱**（2026-10-11 定位，691 条 Missing character 的真根因）：
+%   可选参数次序是 \newCJKfontfamily[族名]\命令[fontspec特性]{字体}。
+%   把特性写在**命令名之前**，整串会被解析成"族名"——于是 13 个声明共用一个
+%   垃圾族名互相 Redefining，\fzsong 等命令注册的字体**不带 AutoFakeBold/Slant
+%   也不带 Path**。凡是对这些命令的内容再加粗/斜体（\textbf/\emph/边注斜体），
+%   xeCJK 解析不到 b/it/bi 形状 → 该族回退到主字体 XITS（纯拉丁）→ 中文
+%   Missing character（实测 691 条，全在字体演示块与边注）。最小对照实验：
+%   特性在前 = 书宋体A加粗。→ XITS-Bold 全丢；特性在后 = 0 缺失。
+\newCJKfontfamily[fzsong]\fzsong[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZSSJW}    %方正书宋
+\newCJKfontfamily[fzhei]\fzhei[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZHTJW}     %方正黑体
+\newCJKfontfamily[fzkt]\fzkai[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZKTJW}     %方正楷体
+\newCJKfontfamily[fzfs]\fzfs[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZFSJW}      %方正仿宋
 
 % ── 方正小标宋（最大标题专用）──
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzxiaobiaosong{FZXBSJW}
+\newCJKfontfamily[fzxbs]\fzxiaobiaosong[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZXBSJW}
 
 % ── 方正黑体（标题用，别名 yh 兼容旧代码）──
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\yh{FZHTJW}
+\newCJKfontfamily[yh]\yh[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZHTJW}
 
 % ── 装饰字体：项目未内嵌舒体/姚体，回退到内嵌仿宋而非系统字体 ──
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzli{FZFSJW}
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzshti{FZFSJW}
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fzyao{FZFSJW}
+\newCJKfontfamily[fzli]\fzli[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZFSJW}
+\newCJKfontfamily[fzshti]\fzshti[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZFSJW}
+\newCJKfontfamily[fzyao]\fzyao[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZFSJW}
 
 % ── 备用字体族：原为 SimSun/SimHei/KaiTi/FangSong 系统字体，换机器即失效
-%   （且这些系统字体缺 CJK 字形时会静默丢字）。一律指向内嵌字体。──
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\song{FZSSJW}
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\hei{FZHTJW}
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\kai{FZKTJW}
-\newCJKfontfamily[Path=\fontpath, Extension=.TTF,
-  AutoFakeBold=2.4, AutoFakeSlant=0.2]\fs{FZFSJW}
+%   （且这些系统字体缺 CJK 字形时会静默丢字）。一律指向内嵌字体。
+%   族名显式注册（song/hei/kai/fs），供 \CJKfamily{...} 按名引用。──
+\newCJKfontfamily[song]\song[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZSSJW}
+\newCJKfontfamily[hei]\hei[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZHTJW}
+\newCJKfontfamily[kai]\kai[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZKTJW}
+\newCJKfontfamily[fs]\fs[Path=\fontpath, Extension=.TTF,
+  AutoFakeBold=2.4, AutoFakeSlant=0.2]{FZFSJW}
 
 %----------------------------------------------------------------------------------------
 % 等宽代码字体（公式/代码用，优先级：Cascadia Code > Consolas > Courier New）
