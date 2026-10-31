@@ -269,6 +269,7 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 | 低 | endcsname ×1 | ⚠️ 记档：markdown 包 glossaries 主题第三方交互（preamble 期，非致命，按"不动第三方包"原则记档） |
 | 低 | ~~lstlisting 孤儿环境连锁~~ | ✅ 2026-10-11 已清（7→3）：paiban.tex 示例行含**字面 \end{lstlisting}**，扫描器按 token 匹配提前闭合环境。唯一可靠修法=内容行不出现完整序列（加空格/前后加字均无效——listings 比较忽略空白）；陷阱已写进源码注释 |
 | 低 | 工作区残留 | ✅ 2026-10-11 已清：probe2.tex 删除（字体排错探针，任务完结）；templates/{book,math-notes,slides}/figures/ 图表副本入库（与 paper/figures 先例一致） |
+| 中 | 把 `office.py doctor` 接进 CI（`.github/workflows/ci.yml`） | 新加的「文档口径」闸现在**只在本地跑**，CI 里两道 job 都不含 doctor——闸要长在提交落地的地方才算闸。接法前先解决一件事：doctor 的工具链/字体/隐私三类断言在 ubuntu runner 上是否会误 FAIL（本机基线 69 OK，Linux 无 mmdc/系统浏览器/方正字体环境），确认只出 WARN 再接；**别用 `\|\| true` 包**（10-11 CI 三坑之一：那样等于没接） |
 | P3 | Typst 0.15 第三输出通道 | 方案书 §6 长期储备 |
 | P3 增补 | ~~规范包架构~~ ✅ 2026-10-11（rulepack_check.py + rules/gbt9704-2012.yaml + 自制指南，gov-notice 对照逐行一致） | 第四轮调研 Adopt |
 | P3 增补 | ~~blindcheck 子命令~~ ✅ 2026-10-11（身份暴露点扫描：元信息/学号/邮箱/手机号/致谢基金/导师/路径，gov 示例命中 2/干净源 0 误报） | 第四轮调研 Adopt |
