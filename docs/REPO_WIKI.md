@@ -1,6 +1,6 @@
 # Repo Wiki — d:\ai\latex 办公文档 AI 生产力平台
 
-> 生成方式：AI 全仓遍历（607 个入库文件，核心为 29 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~17226 行 + LaTeX 模板体系 + 94 篇文档）
+> 生成方式：AI 全仓遍历（607 个入库文件，核心为 29 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~17306 行 + LaTeX 模板体系 + 94 篇文档）
 > 数字来源：`office.py doctor --stats` 实时统计，**不要手写**——手写的数字必然漂移（本次修正前此处声明 679 文件/19 脚本/~7900 行，实际已到 561/44/16773）。`office.py doctor` 会校验本行 5 项数字与实际是否一致，不一致报 WARN。
 > 最后验证：2026-10-11（三次） | 覆盖：规范包架构（rulepack_check）+ blindcheck 盲审隐匿检查
 > 本文件是 AI 协作知识库：新需求开发前先检索第 4/9/10 章，优先复用，防止重复造轮子。
@@ -35,7 +35,7 @@ d:\ai\latex\
 ├── .trae/skills/harryopo-office/   # ★ 核心 skill（自包含，可整体拷贝分发）
 │   ├── SKILL.md                    #   流程定义：主流程 + 硬约束 + 触发词路由
 │   ├── scripts/                    #   全部功能脚本（见 §3/§4）
-│   │   ├── office.py               #     ★ 统一主入口（12 子命令总编排）
+│   │   ├── office.py               #     ★ 统一主入口（13 子命令总编排）
 │   │   ├── doctor.py               #     自检护栏（逐项断言，FAIL→exit 1）
 │   │   ├── convert.py md2latex.py tex2md.py docx_clean.py mineru_cli.py
 │   │   │   html_table_to_latex.py text_norm.py                    # 转换/清洗引擎
@@ -79,7 +79,7 @@ d:\ai\latex\
 
 | 层 | 模块 | 职责 |
 |----|------|------|
-| 入口编排 | `office.py` | 13 子命令：render（word/paper/notes/slides/book 五链路）/ template / diagram / redline / revise / live / trace / style / govcheck（规则包驱动，rules/ 可插拔）/ blindcheck（盲审隐匿）/ ide / info；路径常量单一事实来源（CLS_DIR/FONTS_DIR/PAPER_DIR/NOTES_DIR/SLIDES_DIR/BOOK_DIR）；ASCII 护栏；环境探测（tex/pandoc 补 PATH） |
+| 入口编排 | `office.py` | 13 子命令：render（word/paper/notes/slides/book 五链路）/ template / diagram / redline / revise / live / trace / style / govcheck（规则包驱动，rules/ 可插拔）/ blindcheck（盲审隐匿）/ ide / info / doctor；路径常量单一事实来源（CLS_DIR/FONTS_DIR/PAPER_DIR/NOTES_DIR/SLIDES_DIR/BOOK_DIR）；ASCII 护栏；环境探测（tex/pandoc 补 PATH） |
 | 解析层 | `mineru_cli.py` `docx_clean.py` `html_table_to_latex.py` + kreuzberg/anydoc/pandoc/markitdown | 任意格式 → MD 中间态 |
 | 引擎层 | `convert.py`(MD→tex) `md2latex.py`(笔记) `word/md_to_word.py`+`word_template_engine.py`(MD→docx) `tex2md.py`(tex→MD) | 双向转换与渲染 |
 | 护栏层 | `text_norm.py` | CJK 标点全角化 + 中西空格清理（双引擎入口统一接入） |
@@ -309,6 +309,7 @@ GB/T 9704 规定四级标题**同为三号**、靠字体区分（一、黑体／
 | 隐私护栏 | 蒸馏区·memory·.learnings·CLAUDE.md·简历·test-e2e·测试区·`.qoder` 确认未被 git 跟踪 | — |
 | gitignore 有效性 | 上述路径逐个 `git check-ignore` 确认**规则真的生效**（不只是"当前没文件被跟踪"） | — |
 | 文档时效 | REPO_WIKI 头部画像的入库文件数与实际一致（规范 4.4「过期自动降级」） | — |
+| **文档口径** | README 中英 / REPO_WIKI / SKILL.md 里写明的子命令数量、以及列举了 ≥6 成命令名的清单，必须等于 `office.py` 的实际注册集（从源码 `sub.add_parser` 直取，不跑 `--help` 以免自嵌套）。历史读数所在 `.ai/HANDOFF.md` 与 memory 流水**排除在外** | 2026-10-31 横扫 |
 
 用法：
 ```bash

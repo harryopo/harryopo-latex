@@ -53,6 +53,10 @@
 | 2 | **同类横扫**：顺着"手写数字必漂"这条线全仓查同类，另清 4 处——REPO_WIKI 的「52 项断言」×2、「28 个脚本」、SKILL.md 目录树「render/diagram/template 三子命令」、HANDOFF 导航表「MEMORY.md 1180 行」 | ✅ `grep` 断言零命中 |
 | 3 | **改法不是改数字，是拆掉会漂的写法**：断言项数/脚本数改为「以 doctor 实时计数为准」，子命令列全 13 个名字（`--help` 可读回） | ✅ 无新增手写数字 |
 | 4 | README 中英同步：12→13 子命令 + 补 `blindcheck` 特性条与快速开始 3.5 步（上轮 Adopt 的 blindcheck/规则包在门面完全没露出） | ✅ 双语同改；`blindcheck --help` 核实接受文件/目录 |
+| 5 | **闸门化（不是修完就完）**：doctor 新增第 6 类检查 `check_doc_command_claims`——现状面四份文档（README 中英/REPO_WIKI/SKILL.md）里"N 子命令"声明与列举清单必须等于 `office.py` 实际注册集（从源码 `sub.add_parser` 直取，不跑 `--help` 避免自嵌套）。`.ai/HANDOFF.md` 与 memory 流水按"历史读数不改写"排除在外 | ✅ **canary 双注双验**：README 改 12 → `[FAIL] README.md:100 声明 12 子命令，实际 13 个`；SKILL.md 清单删 `doctor` → `[FAIL] SKILL.md:28 子命令清单漏列 doctor`；两处从 /tmp 副本还原后 **69 OK / 0 WARN / 0 FAIL**，退出码回 0 |
+| 6 | 闸门首跑就抓到本轮自己漏掉的两处：REPO_WIKI:38 目录树仍写 12、REPO_WIKI:82 §3.1 清单漏 `doctor`（"grep 到却漏改"的典型） | ✅ 已修，且由闸门兜底 |
+
+**阈值教训**：清单完整性一开始按"行内出现 ≥3 个命令名"触发，误报 4 处散文（特性条"redline + revise + live 三态闭环"根本没有穷举承诺）。改为"窗口内出现 ≥6 成命令名才算在列举全部"后假阳性清零、真缺陷仍全中——**闸门的判据要挑"它在不在做承诺"，不是"它在不在提这些词"**。
 
 ### 方法论留档
 

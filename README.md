@@ -100,7 +100,7 @@ harryopo-office/
 │   ├── office.py               # 统一入口（13 子命令）：
 │   │                           #   render / template / diagram / redline / revise / live
 │   │                           #   trace / style / govcheck / blindcheck / ide / info / doctor
-│   ├── doctor.py               #   自检：cls 双源漂移 / 必含段 / 工具链 / 隐私护栏（FAIL→exit 1）
+│   ├── doctor.py               #   自检：cls 双源漂移 / 必含段 / 工具链 / 隐私护栏 / 文档口径（FAIL→exit 1）
 │   ├── convert.py              #   MD → LaTeX（paper/report/notes/slides 四类型，含 --gov 公文模式）
 │   ├── tex2md.py               #   LaTeX → MD（反向链路，供 Word 渲染复用）
 │   ├── md2latex.py             #   MD → LaTeX 纯 Python 回退引擎（无外部依赖）

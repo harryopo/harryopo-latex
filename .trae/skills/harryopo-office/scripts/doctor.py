@@ -439,9 +439,88 @@ def check_stats_freshness(project_root: Path, rep: Report, wiki_rel='docs/REPO_W
 
 
 # ============================================================
-# 入口
+# 6. 文档口径一致性（子命令数量与清单）
 # ============================================================
 
+def canonical_subcommands(skill_dir: Path) -> list:
+    """从 office.py 源码直取 `sub.add_parser('name', ...)` 的注册名。
+
+    不跑 `office.py --help`：doctor 本身就是 office.py 以子进程调起的，
+    再反向调一次是自嵌套，且解析 argparse 输出比解析注册点脆。
+    """
+    office_py = skill_dir / 'scripts' / 'office.py'
+    try:
+        src = office_py.read_text(encoding='utf-8', errors='replace')
+    except OSError:
+        return []
+    return re.findall(r"sub\.add_parser\('([a-z_]+)'", src)
+
+
+def check_doc_command_claims(project_root: Path, skill_dir: Path, rep: Report):
+    """文档写的子命令数量与清单必须与 office.py 实际注册一致。
+
+    存在理由（2026-10-31）：本模块原先只校验 REPO_WIKI 头部那 4 个画像数字，
+    "N 子命令"这类手写数字没有任何闸在看——顺着一个被报出来的漂移横扫，
+    又抓到 REPO_WIKI 目录树写 12（实际 13）、§3.1 清单漏列 `doctor` 两处。
+    只覆盖「对外现状面」（README 中英 / REPO_WIKI / SKILL.md）：
+    `.ai/HANDOFF.md` 与 memory 流水里的是**历史读数**，按"不改写诊断历史"原则排除。
+    """
+    cmds = canonical_subcommands(skill_dir)
+    if len(cmds) < 5:
+        rep.add(WARN, '文档口径',
+                '未从 office.py 解析出子命令注册表（`sub.add_parser` 形态变了？），跳过口径检查')
+        return
+
+    docs = [('README.md', project_root / 'README.md'),
+            ('README.en.md', project_root / 'README.en.md'),
+            ('docs/REPO_WIKI.md', project_root / 'docs' / 'REPO_WIKI.md'),
+            ('SKILL.md', skill_dir / 'SKILL.md')]
+    present = [(label, p) for label, p in docs if p.is_file()]
+    if not present:
+        rep.add(WARN, '文档口径', '四份现状面文档都不在（独立分发副本？），跳过口径检查')
+        return
+
+    problems = []
+    for label, path in present:
+        lines = path.read_text(encoding='utf-8', errors='replace').splitlines()
+        # a) 数量声明：任何 "N 子命令 / N subcommands" 都要等于实际数
+        for i, ln in enumerate(lines):
+            for m in re.finditer(r'(\d+)\s*个?\s*(?:子命令|subcommands)', ln):
+                if int(m.group(1)) != len(cmds):
+                    problems.append(f'{label}:{i + 1} 声明 {m.group(1)} 子命令，'
+                                    f'实际 {len(cmds)} 个')
+        # b) 清单完整性：一段文字里出现 ≥6 成真实命令名，才认定它"在列举全部子命令"
+        #    （阈值随实际数浮动）。低于阈值的是特性散文（如"redline + revise + live 三态闭环"），
+        #    它们没有穷举承诺，拿去要求列齐 13 个只会造出假 FAIL。
+        #    命中后向前跳 3 行，避免同一份清单被折行窗口重复报成两个缺陷。
+        threshold = max(5, -(-len(cmds) * 6 // 10))   # 向上取整的 60%
+        i = 0
+        while i < len(lines):
+            if sum(1 for c in cmds if re.search(r'\b' + c + r'\b', lines[i])) >= 3:
+                window = '\n'.join(lines[i:i + 3])
+                in_window = [c for c in cmds if re.search(r'\b' + c + r'\b', window)]
+                if len(in_window) >= threshold:
+                    miss = [c for c in cmds if c not in in_window]
+                    if miss:
+                        problems.append(f'{label}:{i + 1} 子命令清单漏列 ' + ' / '.join(miss))
+                i += 3
+            else:
+                i += 1
+    # 完全相同的读数只报一次
+    uniq = list(dict.fromkeys(problems))
+
+    if uniq:
+        for p in uniq:
+            rep.add(FAIL, '文档口径', p + '——改文档对齐 `office.py --help`')
+    else:
+        rep.add(OK, '文档口径',
+                f'{len(present)} 份现状面文档的子命令数量与清单全部与实际一致'
+                f'（{len(cmds)} 个：{"/".join(cmds)}）')
+
+
+# ============================================================
+# 入口
+# ============================================================
 def run_doctor(project_root: Path, skill_dir: Path, skip_privacy=False):
     rep = Report()
     check_syntax(skill_dir, rep)
@@ -451,6 +530,7 @@ def run_doctor(project_root: Path, skill_dir: Path, skip_privacy=False):
     if not skip_privacy:
         check_privacy(project_root, rep)
     check_stats_freshness(project_root, rep)
+    check_doc_command_claims(project_root, skill_dir, rep)
     return rep
 
 
