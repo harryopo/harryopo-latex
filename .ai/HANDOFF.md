@@ -14,7 +14,8 @@
 | 交付形态 | 自包含 Agent Skill，13 个子命令 / 5 条输出链路（word·paper·notes·slides·book）+ 规则包合规检查/盲审隐匿 | ✅ |
 | 健康检查基线 | `office.py doctor` → **68 OK / 0 WARN / 0 FAIL** | ✅ |
 | chinese-book | 缺字形 691→0；错误 7→**3** 且**三个丢失的边栏 caption 已全部恢复渲染**（floatrow 报错降为处理期告警，恢复后输出正确） | ✅ |
-| 远程同步 | `origin/main` = 本地 HEAD（2026-10-11 接手轮发现 6 commit 漏推，已补推核验） | ✅ |
+| 远程同步 | `origin/main` = 本地 HEAD（2026-10-11 接手轮发现 6 commit 漏推已补推；2026-10-31 复核 `origin/main..HEAD` = 0） | ✅ |
+| CI | `.github/workflows/ci.yml`（skill-ci）最近 run success | ✅ 2026-10-31 `gh run list` |
 
 ---
 
@@ -25,9 +26,39 @@
 | `docs/REPO_WIKI.md` | **架构地图 + 能力清单 + API + 技术债**（接手先读 §4 能力清单防重复造轮子、§9 复用指引） | ✅ |
 | `.trae/skills/harryopo-office/SKILL.md` | AI 行为契约：触发词、主流程、全部排版约定 | ✅ |
 | `CLAUDE.md` | 项目铁律 + 37 条踩坑警示（**本地未入库**） | ❌ |
-| `memory/MEMORY.md` | 会话流水（1180 行，**本地未入库**，只作参考） | ❌ |
+| `memory/MEMORY.md` | 会话流水（**本地未入库**，只作参考；行数会涨，别当真值） | ❌ |
 
 > ⚠️ **已知反模式**：`CLAUDE.md` / `MEMORY.md` 在 `.gitignore` 内，克隆仓库的人看不到。涉及项目铁律时，优先读已入库的 `SKILL.md` + `REPO_WIKI.md`。
+
+---
+
+## 2026-10-31 会话：状态复盘 + 文档漂移横扫（无功能改动）
+
+### 实测现状（本轮取数）
+
+| 项 | 读数 | 取数方式 |
+|---|---|---|
+| doctor | **68 OK / 0 WARN / 0 FAIL** | `office.py doctor`（修画像前 67 OK / 1 WARN） |
+| 子命令 | **13** | `office.py --help` 实读 |
+| govcheck | **10/10 通过** | `office.py govcheck output/examples/gov-notice-paper.tex` |
+| 远程同步 | `origin/main..HEAD` = **0** | `git log --oneline origin/main..HEAD \| wc -l` |
+| CI | 最近一次 run **success**（skill-ci / main） | `gh run list` |
+| 最近提交 | 2026-10-11（本轮为空窗 20 天后的第一次改动） | `git log -1` |
+
+### 本轮完成
+
+| # | 工作 | 验证 |
+|---|---|---|
+| 1 | REPO_WIKI 头部画像漂移回正（603/28/16799/93 → 607/29/17226/94，取 `doctor --stats` 实时值整行替换） | ✅ doctor 文档时效项转 OK |
+| 2 | **同类横扫**：顺着"手写数字必漂"这条线全仓查同类，另清 4 处——REPO_WIKI 的「52 项断言」×2、「28 个脚本」、SKILL.md 目录树「render/diagram/template 三子命令」、HANDOFF 导航表「MEMORY.md 1180 行」 | ✅ `grep` 断言零命中 |
+| 3 | **改法不是改数字，是拆掉会漂的写法**：断言项数/脚本数改为「以 doctor 实时计数为准」，子命令列全 13 个名字（`--help` 可读回） | ✅ 无新增手写数字 |
+| 4 | README 中英同步：12→13 子命令 + 补 `blindcheck` 特性条与快速开始 3.5 步（上轮 Adopt 的 blindcheck/规则包在门面完全没露出） | ✅ 双语同改；`blindcheck --help` 核实接受文件/目录 |
+
+### 方法论留档
+
+- **一个漂移数字背后是一族**：REPO_WIKI 头部只是被 doctor 咬着报出来的那一个；同类手写数字（断言项数、脚本数、子命令数、行数）doctor **不检查**，靠"报一个修一个"必然漏。修完后这类数字要么删掉、要么改成"以 X 命令实时输出为准"。
+- **门面落后于内核**：10-11 落地的 `blindcheck` + 规则包架构进了 SKILL.md/REPO_WIKI/HANDOFF，但 README 中英两份完全没提——**外部可见面必须和内部能力同轮同步**，否则用户永远发现不了新功能（对应"功能可达性也算缺陷"）。
+- HANDOFF 当日核验记录里的"12 个子命令"是**历史读数**，不改写，只加当日 Adopt 后的括注。
 
 ---
 
@@ -46,6 +77,7 @@
 ### 核验结论（接手者重点）
 
 - 12 个子命令实测存在：render / template / diagram / redline / revise / live / trace / style / govcheck / ide / info / doctor
+  （注：这是当日 intake 时刻的读数；同日 Adopt 落地 `blindcheck` 后为 **13**，以 `office.py --help` 为准）
 - `CLAUDE.md` 与 `memory/` 确在 `.gitignore`（97/99 行）——**仓库里没有会话流水是设计而非事故**；入库知识三件套 = `SKILL.md` + `docs/REPO_WIKI.md` + 本文件
 - doctor 基线 68 OK 是回归红线：改模板/换机器/提交前必跑（见「可复现验证命令」§1）
 

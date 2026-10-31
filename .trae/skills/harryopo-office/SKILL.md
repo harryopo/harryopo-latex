@@ -25,7 +25,7 @@ harryopo 办公文档超级 skill —— 覆盖 **Word (.docx)** 与 **LaTeX (PD
 harryopo-office/
 ├── SKILL.md                              # 本文件
 ├── scripts/
-│   ├── office.py                        # ★ 统一主入口（render / diagram / template 三子命令）
+│   ├── office.py                        # ★ 统一主入口（13 子命令总编排：render/template/diagram/redline/revise/live/trace/style/govcheck/blindcheck/ide/info/doctor）
 │   ├── convert.py                        # MD/DOCX → paper/report .tex（纯 Python）
 │   ├── tex2md.py                         # .tex → MD 中间态（反向链路：LaTeX→Word/PDF）
 │   ├── diagram_render.py                 # 图表统一渲染器（mermaid 流程图，被 office.py 调用）

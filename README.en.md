@@ -52,6 +52,7 @@
 - **🎯 Style-fidelity check** — `office.py style extract/check` exports a template style profile (margins + heading levels) and compares a product against it, catching "template applied but formatting drifted"
 - **🧰 One-command IDE setup** — `office.py ide` writes `.vscode/settings.json`: a LaTeX Workshop xelatex recipe, TEXINPUTS, and FangZheng preview CSS (idempotent, preserves your custom recipes)
 - **🏛️ GB/T 9704 official-document mode** — `--gov` applies the national standard layout (margins 37/35/28/26mm, size-3 FangSong body, 28pt leading, hierarchical heading fonts) in both LaTeX and Word; `govcheck` runs a 10-item compliance audit
+- **🔒 Blind-review scrubbing + pluggable rule packs** — `office.py blindcheck` scans identity leaks (metadata, student IDs, emails, phone numbers, funding acknowledgements, advisor names, local paths); the gov checker is driven by `rules/gbt9704-2012.yaml`, so switching standards needs no code change
 - **🔧 harryopo-build-mcp** — LaTeX compile-diagnosis loop as an MCP server: build → structured errors (code + line + fix suggestion) → fix → rebuild, plus a 7-item .tex static lint
 - **🇨🇳 Chinese typography guard** — text_norm normalizes AI-generated half-width punctuation and CJK spacing, with code blocks / math / URLs protected
 
@@ -74,6 +75,9 @@ python .trae/skills/harryopo-office/scripts/office.py doctor
 python .trae/skills/harryopo-office/scripts/office.py render notice.md --format paper --gov
 python .trae/skills/harryopo-office/scripts/office.py govcheck notice-paper.tex
 
+# 3.5) Pre-submission identity scrub (metadata / student IDs / emails / acknowledgements / paths)
+python .trae/skills/harryopo-office/scripts/office.py blindcheck paper.docx
+
 # 4) Diagrams: write them inline
 #    ```mermaid
 #    flowchart TD; A[Start] --> B{Condition}; B -->|yes| C[Do];
@@ -93,9 +97,9 @@ python .trae/skills/harryopo-office/scripts/word/track_changes.py draft.docx v2.
 harryopo-office/
 ├── SKILL.md                    # trigger words + the full document workflow + conventions
 ├── scripts/
-│   ├── office.py               # unified entry (12 subcommands):
+│   ├── office.py               # unified entry (13 subcommands):
 │   │                           #   render / template / diagram / redline / revise / live
-│   │                           #   trace / style / govcheck / ide / info / doctor
+│   │                           #   trace / style / govcheck / blindcheck / ide / info / doctor
 │   ├── doctor.py               #   self-check: cls drift / required segments / toolchain / privacy
 │   ├── convert.py              #   MD → LaTeX (paper/report/notes/slides, incl. --gov)
 │   ├── tex2md.py               #   LaTeX → MD (reverse lane, feeds the Word renderer)

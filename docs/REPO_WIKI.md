@@ -1,6 +1,6 @@
 # Repo Wiki — d:\ai\latex 办公文档 AI 生产力平台
 
-> 生成方式：AI 全仓遍历（603 个入库文件，核心为 28 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~16799 行 + LaTeX 模板体系 + 93 篇文档）
+> 生成方式：AI 全仓遍历（607 个入库文件，核心为 29 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~17226 行 + LaTeX 模板体系 + 94 篇文档）
 > 数字来源：`office.py doctor --stats` 实时统计，**不要手写**——手写的数字必然漂移（本次修正前此处声明 679 文件/19 脚本/~7900 行，实际已到 561/44/16773）。`office.py doctor` 会校验本行 5 项数字与实际是否一致，不一致报 WARN。
 > 最后验证：2026-10-11（三次） | 覆盖：规范包架构（rulepack_check）+ blindcheck 盲审隐匿检查
 > 本文件是 AI 协作知识库：新需求开发前先检索第 4/9/10 章，优先复用，防止重复造轮子。
@@ -21,7 +21,7 @@
 - 修订：python-redlines（内嵌 .NET Docxodus）+ 自研 track_changes（ECMA-376 w:ins/w:del 直构）
 - 服务化：harryopo-build-mcp（MCP 2.x stdio）；Word/PPT COM（pywin32，仅 Windows）
 - 运行：Windows + Python 3.10+（当前 Anaconda 3.13）+ TinyTeX + pandoc 3.11；无服务端部署形态，纯本地 CLI/skill
-- 自检：office.py doctor（52 项断言，FAIL→exit 1，可接 CI）
+- 自检：office.py doctor（逐项断言，FAIL→exit 1，可接 CI；项数以 doctor 汇总为准，不手写）
 
 **阶段**：**维护期**（方案书 v3 P0 3/3 · P1 6/6 · P2 5/5 全部收官；P3 四项未启动）。
 
@@ -36,7 +36,7 @@ d:\ai\latex\
 │   ├── SKILL.md                    #   流程定义：主流程 + 硬约束 + 触发词路由
 │   ├── scripts/                    #   全部功能脚本（见 §3/§4）
 │   │   ├── office.py               #     ★ 统一主入口（12 子命令总编排）
-│   │   ├── doctor.py               #     自检护栏（52 项断言，FAIL→exit 1）
+│   │   ├── doctor.py               #     自检护栏（逐项断言，FAIL→exit 1）
 │   │   ├── convert.py md2latex.py tex2md.py docx_clean.py mineru_cli.py
 │   │   │   html_table_to_latex.py text_norm.py                    # 转换/清洗引擎
 │   │   ├── redline.py blindcheck.py                                # 修订/盲审隐匿
@@ -301,7 +301,7 @@ GB/T 9704 规定四级标题**同为三号**、靠字体区分（一、黑体／
 
 | 检查类 | 断言内容 | 对应债项 |
 |---|---|---|
-| **语法检查** | 28 个脚本在 `SyntaxWarning` 升级为异常的模式下 `ast.parse` —— 等价于"非法转义即失败" | 踩坑 27/31 |
+| **语法检查** | scripts/ 下全部 .py（数量由 doctor 动态计数，不手写）在 `SyntaxWarning` 升级为异常的模式下 `ast.parse` —— 等价于"非法转义即失败" | 踩坑 27/31 |
 | cls 双源同步 | 6 份 cls/mathnotes 副本与项目根 sha256 一致（不一致报 FAIL 并给差异行数） | §8-10 |
 | cls 必含段 | `typography.sty` 6 项（代码块 `numbers=none`/`frame=none`、目录一级绝对字号、目录页码正文字号、统一行距）+ `paper.cls` 3 项（`\hrpapplyall`/tocloft/`\if@govmode`）+ `report.cls` 2 项 + `book.cls` 5 项 | §8-9/10 |
 | 关键路径 | 10 个必需目录/文件存在 + 两份字体数均为 19 | — |

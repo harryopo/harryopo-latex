@@ -52,6 +52,7 @@
 - **🎯 样式保真校验** — `office.py style extract/check`：导出模板样式画像（边距 + 标题层级）并对产物做容差比对，捕捉"套了模板但格式走样"
 - **🧰 IDE 配置一键分发** — `office.py ide` 生成 `.vscode/settings.json`：LaTeX Workshop xelatex 配方 + TEXINPUTS + 方正预览 CSS（幂等，不覆盖用户自定义）
 - **🏛️ GB/T 9704 公文模式** — `--gov` 一键国标版式（页边距 37/35/28/26mm、三号仿宋、28 磅行距、层级标题字体），LaTeX 与 Word 双格式，`govcheck` 十项合规自检
+- **🔒 盲审隐匿 + 可插拔规则包** — `office.py blindcheck` 扫描身份暴露点（元信息/学号/邮箱/手机号/致谢基金/导师/本地路径），送审前一道闸；公文检查由 `rules/gbt9704-2012.yaml` 规则包驱动，换标准不改代码
 - **🔧 harryopo-build-mcp** — LaTeX 编译诊断闭环 MCP：编译 → 结构化错误（错误码+行号+修复建议）→ 修复 → 重编译，附 7 项 .tex 静态预检
 - **🇨🇳 中文排版护栏** — text_norm 统一清洗 AI 产物的英文标点/中英空格（公文风格），代码块/公式/URL 自动保护
 
@@ -74,6 +75,9 @@ python .trae/skills/harryopo-office/scripts/office.py doctor
 python .trae/skills/harryopo-office/scripts/office.py render 通知.md --format paper --gov
 python .trae/skills/harryopo-office/scripts/office.py govcheck 通知-paper.tex   # 合规自检
 
+# 3.5) 送审前隐匿检查（扫身份暴露点：元信息/学号/邮箱/致谢/导师/路径）
+python .trae/skills/harryopo-office/scripts/office.py blindcheck 论文.docx
+
 # 4) 图表：在 MD 里直接写
 #    ```mermaid
 #    flowchart TD; A[开始] --> B{条件}; B -->|是| C[执行];
@@ -93,9 +97,9 @@ python .trae/skills/harryopo-office/scripts/word/track_changes.py 初稿.docx �
 harryopo-office/
 ├── SKILL.md                    # 触发词 + 文档生成主流程 + 全部约定（AI 读这一个文件就够）
 ├── scripts/
-│   ├── office.py               # 统一入口（12 子命令）：
+│   ├── office.py               # 统一入口（13 子命令）：
 │   │                           #   render / template / diagram / redline / revise / live
-│   │                           #   trace / style / govcheck / ide / info / doctor
+│   │                           #   trace / style / govcheck / blindcheck / ide / info / doctor
 │   ├── doctor.py               #   自检：cls 双源漂移 / 必含段 / 工具链 / 隐私护栏（FAIL→exit 1）
 │   ├── convert.py              #   MD → LaTeX（paper/report/notes/slides 四类型，含 --gov 公文模式）
 │   ├── tex2md.py               #   LaTeX → MD（反向链路，供 Word 渲染复用）
