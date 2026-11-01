@@ -74,3 +74,10 @@ jobs:
           sz=$(stat -c%s "$f")
           echo "PDF $sz bytes"
           test "$sz" -gt 50000
+      - name: doctor 全量自检（防回归闸）
+        # 闸要长在提交落地的地方，否则只在本地跑 = 提醒不是闸。
+        # 必须放本 job（不是 lint job）：check_toolchain 里 xelatex 缺失判 FAIL，
+        # 而 lint job 不装 TeX。pandoc/mmdc/系统浏览器/pymupdf 缺失只出 WARN，
+        # 不阻断；字体数与基线不符也只出 WARN。
+        # 前面几步已备齐 doctor 的 FAIL 级前提：texlive-xetex + python-docx + git 检出。
+        run: python .trae/skills/harryopo-office/scripts/office.py doctor
