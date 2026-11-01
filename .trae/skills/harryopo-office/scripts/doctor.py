@@ -86,6 +86,8 @@ REQUIRED_SEGMENTS = {
     'harryopo-paper.cls': [
         (r'\\if@govmode',              'GB/T 9704 公文模式段（\\if@govmode 分支）'),
         (r'\\DeclareOption\{gov\}',    '公文模式选项声明'),
+        (r'\\hrpapplyall',             '接入统一排版规范'),
+        (r'tocloft',                   '目录需 tocloft（此前用 ctexart 默认目录，无层级无色）'),
     ],
     'harryopo-base.sty': [
         (r'\\ifnum\\harryopo@nomath=0', '公式字体判定（\\ifnum 修复；\\ifx 写法恒假会让 XITS Math 永不加载）'),
@@ -104,11 +106,6 @@ REQUIRED_SEGMENTS = {
                                         '目录一级条目用绝对字号（缺层级差即"缩放反了"）'),
         (r'\\cftsecpagefont\}\{\\normalfont\}', '目录页码用正文字号（不随条目放大）'),        (r'\\newcommand\{\\hrpLineSpread\}', '统一行距（mathnotes 此前完全没设，正文偏紧）'),
     ],
-    'harryopo-paper.cls': [
-        (r'\\hrpapplyall',               '接入统一排版规范'),
-        (r'tocloft',                     '目录需 tocloft（此前用 ctexart 默认目录，无层级无色）'),
-        (r'\\if@govmode',                'GB/T 9704 公文模式（四级标题同三号，国标硬要求）'),
-    ],
     'harryopo-report.cls': [
         (r'\\hrpapplyall',               '接入统一排版规范'),
         (r'\\hrptocsetup',               '目录走统一层级'),
@@ -125,6 +122,17 @@ REQUIRED_SEGMENTS = {
          '双面页眉（[L] 单槽 + \\ifodd 分流；用 [LE]/[RO] 会被 ctexbook 重映射）'),
         (r'\\newcommand\{\\bianzhu\}',
          '右侧旁注命令（\\bianzhu/\\bianzhutu，方案书规格要求）'),
+    ],
+}
+
+# 必含段里住在 templates/ 其它子目录的模板（上面那张表按 templates/cls/ 取路径，
+# 照不到 math-notes 独立体系）。2026-11-01 补：notes 链路每份 PDF 都带
+# "! Undefined control sequence. \tightlist" 却照样出满页—— pandoc 注入的私有宏
+# 无人定义，nonstopmode 把错误咽掉了。定义补进 cls，这里守它别再丢。
+TEMPLATE_SEGMENTS = {
+    'math-notes/harryopo-mathnotes.cls': [
+        (r'\\providecommand\{\\tightlist\}',
+         '\\tightlist 定义（pandoc 列表注入的私有宏，缺了列表间距静默丢失且日志报错）'),
     ],
 }
 
@@ -181,6 +189,19 @@ def check_cls_sync(project_root: Path, skill_dir: Path, rep: Report):
                 rep.add(OK, 'cls 必含段', f'{fname}: {desc}')
             else:
                 rep.add(FAIL, 'cls 必含段', f'{fname}: 缺 {desc}')
+
+    # templates/ 其它子目录里的模板必含段（路径按 templates/ 解析）
+    for rel, segments in TEMPLATE_SEGMENTS.items():
+        p = project_root / 'templates' / rel
+        if not p.exists():
+            rep.add(FAIL, 'cls 必含段', f'{rel}: 文件不存在')
+            continue
+        text = p.read_text(encoding='utf-8', errors='replace')
+        for pattern, desc in segments:
+            if re.search(pattern, text):
+                rep.add(OK, 'cls 必含段', f'{rel}: {desc}')
+            else:
+                rep.add(FAIL, 'cls 必含段', f'{rel}: 缺 {desc}')
 
 
 # ============================================================
@@ -602,6 +623,47 @@ def check_credentials(project_root: Path, rep: Report):
 
 
 # ============================================================
+# 8. TeX 宏名合法性（控制序列名不能含数字）
+# ============================================================
+
+# LaTeX 的控制序列名只认字母：`\hrpH1Size` 会被切成 `\hrpH` + `1Size`，
+# 定义不成立，`1Size` 还会被当正文排出——2026-11-01 就是这条让五类链路
+# 每次编译顶出 40+ 条错误（全被 nonstopmode 咽掉，PDF 看着正常）。
+# 只查"定义处"，使用处交给编译日志断言（check_tex_log）。
+TEX_BAD_NAME_RE = re.compile(
+    r'\\(?:renewcommand|newcommand|providecommand|DeclareRobustCommand)\s*\{?\s*\\'
+    r'([A-Za-z@]*[0-9][A-Za-z0-9]*)|\\def\s*\\([A-Za-z@]*[0-9][A-Za-z0-9]*)')
+
+
+def check_tex_macro_names(project_root: Path, rep: Report):
+    """断言模板里没有"名字含数字"的宏定义。"""
+    bad = []
+    scanned = 0
+    for rel in SYNC_FILES:
+        p = project_root / 'templates' / rel
+        if not p.exists():
+            continue
+        scanned += 1
+        for i, line in enumerate(
+                p.read_text(encoding='utf-8', errors='replace').splitlines(), 1):
+            if line.lstrip().startswith('%'):
+                continue
+            code = line.split('%')[0]
+            m = TEX_BAD_NAME_RE.search(code)
+            if m:
+                name = m.group(1) or m.group(2)
+                stem = re.match(r'[A-Za-z@]*', name).group(0)
+                bad.append(f'{rel}:{i} 宏名 `\\{name}` 含数字'
+                           f'——TeX 会切成 `\\{stem}` + `{name[len(stem):]}`')
+    if bad:
+        for b in bad:
+            rep.add(FAIL, '宏名合法性', b + '，改名用英文数词（One/Two/Three）')
+    else:
+        rep.add(OK, '宏名合法性',
+                f'{scanned} 份模板无含数字的宏名定义（控制序列名只认字母）')
+
+
+# ============================================================
 # 入口
 # ============================================================
 def run_doctor(project_root: Path, skill_dir: Path, skip_privacy=False):
@@ -615,6 +677,7 @@ def run_doctor(project_root: Path, skill_dir: Path, skip_privacy=False):
     check_stats_freshness(project_root, rep)
     check_doc_command_claims(project_root, skill_dir, rep)
     check_credentials(project_root, rep)
+    check_tex_macro_names(project_root, rep)
     return rep
 
 

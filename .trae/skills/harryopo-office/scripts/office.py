@@ -234,6 +234,43 @@ def collect_output(src, dst):
     return False
 
 
+def check_tex_log(work_dir, tex_stem, chain):
+    """编译成功 ≠ 编译无错：nonstopmode 会把 `! ...` 错误咽掉照样出 PDF。
+
+    存在理由（2026-11-01 实测）：notes 链路每份产物都带
+    `! Undefined control sequence. \\tightlist`（pandoc 私有宏无人定义），
+    却出满页 PDF——"页在、尺寸正常、内容静默缺"那类隐形缺陷，
+    原先只判 `Output written` + 体积门槛根本照不到。
+    复用 latex_diagnostics.parse_log 把错误逐条打出来（默认 WARN，存量清零后升 FAIL）。
+    """
+    log = Path(work_dir) / f'{tex_stem}.log'
+    if not log.exists():
+        print(f'  [FATAL] {chain} 链路没有编译日志：{log.name}（编译未真正跑起来）')
+        return False
+    try:
+        if str(SCRIPT_DIR) not in sys.path:
+            sys.path.insert(0, str(SCRIPT_DIR))
+        from latex_diagnostics import parse_log
+    except ImportError:
+        print(f'  [WARN] 缺 latex_diagnostics，跳过 {chain} 链路日志断言')
+        return True
+    errors = (parse_log(log.read_text(encoding='utf-8', errors='replace')) or {}).get('errors') or []
+    if not errors:
+        return True
+    # 严重度定为 WARN 而非 FAIL（2026-11-01）：五类链路里仍有一批存量错误
+    # （paper 8 / notes 1 / slides 6 / book 21，逐条见 docs/REPO_WIKI.md §8 债项）。
+    # 判 FAIL 会让所有 LaTeX 链路当场不可用，等于把"发现缺陷"变成"停摆"；
+    # 存量清零后再升 FAIL（HANDOFF 待办挂着这个门槛）。
+    print(f'  [WARN] {chain} 链路 XeLaTeX 日志 {len(errors)} 条错误——'
+          f'PDF 已产出但可能有内容静默缺失，逐条核对：')
+    for e in errors[:12]:                      # 超出部分按数量交代，不藏整族
+        loc = f"  （tex 第 {e['line']} 行）" if e.get('line') else ''
+        print(f"    ! {e['message'][:110]}{loc}")
+    if len(errors) > 12:
+        print(f'    （另有 {len(errors) - 12} 条同类，全文见 {log.name}）')
+    return True
+
+
 # ============================================================
 # 通用解析路由（v2：anydoc 快检 → MinerU 深解析 → markitdown 兜底）
 # ============================================================
@@ -366,6 +403,8 @@ def render_paper(md_file, output_dir, doc_type='paper', twocolumn=False,
             check=False, label=f'xelatex #{i+1}'
         )
 
+    if not check_tex_log(PAPER_DIR, compile_tex.stem, 'paper'):
+        return None
     pdf = PAPER_DIR / compile_tex.with_suffix('.pdf').name
     final_pdf = output_dir / f'{stem}-paper.pdf'
     if pdf.exists() and pdf.stat().st_size > 5000:
@@ -494,6 +533,8 @@ def render_notes(md_file, output_dir, out_stem=None):
             check=False, label=f'xelatex #{i+1}'
         )
 
+    if not check_tex_log(NOTES_DIR, compile_tex.stem, 'notes'):
+        return None
     pdf = NOTES_DIR / compile_tex.with_suffix('.pdf').name
     final_pdf = output_dir / f'{stem}-notes.pdf'
     if pdf.exists() and pdf.stat().st_size > 5000:
@@ -541,6 +582,8 @@ def render_slides(md_file, output_dir, out_stem=None, theme='blue'):
             check=False, label=f'xelatex #{i+1}'
         )
 
+    if not check_tex_log(SLIDES_DIR, compile_tex.stem, 'slides'):
+        return None
     pdf = SLIDES_DIR / compile_tex.with_suffix('.pdf').name
     final_pdf = output_dir / f'{stem}-slides.pdf'
     if pdf.exists() and pdf.stat().st_size > 5000:
@@ -599,6 +642,8 @@ def render_book(md_file, output_dir, out_stem=None, dark=False,
             check=False, label=f'xelatex #{i+1}'
         )
 
+    if not check_tex_log(BOOK_DIR, compile_tex.stem, 'book'):
+        return None
     pdf = BOOK_DIR / compile_tex.with_suffix('.pdf').name
     final_pdf = output_dir / f'{stem}-book.pdf'
     if pdf.exists() and pdf.stat().st_size > 5000:
