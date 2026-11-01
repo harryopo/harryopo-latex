@@ -67,9 +67,12 @@ harryopo-office/
 ├── templates/                            # 完整 LaTeX 模板包（自包含）
 │   ├── build.ps1                         # 编译脚本（环境检查 + TEXINPUTS + xelatex×3）
 │   ├── cls/                              # 文档类/样式
-    │   ├── harryopo-base.sty             #   共享基础包 v4.2
-    │   ├── harryopo-paper.cls            #   论文文档类（单/双栏 + nomath）v4.0
+    │   ├── harryopo-base.sty             #   共享基础包 v4.2（末尾 RequirePackage typography）
+    │   ├── harryopo-typography.sty       #   统一排版规范 v1.0：字号/标题色阶/目录/题注/代码块
+    │   ├── harryopo-paper.cls            #   论文文档类（单/双栏 + nomath + gov）v4.0
     │   ├── harryopo-report.cls           #   报告文档类（封面 + 目录）v4.0
+    │   ├── harryopo-book.cls             #   书籍文档类（ctexbook 章级 + 教学盒子 + 旁注）v1.0
+    │   ├── harryopo-slides.cls           #   演示文档类（beamer blue/dark/plain）v1.0
     │   └── flushend.sty                  #   双栏末页栏平衡（TinyTeX 缺包时的项目自包含副本）
     ├── fonts/                            # 内嵌字体（24个文件，无需系统安装）
     ├── book/                             # 书籍编译目录（harryopo-book，ctexbook）
@@ -187,6 +190,7 @@ office.py render → Word / LaTeX / 演示 PDF（可选 --pdf / --template 按�
 | 公文生成/公文格式检查 | "公文"、"红头文件"、"GB/T 9704"、"公文格式检查" | **render --gov（国标版式）→ govcheck 合规检查（可换规范包）** |
 | 盲审/匿名化检查 | "盲审"、"隐匿"、"匿名检查"、"投稿前检查" | **blindcheck：扫描学号/邮箱/致谢/基金/导师等身份暴露点** |
 | 演示文稿/答辩/路演 PPT | "演示"、"答辩 PPT"、"路演"、"slides"、"汇报幻灯片" | **render --format slides --theme blue/dark/plain（beamer PDF 交付，含演讲备注）** |
+| 书籍/教材/长篇手册 | "写书"、"教材"、"书稿"、"手册"、"book" | **render --format book（ctexbook 章级编号 + 教学盒子 + 4cm 旁注 + 双面页眉）；A5 开关 `--a5paper` 暂未接通，别承诺** |
 | 环境自检/模板不同步/排障 | "自检"、"体检"、"环境检查"、"模板不同步"、"公文模式失效"、"公式字体不对" | **doctor：cls 双源漂移 + 必含段 + 工具链 + 隐私护栏 + 文档时效/口径 + 凭据形态，有 FAIL 退出码 1** |
 
 ### 环境自检（doctor）—— 改模板后 / 换机器后必跑
