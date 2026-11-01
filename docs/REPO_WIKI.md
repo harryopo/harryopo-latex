@@ -1,6 +1,6 @@
 # Repo Wiki — d:\ai\latex 办公文档 AI 生产力平台
 
-> 生成方式：AI 全仓遍历（607 个入库文件，核心为 29 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~17306 行 + LaTeX 模板体系 + 94 篇文档）
+> 生成方式：AI 全仓遍历（607 个入库文件，核心为 29 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~17314 行 + LaTeX 模板体系 + 94 篇文档）
 > 数字来源：`office.py doctor --stats` 实时统计，**不要手写**——手写的数字必然漂移（本次修正前此处声明 679 文件/19 脚本/~7900 行，实际已到 561/44/16773）。`office.py doctor` 会校验本行 5 项数字与实际是否一致，不一致报 WARN。
 > 最后验证：2026-10-11（三次） | 覆盖：规范包架构（rulepack_check）+ blindcheck 盲审隐匿检查
 > 本文件是 AI 协作知识库：新需求开发前先检索第 4/9/10 章，优先复用，防止重复造轮子。
@@ -316,7 +316,16 @@ GB/T 9704 规定四级标题**同为三号**、靠字体区分（一、黑体／
 python .trae/skills/harryopo-office/scripts/office.py doctor [--json] [--skip-privacy]
 python .trae/skills/harryopo-office/scripts/office.py doctor --stats   # 只出仓库画像，供文档引用
 ```
-有 FAIL 时 **exit 1**，可直接接 CI/CI 前置钩子。当前基线：**68 OK / 0 WARN / 0 FAIL**。
+有 FAIL 时 **exit 1**，已接入 CI（`.github/workflows/ci.yml` 的 `latex-render` job，2026-11-01）。
+必须放这个 job 而不是 lint job：`check_toolchain` 对 xelatex 缺失判 FAIL，而 lint job 不装 TeX。
+
+> ⚠️ **取数面本身也是量具（2026-11-01 实测坑）**：画像与隐私两类断言都从 `git ls-files` 取数。
+> 默认 `core.quotePath=true` 的机器（GitHub Actions ubuntu）会把 CJK 路径转义成 `"\345\217\202\265..."`
+> 一整项带引号，于是 `参考资料/` 下的 `.py`/`.md` 按 `endswith('.md')` 计数、`蒸馏区/` 按
+> `startswith('蒸馏区/')` 判泄漏——**全体漏掉**。后果不是数字难看，而是隐私闸在个人材料真的
+> 被跟踪时照样报"全 OK"。两处已改 `ls-files -z`（NUL 分隔，永不转义）。本机配了
+> `quotePath=false`，这个盲区只有 CI 暴露得出来；canary 已双向验过（伪造跟踪
+> `蒸馏区/__privacy_canary__.md`：旧取数面看不见，`-z` 看见并判 FAIL）。
 
 **验收流程（对应通用规范 3.2 的五步）**——本项目无测试框架，用下列可执行命令替代：
 

@@ -271,13 +271,18 @@ SENSITIVE_PATHS = [
 
 def check_privacy(project_root: Path, rep: Report):
     try:
-        out = subprocess.run(['git', '-C', str(project_root), 'ls-files'],
+        # -z 是安全性质不是风格问题：默认 core.quotePath=true 会把非 ASCII 路径
+        # 转义成 "\345\217\202\350\200\203/..."（带引号），于是 '蒸馏区/' 这类
+        # CJK 敏感目录永远匹配不上 SENSITIVE_PATHS —— 隐私闸会"全 OK"地漏掉
+        # 真的被跟踪了的个人材料。本机配了 quotePath=false 所以看不出来，
+        # 2026-11-01 CI（默认 true）跑出来才暴露。-z 用 NUL 分隔，永不转义。
+        out = subprocess.run(['git', '-C', str(project_root), 'ls-files', '-z'],
                              capture_output=True, text=True,
                              encoding='utf-8', errors='replace', timeout=30)
         if out.returncode != 0:
             rep.add(WARN, '隐私护栏', 'git ls-files 执行失败，跳过检查')
             return
-        tracked = set(out.stdout.splitlines())
+        tracked = {f for f in out.stdout.split('\0') if f}
     except (OSError, subprocess.SubprocessError):
         rep.add(WARN, '隐私护栏', 'git 不可用，跳过检查')
         return
@@ -357,11 +362,14 @@ def collect_stats(project_root: Path) -> dict:
     stats = {'tracked_files': 0, 'py_core': 0, 'py_other': 0,
              'py_lines': 0, 'md_files': 0}
     try:
-        out = subprocess.run(['git', '-C', str(project_root), 'ls-files'],
+        out = subprocess.run(['git', '-C', str(project_root), 'ls-files', '-z'],
                              capture_output=True, text=True,
                              encoding='utf-8', errors='replace', timeout=30)
         if out.returncode == 0:
-            files = [f for f in out.stdout.splitlines() if f.strip()]
+            # -z 而非按行：默认 core.quotePath=true 的机器（CI ubuntu）上 CJK 路径
+            # 会被转义成 "\345\217\202..." 带引号一项，行数不变但按 endswith('.md')
+            # 与 Path 取数会全体漏掉——本机恰好配了 quotePath=false 所以照不出来。
+            files = [f for f in out.stdout.split('\0') if f]
             stats['tracked_files'] = len(files)
             stats['md_files'] = sum(1 for f in files if f.endswith('.md'))
             for f in files:

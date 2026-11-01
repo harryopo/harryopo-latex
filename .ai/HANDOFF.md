@@ -12,10 +12,10 @@
 | 项目 | harryopo 办公文档 AI 生产力平台 | ✅ |
 | 阶段 | **维护期**（P0 3/3 · P1 6/6 · P2 5/5 收官；P3 四项未启动） | ✅ |
 | 交付形态 | 自包含 Agent Skill，13 个子命令 / 5 条输出链路（word·paper·notes·slides·book）+ 规则包合规检查/盲审隐匿 | ✅ |
-| 健康检查基线 | `office.py doctor` → **68 OK / 0 WARN / 0 FAIL** | ✅ |
+| 健康检查基线 | `office.py doctor` 的 OK 项数**随检查类增减，别抄本表**——跑一次看汇总行（2026-11-01 实测 69 OK / 0 WARN / 0 FAIL，其中含「文档口径」一类） | ✅ |
 | chinese-book | 缺字形 691→0；错误 7→**3** 且**三个丢失的边栏 caption 已全部恢复渲染**（floatrow 报错降为处理期告警，恢复后输出正确） | ✅ |
 | 远程同步 | `origin/main` = 本地 HEAD（2026-10-11 接手轮发现 6 commit 漏推已补推；2026-10-31 复核 `origin/main..HEAD` = 0） | ✅ |
-| CI | `.github/workflows/ci.yml`（skill-ci）最近 run success | ✅ 2026-10-31 `gh run list` |
+| CI | `.github/workflows/ci.yml`（skill-ci）：lint + latex-render 两 job，**latex-render 末尾跑 `office.py doctor`**（2026-11-01 起，闸已接进 CI） | ✅ 2026-11-01 分支试跑 success |
 
 ---
 
@@ -29,6 +29,24 @@
 | `memory/MEMORY.md` | 会话流水（**本地未入库**，只作参考；行数会涨，别当真值） | ❌ |
 
 > ⚠️ **已知反模式**：`CLAUDE.md` / `MEMORY.md` 在 `.gitignore` 内，克隆仓库的人看不到。涉及项目铁律时，优先读已入库的 `SKILL.md` + `REPO_WIKI.md`。
+
+---
+
+## 2026-11-01 会话：doctor 接进 CI + 顺带抓到取数面的 CJK 盲区
+
+### 本次完成
+
+| # | 工作 | 验证 |
+|---|---|---|
+| 1 | `ci.yml` 的 `latex-render` job 末尾加 `office.py doctor` 步（闸长在提交落地的地方）；放这个 job 而非 lint job，因为 `check_toolchain` 对 xelatex 缺失判 FAIL 而 lint job 不装 TeX | ✅ 分支试跑（`workflow_dispatch --ref`）两 job success；**不动 main 先量风险** |
+| 2 | **CI 首跑就照出一个本机照不出来的盲区**：doctor 的画像/隐私断言从 `git ls-files` 取数，ubuntu 默认 `core.quotePath=true` 把 CJK 路径转义成 `"\345\217\202..."` 一整项，`endswith('.md')`、`startswith('蒸馏区/')` 全体漏匹配 → Linux 上少算 2 个 .py + 4 个 .md + 616 行，且**隐私闸会在个人材料真被跟踪时报"全 OK"** | ✅ 本机对照实验：`quotePath=true` 下旧取数面看不见 canary、`-z` 看见 |
+| 3 | 两处改 `ls-files -z`（NUL 分隔永不转义） | ✅ 强制 `quotePath=true` 与默认配置下 `--stats` 输出逐字一致（607/29+16/~17314/94）；**canary**：伪造跟踪 `蒸馏区/__privacy_canary__.md` → `[FAIL] 蒸馏区/ 被 git 跟踪（1 个文件）`、exit 1，随后 `git rm --cached` + 删文件复原，`git ls-files 蒸馏区` 回 0 |
+| 4 | 拆掉两处会漂的手写基线数字：REPO_WIKI 用法段的「当前基线 68 OK…」、HANDOFF 速览行的固定读数，改为"跑一次看汇总行" | ✅ doctor 复跑 69 OK / 0 WARN / 0 FAIL（Linux 端为 6 WARN 0 FAIL，都是 CI 不装的可选依赖） |
+
+### 关键收获
+
+- **"本地绿、CI 才有读数"的取数面问题**：本机 git 配了 `core.quotePath=false`，所以 CJK 路径在两种实现下表现相同，盲区完全隐形。**按路径前缀/后缀做断言的门，取数必须用 `-z`**，不然非 ASCII 目录（本项目就叫 `蒸馏区`、`参考资料`、`测试区`）会静默漏出闸外。对应既有教训「闸与夹具的取数面」「量具必须能被证伪」。
+- CI 里那 5 个 WARN（pandoc/mmdc/系统浏览器/pymupdf/playwright/win32com）是**诚实读数**：CI 环境确实没装，且只降不阻断。别为了"CI 全绿好看"去豁免它们。
 
 ---
 
@@ -269,7 +287,7 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 | 低 | endcsname ×1 | ⚠️ 记档：markdown 包 glossaries 主题第三方交互（preamble 期，非致命，按"不动第三方包"原则记档） |
 | 低 | ~~lstlisting 孤儿环境连锁~~ | ✅ 2026-10-11 已清（7→3）：paiban.tex 示例行含**字面 \end{lstlisting}**，扫描器按 token 匹配提前闭合环境。唯一可靠修法=内容行不出现完整序列（加空格/前后加字均无效——listings 比较忽略空白）；陷阱已写进源码注释 |
 | 低 | 工作区残留 | ✅ 2026-10-11 已清：probe2.tex 删除（字体排错探针，任务完结）；templates/{book,math-notes,slides}/figures/ 图表副本入库（与 paper/figures 先例一致） |
-| 中 | 把 `office.py doctor` 接进 CI（`.github/workflows/ci.yml`） | 新加的「文档口径」闸现在**只在本地跑**，CI 里两道 job 都不含 doctor——闸要长在提交落地的地方才算闸。接法前先解决一件事：doctor 的工具链/字体/隐私三类断言在 ubuntu runner 上是否会误 FAIL（本机基线 69 OK，Linux 无 mmdc/系统浏览器/方正字体环境），确认只出 WARN 再接；**别用 `\|\| true` 包**（10-11 CI 三坑之一：那样等于没接） |
+| ~~中~~ | ~~把 `office.py doctor` 接进 CI~~ | ✅ 2026-11-01 落地在 `latex-render` job（分支试跑→Linux 读数暴露 `ls-files` 的 CJK 转义盲区→改 `-z` 后合并）。遗留：CI 端 5 个 WARN 是可选依赖缺失的诚实读数，不豁免 |
 | P3 | Typst 0.15 第三输出通道 | 方案书 §6 长期储备 |
 | P3 增补 | ~~规范包架构~~ ✅ 2026-10-11（rulepack_check.py + rules/gbt9704-2012.yaml + 自制指南，gov-notice 对照逐行一致） | 第四轮调研 Adopt |
 | P3 增补 | ~~blindcheck 子命令~~ ✅ 2026-10-11（身份暴露点扫描：元信息/学号/邮箱/手机号/致谢基金/导师/路径，gov 示例命中 2/干净源 0 误报） | 第四轮调研 Adopt |
