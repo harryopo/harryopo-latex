@@ -1,6 +1,6 @@
 # Repo Wiki — d:\ai\latex 办公文档 AI 生产力平台
 
-> 生成方式：AI 全仓遍历（607 个入库文件，核心为 29 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~17390 行 + LaTeX 模板体系 + 94 篇文档）
+> 生成方式：AI 全仓遍历（607 个入库文件，核心为 29 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~17498 行 + LaTeX 模板体系 + 94 篇文档）
 > 数字来源：`office.py doctor --stats` 实时统计，**不要手写**——手写的数字必然漂移（本次修正前此处声明 679 文件/19 脚本/~7900 行，实际已到 561/44/16773）。`office.py doctor` 会校验本行 5 项数字与实际是否一致，不一致报 WARN。
 > 最后验证：2026-10-11（三次） | 覆盖：规范包架构（rulepack_check）+ blindcheck 盲审隐匿检查
 > 本文件是 AI 协作知识库：新需求开发前先检索第 4/9/10 章，优先复用，防止重复造轮子。
@@ -101,20 +101,32 @@ flowchart LR
         A5[.pptx/.xlsx/.html 等20+] -->|markitdown| MD
     end
     MD[Markdown 中间态<br/>text_norm 护栏] --> PRE[office.py 预处理:<br/>ASCII 警告 + mermaid 块渲染 PNG<br/>失败即 FATAL 退出]
-    subgraph 出口[MD → 一切]
+    subgraph 出口[MD → 五链路]
         PRE -->|md_to_word + COM TOC/PDF| W[.docx / Word 导出 PDF]
-        PRE -->|convert.py + xelatex×3| P[paper/report PDF]
+        PRE -->|convert.py + xelatex×3| P[paper / report PDF<br>--gov 走国标分支]
         PRE -->|pandoc+lua 或 md2latex 回退| N[math-notes PDF]
+        PRE -->|convert.py slides 引擎| S[slides PDF<br/>beamer 三主题]
+        PRE -->|convert.py book 引擎| K[book PDF<br/>ctexbook 章级]
         MD -->|AI 产 data.json + docxtpl| T[用户模板保真填充]
     end
+    P --> LOGCHK
+    N --> LOGCHK
+    S --> LOGCHK
+    K --> LOGCHK
+    LOGCHK{check_tex_log 日志断言<br/>有 ! 错误即判链路失败<br/>不静默出 PDF}
     subgraph 改稿循环
         W -->|用户 Word 修改| R[redline.py 红线稿]
         R -->|AI 解析修订意图| MD
         W -->|AI 定向修改| TC[track_changes.py 修订二稿]
     end
+    subgraph 送审
+        MD -->|office.py blindcheck| BL[身份暴露点扫描<br/>元信息/学号/邮箱/致谢/导师/路径]
+        MD -->|office.py govcheck + rules/*.yaml| GC[规范包合规检查]
+    end
     subgraph 旁路
         DD[diagram-design HTML] -->|office.py diagram| PNG[figures/*.png] -->|MD 引用| PRE
         BM[harryopo-build-mcp] -->|lint→build→diagnostics| P
+        CI[GitHub Actions skill-ci] -.->|提交即跑 doctor + 渲染门| LOGCHK
     end
 ```
 
@@ -184,9 +196,9 @@ subsection 的 `\huge`≈20.7pt）。
 | 层级 | 宏 | 值 | 字体 | 颜色 |
 |---|---|---|---|---|
 | 章/书名 | `\hrpTitleSize` | 二号 22pt | 小标宋 `\fzxb` | `DarkColor` |
-| 一级 | `\hrpH1Size` | 三号 16pt | 大标宋 `\fzdbs` | `MainColor` |
-| 二级 | `\hrpH2Size` | 四号 14pt | 黑体 `\fzht` | `SubColor` |
-| 三级 | `\hrpH3Size` | 小四 12pt | 楷体 `\fzkt` | `MainColor!75!black` |
+| 一级 | `\hrpHOneSize` | 三号 16pt | 大标宋 `\fzdbs` | `MainColor` |
+| 二级 | `\hrpHTwoSize` | 四号 14pt | 黑体 `\fzht` | `SubColor` |
+| 三级 | `\hrpHThreeSize` | 小四 12pt | 楷体 `\fzkt` | `MainColor!75!black` |
 | 正文 | — | 小四 12pt | 书宋 | 黑 |
 | 题注 | `\hrpSmallSize` | 五号 10.5pt | 仿宋 `\fzfs` | — |
 | 代码 | `\hrpMonoSize` | 小四 12pt | JetBrains Mono | — |
@@ -212,9 +224,11 @@ GB/T 9704 规定四级标题**同为三号**、靠字体区分（一、黑体／
 章（小标宋）→ 节（大标宋 + MainColor）→ 小节（楷体 + 淡蓝黑），页码统一正文字号。
 目录标题下**默认不画横线**（`\hrp@tocrule` 开关可开）。
 
-> ⚠️ 目录/标题样式里**不能用 `\hrpH1Size` 这类宏名**，必须写展开值
-> （`\zihao{3}\fzdbs`）。tocloft 与 titlesec 会把定义原样写进 `.toc`/`.aux`，
-> 到 `\begin{document}` 之后再展开会报 Undefined control sequence。
+> ⚠️ 目录/标题样式里**不能写宏名，必须写展开值**（`\zihao{3}\fzdbs`）。tocloft 与
+> titlesec 会把定义原样写进 `.toc`/`.aux`，到 `\begin{document}` 之后再展开会报
+> Undefined control sequence。另有一条独立铁律：**宏名不能含数字**——
+> `\hrpH1Size` 会被 TeX 切成 `\hrpH` + `1Size`，定义根本不成立
+> （2026-11-01 前本文件与此宏都写错，`doctor` 已加「宏名合法性」闸守这条）。
 
 ### 代码块约定
 
@@ -311,6 +325,7 @@ GB/T 9704 规定四级标题**同为三号**、靠字体区分（一、黑体／
 | 文档时效 | REPO_WIKI 头部画像的入库文件数与实际一致（规范 4.4「过期自动降级」） | — |
 | **文档口径** | README 中英 / REPO_WIKI / SKILL.md 里写明的子命令数量、以及列举了 ≥6 成命令名的清单，必须等于 `office.py` 的实际注册集（从源码 `sub.add_parser` 直取，不跑 `--help` 以免自嵌套）。历史读数所在 `.ai/HANDOFF.md` 与 memory 流水**排除在外** | 2026-10-31 横扫 |
 | **凭据形态** | 逐个入库**文本**文件扫 8 类凭据形状（AWS AKIA / GitHub token / OpenAI sk- / PEM 私钥块 / JWT / 带密码的 URL / IM webhook / `key = "≥16 位且含数字或符号的字面量"`），命中即 FAIL。二进制按 NUL 嗅探跳过、单文件上限 3MB | 2026-11-01 按出口枚举补齐 |
+| **宏名合法性** | 模板（`SYNC_FILES` 那 8 份）里不许出现**名字含数字**的宏定义（`\newcommand`/`\renewcommand`/`\providecommand`/`\DeclareRobustCommand`/`\def`）——TeX 控制序列名只认字母 | 2026-11-01 `\hrpH1Size` 事故 |
 
 用法：
 ```bash
@@ -342,6 +357,31 @@ python .trae/skills/harryopo-office/scripts/office.py doctor --stats   # 只出�
 > 2. **行尾注释会被当成模式的一部分**——`!/docs/REPO_WIKI.md   # 知识库必须入库` 整行含 `!` 开头虽仍生效，但 `path  # 说明` 形式会让 git 把 ` # 说明` 并入模式，匹配失败。注释必须单独一行。
 >
 > 这两条都属于「看起来写对了、实际没生效」的静默失效，故 `doctor` 的 gitignore 有效性检查用 `git check-ignore` 逐条实证，而非读 .gitignore 文本猜测。
+
+**2026-11-01 编译日志断言（`check_tex_log`）抓出的模板缺陷**
+
+此前的链路判据只看 `Output written` + 体积 >5KB，而 nonstopmode 会把 `! ...` 错误全部咽掉——
+"PDF 出来了"和"排版是对的"是两件事。加上日志断言后首轮实测：**五类链路每次编译共 61/14/8 条错误**，
+逐条定位后修掉 8 项，A/B 对照（同一份 e2e 用改前/改后模板各编一遍）61 → 0：
+
+| # | 缺陷 | 症状（日志） | 后果 |
+|---|---|---|---|
+| 1 | `harryopo-typography.sty` 六个宏名含数字（`\hrpH1Size` 等） | Missing \begin{document} + Missing number + Illegal unit + nine parameters ×40 | 宏从未定义成功，`1Size` 被当正文排出；文档里的"展开值规避"注释把根因误记成 LaTeX 版本问题 |
+| 2 | `\hrpcaptionsetup` 里 `\DeclareCaptionLabelFormat{...}{#1 #2}` 少一层 `#` | Illegal parameter number in definition of \hrpcaptionsetup | 中文"图 1/表 1"题注格式整段静默失效 |
+| 3 | `\hrptocsetup` 里 `\setlength\cftchapnumwidth}{...}` 多一个 `}` + `\else\fi` 悬空 | Too many }'s / Extra \fi | 章编号宽度从未设上 |
+| 4 | caption 的 `font` 里塞 `\hrpSmallSize`（caption 只收注册字形名） | caption Error: \zihao {5} undefined + Missing/Extra \endcsname | 题注字号失效；改走 `\DeclareCaptionFont{hrpsmall}` |
+| 5 | 目录间距用了不存在的 `\cftsecskip`/`\cftsubsecskip` | Undefined control sequence + Missing number | 正确旋钮是 `\cftbeforesecskip`/`\cftbeforesubsecskip`；目录行距从未生效 |
+| 6 | `\cfttoctitlefont{...}`/`\cftaftertoctitle{...}` 被当命令调用 | Missing \begin{document} | 应为 `\renewcommand{...}{...}`；目录标题字体从未生效 |
+| 7 | `harryopo-paper.cls`/`book.cls` 与 typography 各自 `\newcommand{\subhead}` | Command \subhead already defined | 类里那份从没生效过（typography 先定义）；类侧改 `\providecommand` |
+| 8 | `mathnotes-template.latex` 用 `max width=\textwidth`（本机 graphicx 的 Gin 族无此键） | xkeyval Error: `max width' undefined in families `Gin' | 图片键值整套失效；已删该键保留 `width=0.85\textwidth` |
+
+**存量未清（`check_tex_log` 仍报 WARN，逐条待办见 `.ai/HANDOFF.md`）**：
+- slides 链路 6 条：MD 显示公式被错误转义成 `\$$...$\$` 落进 `verbatim` 上下文，
+  末遍 **Emergency stop**——当前 slides PDF 是前一遍的产物，尾部内容可能不全（最严重的一项）
+- book 链路 10 条：`\newtheorem` 与 base.sty 重复建计数器（`\c@theorem` 等 ×5）、
+  `FangSong/BI` 形状解析失败、一处 `\newcommand` 体内空行截断
+- `--a5paper` 是**假开关**：生成的 tex 恒为 `\documentclass{harryopo-book}`（无选项），
+  实测 A4/A5 两次渲染页面同为 595×842pt；office.py 的 `render_book` 没把 `a5paper` 透传给类选项
 
 **限制（设计性）**：track_changes 单 run 匹配（跨 run 不支持）；docx_clean 反转义白名单外保持；registry latex schema 为 M2 占位（`tex-placeholder-v1`）；schema 类型推断全 string；marker/docling 网络阻塞判 Hold（HF Xet 存储墙）；Word 链路依赖本机 MS Office（Windows-only），LaTeX/PDF 链路跨平台；方正字体商用授权。
 

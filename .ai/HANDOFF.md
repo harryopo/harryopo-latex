@@ -70,6 +70,26 @@
 `fork` 检查不用劳用户了：`gh api repos/harryopo/harryopo-latex/forks` = **0**，`forks_count=0`。
 所以 9-27 历史重写没有被 fork 带走旧历史；**唯一残余风险只剩 GitHub 服务端按 SHA 缓存的不可达对象**（需 Support 工单）。
 
+### 本次完成（续2）：全链路编译体检 + 模板 8 项缺陷清零（同日晚些）
+
+给 `office.py` 加了 `check_tex_log`（每条 LaTeX 链路收口前解析 xelatex 日志），因为它一上就发现
+**五类链路每次编译都在吞错误**（paper 61 条）。逐条定位并修 8 项，A/B 对照（同一份 e2e 用改前/改后模板各编一遍）
+**61 → 0**；详细成因表见 `docs/REPO_WIKI.md` §8「2026-11-01 编译日志断言抓出的模板缺陷」。
+
+| 验证 | 读数 |
+|---|---|
+| 九用例复测（产物全写仓库外 `Temp/hrp-audit`） | paper 单栏/双栏、report、gov、word 学术/gov、notes **七项 rc=0 且日志零错误**；slides 6 条、book 10 条待清 |
+| govcheck | 10/10 通过 |
+| PDF 公式字体 | 7 份产物 CM 回退**全部为无**、XITS 在位 |
+| 双源同步 | typography/book/mathnotes 三份改动都 cp 到 skill 副本，`doctor` sha256 断言通过（期间真报过一次 30 行差异，同步后回绿） |
+| 新闸 | doctor 加「宏名合法性」（宏名含数字即 FAIL，横扫即抓出 `book.cls` 的 `\harryopo@a5paper`）与 `check_tex_log` WARN |
+
+**顺带查出的两件事**（都归到下面待办，不是猜测，有实测）：
+- `--a5paper` 是**假开关**：A4/A5 两次渲染页面同为 595×842pt，生成的 tex 恒为 `\documentclass{harryopo-book}`
+- 架构图 `output/skill-demo/office-layers.html|png`（09-20）**已过期**：图上写"11 subcommands · 4 chains"，
+  实际 13 子命令 / 5 链路，且交付物层还写着没做的 `pptx`；REPO_WIKI §3.2 的 mermaid 数据流图同样缺
+  slides/book/盲审/日志断言（本轮已把 mermaid 补齐，**架构图重绘待用户审核**）
+
 ---
 
 ## 2026-10-31 会话：状态复盘 + 文档漂移横扫（无功能改动）
@@ -310,6 +330,10 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 | 低 | ~~lstlisting 孤儿环境连锁~~ | ✅ 2026-10-11 已清（7→3）：paiban.tex 示例行含**字面 \end{lstlisting}**，扫描器按 token 匹配提前闭合环境。唯一可靠修法=内容行不出现完整序列（加空格/前后加字均无效——listings 比较忽略空白）；陷阱已写进源码注释 |
 | 低 | 工作区残留 | ✅ 2026-10-11 已清：probe2.tex 删除（字体排错探针，任务完结）；templates/{book,math-notes,slides}/figures/ 图表副本入库（与 paper/figures 先例一致） |
 | ~~中~~ | ~~把 `office.py doctor` 接进 CI~~ | ✅ 2026-11-01 落地在 `latex-render` job（分支试跑→Linux 读数暴露 `ls-files` 的 CJK 转义盲区→改 `-z` 后合并）。遗留：CI 端 5 个 WARN 是可选依赖缺失的诚实读数，不豁免 |
+| **高** | slides 链路末遍 **Emergency stop**（6 条错误） | `convert.py` 的 slides 引擎把 MD 显示公式转义成 `\$$\text{sim}...$\$` 落进 verbatim 上下文（`templates/slides/report-showcase-e2e.tex:112`）。当前 slides PDF 是**前一遍**的产物，尾部可能不全——这是产物正确性问题，不是噪音。修完把 `check_tex_log` 从 WARN 升 FAIL 的门槛就近了 |
+| 中 | book 链路 10 条错误 | `\newtheorem` 与 base.sty 重复建计数器（`\c@theorem` 等 5 条）、`FangSong/BI` 形状解析失败、一处 `\newcommand` 体内空行截断（`harryopo-book.cls:378`） |
+| 中 | `--a5paper` 是假开关 | 实测 A4/A5 同为 595×842pt，生成的 tex 恒为 `\documentclass{harryopo-book}`；`office.py:601 render_book` 收到 `a5paper` 却没透传类选项。要么接通，要么把开关删掉（不许留"看着能用"的控件） |
+| 中 | 架构图 `office-layers.html|png` 重绘（**待用户审核**） | 图上"11 subcommands · 4 chains"、交付物层含未实现的 `pptx`；按 diagram-design 流程改：层 03 编排 13 子命令、层 05 质检加 blindcheck/规则包/日志断言、层 06 交付物改为 docx/pdf(五类)/png；渲染出 PNG 先交用户确认再插文档 |
 | P3 | Typst 0.15 第三输出通道 | 方案书 §6 长期储备 |
 | P3 增补 | ~~规范包架构~~ ✅ 2026-10-11（rulepack_check.py + rules/gbt9704-2012.yaml + 自制指南，gov-notice 对照逐行一致） | 第四轮调研 Adopt |
 | P3 增补 | ~~blindcheck 子命令~~ ✅ 2026-10-11（身份暴露点扫描：元信息/学号/邮箱/手机号/致谢基金/导师/路径，gov 示例命中 2/干净源 0 误报） | 第四轮调研 Adopt |
