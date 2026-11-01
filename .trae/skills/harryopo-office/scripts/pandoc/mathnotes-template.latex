@@ -9,7 +9,7 @@
 \providecommand{\pandocbounded}[1]{#1}
 % 图片宽度约束：防止大图撑满页面
 \usepackage{graphicx}
-\setkeys{Gin}{width=0.85\textwidth,max width=\textwidth}
+\setkeys{Gin}{width=0.85\textwidth}
 
 $if(title)$
 \renewcommand{\mathtitle}{$title$$if(subtitle)$\\[0.6em]{\Large\fzfs $subtitle$}$endif$}

@@ -395,6 +395,14 @@
   }%
 }
 
+% ===================== pandoc 列表紧凑宏 =====================
+% \tightlist 由 pandoc 的 Markdown 列表注入（md2latex/notes 链路都会产出），
+% 但它是 pandoc 侧的私有宏、不在任何宏包里。类里不定义的话，nonstopmode 会
+% 把「! Undefined control sequence」咽掉继续出 PDF——页在、尺寸正常，
+% 只是列表间距静默丢失（2026-11-01 实测 example-note 5 处、notes 链路每份都中）。
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
 % ===================== 封面命令 =====================
 % 用户可重新定义 \mathtitle, \mathauthor, \mathaffiliation, \mathinfo
 \newcommand{\mathtitle}{数理笔记}

@@ -24,14 +24,14 @@
 % 展开条件文本，产出成片 "Missing character in nullfont" 垃圾
 % （已用最小样例复现验证：\newif 在 \LoadClass 前 → nullfont 报错，
 %   在其后 → 0 次）。选项体只赋值，加载后再建条件。
-\DeclareOption{a5paper}{\def\hryopo@a5paper{1}}
+\DeclareOption{a5paper}{\def\harryopo@afive{1}}
 \DeclareOption{oneside}{\def\harryopo@oneside{1}}
 \DeclareOption{dark}{\def\harryopo@theme{dark}}
 \DeclareOption{nomath}{\def\harryopo@nomath{1}}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{ctexbook}}
 \ProcessOptions\relax
 
-\ifdefined\harryopo@a5paper\else\def\harryopo@a5paper{0}\fi
+\ifdefined\harryopo@afive\else\def\harryopo@afive{0}\fi
 \ifdefined\harryopo@oneside\else\def\harryopo@oneside{0}\fi
 
 % 默认双面排版（书籍惯例），oneside 可关
@@ -41,7 +41,7 @@
   \def\hrypbook@sideopts{twoside}
 \fi
 
-\ifnum\harryopo@a5paper=1
+\ifnum\harryopo@afive=1
   \LoadClass[a5paper,11pt,\hrypbook@sideopts]{ctexbook}
 \else
   \LoadClass[a4paper,11pt,\hrypbook@sideopts]{ctexbook}
@@ -174,7 +174,7 @@
 \setcounter{tocdepth}{2}
 
 % 括号式小标题：\subhead{标题名}
-\newcommand{\subhead}[1]{%
+\providecommand{\subhead}[1]{%
     \par\vspace{6pt}\noindent
     {\fzht\color{SubColor}（#1）}\hspace{0.5em}%
 }
@@ -339,15 +339,16 @@
 % 直接写 \renewcommand{\cftchapleader}{\cftdotfill} 会把 tagging socket
 % 名当普通文本排进目录（实测出现 "u.u.u.…/toc/leaders" 字面量）。
 \renewcommand{\cftchapleader}{\normalfont\cftdotfill{\cftchapdotsep}}
-\renewcommand{\cftchapafterindent}{0pt}
+% \cftchapafterindent 这个旋钮在 tocloft 里不存在（写下它只会报错，
+% 目录缩进从来没被它设过），删除。
 \renewcommand{\cftsecfont}{\fzkt}
 \renewcommand{\cftsecpagefont}{\normalfont}
 \renewcommand{\cftsecleader}{\dotfill}
 \renewcommand{\cftsubsecfont}{\normalfont\fzfs}
 \renewcommand{\cftsubsecpagefont}{\normalfont}
 \renewcommand{\cftsubsecleader}{\dotfill}
-\renewcommand{\cftsecskip}{4pt}
-\renewcommand{\cftsubsecskip}{2pt}
+\setlength{\cftbeforesecskip}{4pt}%
+\setlength{\cftbeforesubsecskip}{2pt}%
 
 % ============================================================
 % 第十部分：题注格式

@@ -119,7 +119,7 @@
 
 % 括号式小标题：\subhead{标题名} → （标题名）黑体后接正文
 % 注意：不再使用 \noindent，保证后续段落正常段首缩进 2 字符
-\newcommand{\subhead}[1]{%
+\providecommand{\subhead}[1]{%
     \par\vspace{6pt}%
     {\bfseries\fzht\color{SubColor}（#1）}\hspace{0.5em}%
 }

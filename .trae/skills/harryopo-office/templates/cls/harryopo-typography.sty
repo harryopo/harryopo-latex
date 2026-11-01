@@ -53,9 +53,13 @@
 % ============================================================
 
 \newcommand{\hrpTitleSize}{\zihao{2}}    % 书名 / 章标题
-\newcommand{\hrpH1Size}{\zihao{3}}       % 一级标题
-\newcommand{\hrpH2Size}{\zihao{4}}       % 二级标题
-\newcommand{\hrpH3Size}{\zihao{-4}}      % 三级标题
+% ⚠️ 宏名不许含数字：LaTeX 控制序列名只认字母，`\hrpH1Size` 会被切成
+%    `\hrpH` + `1Size`，定义失败还把 `1Size` 当正文排出来——实测每次编译
+%    在 .sty 加载点抛 40+ 条错误（Missing \begin{document}/Missing number/
+%    Illegal unit…），nonstopmode 全咽掉，PDF 看着正常。改用英文数词。
+\newcommand{\hrpHOneSize}{\zihao{3}}     % 一级标题
+\newcommand{\hrpHTwoSize}{\zihao{4}}     % 二级标题
+\newcommand{\hrpHThreeSize}{\zihao{-4}}  % 三级标题
 \newcommand{\hrpBodySize}{\zihao{-4}}    % 正文
 \newcommand{\hrpSmallSize}{\zihao{5}}     % 图/表题注
 \newcommand{\hrpMonoSize}{\zihao{-4}}     % 代码
@@ -72,9 +76,9 @@
 % 这就是"颜色不统一"的直接原因。
 % ============================================================
 
-\newcommand{\hrpH1Color}{\color{MainColor}}               % 一级：深蓝
-\newcommand{\hrpH2Color}{\color{SubColor}}                % 二级：中蓝
-\newcommand{\hrpH3Color}{\color{MainColor!75!black}}      % 三级：淡蓝黑
+\newcommand{\hrpHOneColor}{\color{MainColor}}             % 一级：深蓝
+\newcommand{\hrpHTwoColor}{\color{SubColor}}              % 二级：中蓝
+\newcommand{\hrpHThreeColor}{\color{MainColor!75!black}}  % 三级：淡蓝黑
 \newcommand{\hrpBodyColor}{\color{black}}                  % 正文：黑
 
 % ============================================================
@@ -90,14 +94,13 @@
 }
 
 % ⚠️ 下面所有 \hrptitleformat@{...} 里的字号/颜色**直接写展开值**
-%    （\zihao{3}\fzdbs\color{MainColor}），不写 \hrpH1Size 这类宏名。
-%    原因：titlesec 会把 titleformat 的第一个参数原样存进 .aux/.toc，
-%    到 \begin{document} 之后再展开。本包是 .sty，在文档类加载阶段
-%    \RequirePackage 进来，此处 \newcommand 的宏定义虽然已存在，但
-%    宏体在**文档正文分组之外**被调用时，某些 LaTeX 版本的
-%    \csname 路径会丢失——实测报 "\hrpH1Size undefined"（40 处）。
-%    写死展开值可完全规避，且与 .toc 的情形（见 \hrptocsetup 注释）
-%    是同一类问题，统一处理。
+%    （\zihao{3}\fzdbs\color{MainColor}），不写宏名。
+%    历史原因（2026-11-01 定位修正）：原先这里写的是 `\hrpH1Size` 一类宏名，
+%    而 **LaTeX 控制序列名不能含数字**——`\hrpH1Size` 实际被切成 `\hrpH`+`1Size`，
+%    定义根本没成立（当时观察到"40 处 undefined"，误记成"某些 LaTeX 版本的
+%    \csname 路径会丢失"）。现在宏名已改成 \hrpHOneSize 等合法写法，但题注/标题
+%    仍按展开值写死：titlesec 与 tocloft 会把定义原样存进 .aux/.toc，
+%    到 \begin{document} 之后才展开，写死展开值对那条路径同样免疫。
 
 % 一级（section）：大标宋 + 主色
 \newcommand{\hrp@titleformat@section}{%
@@ -149,11 +152,11 @@
 \newcommand{\hrptocsetup}{%
   % 目录标题
   \renewcommand{\contentsname}{目\quad 录}%
-  \cfttoctitlefont{\hfill\zihao{2}\fzxb\color{DarkColor}}%
+  \renewcommand{\cfttoctitlefont}{\hfill\zihao{2}\fzxb\color{DarkColor}}%
   \ifhrp@tocrule
-    \cftaftertoctitle{\hfill\par\vspace{6pt}\rule{\textwidth}{1.2pt}\par}%
+    \renewcommand{\cftaftertoctitle}{\hfill\par\vspace{6pt}\rule{\textwidth}{1.2pt}\par}%
   \else
-    \cftaftertoctitle{\hfill}%
+    \renewcommand{\cftaftertoctitle}{\hfill}%
   \fi
   % ⚠️ 这里必须用 \hrpTitleSize 等的**展开值**，不能直接写宏名。
   %    tocloft 会把 \cftsecfont 的**当前定义**写进 .toc 文件；而 .toc 是在
@@ -162,11 +165,22 @@
   %    写成 \zihao{4}\fzdbs 这种"可展开的 token 串"则 .toc 重新读时
   %    \fzdbs 依然可用（它在 .sty 里是全局 \newCJKfontfamily）。
   %
-  % 章级：小标宋 + 深色
-  \renewcommand{\cftchapfont}{\fzxb\color{DarkColor}}%
-  \renewcommand{\cftchappagefont}{\normalfont\color{DarkColor}}%
-  \renewcommand{\cftchapleader}{\normalfont\cftdotfill{\cftchapdotsep}}%
-  \renewcommand{\cftchapafterindent}{0pt}%
+  % 章级条目只在有 chapter 的类（ctexrep/ctexbook）里存在；ctexart（paper）
+  % 没有这些寄存器，\renewcommand/\setlength 直接报 Undefined control sequence。
+  % 逐个按存在性守卫——注意 tocloft 并没有 \cftchapafterindent 这个旋钮
+  % （原先写它，从来没生效过），章首行缩进的正确旋钮是 \cftchapaftersnum。
+  \@ifundefined{cftchapfont}{}{%
+    \renewcommand{\cftchapfont}{\fzxb\color{DarkColor}}%
+  }%
+  \@ifundefined{cftchappagefont}{}{%
+    \renewcommand{\cftchappagefont}{\normalfont\color{DarkColor}}%
+  }%
+  \@ifundefined{cftchapleader}{}{%
+    \renewcommand{\cftchapleader}{\normalfont\cftdotfill{\cftchapdotsep}}%
+  }%
+  \@ifundefined{cftchapaftersnum}{}{%
+    \renewcommand{\cftchapaftersnum}{}%
+  }%
   % 一级：大标宋 + 主色（明显大于二级——此前四级同 \large 即"缩放反了"）
   \renewcommand{\cftsecfont}{\zihao{4}\fzdbs\color{MainColor}}%
   \renewcommand{\cftsecpagefont}{\normalfont}%
@@ -175,18 +189,22 @@
   \renewcommand{\cftsubsecfont}{\zihao{-4}\fzkt\color{MainColor!80!black}}%
   \renewcommand{\cftsubsecpagefont}{\normalfont}%
   \renewcommand{\cftsubsecleader}{\dotfill}%
-  \renewcommand{\cftsecskip}{5pt}%
-  \renewcommand{\cftsubsecskip}{2pt}%
+  % ⚠️ 目录条目间距的正确旋钮是 \cftbeforesecskip / \cftbeforesubsecskip
+  %    （tocloft 只有这两个 skip 寄存器；\cftsecskip 根本不存在）。
+  %    原先先写 \renewcommand{\cftsecskip}、后改 \setlength{\cftsecskip}，
+  %    两种写法都在 \hrptocsetup 处抛 Undefined control sequence +
+  %    Missing number + Illegal unit（实测每链路 8 条），间距从未生效。
+  \setlength{\cftbeforesecskip}{5pt}%
+  \setlength{\cftbeforesubsecskip}{2pt}%
   % 章编号框要容纳 ctex 的"第X章"三字。
   % ⚠️ \cftchapnumwidth 只在有 chapter 级的类（ctexrep/ctexbook）里存在；
   %    ctexart（paper 用）没有章，直接 \setlength 会报 Undefined control
-  %    sequence，故按 \@ifundefined 守卫。
-  \@ifundefined{cftchapnumwidth}{%
-    \newlength\cftchapnumwidth
-    \setlength\cftchapnumwidth}{1.8em}%
-  \else
-    \setlength\cftchapnumwidth}{1.8em}%
-  \fi
+  %    sequence，故缺失时先 \newlength 兜底。
+  %    原先这段写成 `\setlength\cftchapnumwidth}{1.8em}`（多一个 `}`）并让
+  %    \@ifundefined 的真分支提前闭合，导致 `\else \fi` 悬空——每次编译抛
+  %    "Too many }'s / Extra \fi / Missing \begin{document}"，且章宽从未真正设上。
+  \@ifundefined{cftchapnumwidth}{\newlength\cftchapnumwidth}{}%
+  \setlength{\cftchapnumwidth}{1.8em}%
   % 只列到二级
   \setcounter{tocdepth}{2}%
 }
@@ -197,12 +215,22 @@
 
 \newcommand{\hrpcaptionsetup}{%
   \DeclareCaptionFont{hrpcap}{\fzfs}%
-  \DeclareCaptionLabelFormat{hrpzhlabel}{{\fzht #1 #2}\;}%
+  % ⚠️ caption 的 font 只收**已注册的字形名**，不收任意宏：写 `font={\hrpSmallSize,...}`
+  %    时 caption 会把展开后的 `\zihao {5}` 当名字去 \csname 查，报
+  %    "Package caption Error: \zihao {5} undefined" + "Missing \endcsname inserted"，
+  %    题注字号整套静默失效。故先 \DeclareCaptionFont 注册，再按名引用。
+  \DeclareCaptionFont{hrpsmall}{\zihao{5}}%
+  \DeclareCaptionFont{hrpmicro}{\zihao{-5}}%
+  % ⚠️ 0 参 \newcommand 的体内引用外层宏参数必须写 ##：这里 caption 标签格式
+  %    的 #1/#2 属于 \DeclareCaptionLabelFormat 的参数，写成单 # 会报
+  %    "Illegal parameter number in definition of \hrpcaptionsetup"，
+  %    整个中文题注格式静默不生效（2026-11-01 日志断言抓到）。
+  \DeclareCaptionLabelFormat{hrpzhlabel}{{\fzht ##1 ##2}\;}%
   \captionsetup{labelformat=hrpzhlabel,labelsep=quad,%
-                font={\hrpSmallSize,hrpcap},skip=6pt}%
+                font={hrpsmall,hrpcap},skip=6pt}%
   \captionsetup[table]{position=bottom}%
   \captionsetup[subfigure]{labelformat=simple,labelsep=space,%
-                           font={\hrpHeaderSize,hrpcap}}%
+                           font={hrpmicro,hrpcap}}%
 }
 
 % ============================================================
