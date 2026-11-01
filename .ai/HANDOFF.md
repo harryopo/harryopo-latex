@@ -48,6 +48,28 @@
 - **"本地绿、CI 才有读数"的取数面问题**：本机 git 配了 `core.quotePath=false`，所以 CJK 路径在两种实现下表现相同，盲区完全隐形。**按路径前缀/后缀做断言的门，取数必须用 `-z`**，不然非 ASCII 目录（本项目就叫 `蒸馏区`、`参考资料`、`测试区`）会静默漏出闸外。对应既有教训「闸与夹具的取数面」「量具必须能被证伪」。
 - CI 里那 5 个 WARN（pandoc/mmdc/系统浏览器/pymupdf/playwright/win32com）是**诚实读数**：CI 环境确实没装，且只降不阻断。别为了"CI 全绿好看"去豁免它们。
 
+### 本次完成（续）：按出口枚举补第 8 类闸「凭据形态」
+
+隐私护栏原先只查"个人材料目录有没有被跟踪"，但**已跟踪文件内容里混进 token** 是另一条独立出口
+（改环境脚本、示例配置、复制粘贴的链接）。新增 `check_credentials`：逐个入库**文本**文件扫 8 类形状
+→ AWS AKIA / GitHub token(ghp_/gho_/ghs_/github_pat_) / OpenAI sk- / PEM 私钥块 / JWT /
+带密码的 URL(`://u:p@host`) / IM webhook(Slack·钉钉·Discord) / `key = "≥16 位且含数字或符号的字面量"`。
+命中即 FAIL；二进制按 NUL 嗅探跳过、单文件上限 3MB（**已知边界**：docx/pdf 里塞凭据照不到，只能靠 review）。
+
+| 验证 | 结果 |
+|---|---|
+| 存量扫描 | 607 个入库文件 **0 命中**（收紧前的宽松版会假报 `token = text.split(...)` 两处，收紧右值形状后清零） |
+| canary | 造 `__cred_canary__.md` 注入 7 类形状 → 7 条 FAIL 全中、exit 1；同时良性行（`api_key = "text"` 短值、`token = text.split(...)`）正确放过 |
+| 清理 | `git reset -- 路径` 取消暂存 + 删文件（canary 从未进 HEAD）；`git ls-files` 回 0 |
+| 口径同步 | 5 处 doctor 能力清单同改（SKILL.md frontmatter + 路由表、office.py help/docstring、README 中英），Python 脚本断言每处命中恰好 1 次 |
+
+本机基线：**70 OK / 0 WARN / 0 FAIL**（+1 类）。
+
+### 顺手关掉一项待确认
+
+`fork` 检查不用劳用户了：`gh api repos/harryopo/harryopo-latex/forks` = **0**，`forks_count=0`。
+所以 9-27 历史重写没有被 fork 带走旧历史；**唯一残余风险只剩 GitHub 服务端按 SHA 缓存的不可达对象**（需 Support 工单）。
+
 ---
 
 ## 2026-10-31 会话：状态复盘 + 文档漂移横扫（无功能改动）
@@ -301,5 +323,5 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 
 ## ❓ 待确认
 
-- **GitHub 端缓存对象**：8-30 与 9-27 两轮 filter-repo 已清空历史中的 PII，但 GitHub 服务端的对象缓存需联系 Support 才能彻底清除。是否需要处理？
+- **GitHub 端缓存对象**：8-30 与 9-27 两轮 filter-repo 已清空历史中的 PII，但 GitHub 服务端的对象缓存需联系 Support 才能彻底清除。**只剩这一项**（fork 已于 2026-11-01 实测为 0，见当日会话节）。
 - **历史备份 bundle**：`D:\ai\latex-history-backup-20260927.bundle` 已确认不存在（上一轮清理时已删）

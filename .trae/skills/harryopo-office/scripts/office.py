@@ -1111,7 +1111,7 @@ def cmd_doctor(args):
     """doctor 子命令：自检 + 防回归护栏（委托 doctor.py）
 
     与 info 的区别：info 只打印环境，doctor 做断言——cls 双源漂移、
-    必含段缺失、敏感目录被误跟踪、文档口径与实际注册表不符都会判 FAIL 并 exit 1，可接 CI。
+    必含段缺失、敏感目录被误跟踪、文档口径与实际注册表不符、入库内容里出现凭据形状都会判 FAIL 并 exit 1，可接 CI。
     """
     script = SCRIPT_DIR / 'doctor.py'
     argv = [sys.executable, str(script)]
@@ -1244,7 +1244,7 @@ def main():
     p_info.set_defaults(func=cmd_info)
 
     # doctor 子命令（自检 + 防回归护栏，委托 doctor.py）
-    p_doctor = sub.add_parser('doctor', help='自检：语法/cls 双源/必含段/工具链/隐私/文档时效与口径（FAIL→exit 1）')
+    p_doctor = sub.add_parser('doctor', help='自检：语法/cls 双源/必含段/工具链/隐私/文档时效与口径/凭据形态（FAIL→exit 1）')
     p_doctor.add_argument('--skip-privacy', action='store_true', help='跳过 git 跟踪检查')
     p_doctor.add_argument('--json', action='store_true', help='输出 JSON（供 AI 消费）')
     p_doctor.add_argument('--stats', action='store_true',

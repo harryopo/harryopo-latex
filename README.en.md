@@ -100,7 +100,7 @@ harryopo-office/
 │   ├── office.py               # unified entry (13 subcommands):
 │   │                           #   render / template / diagram / redline / revise / live
 │   │                           #   trace / style / govcheck / blindcheck / ide / info / doctor
-│   ├── doctor.py               #   self-check: cls drift / required segments / toolchain / privacy / doc claims
+│   ├── doctor.py               #   self-check: cls drift / required segments / toolchain / privacy / doc claims / credential shapes
 │   ├── convert.py              #   MD → LaTeX (paper/report/notes/slides, incl. --gov)
 │   ├── tex2md.py               #   LaTeX → MD (reverse lane, feeds the Word renderer)
 │   ├── md2latex.py             #   MD → LaTeX pure-Python fallback engine (no deps)

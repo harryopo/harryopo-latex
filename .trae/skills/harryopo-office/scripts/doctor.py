@@ -527,6 +527,81 @@ def check_doc_command_claims(project_root: Path, skill_dir: Path, rep: Report):
 
 
 # ============================================================
+# 7. 凭据形态扫描（入库内容级）
+# ============================================================
+
+# (标签, 编译好的正则)。前六条是**固定形状**，几乎不存在假阳性；
+# 最后一条"赋值型"要求右值是引号字面量且 >=16 位且含数字或符号——
+# 因为 `token = text.split(...)` 这类普通变量赋值在本仓库合法存在，
+# 不加这个形状约束会天天误报（判据要能证伪，也要能被放过）。
+CREDENTIAL_PATTERNS = [
+    ('AWS AKIA', re.compile(r'\bAKIA[0-9A-Z]{16}\b')),
+    ('GitHub token', re.compile(r'\b(?:ghp|gho|ghs|github_pat)_[A-Za-z0-9_]{20,}\b')),
+    ('OpenAI sk-', re.compile(r'\bsk-[A-Za-z0-9]{20,}\b')),
+    ('私钥块', re.compile(r'-----BEGIN [A-Z ]*PRIVATE KEY-----')),
+    ('JWT', re.compile(r'\beyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\b')),
+    ('带密码的 URL', re.compile(r'://[^/\s:@]+:[^/\s:@]{3,}@[A-Za-z0-9.\-]+')),
+    ('IM webhook', re.compile(r'(?i)hooks\.slack\.com|oapi\.dingtalk\.com/robot|discord\.com/api/webhooks')),
+    ('赋值型字面量', re.compile(
+        r'(?i)\b(api[_-]?key|secret|passwd|password|access[_-]?token|'
+        r'private[_-]?token|client[_-]?secret)\b\s*[:=]\s*(["\'])([^"\'\s]{16,})\2')),
+]
+
+
+def check_credentials(project_root: Path, rep: Report):
+    """扫入库文本文件里的凭据形状——命中即 FAIL。
+
+    存在理由：本仓库是公开仓库，隐私护栏查的是"个人材料目录有没有被跟踪"，
+    但**已跟踪文件的内容里混进 token** 是另一条独立出口（脚本改环境、示例配置、
+    复制粘贴的链接都可能带进来），按出口枚举必须单独立一条。
+    已知边界：二进制（docx/pdf/png/字体）按 NUL 嗅探跳过——OOXML 里塞凭据这条
+    路本检查照不到，只能靠 review；扫描上限 3MB。
+    """
+    try:
+        out = subprocess.run(['git', '-C', str(project_root), 'ls-files', '-z'],
+                             capture_output=True, text=True,
+                             encoding='utf-8', errors='replace', timeout=30)
+        if out.returncode != 0:
+            rep.add(WARN, '凭据形态', 'git ls-files 执行失败，跳过扫描')
+            return
+        files = [f for f in out.stdout.split('\0') if f]
+    except (OSError, subprocess.SubprocessError):
+        rep.add(WARN, '凭据形态', 'git 不可用，跳过扫描')
+        return
+
+    hits = []
+    scanned = 0
+    for rel in files:
+        p = project_root / rel
+        try:
+            if not p.is_file() or p.stat().st_size > 3_000_000:
+                continue
+            raw = p.read_bytes()
+        except OSError:
+            continue
+        if b'\x00' in raw[:8192]:          # 二进制：内容级扫描照不到，见 docstring
+            continue
+        text = raw.decode('utf-8', errors='replace')
+        scanned += 1
+        for label, rx in CREDENTIAL_PATTERNS:
+            for m in rx.finditer(text):
+                if label == '赋值型字面量':
+                    value = m.group(3)
+                    if not re.search(r'[0-9!@#$%^&*+=_/\\]', value):
+                        continue          # 纯字母值（如示例里的 your-key-name）不当凭据
+                line = text[:m.start()].count('\n') + 1
+                hits.append(f'{rel}:{line} 命中「{label}」')
+
+    if hits:
+        # 不截断：截断读数会藏掉整族缺陷（本项目踩过）
+        for h in hits:
+            rep.add(FAIL, '凭据形态', h + '——公开仓库不许出现凭据，轮换后删除')
+    else:
+        rep.add(OK, '凭据形态',
+                f'{scanned} 个入库文本文件零凭据形状命中（8 类形态；二进制跳过，上限 3MB）')
+
+
+# ============================================================
 # 入口
 # ============================================================
 def run_doctor(project_root: Path, skill_dir: Path, skip_privacy=False):
@@ -539,6 +614,7 @@ def run_doctor(project_root: Path, skill_dir: Path, skip_privacy=False):
         check_privacy(project_root, rep)
     check_stats_freshness(project_root, rep)
     check_doc_command_claims(project_root, skill_dir, rep)
+    check_credentials(project_root, rep)
     return rep
 
 
