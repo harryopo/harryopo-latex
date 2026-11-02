@@ -241,7 +241,13 @@ def check_tex_log(work_dir, tex_stem, chain):
     `! Undefined control sequence. \\tightlist`（pandoc 私有宏无人定义），
     却出满页 PDF——"页在、尺寸正常、内容静默缺"那类隐形缺陷，
     原先只判 `Output written` + 体积门槛根本照不到。
-    复用 latex_diagnostics.parse_log 把错误逐条打出来（默认 WARN，存量清零后升 FAIL）。
+    复用 latex_diagnostics.parse_log 把错误逐条打出来。
+
+    2026-11-02 起判 **FAIL**（不再是 WARN）：五条 LaTeX 链路存量错误已清零
+    （paper 单栏/双栏、report、slides、book、notes 含代码块均 0 条；A/B 对照
+    见 docs/plans/2026-11-02-编译链路缺陷修复方案.md）。日志出现 `! ...`
+    即说明排版层已出错，nonstopmode 出的 PDF 不可信——必须修根因，
+    不能带着静默缺失交付（"静默降级"是本项目最高频教训）。
     """
     log = Path(work_dir) / f'{tex_stem}.log'
     if not log.exists():
@@ -257,18 +263,16 @@ def check_tex_log(work_dir, tex_stem, chain):
     errors = (parse_log(log.read_text(encoding='utf-8', errors='replace')) or {}).get('errors') or []
     if not errors:
         return True
-    # 严重度定为 WARN 而非 FAIL（2026-11-01）：五类链路里仍有一批存量错误
-    # （paper 8 / notes 1 / slides 6 / book 21，逐条见 docs/REPO_WIKI.md §8 债项）。
-    # 判 FAIL 会让所有 LaTeX 链路当场不可用，等于把"发现缺陷"变成"停摆"；
-    # 存量清零后再升 FAIL（HANDOFF 待办挂着这个门槛）。
-    print(f'  [WARN] {chain} 链路 XeLaTeX 日志 {len(errors)} 条错误——'
-          f'PDF 已产出但可能有内容静默缺失，逐条核对：')
+    # 存量清零后升级为 FAIL（2026-11-02）：见到 `! ...` 就判渲染失败，
+    # 调用方据此中止并保留日志路径，避免"PDF 出来了 = 排版是对的"的历史误判。
+    print(f'  [FATAL] {chain} 链路 XeLaTeX 日志 {len(errors)} 条错误——'
+          f'PDF 可能内容静默缺失，按失败处理，逐条核对：')
     for e in errors[:12]:                      # 超出部分按数量交代，不藏整族
         loc = f"  （tex 第 {e['line']} 行）" if e.get('line') else ''
         print(f"    ! {e['message'][:110]}{loc}")
     if len(errors) > 12:
         print(f'    （另有 {len(errors) - 12} 条同类，全文见 {log.name}）')
-    return True
+    return False
 
 
 # ============================================================
@@ -614,6 +618,8 @@ def render_book(md_file, output_dir, out_stem=None, dark=False,
            '--type', 'book', '-o', str(tex_file)]
     if dark:
         cmd.append('--dark')
+    if a5paper:
+        cmd.append('--a5paper')
     ok, out, err = run(cmd, label='convert.py(book)')
     if not ok:
         print(f'  [失败] {err}')

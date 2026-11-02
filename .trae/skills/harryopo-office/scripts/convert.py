@@ -234,6 +234,18 @@ def _escape_latex(text: str) -> str:
 
 def parse_inline(text: str) -> str:
     """将行内 Markdown 转换为 LaTeX"""
+    # 展示公式 $$…$$ 必须先行保护：行内正则 \$([^$]+?)\$ 会把 $$X$$ 中间那对
+    # $ 当成行内公式吃掉，首尾两个 $ 再被 _escape_latex 转成 \$，产出 \$$X$\$
+    # （实测 22 处，quote 内的 display 公式全中；slides 里落进 block 造成
+    #  Extra \fi 连锁）。恢复为 \[…\]，保持展示公式语义。
+    display_placeholders: List[str] = []
+
+    def _save_display(m: re.Match) -> str:
+        display_placeholders.append(m.group(1))
+        return f"\x00DMATH{len(display_placeholders)-1}\x00"
+
+    text = re.sub(r'\$\$(.+?)\$\$', _save_display, text, flags=re.DOTALL)
+
     # 保护数学公式区域（行内）
     math_placeholders: List[str] = []
 
@@ -274,7 +286,9 @@ def parse_inline(text: str) -> str:
     # 斜体 * （英文场景保留斜体）
     text = re.sub(r'\*(.+?)\*', r'\\textit{\1}', text)
 
-    # 恢复数学公式
+    # 恢复数学公式（先展示后行内；占位符互不嵌套）
+    for i, math in enumerate(display_placeholders):
+        text = text.replace(f"\x00DMATH{i}\x00", f"\\[{math}\\]")
     for i, math in enumerate(math_placeholders):
         text = text.replace(f"\x00MATH{i}\x00", f"${math}$")
 
@@ -308,6 +322,29 @@ def _render_nested_list(content: str, env: str) -> List[str]:
         out.append(f'\\end{{{env}}}')
         depth -= 1
     return out
+
+
+_QUOTE_FENCE_RE = re.compile(r'```([^\n`]*)\n(.*?)```', re.DOTALL)
+
+
+def _split_quote_code(content: str):
+    """把引用块里的 ``` 代码围栏拆出来。
+
+    引用块整块进 parse_inline 时，行内代码正则允许跨行，围栏被当成
+    `` `…` `` 吃掉 → \\inlinecode{多行} → \\texttt（LaTeX 2026 的
+    \\text@command 是 short macro）参数含 \\par 直接 runaway
+    （book 实测 "Paragraph ended before \\text@command" + Extra }）。
+
+    返回 [(文本段, None), (None, (lang, code)), …]；无围栏时只有一段文本。
+    """
+    segments = []
+    pos = 0
+    for m in _QUOTE_FENCE_RE.finditer(content):
+        segments.append((content[pos:m.start()], None))
+        segments.append((None, (m.group(1).strip(), m.group(2).rstrip('\n'))))
+        pos = m.end()
+    segments.append((content[pos:], None))
+    return segments
 
 
 def format_author(author_str: str) -> str:
@@ -466,10 +503,28 @@ def assemble_paper(blocks: List[Tuple[str, str]], title: str, author: str,
                     i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_TABLE:
                 pending_caption = re.sub(r'\*+', '', qc).strip()
                 continue
-            lines.append(r"\begin{quote}")
-            lines.append(parse_inline(content))
-            lines.append(r"\end{quote}")
-            lines.append("")
+            segs = _split_quote_code(content)
+            if any(code is not None for _, code in segs):
+                # 引用块内含 ``` 代码围栏：拆成 quote 文本 + lstlisting，
+                # 否则 parse_inline 会把围栏当跨行行内代码 → \texttt 参数含 \par
+                for text_seg, code_seg in segs:
+                    if code_seg is not None:
+                        lang, code = code_seg
+                        style = LANG_MAP.get(lang, "plainstyle")
+                        lines.append(f"\\begin{{lstlisting}}[style={style},caption={{}}]")
+                        lines.append(code)
+                        lines.append(r"\end{lstlisting}")
+                        lines.append("")
+                    elif text_seg.strip():
+                        lines.append(r"\begin{quote}")
+                        lines.append(parse_inline(text_seg.strip()))
+                        lines.append(r"\end{quote}")
+                        lines.append("")
+            else:
+                lines.append(r"\begin{quote}")
+                lines.append(parse_inline(content))
+                lines.append(r"\end{quote}")
+                lines.append("")
         elif btype == BLOCK_CODE:
             parts = content.split('\n', 1)
             lang = parts[0].strip()
@@ -760,10 +815,28 @@ def assemble_report(blocks: List[Tuple[str, str]], title: str, author: str,
                     i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_TABLE:
                 pending_caption = re.sub(r'\*+', '', qc).strip()
                 continue
-            lines.append(r"\begin{quote}")
-            lines.append(parse_inline(content))
-            lines.append(r"\end{quote}")
-            lines.append("")
+            segs = _split_quote_code(content)
+            if any(code is not None for _, code in segs):
+                # 引用块内含 ``` 代码围栏：拆成 quote 文本 + lstlisting，
+                # 否则 parse_inline 会把围栏当跨行行内代码 → \texttt 参数含 \par
+                for text_seg, code_seg in segs:
+                    if code_seg is not None:
+                        lang, code = code_seg
+                        style = LANG_MAP.get(lang, "plainstyle")
+                        lines.append(f"\\begin{{lstlisting}}[style={style},caption={{}}]")
+                        lines.append(code)
+                        lines.append(r"\end{lstlisting}")
+                        lines.append("")
+                    elif text_seg.strip():
+                        lines.append(r"\begin{quote}")
+                        lines.append(parse_inline(text_seg.strip()))
+                        lines.append(r"\end{quote}")
+                        lines.append("")
+            else:
+                lines.append(r"\begin{quote}")
+                lines.append(parse_inline(content))
+                lines.append(r"\end{quote}")
+                lines.append("")
         elif btype == BLOCK_CODE:
             parts = content.split('\n', 1)
             lang = parts[0].strip()
@@ -928,9 +1001,14 @@ def assemble_slides(blocks: List[Tuple[str, str]], title: str, author: str,
     def emit_frame(frame_title: str, body: List[str], has_math: bool):
         if not body:
             return
+        # beamer 硬契约：帧内含 verbatim 必须 [fragile]。普通帧把 body 收进
+        # \beamer@envbody 时换行已 token 化为 \par，\@xverbatim（short macro）
+        # 参数扫描遇 \par 立即报错 → \end{verbatim} 永远等不到 → 后续
+        # \end{frame}/\end{block} 错位，末遍 Emergency stop（实测 6 条）。
+        fragile = "[fragile]" if any(r"\begin{verbatim}" in ln for ln in body) else ""
         # 不用 allowframebreaks：beamer 会给分帧标题强加罗马数字后缀（I/II），
         # 且溢出 Overfull 警告比强行切帧更可控——内容超长应精简 MD
-        lines.append(r"\begin{frame}{" + frame_title + "}")
+        lines.append(r"\begin{frame}" + fragile + "{" + frame_title + "}")
         lines.extend(body)
         lines.append(r"\end{frame}")
         lines.append("")
@@ -989,9 +1067,22 @@ def assemble_slides(blocks: List[Tuple[str, str]], title: str, author: str,
             if m and i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_TABLE:
                 pending_caption = re.sub(r'\*+', '', m.group(1)).strip()
                 continue
-            cur_body.append(r"\begin{block}{}")
-            cur_body.append(parse_inline(qc))
-            cur_body.append(r"\end{block}")
+            segs = _split_quote_code(content)
+            if any(code is not None for _, code in segs):
+                # 引用块内含 ``` 代码围栏：拆成 block 文本 + verbatim（帧由
+                # emit_frame 自动加 [fragile]，否则 verbatim 在 beamer 帧内不闭合）
+                for text_seg, code_seg in segs:
+                    if code_seg is not None:
+                        _, code = code_seg
+                        cur_body.append(r"\begin{verbatim}" + "\n" + code + "\n" + r"\end{verbatim}")
+                    elif text_seg.strip():
+                        cur_body.append(r"\begin{block}{}")
+                        cur_body.append(parse_inline(text_seg.strip()))
+                        cur_body.append(r"\end{block}")
+            else:
+                cur_body.append(r"\begin{block}{}")
+                cur_body.append(parse_inline(qc))
+                cur_body.append(r"\end{block}")
         elif btype == BLOCK_TABLE:
             note = None
             if i + 1 < len(blocks) and blocks[i + 1][0] == BLOCK_QUOTE \
@@ -1294,6 +1385,8 @@ def main():
                         help="GB/T 9704 公文模式（仅 paper：国标页边距 + 三号仿宋 + 28磅行距 + 公文标题层级）")
     parser.add_argument("--no-math", action="store_true", dest="nomath",
                         help="禁用 unicode-math（无数学文档/读书笔记用）")
+    parser.add_argument("--a5paper", action="store_true",
+                        help="书籍 A5 开本（仅 book：透传 \\documentclass[a5paper]{harryopo-book}）")
     parser.add_argument("--output", "-o", default="", help="输出 .tex 路径")
     args = parser.parse_args()
 
@@ -1329,7 +1422,8 @@ def main():
             args.subtitle, args.institute,
             args.abstract, args.keywords,
             args.dark, args.twocolumn, args.nomath,
-            getattr(args, 'gov', False), theme=args.theme
+            getattr(args, 'gov', False), theme=args.theme,
+            a5paper=args.a5paper
         )
     elif ext in (".docx", ".doc"):
         result = convert_docx_to_tex(

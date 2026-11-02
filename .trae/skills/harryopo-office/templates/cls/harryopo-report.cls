@@ -20,7 +20,9 @@
 % 统一为 11pt 与 paper/book 对齐（规范用绝对 \zihao 字号，基准 pt
 % 只影响 \normalsize 与行距；12pt 会让正文比另两类明显偏大——即用户报
 % 的"正文字体字号不统一、很大很小都有"）。
-\LoadClass[a4paper,11pt]{ctexrep}
+% fontset=none：字体全由 harryopo-base 自管（方正内嵌），避免 ctex 加载
+% Windows 系统字体集（SimSun/KaiTi/FangSong 无 B/I/BI 形状）
+\LoadClass[a4paper,11pt,fontset=none]{ctexrep}
 
 % ============================================================
 % 第二部分：依赖包加载

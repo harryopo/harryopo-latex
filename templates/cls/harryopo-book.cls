@@ -41,10 +41,13 @@
   \def\hrypbook@sideopts{twoside}
 \fi
 
+% fontset=none：字体全部由 harryopo-base 自管（方正内嵌）。否则 ctex 在 Windows
+% 上默认加载 windows 字体集（SimSun/KaiTi/FangSong），这些系统字体只有单一字重，
+% 请求 B/I/BI 时 fontspec 报 "Could not resolve font"（book 日志实测 4 条）。
 \ifnum\harryopo@afive=1
-  \LoadClass[a5paper,11pt,\hrypbook@sideopts]{ctexbook}
+  \LoadClass[a5paper,11pt,\hrypbook@sideopts,fontset=none]{ctexbook}
 \else
-  \LoadClass[a4paper,11pt,\hrypbook@sideopts]{ctexbook}
+  \LoadClass[a4paper,11pt,\hrypbook@sideopts,fontset=none]{ctexbook}
 \fi
 
 % ============================================================
@@ -61,8 +64,15 @@
 \RequirePackage{graphicx}
 
 % marginfix 必须在 geometry 之后加载（见 CLAUDE.md 踩坑 5）
-\geometry{left=2.6cm, right=3.2cm, top=2.6cm, bottom=2.6cm,
-          headheight=15pt, marginparwidth=4cm, marginparsep=0.6cm}
+% A5 专用边距：正文宽 = 148 − 18 − 28 = 102mm；右栏 22+4 = 26mm ≤ 28mm，
+% 旁注不越出页面（A4 沿用原 2.6/3.2/4cm，既有版式不变）
+\ifnum\harryopo@afive=1
+  \geometry{left=1.8cm, right=2.8cm, top=2.0cm, bottom=2.0cm,
+            headheight=15pt, marginparwidth=2.2cm, marginparsep=0.4cm}
+\else
+  \geometry{left=2.6cm, right=3.2cm, top=2.6cm, bottom=2.6cm,
+            headheight=15pt, marginparwidth=4cm, marginparsep=0.6cm}
+\fi
 \RequirePackage{marginfix}
 
 % ============================================================
@@ -210,6 +220,13 @@
 \let\corollary\relax      \let\endcorollary\relax
 \let\example\relax        \let\endexample\relax
 \let\remark\relax         \let\endremark\relax
+% 计数器也要一并注销：\let\theorem\relax 只清环境名，\c@theorem 仍在，
+% \newtheorem 会 \@definecounter → "Command \c@theorem already defined"（实测 5 条）
+\let\c@theorem\relax
+\let\c@definition\relax
+\let\c@proposition\relax
+\let\c@lemma\relax
+\let\c@corollary\relax
 
 \theoremstyle{plain}
 \newtheorem{theorem}{定理}[chapter]
@@ -315,8 +332,8 @@
 \renewcommand{\appendixname}{附\quad 录}
 \renewcommand{\abstractname}{摘\quad 要}
 
-\cfttoctitlefont{\hfill\LARGE\fzxb\color{DarkColor}}
-\cftaftertoctitle{\par\vspace{6pt}\rule{\textwidth}{1.2pt}\par}
+\renewcommand{\cfttoctitlefont}{\hfill\LARGE\fzxb\color{DarkColor}}
+\renewcommand{\cftaftertoctitle}{\par\vspace{6pt}\rule{\textwidth}{1.2pt}\par}
 
 % 章级条目：小标宋、无点线
 %
@@ -375,7 +392,7 @@
 % \institute 由 report.cls 定义、base.sty 未提供，book 自带一份
 % （report/slides 各自定义，base.sty 不含——不可依赖继承）
 \newcommand{\institute}[1]{\def\@institute{#1}}
-\newcommand{\@institute{}{}
+\newcommand{\@institute}{}
 
 \newcommand{\bookabstract}[1]{%
   \par\vspace{0.8em}\noindent

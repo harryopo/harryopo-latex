@@ -11,6 +11,11 @@
 \usepackage{graphicx}
 \setkeys{Gin}{width=0.85\textwidth}
 
+% Pandoc 3.x skylighting 代码高亮宏（\begin{Shaded} / \begin{Highlighting} /
+% \ImportTok 等）。缺这一段时含代码块的 MD 会报 60 条 Undefined control
+% sequence + 2 个环境未定义，nonstopmode 照样出 PDF——内容静默缺。
+$highlighting-macros$
+
 $if(title)$
 \renewcommand{\mathtitle}{$title$$if(subtitle)$\\[0.6em]{\Large\fzfs $subtitle$}$endif$}
 $endif$

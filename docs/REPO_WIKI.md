@@ -1,6 +1,6 @@
 # Repo Wiki — d:\ai\latex 办公文档 AI 生产力平台
 
-> 生成方式：AI 全仓遍历（607 个入库文件，核心为 29 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~17498 行 + LaTeX 模板体系 + 94 篇文档）
+> 生成方式：AI 全仓遍历（607 个入库文件，核心为 29 个 Python 脚本（skill 自研）+ 16 个辅助脚本，共 ~17598 行 + LaTeX 模板体系 + 94 篇文档）
 > 数字来源：`office.py doctor --stats` 实时统计，**不要手写**——手写的数字必然漂移（本次修正前此处声明 679 文件/19 脚本/~7900 行，实际已到 561/44/16773）。`office.py doctor` 会校验本行 5 项数字与实际是否一致，不一致报 WARN。
 > 最后验证：2026-10-11（三次） | 覆盖：规范包架构（rulepack_check）+ blindcheck 盲审隐匿检查
 > 本文件是 AI 协作知识库：新需求开发前先检索第 4/9/10 章，优先复用，防止重复造轮子。
@@ -375,13 +375,18 @@ python .trae/skills/harryopo-office/scripts/office.py doctor --stats   # 只出�
 | 7 | `harryopo-paper.cls`/`book.cls` 与 typography 各自 `\newcommand{\subhead}` | Command \subhead already defined | 类里那份从没生效过（typography 先定义）；类侧改 `\providecommand` |
 | 8 | `mathnotes-template.latex` 用 `max width=\textwidth`（本机 graphicx 的 Gin 族无此键） | xkeyval Error: `max width' undefined in families `Gin' | 图片键值整套失效；已删该键保留 `width=0.85\textwidth` |
 
-**存量未清（`check_tex_log` 仍报 WARN，逐条待办见 `.ai/HANDOFF.md`）**：
-- slides 链路 6 条：MD 显示公式被错误转义成 `\$$...$\$` 落进 `verbatim` 上下文，
-  末遍 **Emergency stop**——当前 slides PDF 是前一遍的产物，尾部内容可能不全（最严重的一项）
-- book 链路 10 条：`\newtheorem` 与 base.sty 重复建计数器（`\c@theorem` 等 ×5）、
-  `FangSong/BI` 形状解析失败、一处 `\newcommand` 体内空行截断
-- `--a5paper` 是**假开关**：生成的 tex 恒为 `\documentclass{harryopo-book}`（无选项），
-  实测 A4/A5 两次渲染页面同为 595×842pt；office.py 的 `render_book` 没把 `a5paper` 透传给类选项
+**2026-11-02 已清（上述三条存量，A/B 对照见 `docs/plans/2026-11-02-编译链路缺陷修复方案.md`）**：
+- ✅ slides 链路 6 条 → **0**：根因是 beamer 帧内 `verbatim` 未声明 `[fragile]`
+  （`\@xverbatim` 参数扫描遇 `\par` 崩帧）；另修 `parse_inline` 的 `$$…$$` 保护
+  （原先产出 `\$$…$\$`，全仓 22 处）。产物 7 页（止于 2.1）→ **28 页**，致谢/参考文献尾部恢复
+- ✅ book 链路 10 条 → **0**：`\c@theorem` 等 5 个计数器注销、`\cfttoctitlefont`
+  两行改 `\renewcommand`、`\newcommand{\@institute}{}` 括号、quote 内 ``` 围栏拆 `lstlisting`
+- ✅ `--a5paper` 已**接通**：`office.py render_book` → `convert.py --a5paper` →
+  `\documentclass[a5paper]{harryopo-book}`；另修 `base.sty:39` 的 `[a4paper]` 强制
+  （实测 A4=210×297mm / A5=**148×210mm**）
+- ✅ 顺带：四类 cls 改 `fontset=none`（字体全自管，`Could not resolve font SimSun/…` 清零）、
+  pandoc 模板补 `$highlighting-macros$`（notes 含代码块 64 条 → 0）、
+  `check_tex_log` 由 WARN **升为 FAIL**（见下）
 
 **限制（设计性）**：track_changes 单 run 匹配（跨 run 不支持）；docx_clean 反转义白名单外保持；registry latex schema 为 M2 占位（`tex-placeholder-v1`）；schema 类型推断全 string；marker/docling 网络阻塞判 Hold（HF Xet 存储墙）；Word 链路依赖本机 MS Office（Windows-only），LaTeX/PDF 链路跨平台；方正字体商用授权。
 

@@ -330,9 +330,9 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 | 低 | ~~lstlisting 孤儿环境连锁~~ | ✅ 2026-10-11 已清（7→3）：paiban.tex 示例行含**字面 \end{lstlisting}**，扫描器按 token 匹配提前闭合环境。唯一可靠修法=内容行不出现完整序列（加空格/前后加字均无效——listings 比较忽略空白）；陷阱已写进源码注释 |
 | 低 | 工作区残留 | ✅ 2026-10-11 已清：probe2.tex 删除（字体排错探针，任务完结）；templates/{book,math-notes,slides}/figures/ 图表副本入库（与 paper/figures 先例一致） |
 | ~~中~~ | ~~把 `office.py doctor` 接进 CI~~ | ✅ 2026-11-01 落地在 `latex-render` job（分支试跑→Linux 读数暴露 `ls-files` 的 CJK 转义盲区→改 `-z` 后合并）。遗留：CI 端 5 个 WARN 是可选依赖缺失的诚实读数，不豁免 |
-| **高** | slides 链路末遍 **Emergency stop**（6 条错误） | `convert.py` 的 slides 引擎把 MD 显示公式转义成 `\$$\text{sim}...$\$` 落进 verbatim 上下文（`templates/slides/report-showcase-e2e.tex:112`）。当前 slides PDF 是**前一遍**的产物，尾部可能不全——这是产物正确性问题，不是噪音。修完把 `check_tex_log` 从 WARN 升 FAIL 的门槛就近了 |
-| 中 | book 链路 10 条错误 | `\newtheorem` 与 base.sty 重复建计数器（`\c@theorem` 等 5 条）、`FangSong/BI` 形状解析失败、一处 `\newcommand` 体内空行截断（`harryopo-book.cls:378`） |
-| 中 | `--a5paper` 是假开关 | 实测 A4/A5 同为 595×842pt，生成的 tex 恒为 `\documentclass{harryopo-book}`；`office.py:601 render_book` 收到 `a5paper` 却没透传类选项。要么接通，要么把开关删掉（不许留"看着能用"的控件） |
+| ~~高~~ | ~~slides 链路末遍 Emergency stop（6 条错误）~~ | ✅ 2026-11-02：根因是 beamer 帧内 `verbatim` 缺 `[fragile]`（`\@xverbatim` 遇 `\par` 崩帧）+ `parse_inline` 的 `$$…$$` 保护缺失；6→0，PDF 7 页（止于 2.1）→ 28 页（尾部完整） |
+| ~~中~~ | ~~book 链路 10 条错误~~ | ✅ 2026-11-02：`\c@theorem` 等 5 个计数器注销 + `\cfttoctitlefont` 两行 `\renewcommand` + `\newcommand{\@institute}{}` + quote 内 ``` 围栏拆 `lstlisting`；10→0，页数 11 不塌 |
+| ~~中~~ | ~~`--a5paper` 是假开关~~ | ✅ 2026-11-02 **接通**：`render_book` → `convert.py --a5paper` → `\documentclass[a5paper]`；另修 `base.sty` 的 `[a4paper]` 强制。实测 A4 210×297mm / A5 **148×210mm**（16 页） |
 | 中 | 架构图 `office-layers.html|png` 重绘（**待用户审核**） | 图上"11 subcommands · 4 chains"、交付物层含未实现的 `pptx`；按 diagram-design 流程改：层 03 编排 13 子命令、层 05 质检加 blindcheck/规则包/日志断言、层 06 交付物改为 docx/pdf(五类)/png；渲染出 PNG 先交用户确认再插文档 |
 | P3 | Typst 0.15 第三输出通道 | 方案书 §6 长期储备 |
 | P3 增补 | ~~规范包架构~~ ✅ 2026-10-11（rulepack_check.py + rules/gbt9704-2012.yaml + 自制指南，gov-notice 对照逐行一致） | 第四轮调研 Adopt |

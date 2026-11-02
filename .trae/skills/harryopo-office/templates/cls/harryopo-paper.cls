@@ -22,10 +22,12 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{ctexart}}
 \ProcessOptions\relax
 
+% fontset=none：字体全由 harryopo-base 自管（方正内嵌），避免 ctex 在 Windows
+% 上加载系统字体集（SimSun/KaiTi/FangSong 无 B/I/BI 形状，fontspec 报 Cannot resolve）
 \if@twocolumnmode
-    \LoadClass[a4paper,11pt,twocolumn]{ctexart}
+    \LoadClass[a4paper,11pt,twocolumn,fontset=none]{ctexart}
 \else
-    \LoadClass[a4paper,11pt]{ctexart}
+    \LoadClass[a4paper,11pt,fontset=none]{ctexart}
 \fi
 
 % ============================================================

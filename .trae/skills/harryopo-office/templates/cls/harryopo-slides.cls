@@ -17,7 +17,9 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{ctexbeamer}}
 \ProcessOptions\relax
 
-\LoadClass[aspectratio=169,11pt]{ctexbeamer}
+% fontset=none：字体全由本类自管（方正内嵌），避免 ctex 加载 Windows
+% 系统字体集（SimSun/KaiTi/FangSong 无 B/I/BI 形状）
+\LoadClass[aspectratio=169,11pt,fontset=none]{ctexbeamer}
 
 % ============================================================
 % 字体（方正内嵌，相对编译 cwd 的 ../fonts/，与 base.sty 同款语法）
@@ -35,6 +37,10 @@
     Extension = .TTF,
     Path = ../fonts/
 ]{FZHTJW}
+% 中文族 zhfs / 中文等宽：fontset=none 下 ctex 不再定义，这里统一方正仿宋
+% （原先的 windows 字体集会把它设成系统 FangSong，只有单一字重、B/I/BI 解析失败）
+\setCJKfamilyfont{zhfs}[Extension = .TTF, BoldFont = FZHTJW, Path = ../fonts/]{FZFSJW}
+\setCJKmonofont[Extension = .TTF, BoldFont = FZHTJW, Path = ../fonts/]{FZFSJW}
 \newCJKfontfamily\hrypxb{FZXBSJW}[Extension=.TTF, Path=../fonts/]
 \newCJKfontfamily\hrypht{FZHTJW}[Extension=.TTF, Path=../fonts/]
 \newCJKfontfamily\hrypkai{FZKTJW}[Extension=.TTF, Path=../fonts/]
@@ -48,6 +54,16 @@
 \AtBeginDocument{\renewcommand{\familydefault}{\rmdefault}\selectfont}
 \setmainfont{XITS}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Bold,
                   ItalicFont=*-Italic, Path=../fonts/]
+% 无衬线：beamer 默认 LMSans 缺 Unicode 符号（≥ U+2265 实测 3 处 Missing
+% character）；与 base.sty 同款 TeX Gyre Heros（含该字形）
+\setsansfont{texgyreheros}[
+    Extension = .otf,
+    UprightFont = *-regular,
+    BoldFont = *-bold,
+    ItalicFont = *-italic,
+    BoldItalicFont = *-bolditalic,
+    Path = ../fonts/
+]
 \usepackage{unicode-math}
 \usepackage{booktabs}
 \usepackage{tabularx}

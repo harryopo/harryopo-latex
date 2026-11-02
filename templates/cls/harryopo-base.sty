@@ -36,7 +36,10 @@
 \RequirePackage{enumitem}
 
 % --- 页面布局 ---
-\RequirePackage[a4paper]{geometry}
+% 不能带 [a4paper]：book 类的 a5paper 分支靠 ctexbook 设定纸型，
+% geometry 的 a4paper 选项会把它压回 A4（实测 \documentclass[a5paper]{harryopo-book}
+% 仍输出 210×297mm）。paper/report 的 \LoadClass 已显式 a4paper，不受影响。
+\RequirePackage{geometry}
 
 % --- 字体（fontspec 由 ctex 已加载，这里仅确保存在） ---
 \RequirePackage{fontspec}
@@ -170,6 +173,13 @@
     Extension = .TTF,
     Path = ../fonts/
 ]{FZHTJW}
+
+% 中文族 zhfs / 中文等宽：cls 均以 fontset=none 加载 ctex（字体全自管），
+% ctex 不再定义这两族，这里显式设为方正仿宋（BoldFont 指黑体）。
+% 若误用 windows fontset，它们会变成系统 FangSong（单一字重），
+% 请求 B/I/BI 时 fontspec 报 "Could not resolve font FangSong/BI"。
+\setCJKfamilyfont{zhfs}[Extension = .TTF, BoldFont = FZHTJW, Path = ../fonts/]{FZFSJW}
+\setCJKmonofont[Extension = .TTF, BoldFont = FZHTJW, Path = ../fonts/]{FZFSJW}
 
 % 用 ctex 提供的接口覆盖默认 CJK 字体族（而非直接 \setCJKfamilyfont 重复定义）
 % 这样避免 "already defined" 冲突
