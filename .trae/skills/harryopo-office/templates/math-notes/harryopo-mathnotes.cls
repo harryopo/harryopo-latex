@@ -93,6 +93,28 @@
   }
 }
 
+% ===================== 等宽字体（JetBrains Mono，优先项目内嵌） =====================
+% 不设 \setmonofont 时等宽落到 XeLaTeX 默认 lmmono9（该字库 0/11 个框线字形，
+% U+2500–U+257F），代码块里的 ─│┌┐└┘├┤┬┴┼ 逐字缺字形、PDF 文本层不可检索
+% （实测 report.md 404 条 Missing character ↔ PDF 404 个 U+FFFF 占位）。
+% 路径用 ../fonts/：编译 cwd 是 templates/math-notes，项目根与 skill 分发件的
+% 同级 templates/fonts 都存在（cls 其它字体用的 ./fonts/ 在项目根不存在，故不沿用）。
+\IfFontExistsTF{../fonts/JetBrainsMono-Regular.ttf}{%
+  \setmonofont{JetBrainsMono-Regular}[
+    Extension = .ttf,
+    Path = ../fonts/,
+    BoldFont = JetBrainsMono-Bold,
+    ItalicFont = JetBrainsMono-Italic,
+    BoldItalicFont = JetBrainsMono-BoldItalic,
+  ]
+}{%
+  \IfFontExistsTF{Consolas}{%
+    \setmonofont{Consolas}
+  }{%
+    \setmonofont[Scale=0.9]{Latin Modern Mono}
+  }
+}
+
 \IfFontExistsTF{XITSMath-Regular.otf}{%
   \setmathfont{XITSMath-Regular.otf}[
     Path=./fonts/,
