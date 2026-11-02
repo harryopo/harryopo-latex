@@ -62,6 +62,9 @@ output/*
 templates/**/*-e2e.tex
 templates/**/*-e2e.pdf
 
+# notes 编译目录中的图片副本（ensure_placeholder_figures 从 MD 同级复制，非源文件）
+templates/math-notes/office-layers.png
+
 # 自检样张编译产物（templates/book/selftest-book.* 只入库 .tex 源文件）
 templates/book/selftest-book.pdf
 templates/book/selftest-book.toc
