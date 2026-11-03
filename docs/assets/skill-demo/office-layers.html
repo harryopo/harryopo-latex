@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>harryopo-office 生产线 · 六层架构</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:  #f7f6f4;
+      --color-ink:    #1a202c;
+      --color-muted:  #4a5568;
+      --color-accent: #2b6cb0;
+      --font-sans:    'Geist', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+      --font-serif:   'Instrument Serif', 'Noto Serif SC', serif;
+      --font-mono:    'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Layer stack · Diagram Design · harryopo-blue · rev 2026-11-03</p>
+    <h1>harryopo-office 生产线 —— 一条 MD 如何变成五类交付物</h1>
+
+    <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="office-title office-desc">
+      <title id="office-title">harryopo-office 生产线六层架构</title>
+      <desc id="office-desc">六个层叠带，自上而下为：用户交互层、AI 生成层、编排层（焦点，office.py，13 个子命令 5 条链路）、渲染引擎层、质检护栏层（含规则包合规、盲审隐匿、证据回溯、编译日志断言）、交付物层（docx / pdf / tex / png）。内容自上而下流动，质检校验自下而上反馈。</desc>
+
+      <!-- 纸面 -->
+      <rect width="100%" height="100%" fill="#f7f6f4"/>
+
+      <!-- 左 margin 方向指示：下行内容流（实线） -->
+      <line x1="128" y1="104" x2="128" y2="516" stroke="rgba(26,32,44,0.30)" stroke-width="1"/>
+      <polygon points="124,516 132,516 128,528" fill="#4a5568"/>
+      <text x="128" y="88" text-anchor="middle" fill="#4a5568" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">内容流</text>
+
+      <!-- 上行校验反馈（虚线） -->
+      <line x1="176" y1="516" x2="176" y2="116" stroke="#4a5568" stroke-width="1" stroke-dasharray="5,4"/>
+      <polygon points="172,116 180,116 176,104" fill="#4a5568"/>
+      <text x="176" y="556" text-anchor="middle" fill="#4a5568" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">校验反馈</text>
+
+      <!-- 层叠容器：外轮廓 + 交替底色 + 发丝分隔线 -->
+      <rect x="224" y="100" width="976" height="432" fill="none" stroke="rgba(26,32,44,0.30)" stroke-width="1"/>
+      <rect x="224" y="100" width="976" height="72" fill="#efeeea"/>
+      <rect x="224" y="172" width="976" height="72" fill="#f7f6f4"/>
+      <rect x="224" y="244" width="976" height="72" fill="rgba(43,108,176,0.08)"/>
+      <rect x="224" y="316" width="976" height="72" fill="#f7f6f4"/>
+      <rect x="224" y="388" width="976" height="72" fill="#efeeea"/>
+      <rect x="224" y="460" width="976" height="72" fill="#f7f6f4"/>
+      <line x1="224" y1="172" x2="1200" y2="172" stroke="rgba(26,32,44,0.12)" stroke-width="1"/>
+      <line x1="224" y1="388" x2="1200" y2="388" stroke="rgba(26,32,44,0.12)" stroke-width="1"/>
+      <line x1="224" y1="460" x2="1200" y2="460" stroke="rgba(26,32,44,0.12)" stroke-width="1"/>
+
+      <!-- 01 用户交互层 -->
+      <text x="256" y="144" fill="#4a5568" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">01</text>
+      <text x="384" y="144" fill="#1a202c" font-size="16" font-weight="600" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">用户交互层</text>
+      <text x="1168" y="144" fill="#4a5568" font-size="12" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.08em">SKILL.md · office.py CLI · IDE 预览</text>
+
+      <!-- 02 AI 生成层 -->
+      <text x="256" y="216" fill="#4a5568" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">02</text>
+      <text x="384" y="216" fill="#1a202c" font-size="16" font-weight="600" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">AI 生成层</text>
+      <text x="1168" y="216" fill="#4a5568" font-size="12" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.08em">Markdown 中间态 · JSON 数据</text>
+
+      <!-- 03 编排层（FOCAL：accent 描边 + 浅色调底色） -->
+      <rect x="224" y="244" width="976" height="72" fill="none" stroke="#2b6cb0" stroke-width="1"/>
+      <text x="256" y="288" fill="#2b6cb0" font-size="8" font-weight="600" font-family="'Geist Mono', monospace" letter-spacing="0.14em">03</text>
+      <text x="384" y="288" fill="#1a202c" font-size="16" font-weight="600" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">编排层 office.py</text>
+      <text x="1168" y="288" fill="#2b6cb0" font-size="12" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.08em">13 subcommands · 5 chains</text>
+
+      <!-- 04 渲染引擎层 -->
+      <text x="256" y="360" fill="#4a5568" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">04</text>
+      <text x="384" y="360" fill="#1a202c" font-size="16" font-weight="600" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">渲染引擎层</text>
+      <text x="1168" y="360" fill="#4a5568" font-size="12" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.08em">Word+COM · XeLaTeX · pandoc · playwright</text>
+
+      <!-- 05 质检护栏层 -->
+      <text x="256" y="432" fill="#4a5568" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">05</text>
+      <text x="384" y="432" fill="#1a202c" font-size="16" font-weight="600" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">质检护栏层</text>
+      <text x="1168" y="432" fill="#4a5568" font-size="12" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.08em">规则包 · 盲审 · 证据回溯 · 日志断言</text>
+
+      <!-- 06 交付物层 -->
+      <text x="256" y="504" fill="#4a5568" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">06</text>
+      <text x="384" y="504" fill="#1a202c" font-size="16" font-weight="600" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">交付物层</text>
+      <text x="1168" y="504" fill="#4a5568" font-size="12" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.08em">docx · pdf ×5 · tex · png</text>
+
+      <!-- 焦点注释 -->
+      <text x="224" y="584" fill="#4a5568" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.18em">FOCAL LAYER</text>
+      <text x="336" y="584" fill="#4a5568" font-size="12" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">编排层是唯一入口：13 个子命令、5 条链路（word / paper / notes / slides / book）都经 office.py 调度；LaTeX 链路收口前过日志断言，见到错误即判失败，绝不静默降级。</text>
+
+      <!-- 图例条（底部 60px） -->
+      <line x1="224" y1="660" x2="1200" y2="660" stroke="rgba(26,32,44,0.12)" stroke-width="1"/>
+      <rect x="224" y="680" width="12" height="12" fill="rgba(43,108,176,0.08)" stroke="#2b6cb0" stroke-width="1"/>
+      <text x="248" y="691" fill="#4a5568" font-size="12" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">焦点层（编排枢纽）</text>
+      <rect x="416" y="680" width="12" height="12" fill="#f7f6f4" stroke="rgba(26,32,44,0.30)" stroke-width="1"/>
+      <text x="440" y="691" fill="#4a5568" font-size="12" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">普通层</text>
+      <line x1="544" y1="686" x2="576" y2="686" stroke="#4a5568" stroke-width="1" stroke-dasharray="5,4"/>
+      <text x="588" y="691" fill="#4a5568" font-size="12" font-family="'Geist', 'Noto Sans SC', 'Microsoft YaHei', sans-serif">校验反馈（自下而上）</text>
+    </svg>
+  </div>
+</body>
+</html>
