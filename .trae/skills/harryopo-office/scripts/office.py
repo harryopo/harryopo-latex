@@ -97,7 +97,8 @@ def run(cmd, cwd=None, env_extra=None, check=True, label=''):
                                 encoding='utf-8', errors='replace')
     except FileNotFoundError as e:
         # 命令不在 PATH（如 xelatex 未安装）→ 优雅失败而非崩溃
-        return False, '', f'命令不存在: {e.filename}（请检查环境，如安装 TeX Live/MiKTeX）'
+        return False, '', (f'命令不存在: {e.filename or cmd[0]}'
+                           f'（请检查环境，如安装 TeX Live/MiKTeX）')
     if check and result.returncode != 0:
         stderr_tail = result.stderr.strip().split('\n')[-3:] if result.stderr else []
         return False, result.stdout, '\n'.join(stderr_tail)
@@ -126,7 +127,10 @@ def _ensure_tex_on_path():
                 os.environ['PATH'] = d + os.pathsep + os.environ['PATH']
                 print(f'  [INFO] 已把 TeX 目录加入 PATH: {d}')
                 return
-    print('  [WARN] 未找到 xelatex（TinyTeX/MiKTeX/TeX Live 均未探测到）')
+    print('  [WARN] 未找到 xelatex（TinyTeX/MiKTeX/TeX Live 均未探测到）。')
+    print('         安装: winget install TeXLive.TeXLive（或 https://tug.org/texlive/），'
+          '装好后重开终端')
+    print('         验证: python scripts/office.py info 或 xelatex --version')
 
 
 def _ensure_pandoc_on_path():
@@ -181,6 +185,32 @@ def ensure_placeholder_figures(target_dir, md_file):
                 img = Image.new('RGB', (800, 400), '#F0F0F0')
                 img.save(str(target))
                 print(f'  [占位] {target.name}')
+
+
+def copy_source_images(src_md, dst_dir, md_text):
+    """把源 MD 引用的同级图片复制到 dst_dir 的对应相对路径。
+
+    背景（2026-11-03 验收）：图表预处理会把 MD 写成 output_dir/*.processed.md，
+    相对图片（figures/xxx.png）的解析基准从"源 MD 目录"变成 output_dir；
+    两者不同时 ensure_placeholder_figures 取不到真图，会退化成 800×400 灰块
+    占位（实测 slides 产物 358KB → 245KB，并非模板缺陷而是解析基准丢失）。
+    """
+    dst_dir = Path(dst_dir)
+    for img in re.findall(r'!\[.*?\]\((.*?)\)', md_text):
+        if img.startswith(('http://', 'https://')):
+            continue
+        src = Path(src_md).parent / img
+        if not src.is_file():
+            continue
+        dst = dst_dir / img
+        try:
+            if src.resolve() == dst.resolve():
+                continue
+        except OSError:
+            pass
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(str(src), str(dst))
+        print(f'  [源图] {img}')
 
 
 _CM_MATH_RE = re.compile(r'^CM(R|MI|SY|EX)\d{2}$')
@@ -854,6 +884,7 @@ def cmd_render(args):
     # ---- 图表统一预处理（mermaid；super-diagram 块会被报错拦截）----
     # 将 MD 中的图表数据代码块渲染为 PNG，替换为 ![](figures/xxx.png)
     base_stem = md_file.stem  # 产物命名基准：原始输入文件（不泄漏中间态后缀）
+    raw_md_text = md_text      # 图表替换前的原文（用于回填源 MD 同级图片）
     if '```mermaid' in md_text or '```super-diagram' in md_text:
         print('\n=== 图表统一预处理 ===')
         try:
@@ -874,6 +905,9 @@ def cmd_render(args):
         except ImportError:
             print('  [WARN] diagram_render 模块未找到，跳过图表渲染')
 
+        # processed MD 落在 output_dir：相对图片的解析基准变了，
+        # 先把源 MD 同级图片回填到 output_dir，避免 ensure 落灰块占位
+        copy_source_images(md_file, output_dir, raw_md_text)
         # 写预处理后的临时 MD
         processed_md = output_dir / f'{md_file.stem}.processed.md'
         processed_md.write_text(md_text, encoding='utf-8')
