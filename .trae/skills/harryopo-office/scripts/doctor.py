@@ -146,6 +146,10 @@ SYNC_FILES = [
     'cls/harryopo-book.cls',
     'cls/flushend.sty',
     'math-notes/harryopo-mathnotes.cls',
+    # notes 手写编译路径（templates/math-notes/md2latex.py）读这两份，
+    # 与 scripts/pandoc 版分叉过（缺 $highlighting-macros$ → 60 条错误），纳入守护
+    'math-notes/pandoc/mathnotes-template.latex',
+    'math-notes/pandoc/mathnotes-table.lua',
 ]
 
 
@@ -221,6 +225,15 @@ def check_paths(project_root: Path, skill_dir: Path, rep: Report):
         ('skill templates/slides', skill_dir / 'templates' / 'slides'),
         ('skill 内嵌 diagram-design', skill_dir / 'skills' / 'diagram-design'),
     ]
+    # skill 自包含：seed_builtins 的 5 个内置模板源必须在包内，否则"拷走即用"
+    # 模式（项目根不在场）下 template 注册表 4/5 条目静默 [SKIP]（2026-11-03 审计）
+    for rel in ('paper/showcase-paper.tex', 'report/showcase-report.tex',
+                'math-notes/example-note.tex', 'book/selftest-book.tex',
+                'slides/example-defense.tex'):
+        p = skill_dir / 'templates' / rel
+        rep.add(OK if p.exists() else FAIL, '关键路径',
+                f'skill 内置模板源 templates/{rel}: '
+                + ('在位' if p.exists() else '缺失 ← 自包含模式 seed 会 SKIP'))
     for label, path in required:
         rep.add(OK if path.exists() else FAIL, '关键路径', f'{label}: {path}'
                 + ('' if path.exists() else '  ← 缺失'))
@@ -547,6 +560,47 @@ def check_doc_command_claims(project_root: Path, skill_dir: Path, rep: Report):
                 f'（{len(cmds)} 个：{"/".join(cmds)}）')
 
 
+def check_lane_claims(project_root: Path, skill_dir: Path, rep: Report):
+    """链路清单口径：现状面文档列举的 lane 必须与 office.py 的渲染入口一致。
+
+    五条链路 = word / paper（含 --type report）/ notes / slides / book。
+    存在理由（2026-11-03 审计）：README.md:128 与 README.en.md:128 长期写
+    `word` / `paper` / `notes` / `report` / `slides`（漏 book、把 report 当独立
+    链路）；check_doc_command_claims 只守子命令数，链路清单漂移无人看。
+    判据：一行里连续列举 ≥3 个反引号 lane 名，才算"在承诺链路清单"；
+    散文提及（如"redline + revise + live 三态"）不触发。
+    """
+    docs = [('README.md', project_root / 'README.md'),
+            ('README.en.md', project_root / 'README.en.md'),
+            ('docs/REPO_WIKI.md', project_root / 'docs' / 'REPO_WIKI.md'),
+            ('SKILL.md', skill_dir / 'SKILL.md')]
+    problems = []
+    for label, path in docs:
+        if not path.is_file():
+            continue
+        lines = path.read_text(encoding='utf-8', errors='replace').splitlines()
+        for i, ln in enumerate(lines, 1):
+            toks = re.findall(r'`([a-zA-Z-]+)`', ln)
+            lane_toks = [t for t in toks
+                         if t in ('word', 'paper', 'notes', 'report', 'slides', 'book')]
+            if len(lane_toks) < 3:
+                continue
+            joined = ' / '.join(lane_toks)
+            if 'book' not in lane_toks:
+                problems.append(f'{label}:{i} 链路清单漏 book（{joined}）')
+            if 'report' in lane_toks and '--type report' not in ln:
+                problems.append(f'{label}:{i} 把 report 当独立链路（{joined}）'
+                                f'——report 是 paper 的 --type 变体')
+    uniq = list(dict.fromkeys(problems))
+    if uniq:
+        for p in uniq:
+            rep.add(FAIL, '链路口径', p)
+    else:
+        rep.add(OK, '链路口径',
+                '现状面文档的链路清单与渲染入口一致'
+                '（word / paper(含 --type report) / notes / slides / book）')
+
+
 # ============================================================
 # 7. 凭据形态扫描（入库内容级）
 # ============================================================
@@ -676,6 +730,7 @@ def run_doctor(project_root: Path, skill_dir: Path, skip_privacy=False):
         check_privacy(project_root, rep)
     check_stats_freshness(project_root, rep)
     check_doc_command_claims(project_root, skill_dir, rep)
+    check_lane_claims(project_root, skill_dir, rep)
     check_credentials(project_root, rep)
     check_tex_macro_names(project_root, rep)
     return rep
