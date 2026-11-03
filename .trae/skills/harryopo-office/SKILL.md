@@ -19,11 +19,56 @@ harryopo 办公文档超级 skill —— 覆盖 **Word (.docx)** 与 **LaTeX (PD
 - **Word 流程**：AI 产出 Markdown 中间态（用户可直接编辑）→ `md_to_word.py` 渲染成规范 .docx
 - **LaTeX 流程**：手写 .tex 或 MD/DOCX 自动转换（Pandoc + Lua Filter 或纯 Python），编译生成专业 PDF
 
+## 三步上手（每条命令本机实测，2026-11-03）
+
+### ① 验环境
+
+```bash
+python .trae/skills/harryopo-office/scripts/office.py doctor
+```
+
+预期汇总行：`=== 汇总: 81 OK / 0 WARN / 0 FAIL ===`。有 FAIL 按提示装依赖；xelatex 缺失会明确提示"安装 TeX Live/TinyTeX，用 office.py info 验证"。
+
+### ② 跑示例（示例 MD 与图片随包分发，不依赖本仓库 output/）
+
+```bash
+python .trae/skills/harryopo-office/scripts/office.py render \
+  .trae/skills/harryopo-office/examples/paper-showcase.md \
+  --format word,paper -o qs-demo
+```
+
+实测产物：`qs-demo/paper-showcase-word.docx` **141KB**；`qs-demo/paper-showcase-paper.pdf` **301KB / 7 页**。
+
+### ③ 出第一篇（最短 MD → PDF）
+
+新建 `first.md`：
+
+```markdown
+# 我的第一篇
+
+这是一段正文。
+
+## 一、公式
+
+质能方程：$E = mc^2$。
+```
+
+```bash
+python .trae/skills/harryopo-office/scripts/office.py render first.md --format paper
+```
+
+实测产物：`first-paper.pdf` **24KB / 1 页**（A4，方正字体 + XITS 数学）。
+
 ## 项目架构
 
 ```text
 harryopo-office/
 ├── SKILL.md                              # 本文件
+├── examples/                             # 开箱示例（MD + 随包静态图片资源）
+│   ├── paper-showcase.md / paper-single-column.md / paper-twocolumn.md
+│   ├── report.md / report-showcase.md / campus-qa-plan.md
+│   ├── office-layers.png                 # campus-qa-plan 引用的架构图
+│   └── figures/                          # 示例引用的 PNG（渲染时真图可解析）
 ├── scripts/
 │   ├── office.py                        # ★ 统一主入口（13 子命令总编排：render/template/diagram/redline/revise/live/trace/style/govcheck/blindcheck/ide/info/doctor）
 │   ├── convert.py                        # MD/DOCX → paper/report .tex（纯 Python）

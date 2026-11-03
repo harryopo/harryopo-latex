@@ -66,7 +66,13 @@ python -m playwright install chromium          # diagram PNG rendering
 # LaTeX: TinyTeX / TeX Live (xelatex + ctex)
 # Optional: firecrawl-anydoc (fast docx parsing) / mineru[core] (scanned documents)
 
-# 2) One command: Markdown → Word + PDF
+# 2) 3-step quickstart (full tested version at the top of SKILL.md):
+#    doctor → render examples/paper-showcase.md (141KB docx + 301KB/7p pdf)
+#    → write first.md and render (24KB / 1 page)
+python .trae/skills/harryopo-office/scripts/office.py render \
+  .trae/skills/harryopo-office/examples/paper-showcase.md --format word,paper -o qs-demo
+
+# 2.1) One command: Markdown → Word + PDF
 python .trae/skills/harryopo-office/scripts/office.py render mydoc.md --format all
 
 # 2.5) Self-check (run after editing templates or on a new machine; exits 1 on problems)
@@ -96,7 +102,8 @@ python .trae/skills/harryopo-office/scripts/word/track_changes.py draft.docx v2.
 
 ```
 harryopo-office/
-├── SKILL.md                    # trigger words + the full document workflow + conventions
+├── SKILL.md                    # trigger words + 3-step quickstart + the full document workflow + conventions
+├── examples/                   # out-of-box samples (MD + bundled static images, resolves at render time)
 ├── scripts/
 │   ├── office.py               # unified entry (13 subcommands):
 │   │                           #   render / template / diagram / redline / revise / live

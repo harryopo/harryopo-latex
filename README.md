@@ -66,7 +66,13 @@ python -m playwright install chromium          # 图表 PNG 渲染
 # LaTeX: TinyTeX / TeX Live（需 xelatex + ctex）
 # 可选增强: firecrawl-anydoc（毫秒级 docx 解析） / mineru[core]（扫描件深解析）
 
-# 2) 一键渲染：一份 Markdown → Word + PDF
+# 2) 三步上手（SKILL.md 顶部有完整实测版）：
+#    doctor → 渲染 examples/paper-showcase.md（141KB docx + 301KB/7 页 pdf）
+#    → 新建 first.md 渲染（24KB / 1 页）
+python .trae/skills/harryopo-office/scripts/office.py render \
+  .trae/skills/harryopo-office/examples/paper-showcase.md --format word,paper -o qs-demo
+
+# 2.1) 一键渲染：一份 Markdown → Word + PDF
 python .trae/skills/harryopo-office/scripts/office.py render 我的文档.md --format all
 
 # 2.5) 环境自检（改模板后 / 换机器后必跑，有问题 exit 1）
@@ -96,7 +102,8 @@ python .trae/skills/harryopo-office/scripts/word/track_changes.py 初稿.docx �
 
 ```
 harryopo-office/
-├── SKILL.md                    # 触发词 + 文档生成主流程 + 全部约定（AI 读这一个文件就够）
+├── SKILL.md                    # 触发词 + 三步上手 + 文档生成主流程 + 全部约定（AI 读这一个文件就够）
+├── examples/                   # 开箱示例（MD + 随包静态图片，渲染时真图可解析）
 ├── scripts/
 │   ├── office.py               # 统一入口（13 子命令）：
 │   │                           #   render / template / diagram / redline / revise / live
