@@ -157,29 +157,46 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _same_tree(project_root: Path, skill_dir: Path) -> bool:
+    """分发包模式判定：PROJECT_ROOT 回退到 SKILL_DIR 时，双源比对无意义。"""
+    try:
+        return project_root.resolve() == skill_dir.resolve()
+    except OSError:
+        return False
+
+
 def check_cls_sync(project_root: Path, skill_dir: Path, rep: Report):
     """比对项目根与 skill 内嵌 templates/ 是否同步，并断言必含段存在"""
     skill_tpl = skill_dir / 'templates'
 
-    for rel in SYNC_FILES:
-        a, b = project_root / 'templates' / rel, skill_tpl / rel
-        if not a.exists():
-            rep.add(FAIL, 'cls 双源同步', f'{rel}: 项目根缺失（异常）')
-            continue
-        if not b.exists():
-            rep.add(FAIL, 'cls 双源同步', f'{rel}: skill 内嵌缺失 —— 拷走后该能力不可用')
-            continue
-        if _sha(a) == _sha(b):
-            rep.add(OK, 'cls 双源同步', f'{rel}: 一致')
-        else:
-            diff = list(difflib.unified_diff(
-                a.read_text(encoding='utf-8', errors='replace').splitlines(),
-                b.read_text(encoding='utf-8', errors='replace').splitlines(),
-                lineterm='', n=0))
-            changed = sum(1 for d in diff if d.startswith(('+', '-'))
-                          and not d.startswith(('+++', '---')))
-            rep.add(FAIL, 'cls 双源同步',
-                    f'{rel}: 不一致（{changed} 行差异）→ 以项目根为准 cp 覆盖 skill 内嵌副本')
+    if _same_tree(project_root, skill_dir):
+        # 分发包模式：project_root 与 skill_dir 是同一目录，SYNC_FILES 的 a/b
+        # 指向同一文件，sha 恒等——10 条"一致"是自比自的假绿（2026-11-03 审计）。
+        # 改为 1 条带说明的 WARN；必含段断言仍真实执行（读同一份包内模板）。
+        n_seg = (sum(len(v) for v in REQUIRED_SEGMENTS.values())
+                 + sum(len(v) for v in TEMPLATE_SEGMENTS.values()))
+        rep.add(WARN, 'cls 双源同步',
+                f'分发包模式：无双源可比，跳过 sha 比对；必含段 {n_seg} 项仍生效')
+    else:
+        for rel in SYNC_FILES:
+            a, b = project_root / 'templates' / rel, skill_tpl / rel
+            if not a.exists():
+                rep.add(FAIL, 'cls 双源同步', f'{rel}: 项目根缺失（异常）')
+                continue
+            if not b.exists():
+                rep.add(FAIL, 'cls 双源同步', f'{rel}: skill 内嵌缺失 —— 拷走后该能力不可用')
+                continue
+            if _sha(a) == _sha(b):
+                rep.add(OK, 'cls 双源同步', f'{rel}: 一致')
+            else:
+                diff = list(difflib.unified_diff(
+                    a.read_text(encoding='utf-8', errors='replace').splitlines(),
+                    b.read_text(encoding='utf-8', errors='replace').splitlines(),
+                    lineterm='', n=0))
+                changed = sum(1 for d in diff if d.startswith(('+', '-'))
+                              and not d.startswith(('+++', '---')))
+                rep.add(FAIL, 'cls 双源同步',
+                        f'{rel}: 不一致（{changed} 行差异）→ 以项目根为准 cp 覆盖 skill 内嵌副本')
 
     # 必含段断言（对项目根那份查——它是唯一事实来源）
     for fname, segments in REQUIRED_SEGMENTS.items():
@@ -213,12 +230,15 @@ def check_cls_sync(project_root: Path, skill_dir: Path, rep: Report):
 # ============================================================
 
 def check_paths(project_root: Path, skill_dir: Path, rep: Report):
+    # 分发包模式下 PROJECT_ROOT 回退到 SKILL_DIR，这些路径实际都指向包内，
+    # 标签仍写"项目根"会误导（检查逻辑本身不变，只改显示文案）
+    root_label = '包内' if _same_tree(project_root, skill_dir) else '项目根'
     required = [
-        ('项目根 templates/cls', project_root / 'templates' / 'cls'),
-        ('项目根 templates/fonts', project_root / 'templates' / 'fonts'),
-        ('项目根 templates/paper', project_root / 'templates' / 'paper'),
-        ('项目根 templates/math-notes', project_root / 'templates' / 'math-notes'),
-        ('项目根 templates/slides', project_root / 'templates' / 'slides'),
+        (f'{root_label} templates/cls', project_root / 'templates' / 'cls'),
+        (f'{root_label} templates/fonts', project_root / 'templates' / 'fonts'),
+        (f'{root_label} templates/paper', project_root / 'templates' / 'paper'),
+        (f'{root_label} templates/math-notes', project_root / 'templates' / 'math-notes'),
+        (f'{root_label} templates/slides', project_root / 'templates' / 'slides'),
         ('skill SKILL.md', skill_dir / 'SKILL.md'),
         ('skill templates/cls', skill_dir / 'templates' / 'cls'),
         ('skill templates/fonts', skill_dir / 'templates' / 'fonts'),
@@ -243,7 +263,7 @@ def check_paths(project_root: Path, skill_dir: Path, rep: Report):
     #   + JetBrains Mono 4（代码块等宽，SIL OFL 1.1）
     #   + LICENSE-JetBrainsMono.txt（字体许可说明，也计文件数）
     FONT_BASELINE = 24
-    for label, path in (('项目根 fonts', project_root / 'templates' / 'fonts'),
+    for label, path in ((f'{root_label} fonts', project_root / 'templates' / 'fonts'),
                         ('skill fonts', skill_dir / 'templates' / 'fonts')):
         if not path.exists():
             continue
@@ -623,31 +643,51 @@ CREDENTIAL_PATTERNS = [
 ]
 
 
-def check_credentials(project_root: Path, rep: Report):
-    """扫入库文本文件里的凭据形状——命中即 FAIL。
+def check_credentials(project_root: Path, skill_dir: Path, rep: Report):
+    """扫文本文件里的凭据形状——命中即 FAIL。
 
     存在理由：本仓库是公开仓库，隐私护栏查的是"个人材料目录有没有被跟踪"，
     但**已跟踪文件的内容里混进 token** 是另一条独立出口（脚本改环境、示例配置、
     复制粘贴的链接都可能带进来），按出口枚举必须单独立一条。
+    分发包模式（无 .git）：凭据是内容级风险，不依赖版本控制，退化为
+    rglob 扫描 skill 目录文本文件（2026-11-03 审计：原先无 git 直接跳过，
+    分发件被塞 token 会漏）。
     已知边界：二进制（docx/pdf/png/字体）按 NUL 嗅探跳过——OOXML 里塞凭据这条
     路本检查照不到，只能靠 review；扫描上限 3MB。
     """
+    tracked = None
     try:
         out = subprocess.run(['git', '-C', str(project_root), 'ls-files', '-z'],
                              capture_output=True, text=True,
                              encoding='utf-8', errors='replace', timeout=30)
-        if out.returncode != 0:
-            rep.add(WARN, '凭据形态', 'git ls-files 执行失败，跳过扫描')
-            return
-        files = [f for f in out.stdout.split('\0') if f]
+        if out.returncode == 0:
+            tracked = [f for f in out.stdout.split('\0') if f]
     except (OSError, subprocess.SubprocessError):
-        rep.add(WARN, '凭据形态', 'git 不可用，跳过扫描')
-        return
+        tracked = None
+
+    if tracked is not None:
+        files = [project_root / rel for rel in tracked]
+        base = project_root
+        scope = f'{len(tracked)} 个入库文本文件'
+    else:
+        # 分发包模式：无 .git → 扫 skill 目录本身；压缩包/字体/图片按后缀跳过
+        # （避免把 16MB zip 读进内存），其余二进制仍由 NUL 嗅探兜底。
+        files = []
+        for p in skill_dir.rglob('*'):
+            if not p.is_file():
+                continue
+            if '.git' in p.parts or '__pycache__' in p.parts:
+                continue
+            if p.suffix.lower() in ('.zip', '.docx', '.pdf', '.png', '.jpg', '.jpeg',
+                                    '.gif', '.webp', '.ttf', '.otf', '.woff', '.woff2'):
+                continue
+            files.append(p)
+        base = skill_dir
+        scope = f'{len(files)} 个包内文本文件（无 .git，本地目录扫描）'
 
     hits = []
     scanned = 0
-    for rel in files:
-        p = project_root / rel
+    for p in files:
         try:
             if not p.is_file() or p.stat().st_size > 3_000_000:
                 continue
@@ -658,6 +698,7 @@ def check_credentials(project_root: Path, rep: Report):
             continue
         text = raw.decode('utf-8', errors='replace')
         scanned += 1
+        rel = os.path.relpath(str(p), str(base)).replace(os.sep, '/')
         for label, rx in CREDENTIAL_PATTERNS:
             for m in rx.finditer(text):
                 if label == '赋值型字面量':
@@ -673,7 +714,7 @@ def check_credentials(project_root: Path, rep: Report):
             rep.add(FAIL, '凭据形态', h + '——公开仓库不许出现凭据，轮换后删除')
     else:
         rep.add(OK, '凭据形态',
-                f'{scanned} 个入库文本文件零凭据形状命中（8 类形态；二进制跳过，上限 3MB）')
+                f'{scope} 零凭据形状命中（扫描 {scanned} 个；8 类形态；二进制跳过，上限 3MB）')
 
 
 # ============================================================
@@ -731,7 +772,7 @@ def run_doctor(project_root: Path, skill_dir: Path, skip_privacy=False):
     check_stats_freshness(project_root, rep)
     check_doc_command_claims(project_root, skill_dir, rep)
     check_lane_claims(project_root, skill_dir, rep)
-    check_credentials(project_root, rep)
+    check_credentials(project_root, skill_dir, rep)
     check_tex_macro_names(project_root, rep)
     return rep
 
