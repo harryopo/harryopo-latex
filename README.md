@@ -47,6 +47,7 @@
 
 - **🖼️ 内置图表引擎** — 在 MD 里写 ` ```mermaid ` 代码块或 diagram-design 规范，管线自动渲染 PNG、按"图注在下方 + `> 注：` 注释"规范插入；ASCII 字符画会被运行时护栏拦截
 - **📽️ 演示文稿链路** — `--format slides --theme blue/dark/plain`，MD → beamer 16:9 PDF（复用同一套字体/公式/三线表组件，含 `\note{}` 演讲备注与双页备注导出）
+- **📚 书籍/长文档链路** — `--format book [--a5paper]`，MD → ctexbook PDF（章级编号 + front/main/backmatter + 6 类教学盒子 + 右侧旁注 + 双面页眉；A5 开本 148×210mm）
 - **✏️ 改稿循环三态闭环** — `redline`（用户改了什么：两份 docx diff 出红线稿）+ `revise`（AI 改了什么：二稿带原生 w:ins/w:del）+ `live`（实时：附着打开中的 Word 做替换/批注/接受/拒绝）
 - **🔍 证据回溯** — `office.py trace` 逐段把 MD 论断定位回源 PDF 的页码与坐标（NFKC + 字符集归一 + 公式剥壳，规避数学斜体字符造成的假阳性）
 - **🎯 样式保真校验** — `office.py style extract/check`：导出模板样式画像（边距 + 标题层级）并对产物做容差比对，捕捉"套了模板但格式走样"
@@ -101,7 +102,7 @@ harryopo-office/
 │   │                           #   render / template / diagram / redline / revise / live
 │   │                           #   trace / style / govcheck / blindcheck / ide / info / doctor
 │   ├── doctor.py               #   自检：cls 双源漂移 / 必含段 / 工具链 / 隐私护栏 / 文档口径 / 凭据形态（FAIL→exit 1）
-│   ├── convert.py              #   MD → LaTeX（paper/report/notes/slides 四类型，含 --gov 公文模式）
+│   ├── convert.py              #   MD → LaTeX（paper/report/notes/slides/book 五类型，含 --gov 公文模式）
 │   ├── tex2md.py               #   LaTeX → MD（反向链路，供 Word 渲染复用）
 │   ├── md2latex.py             #   MD → LaTeX 纯 Python 回退引擎（无外部依赖）
 │   ├── text_norm.py            #   中文排版护栏（标点全角化 + CJK 空格清理，双引擎共用）
@@ -119,13 +120,13 @@ harryopo-office/
 │   ├── mermaid_render.py       #   Mermaid → PNG（跨平台浏览器回退）
 │   ├── latex_diagnostics.py    #   LaTeX 诊断库（日志解析 + L01-L07 静态预检）
 │   ├── build_mcp.py            #   harryopo-build-mcp（编译诊断闭环 MCP 服务）
-│   ├── gb9704_check.py         #   公文格式合规检查
+│   ├── rulepack_check.py       #   规范包驱动合规检查（rules/gbt9704-2012.yaml 可插拔）
 │   └── pandoc/                 #   notes 链路 pandoc 模板 + lua filter
 ├── skills/diagram-design/      # 编辑级图表规范（39 类型）
-└── templates/                  # 自包含 LaTeX 模板（4 cls + flushend + 19 字体，TEXINPUTS 免安装）
+└── templates/                  # 自包含 LaTeX 模板（4 cls + base/typography/flushend + 24 字体资源，TEXINPUTS 免安装）
 ```
 
-> 五条输出链路均可**脱离本仓库独立运行**（把整个目录拷到任意机器即可）：`word` / `paper` / `notes` / `report` / `slides`。
+> 五条输出链路均可**脱离本仓库独立运行**（把整个目录拷到任意机器即可）：`word` / `paper`（含 `--type report`）/ `notes` / `slides` / `book`。
 
 **给 AI 的推荐工作流**（SKILL.md 已固化）：
 

@@ -10,7 +10,7 @@ metadata:
   category: office-document-generation
   tags: [latex, word, docx, pdf, 公文, 学位论文, xelatex, 方正字体, omml, 三线表, 幻灯片, 规范包, 盲审]
   version: "7.1.0"
-  last_updated: "2026-10-11"
+  last_updated: "2026-11-03"
 ---
 # harryopo-office
 
@@ -39,7 +39,6 @@ harryopo-office/
 │   ├── md2latex.py                       # math-notes MD → .tex（纯 Python 版；Pandoc 优先版在 templates/math-notes/md2latex.py）
 │   ├── mineru_cli.py                     # DOCX/PDF → MD（MinerU 解析 + 清洗 + HTML表格转LaTeX；PDF 走官方 do_parse，DOCX 走 office 后端）
 │   ├── html_table_to_latex.py            # HTML 表格 → LaTeX（colspan/rowspan → multicolumn/multirow）
-│   ├── test-sample.md                    # 测试用 Markdown
 │   └── word/                             # Word (.docx) 模板引擎体系
 │       ├── md_to_word.py                 #   Markdown 中间态 → .docx（主入口）
 │       ├── word_template_engine.py       #   Word 模板引擎（渲染 API + OMML 公式）
@@ -58,6 +57,9 @@ harryopo-office/
 │       │   └── opensource.json           #   开源字体方案（Windows 系统字体）
 │       └── examples/
 │           └── example.md                #   完整示例（标题/摘要/表格/公式/图片/注释/参考文献）
+├── rules/                                # 可插拔规范包（govcheck 用）
+│   ├── README.md                         #   规则包编写指南
+│   └── gbt9704-2012.yaml                 #   内置 GB/T 9704-2012 公文规则
 └── skills/
     ├── diagram-design/                   # 编辑级图表 skill（39 类型 × 3 变体）【内嵌】
     │   ├── SKILL.md                      #   设计规范（4px网格/6连接器规则/焦点色/密度预算）

@@ -47,6 +47,7 @@
 
 - **🖼️ Built-in diagram engine** — write a ` ```mermaid ` block or diagram-design spec in your MD; the pipeline renders PNG and inserts it with caption-below + note conventions. ASCII-art diagrams are blocked by a runtime guard.
 - **📽️ Presentation lane** — `--format slides --theme blue/dark/plain`: MD → beamer 16:9 PDF, reusing the same font / equation / booktabs components, with `\note{}` speaker notes and two-up note export
+- **📚 Book / long-form lane** — `--format book [--a5paper]`: MD → ctexbook PDF (chapter-level numbering + front/main/backmatter + 6 teaching boxes + side notes + twoside headers; A5 148×210mm)
 - **✏️ Three-state revision loop** — `redline` (what the user changed: diff two docx into a native redline draft) + `revise` (what the AI changed: second draft with native w:ins/w:del) + `live` (real-time: attach to an open Word doc for replace / comment / accept / reject)
 - **🔍 Evidence tracing** — `office.py trace` locates each MD claim back to a page and coordinate in the source PDF (NFKC + charset normalisation + formula unwrapping to suppress false positives from math-italic characters)
 - **🎯 Style-fidelity check** — `office.py style extract/check` exports a template style profile (margins + heading levels) and compares a product against it, catching "template applied but formatting drifted"
@@ -101,7 +102,7 @@ harryopo-office/
 │   │                           #   render / template / diagram / redline / revise / live
 │   │                           #   trace / style / govcheck / blindcheck / ide / info / doctor
 │   ├── doctor.py               #   self-check: cls drift / required segments / toolchain / privacy / doc claims / credential shapes
-│   ├── convert.py              #   MD → LaTeX (paper/report/notes/slides, incl. --gov)
+│   ├── convert.py              #   MD → LaTeX (paper/report/notes/slides/book, incl. --gov)
 │   ├── tex2md.py               #   LaTeX → MD (reverse lane, feeds the Word renderer)
 │   ├── md2latex.py             #   MD → LaTeX pure-Python fallback engine (no deps)
 │   ├── text_norm.py            #   Chinese typography guardrails (shared by both engines)
@@ -119,13 +120,13 @@ harryopo-office/
 │   ├── mermaid_render.py       #   Mermaid → PNG (cross-platform browser fallback)
 │   ├── latex_diagnostics.py    #   LaTeX diagnostics (log parsing + L01-L07 lint)
 │   ├── build_mcp.py            #   harryopo-build-mcp (compile-diagnosis MCP server)
-│   ├── gb9704_check.py         #   official-document compliance audit
+│   ├── rulepack_check.py       #   pluggable rule-pack compliance audit (rules/gbt9704-2012.yaml)
 │   └── pandoc/                 #   notes-lane pandoc template + lua filter
 ├── skills/diagram-design/      # editorial diagram specs (39 types)
-└── templates/                  # self-contained LaTeX templates (4 cls + flushend + 19 fonts)
+└── templates/                  # self-contained LaTeX templates (4 cls + base/typography/flushend + 24 font assets)
 ```
 
-> All five output lanes — `word` / `paper` / `notes` / `report` / `slides` — run **standalone**, outside this repo. Copy the directory anywhere and it works.
+> All five output lanes — `word` / `paper` (incl. `--type report`) / `notes` / `slides` / `book` — run **standalone**, outside this repo. Copy the directory anywhere and it works.
 
 **Recommended AI workflow** (solidified in SKILL.md):
 

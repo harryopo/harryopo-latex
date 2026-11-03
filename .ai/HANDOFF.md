@@ -333,7 +333,7 @@ git diff --cached | grep -E '^\+' | grep -inE '[0-9]{8,11}|学号|@qq\.|api[_-]?
 | ~~高~~ | ~~slides 链路末遍 Emergency stop（6 条错误）~~ | ✅ 2026-11-02：根因是 beamer 帧内 `verbatim` 缺 `[fragile]`（`\@xverbatim` 遇 `\par` 崩帧）+ `parse_inline` 的 `$$…$$` 保护缺失；6→0，PDF 7 页（止于 2.1）→ 28 页（尾部完整） |
 | ~~中~~ | ~~book 链路 10 条错误~~ | ✅ 2026-11-02：`\c@theorem` 等 5 个计数器注销 + `\cfttoctitlefont` 两行 `\renewcommand` + `\newcommand{\@institute}{}` + quote 内 ``` 围栏拆 `lstlisting`；10→0，页数 11 不塌 |
 | ~~中~~ | ~~`--a5paper` 是假开关~~ | ✅ 2026-11-02 **接通**：`render_book` → `convert.py --a5paper` → `\documentclass[a5paper]`；另修 `base.sty` 的 `[a4paper]` 强制。实测 A4 210×297mm / A5 **148×210mm**（16 页） |
-| 中 | 架构图 `office-layers.html|png` 重绘（**待用户审核**） | 图上"11 subcommands · 4 chains"、交付物层含未实现的 `pptx`；按 diagram-design 流程改：层 03 编排 13 子命令、层 05 质检加 blindcheck/规则包/日志断言、层 06 交付物改为 docx/pdf(五类)/png；渲染出 PNG 先交用户确认再插文档 |
+| ~~中~~ | ~~架构图 `office-layers.html|png` 重绘~~ | ✅ 2026-11-03 已重绘并替换 `output/skill-demo/`（13 子命令 / 5 链路口径，交付物 docx·pdf×5·tex·png）：源 `2026-11-03/arch-diagram/outputs/office-layers.{html,png}`，self_check 通过 |
 | P3 | Typst 0.15 第三输出通道 | 方案书 §6 长期储备 |
 | P3 增补 | ~~规范包架构~~ ✅ 2026-10-11（rulepack_check.py + rules/gbt9704-2012.yaml + 自制指南，gov-notice 对照逐行一致） | 第四轮调研 Adopt |
 | P3 增补 | ~~blindcheck 子命令~~ ✅ 2026-10-11（身份暴露点扫描：元信息/学号/邮箱/手机号/致谢基金/导师/路径，gov 示例命中 2/干净源 0 误报） | 第四轮调研 Adopt |
